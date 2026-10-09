@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#100f10">
+<meta name="description" content="白雪公主：血色魔鏡。一場關於名字、記憶與魔法代價的哥德式恐怖密室逃脫。五個場景、三種結局，支援手機與桌面遊玩。">
+<meta name="robots" content="noindex,follow"><title>白雪公主：血色魔鏡 — 暗黑童話密室逃脫</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="lab-bar" aria-label="LUCAS LAB 導覽"><a href="__LAB_GAMES_URL__">← LUCAS LAB 遊戲館</a><a href="__LAB_STORY_URL__">閱讀原著 ↗</a></div>
+<a class="skip" href="#main">跳至主要內容</a>
+<header class="site-header"><a class="brand" href="#" aria-label="血色魔鏡首頁"><span class="brand-mark" aria-hidden="true">♜</span><span>血色魔鏡<small>THE BLOOD MIRROR</small></span></a><nav aria-label="主要導覽"><button data-action="story">故事序章</button><button data-action="chapters">逃脫章節</button><button data-action="guide">遊玩指南</button></nav><div class="header-actions"><button id="sound" class="sound-button" aria-label="開啟環境音效" aria-pressed="false"><span id="sound-icon"></span><span class="sound-label">音效關閉</span></button><button data-action="settings" class="icon-button settings-toggle" aria-label="遊戲設定"></button></div></header>
+<main id="main">
+<section id="home" class="home">
+<div class="hero">
+<div class="hero-art"><img src="assets/snow-white.webp" alt="黑髮公主戴著金色王冠，在魔鏡與燭光之間握著血紅蘋果" fetchpriority="high"><div class="art-vignette"></div><span class="art-tag">EVERY MIRROR HIDES A TRUTH.</span></div>
+<div class="hero-content"><div class="eyebrow"><span class="eyebrow-line"></span> 暗黑童話・沉浸式密室逃脫</div><p class="pretitle">白雪公主</p><h1>血色<span>魔鏡</span></h1><p class="english-title">SNOW WHITE : THE BLOOD MIRROR</p><div class="ornament"><span></span>◇<span></span></div><p class="hero-quote">「魔鏡啊，魔鏡……<br>這一次，誰值得活下去？」</p><p class="hero-description">走入被詛咒的霜棘王國，找回失落的記憶。<br>解開謎題，揭穿謊言。每一道門後，都有代價。</p><div class="hero-buttons"><button id="start" class="primary-button">踏入魔鏡 <span>⟶</span></button><button id="continue" class="text-button hidden">繼續旅程 <span>↗</span></button></div><div class="game-meta"><span>◷ 約 25–40 分鐘</span><span>◇ 五幕探索</span><span>♧ 三種結局</span></div><p class="content-note"><span>16+</span> 心理恐怖・黑暗敘事・建議配戴耳機</p></div>
+<div class="hero-bottom"><span>一段被遺忘的名字，一場無法逃避的交易。</span><button data-action="chapters">探索章節 <span>↓</span></button></div>
+</div>
+<section class="chapters-section" id="chapters"><div class="section-heading"><div><p class="eyebrow">THE JOURNEY INTO DARKNESS</p><h2>每一扇門，都是一個祕密。</h2></div><p>五個場景。一條逐漸破碎的真相。</p></div><div id="chapter-cards" class="chapter-cards"></div></section>
+<section class="story-strip"><span class="small-ornament">✦</span><p>在這個國度，魔法不是奇蹟。<br><em>魔法是一門生意。而有人，替你付了錢。</em></p><button data-action="story" class="text-button">閱讀故事序章 <span>⟶</span></button></section>
+<footer><span>白雪公主：血色魔鏡</span><span>改編自同名黑暗童話 · 互動密室遊戲</span><button data-action="guide">遊玩指南 ↗</button></footer>
+</section>
+<section id="game" class="game hidden" aria-label="密室探索"><div class="game-toolbar"><button data-action="home" class="back-button">← <span>返回首頁</span></button><div class="room-title"><span id="room-chapter"></span><h1 id="room-title"></h1></div><div class="game-tools"><span id="timer" aria-label="遊玩時間">00:00</span><button data-action="hint" class="tool-button" aria-label="查看提示">✧ <span>提示</span></button><button data-action="journal" class="tool-button" aria-label="查看線索筆記">▤ <span>筆記</span><b id="journal-count">0</b></button></div></div><div class="game-layout"><div class="scene-panel"><div id="scene" class="scene"><img id="scene-image" src="assets/chamber.webp" alt="哥德式密室場景"><div class="scene-shade"></div><div class="scene-caption"><p class="eyebrow" id="scene-subtitle"></p><span>點擊光點，讓真相浮現。</span></div><div id="hotspots"></div></div><div class="scene-bottom"><span id="scene-progress"></span><button id="room-next" class="primary-button hidden">走向下一扇門 ⟶</button><button id="room-puzzle" class="text-button">檢視封印 ⟶</button></div><div class="room-tabs" id="room-tabs" aria-label="場景選擇"></div></div><aside class="game-sidebar"><div class="objective-block"><p class="eyebrow">CURRENT OBJECTIVE</p><h2>逃出這裡之前…</h2><p id="objective"></p></div><div class="narrative-block"><span class="small-ornament">◇</span><p id="narrative"></p></div><div class="inventory-block"><div class="inventory-heading"><h2>隨身物品</h2><span id="inventory-count">0 件</span></div><p class="inventory-instruction">點選物品，檢視它留下的線索。</p><div id="inventory" class="inventory"></div></div><div class="save-indicator" id="save-indicator">◇ 進度已儲存在此裝置</div></aside></div></section>
+<section id="ending" class="ending hidden"><div class="ending-art"></div><div class="ending-content"><span class="ending-symbol">◇</span><p class="eyebrow" id="ending-eyebrow"></p><h1 id="ending-title"></h1><p class="ending-quote" id="ending-quote"></p><p id="ending-text"></p><div id="ending-stats" class="ending-stats"></div><div class="ending-buttons"><button data-action="reconsider" class="primary-button">回到最後的選擇 ⟶</button><button data-action="home" class="text-button">返回首頁</button></div><p class="ending-adaptation">互動遊戲改編結局 · 「無名的黎明」承接原作尾聲</p></div></section>
+</main>
+<dialog id="modal" aria-labelledby="modal-title"><div class="modal-shell"><button id="modal-close" class="modal-close" aria-label="關閉視窗">×</button><p id="modal-eyebrow" class="eyebrow"></p><h2 id="modal-title"></h2><div id="modal-body"></div></div></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
+</body></html>

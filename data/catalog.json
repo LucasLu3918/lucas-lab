@@ -260,6 +260,35 @@
   ],
   "games": [
     {
+      "slug": "blood-mirror",
+      "title": "白雪公主：血色魔鏡",
+      "description": "化身白雪，探索五座被詛咒的密室，蒐集道具、解開生命契約，決定三種結局。支援手機與桌面，提供提示、線索筆記與本機自動存檔。",
+      "category": "恐怖密室逃脫",
+      "status": "playable",
+      "symbol": "◇",
+      "palette": "rose",
+      "storySlug": "dark-snow-white",
+      "duration": "約 25–40 分鐘",
+      "warnings": [
+        "心理恐怖",
+        "死亡與生命剝削",
+        "兒童受害敘事"
+      ],
+      "cover": "assets/images/snow-white-portrait.webp",
+      "coverSmall": "assets/images/snow-white-portrait-small.webp",
+      "coverAlt": "黑髮公主手持血紅蘋果，身後是魔鏡與月夜城堡",
+      "coverTitle": "白雪公主",
+      "coverSubtitle": "血色魔鏡",
+      "coverSeries": "ESCAPE ROOM · PLAYABLE",
+      "highlights": [
+        "五幕連續探索與謎題",
+        "道具、線索筆記與分層提示",
+        "三種可回看的結局",
+        "桌面、觸控與鍵盤操作",
+        "僅此瀏覽器自動存檔，沒有時間限制"
+      ]
+    },
+    {
       "slug": "mist-trail",
       "title": "霧林迷途",
       "description": "以選擇影響劇情分支的網頁冒險概念；目前尚未開發可遊玩版本。",

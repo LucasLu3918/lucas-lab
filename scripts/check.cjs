@@ -138,12 +138,40 @@
  assert.ok(!sitemap.includes(origin+'/search/'),'noindex search must not be in sitemap');
  assert.ok(!sitemap.includes(origin+'/style-guide/'),'internal component showcase must not be in sitemap');
  for(const s of catalog.stories.filter(x=>!(x.manuscript||(x.chapters||[]).length)))assert.ok(!sitemap.includes(origin+'/stories/'+s.slug+'/'),'pending story in sitemap: '+s.slug);
- for(const g of catalog.games)assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
+ for(const g of catalog.games.filter(g=>g.status==='concept'))assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
  for(const p of catalog.projects.filter(x=>x.status==='concept'))assert.ok(!sitemap.includes(origin+'/projects/'+p.slug+'/'),'concept project in sitemap: '+p.slug);
  const info=JSON.parse(fs.readFileSync(path.join(dist,'_build.json'),'utf8'));
  assert.equal(info.site,origin,'incorrect deploy manifest origin');
  assert.ok(typeof info.commit==='string'&&info.commit.length>0,'missing deploy commit');
  const js=fs.readFileSync(path.join(dist,'assets/app.js'),'utf8');
  assert.ok(js.includes('toggle.focus()')&&js.includes('matchMedia'),'nav Escape/resize handling missing');
+
+ const prefix=process.env.BASE_PATH?('/'+process.env.BASE_PATH.replace(/^\/+|\/+$/g,'')+'/').replace('//','/'):'/';
+ const playable=catalog.games.filter(g=>g.status==='playable');
+ assert.ok(playable.some(g=>g.slug==='blood-mirror'),'completed Blood Mirror game missing');
+ for(const g of playable){
+  const route='games/'+g.slug+'/',play=route+'play/';
+  const detail=fs.readFileSync(path.join(dist,route,'index.html'),'utf8');
+  assert.ok(detail.includes('可遊玩')&&!detail.includes('尚無可遊玩版本'),'playable game mislabeled');
+  assert.ok(detail.includes(prefix+play)&&detail.includes(prefix+'stories/'+g.storySlug+'/'),'game/story entry missing');
+  assert.ok(!detail.includes('noindex,follow')&&sitemap.includes(origin+'/'+route),'playable detail excluded from sitemap');
+  const gameHtml=fs.readFileSync(path.join(dist,play,'index.html'),'utf8');
+  assert.ok(gameHtml.includes(prefix+'games/')&&gameHtml.includes(prefix+'stories/'+g.storySlug+'/'),'game return links ignore BASE_PATH');
+  assert.ok(!gameHtml.includes('__LAB_'),'unresolved game integration placeholder');
+  assert.ok(gameHtml.includes('noindex,follow')&&!sitemap.includes(origin+'/'+play),'gameplay must not duplicate indexed detail');
+  for(const [,href] of gameHtml.matchAll(/(?:href|src)="([^"]+)"/g)){
+   if(href.startsWith('#')||href.startsWith('https://'))continue;
+   const target=href.startsWith(prefix)?path.join(dist,href.slice(prefix.length),''):path.join(dist,play,href);
+   assert.ok(fs.existsSync(target),'broken game asset/link '+href);
+  }
+  const gameSource=path.join(root,'games',g.slug);
+  for(const file of ['app.js','engine.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
+   assert.ok(fs.readFileSync(path.join(gameSource,file)).equals(fs.readFileSync(path.join(dist,play,file))),'game source/output mismatch: '+file);
+  }
+  assert.ok(!fs.readFileSync(path.join(gameSource,'style.css'),'utf8').includes('fonts.googleapis'),'game must use local fonts');
+  assert.ok(homeHtml.includes(prefix+route)&&homeHtml.includes(prefix+play),'game not reachable from homepage');
+  assert.ok(searchPage.includes(prefix+route),'game absent from search');
+  assert.ok(novelIndex.includes(prefix+route),'original story lacks related game entry');
+ }
  console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config');
 })();

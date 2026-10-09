@@ -107,6 +107,9 @@ exceptions:
 - target: book-card variants
   rule: portrait library grid, compact homepage/search/mobile cards
   reason: retain full artwork and legible copy at each viewport
+- target: /games/blood-mirror/play/
+  rule: isolated cinematic gothic game interface, local fonts and local WebP scenes
+  reason: preserve the completed escape game; surrounding detail/catalog pages use shared components
 must_avoid:
 - independent CSS overrides that recreate a second visual system
 - emoji-based product icons
