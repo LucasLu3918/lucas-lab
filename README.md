@@ -65,3 +65,13 @@ docs/                內容與技術規範
 ## 目前的實作取捨
 
 先前曾規劃 Astro + Vue，但第一版選擇無依賴靜態生成，以優先完成高品質響應式體驗與可部署網站。日後有更複雜內容管理和互動需求時，再引入框架。
+
+## 正式部署驗證
+
+`npm run check` 僅驗證原始碼與靜態輸出，**不能取代 Cloudflare 上線驗證**。
+
+- `npm run smoke:live` 唯讀檢查正式網站的主要路由、CSS、sitemap 與 `/_build.json`。
+- `EXPECTED_COMMIT=$(git rev-parse HEAD) npm run smoke:live` 額外要求 Cloudflare 部署版本與指定 Git Commit 一致。
+- GitHub Actions 每日約在台灣時間 10:23 檢查正式網站，也可透過 `workflow_dispatch` 手動執行。GitHub 排程可能延遲。
+- 版本或路由檢查失敗時，請在 Cloudflare Dashboard 的 Workers Builds 檢查 Git 來源、分支、建置命令及部署紀錄；GitHub Action **不會**替 Cloudflare 執行部署。
+- 全站搜尋包含公開 Lucas Tools 項目，但工具仍由原網站提供，不複製、不代理其程式碼。
