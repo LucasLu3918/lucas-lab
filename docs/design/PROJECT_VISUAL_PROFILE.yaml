@@ -1,0 +1,160 @@
+version: 1
+status: DISCOVERED
+last_verified_commit: null
+direction:
+  archetype: literary dark fantasy archive
+  status: approved
+  confidence: high
+  principles:
+  - navy-black surfaces, antique gold details, burgundy primary actions
+  - restrained ornament and cinematic original book artwork
+  - semantic variants share consistent geometry and behavior
+sources:
+  brand_profile: null
+  visual_system: docs/design/UI_COVER_PLAN.md
+  design_tokens:
+  - assets/style.css
+  inferred_from_existing_ui: false
+typography:
+  families:
+  - Georgia / Noto Serif TC / Songti TC for display
+  - Inter / Noto Sans TC / PingFang TC / system sans for controls and body
+  scale:
+  - 11
+  - 12
+  - 13
+  - 15
+  - 17
+  - 19
+  - 24
+  - 32
+  rules:
+  - no external font service
+  - preserve Chinese title wrapping; never truncate essential book titles
+spacing:
+  scale:
+  - 8
+  - 16
+  - 24
+  - 32
+  rules:
+  - use common surface padding with explicit compact mobile variants
+controls:
+  button:
+    golden_component: scripts/components.cjs
+    variants:
+      primary:
+        min_height: 48
+        radius: 6
+        tone: burgundy
+      secondary:
+        min_height: 48
+        radius: 6
+        tone: navy
+  filter:
+    min_height: 44
+    radius: 6
+  input:
+    min_height: 48
+    radius: 6
+  panel:
+    radius: 10
+icons:
+  rules:
+  - local SVG with consistent stroke and inherited visible color
+  - decorative icons are aria-hidden; controls have explicit text or names
+state_rules:
+  geometry_must_remain_stable: true
+  rules:
+  - selected states change color and border without changing size
+  - focus-visible uses a three-pixel gold outline
+  - disabled font controls expose the actual 16–24px limits
+  - respect prefers-reduced-motion
+representative_routes:
+- /
+- /stories/
+- /stories/dark-snow-white/
+- /stories/dark-snow-white/chapters/00/
+- /tools/
+- /search/
+- /gallery/
+- /games/
+- /projects/
+- /projects/aips/
+- /journal/
+- /journal/origin/
+- /about/
+- /legal/
+- /404.html
+- /style-guide/
+golden_components:
+  icon:
+    source: scripts/components.cjs
+    reason: canonical line icon primitives
+  button:
+    source: scripts/components.cjs
+    reason: shared action geometry
+  cover:
+    source: scripts/components.cjs
+    reason: full 2:3 artwork and responsive sources
+  reader_controls:
+    source: scripts/components.cjs
+    reason: common reader states and chapter navigation
+exceptions:
+- target: readerpage paper theme
+  rule: light paper surface with dark body text
+  reason: comfortable long-form reading; controls remain in shared dark shell
+- target: book-card variants
+  rule: portrait library grid, compact homepage/search/mobile cards
+  reason: retain full artwork and legible copy at each viewport
+must_avoid:
+- independent CSS overrides that recreate a second visual system
+- emoji-based product icons
+- cropping portrait covers into landscape thumbnails
+- AI-generated Chinese typography baked into images
+- adding framework dependencies for presentation-only work
+watch:
+  paths:
+  - assets/style.css
+  - assets/app.js
+  - assets/images/
+  - scripts/components.cjs
+  - scripts/build.cjs
+  - data/catalog.json
+  signals:
+  - design_token_change
+  - shared_component_change
+  - global_typography_change
+  - brand_or_visual_direction_change
+evidence:
+  routes:
+  - /
+  - /stories/
+  - /tools/
+  - /gallery/
+  - /search/
+  - /projects/aips/
+  - /style-guide/
+  - /stories/mist-letters/chapters/01/
+  screenshots:
+  - visual-audit-artifacts/home-390.png
+  - visual-audit-artifacts/home-768.png
+  - visual-audit-artifacts/home-1440.png
+  - visual-audit-artifacts/novel-390.png
+  - visual-audit-artifacts/novel-768.png
+  - visual-audit-artifacts/novel-1440.png
+  - visual-audit-artifacts/library-390.png
+  - visual-audit-artifacts/library-1440.png
+  - visual-audit-artifacts/tools-1440.png
+  - visual-audit-artifacts/gallery-1440.png
+  - visual-audit-artifacts/aips-1440.png
+  - visual-audit-artifacts/components-1440.png
+  - visual-audit-artifacts/menu-390.png
+  - visual-audit-artifacts/reader-night-390.png
+  - visual-audit-artifacts/gallery-dialog-390.png
+  implementation_refs:
+  - scripts/components.cjs
+  - assets/style.css
+  - scripts/visual-audit.cjs
+  visual_audit: docs/design/VISUAL_AUDIT.yaml
+  source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10+working-tree:0cf558bb7441a83056b08e71fce88ab88a27a0810ccf15bb3ca8260e064b1553

@@ -2,7 +2,7 @@
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -24,7 +24,30 @@
   }
  }
  const css=fs.readFileSync(path.join(dist,'assets/style.css'),'utf8');
- for(const breakpoint of ['max-width:990px','max-width:720px','max-width:480px','prefers-reduced-motion'])assert.ok(css.includes(breakpoint),'missing responsive '+breakpoint);
+ for(const breakpoint of ['max-width:1100px','max-width:920px','max-width:720px','max-width:480px','prefers-reduced-motion'])assert.ok(css.includes(breakpoint),'missing responsive '+breakpoint);
+ for(const story of catalog.stories){
+  assert.ok(story.cover&&story.coverSmall&&story.coverAlt,'missing cover metadata for '+story.slug);
+  for(const [asset,limit] of [[story.cover,260000],[story.coverSmall,60000]]){
+   const source=fs.readFileSync(path.join(root,asset)),built=fs.readFileSync(path.join(dist,asset));
+   assert.ok(source.equals(built),'cover copy differs: '+asset);
+   assert.equal(source.toString('ascii',0,4),'RIFF','invalid WebP: '+asset);
+   assert.equal(source.toString('ascii',8,12),'WEBP','invalid WebP: '+asset);
+   assert.ok(source.length>5000&&source.length<limit,'cover asset exceeds budget or is empty: '+asset);
+  }
+  const html=fs.readFileSync(path.join(dist,'stories',story.slug,'index.html'),'utf8');
+  assert.ok(html.includes(story.cover)&&html.includes(story.coverSmall)&&html.includes('srcset='),'responsive cover missing: '+story.slug);
+  assert.ok(html.includes('property="og:image"')&&html.includes(story.coverAlt),'cover sharing metadata or alt missing: '+story.slug);
+ }
+ const coverManifest=JSON.parse(fs.readFileSync(path.join(root,'docs/design/COVER_ASSETS.json'),'utf8'));
+ assert.equal(coverManifest.assets.length,catalog.stories.length*2,'incomplete cover asset manifest');
+ for(const asset of coverManifest.assets){
+  const bytes=fs.readFileSync(path.join(root,asset.path));
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),asset.sha256,'cover manifest hash mismatch: '+asset.path);
+  assert.equal(bytes.length,asset.bytes,'cover manifest size mismatch: '+asset.path);
+ }
+ const aipsDetail=fs.readFileSync(path.join(dist,'projects/aips/index.html'),'utf8');
+ assert.ok(aipsDetail.includes('href="https://lucaslu3918.github.io/ai-product-system/"'),'AIPS documentation link missing');
+ assert.ok(aipsDetail.includes('閱讀 AIPS 說明文件')&&aipsDetail.includes('href="https://github.com/LucasLu3918/ai-product-system"'),'AIPS docs/source links must be distinct and named');
  const tools=fs.readFileSync(path.join(dist,'tools/index.html'),'utf8');
  for(const t of catalog.tools){assert.ok(t.href.startsWith('https://lucas-tools.owl3918.workers.dev/'));assert.ok(tools.includes(t.href),'missing original tool link '+t.title)}
  assert.ok(!tools.includes('CY MySQL'),'private extension tool must not be shown');
@@ -99,6 +122,7 @@
  assert.ok(novelIndex.includes('內容提示：')&&novelIndex.includes('第一部：雪中的謊言'),'novel warnings or part navigation missing');
  const reader=fs.readFileSync(path.join(dist,'stories/mist-letters/chapters/01/index.html'),'utf8');
  assert.match(reader,/data-reader/);assert.match(reader,/data-font/);assert.match(reader,/data-theme/);
+ assert.match(reader,/data-chapter-select/);assert.match(reader,/data-reading-progress/);
  const cfg=JSON.parse(fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8'));
  assert.equal(cfg.name,'lucas-lab','unexpected Worker name');
  assert.equal(cfg.assets.directory,'./dist','Cloudflare assets directory must be dist');
@@ -112,6 +136,7 @@
  for(const t of catalog.tools)assert.ok(searchPage.includes(t.href),'tool absent from global search: '+t.title);
  const sitemap=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
  assert.ok(!sitemap.includes(origin+'/search/'),'noindex search must not be in sitemap');
+ assert.ok(!sitemap.includes(origin+'/style-guide/'),'internal component showcase must not be in sitemap');
  for(const s of catalog.stories.filter(x=>!(x.manuscript||(x.chapters||[]).length)))assert.ok(!sitemap.includes(origin+'/stories/'+s.slug+'/'),'pending story in sitemap: '+s.slug);
  for(const g of catalog.games)assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
  for(const p of catalog.projects.filter(x=>x.status==='concept'))assert.ok(!sitemap.includes(origin+'/projects/'+p.slug+'/'),'concept project in sitemap: '+p.slug);

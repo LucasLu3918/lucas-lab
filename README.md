@@ -43,6 +43,7 @@ assets/              CSS 設計系統和無框架互動功能
 data/catalog.json    公開作品清單、狀態與原稿引用
 content/stories/     完整小說 Markdown 原稿（保留原文）
 scripts/build.cjs    產生 dist/ 下的靜態 HTML 網站
+scripts/components.cjs  共用 SVG、封面、狀態與閱讀控制元件
 scripts/story-source.cjs  將完整原稿分章，不修改原文
 scripts/check.cjs    驗證連結、頁面與響應式斷點
 scripts/serve.cjs    本機純 Node 靜態預覽伺服器
@@ -59,7 +60,7 @@ docs/                內容與技術規範
 - 「霧林來信」是用於閱讀器的本站原創示範短篇（兩章）。
 - 《白雪公主：血色魔鏡》與另外五部使用者提供的完整 DOCX 劇本皆已上架，保留完整分章與內容警示；沒有使用 AI 自行補寫不存在的劇情。
 - 遊戲與電商概念仍在規劃階段。
-- 藝廊目前採 CSS/符號佔位，尚未匯入正式插畫。
+- 藝廊展示七本故事的原創 AI 封面，可放大預覽；世界概念區仍為程式繪製的示意圖。
 - 未明確授權的第三方作品、素材不得直接公開。
 
 詳細設計與後續計畫參見 [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)。
@@ -117,3 +118,11 @@ docs/                內容與技術規範
 - `scripts/story-source.cjs` 支援 `序章 / 序幕`、章節、分部、`終章 / 尾聲` 等多種章節結構，不強制每部作品相同章數。
 - 每部的 Markdown SHA-256、章節數、首尾原文與全部章節靜態頁面納入 CI 驗證；`smoke:live` 驗證所有新章節在 Cloudflare 正式網站可開啟。
 - 各劇本保留成人、暴力及其他真實敏感主題的警示；劇情沒有被重新生成或改寫。其他未提供素材的遊戲、藝廊內容維持概念/待匯入標示。
+
+## 共用 UI 與全套故事封面
+
+- 全站 UI 使用 `assets/style.css` 的統一 tokens 與 `scripts/components.cjs`；按鈕、狀態、輸入、卡片、提示、彈窗和閱讀控制共享尺寸與互動規則。
+- 七本書均有 900×1350 與 360×540 WebP 封面，透過 `srcset`／`sizes` 選圖；書名與系列資訊採 HTML 排版。
+- 閱讀器新增章節下拉切換、即時本章進度及字級上／下限停用狀態，沿用既有瀏覽器閱讀偏好。
+- `/style-guide/` 是不索引的元件展示頁；設計規劃位於 `docs/design/UI_COVER_PLAN.md`，素材 hash 與尺寸位於 `docs/design/COVER_ASSETS.json`。
+- AI Product System 詳情的「閱讀 AIPS 說明文件」指向說明網站，GitHub 原始碼保持獨立入口。

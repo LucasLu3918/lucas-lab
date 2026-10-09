@@ -1,0 +1,435 @@
+version: 1
+mode: V2
+status: pass_with_comments
+target:
+  routes:
+  - /
+  - /stories/
+  - /tools/
+  - /gallery/
+  - /search/
+  - /projects/aips/
+  - /style-guide/
+  - /stories/mist-letters/chapters/01/
+  components:
+  - navigation
+  - button
+  - status
+  - input
+  - filter
+  - card
+  - cover
+  - notice
+  - reader
+  - dialog
+baseline_source: docs/design/UI_COVER_PLAN.md
+component_inventory:
+- component: Button
+  source: scripts/components.cjs and assets/style.css
+- component: Status badge
+  source: scripts/components.cjs and assets/style.css
+- component: Search and filters
+  source: scripts/components.cjs and assets/style.css
+- component: Card and tool panel
+  source: scripts/components.cjs and assets/style.css
+- component: Book cover
+  source: scripts/components.cjs and assets/style.css
+- component: Reader controls
+  source: scripts/components.cjs and assets/style.css
+- component: Navigation
+  source: scripts/components.cjs and assets/style.css
+- component: Dialog
+  source: scripts/components.cjs and assets/style.css
+findings:
+- id: VIS-001
+  component: Navigation icons
+  route: /
+  symptom: Legacy raw SVG became dark/invisible and squeezed search label after CSS
+    cleanup
+  classification: outlier
+  valid_variant: false
+  approved_exception: false
+  root_cause:
+    source: scripts/build.cjs
+    style: .icon
+    token: null
+    mechanism: raw SVG did not inherit the shared dimensions/fill/stroke attributes
+  fix: use shared icon(menu) and icon(search); preserve no-wrap search label
+  status: closed
+- id: VIS-002
+  component: Chapter select
+  route: /stories/mist-letters/chapters/01/
+  symptom: Mobile chapter label wrapped vertically
+  classification: outlier
+  valid_variant: false
+  approved_exception: false
+  root_cause:
+    source: assets/style.css
+    style: .chapter-select
+    token: null
+    mechanism: anonymous flex text item could shrink and wrap
+  fix: 'white-space: nowrap on label group; select retains min-width:0'
+  status: closed
+verification:
+  required_viewports:
+  - desktop
+  - mobile
+  - tablet
+  required_states:
+  - default
+  before:
+  - id: home-390-before
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/before/home-390.png
+    input_assets: &id001
+    - assets/images/moonlit-castle.webp
+    - assets/images/mist-letters.webp
+    - assets/images/dark-red-hood.webp
+    - assets/images/snow-white-portrait.webp
+    - assets/images/dark-cinderella.webp
+    - assets/images/dark-aladdin.webp
+    - assets/images/dark-mermaid.webp
+    - assets/images/dark-mulan.webp
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.145743+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: home-768-before
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: tablet
+      width: 768
+      height: 900
+    artifact: visual-audit-artifacts/before/home-768.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.146707+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: home-1440-before
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 900
+    artifact: visual-audit-artifacts/before/home-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.143138+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-390-before
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/before/novel-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.147626+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-768-before
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: tablet
+      width: 768
+      height: 900
+    artifact: visual-audit-artifacts/before/novel-768.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.149048+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-1440-before
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 900
+    artifact: visual-audit-artifacts/before/novel-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10
+      captured_at: '2026-10-09T15:20:52.147200+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  after:
+  - id: home-390-after
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/home-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:07.931556+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: home-768-after
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: tablet
+      width: 768
+      height: 900
+    artifact: visual-audit-artifacts/home-768.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:15.062487+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: home-1440-after
+    kind: screenshot
+    target: /
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 900
+    artifact: visual-audit-artifacts/home-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:18.802387+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-390-after
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/novel-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:08.029794+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-768-after
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: tablet
+      width: 768
+      height: 900
+    artifact: visual-audit-artifacts/novel-768.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:15.187588+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: novel-1440-after
+    kind: screenshot
+    target: /stories/dark-snow-white/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 900
+    artifact: visual-audit-artifacts/novel-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:18.955947+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: library-390-after
+    kind: screenshot
+    target: /stories/
+    state: default
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/library-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:08.429776+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: library-1440-after
+    kind: screenshot
+    target: /stories/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 900
+    artifact: visual-audit-artifacts/library-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:19.498180+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: tools-1440-after
+    kind: screenshot
+    target: /tools/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 1000
+    artifact: visual-audit-artifacts/tools-1440.png
+    input_assets: []
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:45:26.663540+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: gallery-1440-after
+    kind: screenshot
+    target: /gallery/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 1000
+    artifact: visual-audit-artifacts/gallery-1440.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:45:26.933965+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: aips-1440-after
+    kind: screenshot
+    target: /projects/aips/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 1000
+    artifact: visual-audit-artifacts/aips-1440.png
+    input_assets: []
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:45:27.021490+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: components-1440-after
+    kind: screenshot
+    target: /style-guide/
+    state: default
+    viewport:
+      label: desktop
+      width: 1440
+      height: 1000
+    artifact: visual-audit-artifacts/components-1440.png
+    input_assets: []
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:45:27.221838+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: menu-390-after
+    kind: screenshot
+    target: /
+    state: menu_open
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/menu-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:45:27.316964+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: reader-night-390-after
+    kind: screenshot
+    target: /stories/mist-letters/chapters/01/
+    state: night
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/reader-night-390.png
+    input_assets: []
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f6b9c76dab9df85bb140be9530ea935b10+working-tree:0cf558bb7441a83056b08e71fce88ab88a27a0810ccf15bb3ca8260e064b1553
+      captured_at: '2026-10-09T15:48:29.049996+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+  - id: gallery-dialog-390-after
+    kind: screenshot
+    target: /gallery/
+    state: dialog_open
+    viewport:
+      label: mobile
+      width: 390
+      height: 900
+    artifact: visual-audit-artifacts/gallery-dialog-390.png
+    input_assets: *id001
+    provenance:
+      provider: Playwright Chromium
+      source_revision: 1c34b2f+working-tree:b42f65915a02104e40ed257e330034a721b5eb0ce0cbfb873f7e3d8508b17841
+      captured_at: '2026-10-09T15:42:08.550436+00:00'
+      command: scripts/visual-audit.cjs or targeted local Playwright state capture
+review:
+  decision: PASS_WITH_COMMENTS
+  quality_assessed_by: agent_eval
+  checks:
+  - area: cover series composition
+    result: pass
+    evidence:
+    - library-390-after
+    - library-1440-after
+  - area: shared UI materials and visible navigation icons
+    result: pass
+    evidence:
+    - tools-1440-after
+  - area: book artwork and dialog composition
+    result: pass
+    evidence:
+    - gallery-1440-after
+    - gallery-dialog-390-after
+  - area: reading control labels and typography
+    result: pass
+    evidence:
+    - reader-night-390-after
+  notes:
+  - Manual pixel review performed by implementation agent; physical iOS Safari/Android
+    and an independent review were not performed.
+  - 153 page/viewport renders passed before the isolated reader-label fix; nine reader
+    viewports and mobile/desktop axe checks passed after it.
+  - Screenshot artifacts are local ignored files; source revision records the exact
+    visual-source digest at capture.
+profile_updated: true
+remaining_material_findings: []
