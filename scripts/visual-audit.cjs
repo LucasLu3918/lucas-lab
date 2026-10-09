@@ -12,7 +12,8 @@ const root=path.resolve(__dirname,'..');
 const captures=path.join(root,'visual-audit-artifacts');
 const origin='http://127.0.0.1:4173';
 const widths=[320,360,390,480,720,768,900,1024,1440];
-const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/'];
+const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/','/games/','/games/'+JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8')).games[0].slug+'/','/projects/','/projects/aips/','/404.html','/journal/','/journal/origin/','/about/','/legal/','/style-guide/'];
+const stories=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8')).stories;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function decodeImages(page){
  const images=page.locator('img');
@@ -47,20 +48,21 @@ async function audit(){
    for(const route of routes){
     const response=await page.goto(origin+route,{waitUntil:'load'});
     assert.equal(response.status(),200,width+' '+route+' did not respond 200');
-    const covers=page.locator('img[src*="snow-white-portrait.webp"]');
+    const covers=page.locator('img.book-cover');
     for(let k=0;k<await covers.count();k++){
      await covers.nth(k).scrollIntoViewIfNeeded();
      await covers.nth(k).evaluate(img=>img.decode());
     }
     const result=await page.evaluate(()=>{
      const doc=document.documentElement;
-     const images=[...document.images].filter(img=>img.getAttribute('src')?.includes('snow-white-portrait.webp'));
+     const images=[...document.querySelectorAll('img.book-cover')];
      return {width:window.innerWidth,documentWidth:doc.scrollWidth,bodyWidth:document.body.scrollWidth,lang:doc.lang,main:!!document.querySelector('#main'),badImages:images.filter(i=>!i.complete||i.naturalWidth===0).length};
     });
     assert.equal(result.lang,'zh-Hant','wrong document language at '+route);
     assert.ok(result.main,'missing main landmark '+route);
     assert.ok(Math.max(result.documentWidth,result.bodyWidth)<=result.width+2,'horizontal overflow at '+width+'px '+route+' doc='+result.documentWidth+' body='+result.bodyWidth);
     assert.equal(result.badImages,0,'cover image failed to load at '+width+'px '+route);
+    if(route==='/projects/aips/')assert.equal(await page.getByRole('link',{name:'閱讀 AIPS 說明文件'}).getAttribute('href'),'https://lucaslu3918.github.io/ai-product-system/');
     if(route==='/'){
      const heroImage=await page.locator('.hero-art').evaluate(async img=>{await img.decode();return {loaded:img.naturalWidth>0,width:img.naturalWidth}});
      assert.ok(heroImage.loaded&&heroImage.width===1536,'castle hero image failed to load at '+width+'px');
@@ -74,6 +76,7 @@ async function audit(){
     await menu.click();
     assert.equal(await menu.getAttribute('aria-expanded'),'true','mobile menu did not open at '+width);
     assert.ok(await page.locator('#site-nav').isVisible(),'expanded menu not visible at '+width);
+    assert.equal(await menu.locator('svg.icon').count(),1,'menu must use a visible shared icon');
    await page.keyboard.press('Escape');
     assert.equal(await menu.getAttribute('aria-expanded'),'false','menu Escape handling broken at '+width);
     assert.ok(await menu.evaluate(e=>e===document.activeElement),'menu focus not restored at '+width);
@@ -98,7 +101,7 @@ async function audit(){
     const featureCover=page.locator('.feature .cover-visual img');
     assert.equal(await featureCover.getAttribute('loading'),'eager','featured cover should have priority loading');
     await decodeImages(page);
-    assert.ok(await featureCover.evaluate(img=>img.naturalWidth===900),'featured cover failed to decode at '+width);
+    assert.ok(await featureCover.evaluate(img=>img.naturalWidth>0&&Math.abs(img.naturalWidth/img.naturalHeight-2/3)<0.01),'featured cover failed to decode at '+width);
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.waitForFunction(()=>window.scrollY===0);
     await page.screenshot({path:path.join(captures,'home-'+width+'.png'),fullPage:true,animations:'disabled'});
@@ -108,15 +111,48 @@ async function audit(){
     await page.waitForFunction(()=>window.scrollY===0);
     await page.screenshot({path:path.join(captures,'novel-'+width+'.png'),fullPage:true,animations:'disabled'});
    }
+   if(width===390||width===1440){
+    for(const story of stories){
+     await page.goto(origin+'/stories/'+story.slug+'/',{waitUntil:'load'});
+     const image=page.locator('.cover .book-cover');await image.evaluate(img=>img.decode());
+     const dimensions=await image.evaluate(img=>({width:img.naturalWidth,height:img.naturalHeight,renderWidth:img.clientWidth,renderHeight:img.clientHeight,alt:img.alt}));
+     assert.ok(Math.abs(dimensions.width/dimensions.height-2/3)<0.01,'wrong source cover ratio for '+story.slug);
+     assert.ok(Math.abs(dimensions.renderWidth/dimensions.renderHeight-2/3)<0.01,'cover is cropped for '+story.slug+' at '+width);
+     assert.equal(dimensions.alt,story.coverAlt,'wrong story alt '+story.slug);
+    }
+    await page.goto(origin+'/stories/',{waitUntil:'load'});
+    await decodeImages(page);await page.evaluate(()=>window.scrollTo(0,0));
+    await page.screenshot({path:path.join(captures,'library-'+width+'.png'),fullPage:true,animations:'disabled'});
+    const filter=page.locator('[data-filter="黑暗童話"]');const before=await filter.boundingBox();await filter.click();const after=await filter.boundingBox();
+    assert.equal(Math.round(before.height),Math.round(after.height),'selected filter shifts height');
+    assert.equal(Math.round(before.width),Math.round(after.width),'selected filter shifts width');
+    assert.equal(await page.locator('[data-item]:visible').count(),5,'story category filter returns incorrect books');
+    await page.locator('[data-search]').fill('不存在的書名');assert.ok(await page.locator('[data-empty]').isVisible(),'search empty state absent');
+   }
    if(width===390){
     await page.goto(origin+'/gallery/',{waitUntil:'domcontentloaded'});
     await page.locator('[data-preview]').first().click();
     assert.ok(await page.locator('#gallery-dialog').evaluate(el=>el.open),'gallery dialog did not open');
+    await page.locator('#gallery-dialog img').evaluate(img=>img.decode());
+    await page.screenshot({path:path.join(captures,'gallery-dialog-390.png'),animations:'disabled'});
     await page.locator('[data-dialog-close]').click();
     assert.ok(!(await page.locator('#gallery-dialog').evaluate(el=>el.open)),'gallery dialog did not close');
+    await page.locator('[data-preview]').last().click();assert.equal(await page.locator('#gallery-dialog .visual svg').count(),1,'concept art was not cloned into dialog');
+    await page.keyboard.press('Escape');assert.ok(!(await page.locator('#gallery-dialog').evaluate(el=>el.open)),'dialog Escape failed');
+    await page.goto(origin+'/stories/mist-letters/chapters/01/',{waitUntil:'load'});
+    await page.locator('[data-theme="paper"]').click();
+    for(let step=0;step<10;step++){if(await page.locator('[data-font="1"]').isEnabled())await page.locator('[data-font="1"]').click()}
+    assert.equal(await page.locator('[data-size]').textContent(),'24px');assert.ok(await page.locator('[data-font="1"]').isDisabled(),'font limit remains enabled');
+    for(let step=0;step<10;step++){if(await page.locator('[data-font="-1"]').isEnabled())await page.locator('[data-font="-1"]').click()}
+    assert.equal(await page.locator('[data-size]').textContent(),'16px');assert.ok(await page.locator('[data-font="-1"]').isDisabled(),'font minimum remains enabled');
+    await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+    await page.waitForFunction(()=>document.querySelector('[data-reading-progress]').value===100);
+    await page.locator('[data-chapter-select]').selectOption('/stories/mist-letters/chapters/02/');
+    await page.waitForURL('**/stories/mist-letters/chapters/02/');
+    await page.screenshot({path:path.join(captures,'reader-390.png'),fullPage:true,animations:'disabled'});
    }
    if(width===390||width===1440){
-    for(const route of ['/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/search/']){
+    for(const route of routes){
      await page.goto(origin+route,{waitUntil:'load'});
      const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
      const violations=result.violations.map(v=>v.id+' ('+v.impact+'): '+v.nodes.slice(0,4).map(n=>n.target.join(' ')).join(', ')).join('; ');
@@ -127,7 +163,7 @@ async function audit(){
    await context.close();
   }
   console.log('PASS: '+inspected+' page/viewport renders, cover images, no horizontal overflow, menu keyboard and touch, global search, reader controls, gallery dialog, WCAG axe audits');
-  console.log('Chromium screenshots: '+captures+' (3 home + 3 full-novel layouts)');
+  console.log('Chromium screenshots: '+captures+' (home, novel, library, reader and gallery states)');
  }finally{
   if(browser)await browser.close();
   server.kill('SIGTERM');

@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "format": "WebP",
+  "title_rendering": "HTML overlay; no baked-in AI typography",
+  "assets": [
+    {
+      "story": "mist-letters",
+      "kind": "full",
+      "path": "assets/images/mist-letters.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 179554,
+      "sha256": "7848db68bee42f7d784fad3fa42e870449e0e2628f5f6dd2ab0d26f1ffc142cd",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "mist-letters",
+      "kind": "thumbnail",
+      "path": "assets/images/mist-letters-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 36154,
+      "sha256": "d51d94470efcd5f20b867030f3773ab04ae92f0ff5d8c11481f60aee34250b55",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-red-hood",
+      "kind": "full",
+      "path": "assets/images/dark-red-hood.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 105978,
+      "sha256": "3a8a73f95a6d568bf6c099ed7a462bd3204d4cbe987714ba92bebf4471a05e4b",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-red-hood",
+      "kind": "thumbnail",
+      "path": "assets/images/dark-red-hood-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 19302,
+      "sha256": "e2cfb232253ea95e6e27fc5768c2c0782487fffb4eac142ce3775baf8287fccc",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-snow-white",
+      "kind": "full",
+      "path": "assets/images/snow-white-portrait.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 127956,
+      "sha256": "bc355409f837d68ef69d59795be113cb69cd5737ac4a2fe4d9606a4a27ef07a0",
+      "origin": "existing approved original AI artwork; thumbnail derived locally"
+    },
+    {
+      "story": "dark-snow-white",
+      "kind": "thumbnail",
+      "path": "assets/images/snow-white-portrait-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 23588,
+      "sha256": "71276f0455f1e60b377b4eabc9334e064f71ba4cf1418fa31f20fae61d0979d2",
+      "origin": "existing approved original AI artwork; thumbnail derived locally"
+    },
+    {
+      "story": "dark-cinderella",
+      "kind": "full",
+      "path": "assets/images/dark-cinderella.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 186514,
+      "sha256": "b2cbd7f4f58cc9a56921b9a70929be5a1cef1448d6935d0d736a09761a87f7a2",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-cinderella",
+      "kind": "thumbnail",
+      "path": "assets/images/dark-cinderella-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 40844,
+      "sha256": "96f88256f63f327e3f179aee212efccd2397d384e9f359ffdd77a0cb797c0055",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-aladdin",
+      "kind": "full",
+      "path": "assets/images/dark-aladdin.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 114726,
+      "sha256": "08694659e77d3be4cd31d9bd13be550ecb5886730606608f57b8fa43673fc125",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-aladdin",
+      "kind": "thumbnail",
+      "path": "assets/images/dark-aladdin-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 21420,
+      "sha256": "a7b6dc5a09c7c7ec938bb0800f99187b45845d5c2615a2c9eddcf882962fffce",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-mermaid",
+      "kind": "full",
+      "path": "assets/images/dark-mermaid.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 196938,
+      "sha256": "7cf48cf77675f7b7eac770ee98049a967b7034ad8cf4061de6b59c3836370955",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-mermaid",
+      "kind": "thumbnail",
+      "path": "assets/images/dark-mermaid-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 39930,
+      "sha256": "1afa03b65685475bc28372884bdab9da12433ffa3db55fa8c866dfd714f23868",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-mulan",
+      "kind": "full",
+      "path": "assets/images/dark-mulan.webp",
+      "width": 900,
+      "height": 1350,
+      "bytes": 171626,
+      "sha256": "6d9e50e486a92f0cb5daae42e9e35cfdd0ecf5e244e21885ddd1e01edab6ff1e",
+      "origin": "original AI artwork; built-in imagegen"
+    },
+    {
+      "story": "dark-mulan",
+      "kind": "thumbnail",
+      "path": "assets/images/dark-mulan-small.webp",
+      "width": 360,
+      "height": 540,
+      "bytes": 34556,
+      "sha256": "d3b72c3e928d0511310ebb8572f00d5e17d9224f75c664437c9968cfaeaa9294",
+      "origin": "original AI artwork; built-in imagegen"
+    }
+  ]
+}
