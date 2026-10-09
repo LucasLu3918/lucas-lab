@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/build.cjs",
     "check": "node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node scripts/build.cjs && node scripts/check.cjs",
-    "start": "node scripts/serve.cjs"
+    "start": "node scripts/serve.cjs",
+    "smoke:live": "node scripts/smoke-live.cjs"
   }
 }
