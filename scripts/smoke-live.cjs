@@ -39,7 +39,7 @@ async function verify(){
  }else if(!/^[a-f0-9]{40}$/.test(info.commit)){
   console.warn('WARN: deployed commit not known; code version parity not proven');
  }
- console.log('PASS: live routes, mobile CSS, sitemap and deployed revision '+info.commit);
+ console.log('PASS: live routes, illustrated book-cover MIME, mobile CSS, sitemap and deployed revision '+info.commit);
 }
 (async()=>{
  for(let i=0;i<=retries;i++){
