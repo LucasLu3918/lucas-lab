@@ -40,3 +40,10 @@
 }
 /* Preserve WCAG contrast in the game footer on dark backgrounds. */
 footer>span:nth-child(2){color:#b9ada2}
+
+/* Hotspots must win hit testing over the scene image at all viewport sizes. */
+.scene>img{position:absolute;inset:0;z-index:0;pointer-events:none}
+.scene-shade{z-index:1}
+.scene-caption{z-index:2}
+#hotspots{position:absolute;inset:0;z-index:3;pointer-events:none}
+#hotspots .hotspot{pointer-events:auto}
