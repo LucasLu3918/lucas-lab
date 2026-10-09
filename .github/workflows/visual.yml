@@ -1,0 +1,33 @@
+name: Responsive browser acceptance (Chromium)
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and validate public pages
+        run: npm run check
+      - name: Install isolated browser testing tools
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Audit responsive layout and interactions
+        run: npm run test:visual
+      - name: Preserve representative viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-browser-screenshots
+          path: visual-audit-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
