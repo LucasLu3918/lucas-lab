@@ -1,0 +1,301 @@
+{
+  "stories": [
+    {
+      "slug": "mist-letters",
+      "title": "霧林來信",
+      "subtitle": "原創閱讀示範",
+      "description": "一封沒有署名的信，帶領一名旅客走進不再遵守時間的森林。這篇原創短篇示範兩章，用來體驗網站的閱讀功能。",
+      "category": "原創示範",
+      "symbol": "✉",
+      "palette": "teal",
+      "status": "demo",
+      "warnings": [],
+      "chapters": [
+        {
+          "id": "01",
+          "title": "第一章：最後一班車",
+          "paragraphs": [
+            "夜裡十一點，城郊最後一班列車停在了沒有站牌的月台。車門打開時，風把一封沒有署名的信送到了林的腳邊。",
+            "信紙很薄，字跡卻像刻在木頭上的年輪：「別相信森林裡第一個叫出你名字的人。」",
+            "林原本不打算下車。但車窗映著她的臉，也映著一個站在她身後、沒有影子的旅客。她抓起信，踏進濕冷的夜色。",
+            "列車駛走時，月台上的鐘停止在十一點零一分。遠處有人輕輕喊了她的名字。"
+          ]
+        },
+        {
+          "id": "02",
+          "title": "第二章：借來的名字",
+          "paragraphs": [
+            "森林裡的路不按照人的記憶延伸。林繞過同一棵銀色的樹三次，每一次都看見樹上多了一道刻痕。",
+            "第四次經過時，一個披著舊雨衣的孩子坐在樹根旁，手裡拿著另外半封信。「你來得太晚了，」孩子說，「他們已經開始用你的名字開門。」",
+            "林想詢問「他們」是誰，卻發現自己已想不起母親昨晚如何呼喚她。夜風翻開那半封信，最後一行寫著：「要走出這裡，先把真正的名字還給自己。」",
+            "她抬頭時，孩子已不見蹤影。只剩前方的霧氣裡，亮起一盞溫暖得過分的燈。"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dark-red-hood",
+      "title": "暗黑小紅帽",
+      "subtitle": "黑暗童話",
+      "description": "穿越失序的森林，在人性、魔法與命運之間尋找出路。完整劇本尚待匯入與校稿。",
+      "category": "黑暗童話",
+      "symbol": "☾",
+      "palette": "red",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    },
+    {
+      "slug": "dark-snow-white",
+      "title": "暗黑白雪公主",
+      "subtitle": "黑暗童話",
+      "description": "當魔鏡不再說出真話，王國的每一道陰影都有自己的聲音。劇本尚待匯入。",
+      "category": "黑暗童話",
+      "symbol": "♛",
+      "palette": "rose",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    },
+    {
+      "slug": "dark-cinderella",
+      "title": "暗黑灰姑娘",
+      "subtitle": "黑暗童話",
+      "description": "午夜的鐘聲是命運轉折，也是代價的開始。劇本尚待匯入。",
+      "category": "黑暗童話",
+      "symbol": "✦",
+      "palette": "blue",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    },
+    {
+      "slug": "dark-aladdin",
+      "title": "暗黑阿拉丁",
+      "subtitle": "黑暗童話",
+      "description": "當所有願望都需要交換，誰有資格決定代價？劇本尚待匯入。",
+      "category": "黑暗童話",
+      "symbol": "◇",
+      "palette": "gold",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    },
+    {
+      "slug": "dark-mermaid",
+      "title": "暗黑小美人魚",
+      "subtitle": "黑暗童話",
+      "description": "深海用沉默交換秘密，岸上的人卻聽不見潮汐的告別。劇本尚待匯入。",
+      "category": "黑暗童話",
+      "symbol": "≈",
+      "palette": "teal",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    },
+    {
+      "slug": "dark-mulan",
+      "title": "暗黑花木蘭",
+      "subtitle": "黑暗奇幻",
+      "description": "硝煙中的忠誠、抉擇與魔法，不會只用勝敗衡量。劇本尚待匯入。",
+      "category": "黑暗奇幻",
+      "symbol": "⚔",
+      "palette": "red",
+      "status": "pending",
+      "warnings": [
+        "暴力",
+        "成人議題"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "title": "多語翻譯工具",
+      "description": "選擇多個目標語言，比較與複製翻譯結果。",
+      "category": "文字與資料",
+      "symbol": "🌐",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/translation-tool",
+      "trait": "需要網路"
+    },
+    {
+      "title": "圖片轉 WebP",
+      "description": "在瀏覽器批次轉換與壓縮圖片。",
+      "category": "圖片設計",
+      "symbol": "▧",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/convert-to-webp",
+      "trait": "本機處理"
+    },
+    {
+      "title": "資料格式轉換器",
+      "description": "JSON、YAML、CSV 等常見格式轉換。",
+      "category": "開發工具",
+      "symbol": "{}",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/format-converter",
+      "trait": "本機處理"
+    },
+    {
+      "title": "時間轉換",
+      "description": "Unix 時戳與不同時區日期時間換算。",
+      "category": "開發工具",
+      "symbol": "◷",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/time-converter",
+      "trait": "本機處理"
+    },
+    {
+      "title": "PDF 工具箱",
+      "description": "合併、擷取、旋轉與重新排列 PDF 頁面。",
+      "category": "文字與資料",
+      "symbol": "▤",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/pdf-toolbox",
+      "trait": "本機處理"
+    },
+    {
+      "title": "色彩工具箱",
+      "description": "取得色彩值並轉換 HEX、RGB、HSL 等格式。",
+      "category": "圖片設計",
+      "symbol": "◈",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/color-picker",
+      "trait": "本機處理"
+    },
+    {
+      "title": "台灣即時電力看板",
+      "description": "查看台灣用電、發電結構及供電餘裕。",
+      "category": "生活資訊",
+      "symbol": "⚡",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/power-grid",
+      "trait": "需要網路"
+    },
+    {
+      "title": "QR Code 產生器",
+      "description": "在瀏覽器本機產生可下載的 QR Code。",
+      "category": "生活資訊",
+      "symbol": "▦",
+      "href": "https://lucas-tools.owl3918.workers.dev/tools/qr-code",
+      "trait": "本機處理"
+    }
+  ],
+  "games": [
+    {
+      "slug": "mist-trail",
+      "title": "霧林迷途",
+      "description": "以選擇影響劇情分支的網頁冒險概念；目前尚未開發可遊玩版本。",
+      "category": "互動敘事",
+      "status": "concept",
+      "symbol": "✧",
+      "palette": "teal"
+    },
+    {
+      "slug": "rune-room",
+      "title": "符文密室",
+      "description": "觀察符文與場景中的線索，逐步破解關卡的遊戲概念。",
+      "category": "解謎遊戲",
+      "status": "concept",
+      "symbol": "◈",
+      "palette": "rose"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "lucas-tools",
+      "title": "Lucas Tools",
+      "description": "使用 Vue 3、TypeScript、Vite 開發的工具集合。本站僅展示並連回原網站，不搬移程式碼。",
+      "category": "Web Application",
+      "status": "live",
+      "symbol": "⚙",
+      "palette": "blue",
+      "href": "https://lucas-tools.owl3918.workers.dev/",
+      "repo": "https://github.com/LucasLu3918/lucas-tools",
+      "highlights": [
+        "Vue 3 + TypeScript + Vite",
+        "多用途工具分類",
+        "前端本機運算與資料查詢"
+      ]
+    },
+    {
+      "slug": "aips",
+      "title": "AI Product System",
+      "description": "以人類決策為中心的 AI 輔助產品開發系統，涵蓋治理、流程與工程品質。",
+      "category": "AI Engineering",
+      "status": "repo",
+      "symbol": "✳",
+      "palette": "rose",
+      "href": "https://github.com/LucasLu3918/ai-product-system",
+      "repo": "https://github.com/LucasLu3918/ai-product-system",
+      "highlights": [
+        "AI 協作流程",
+        "品質檢查與治理",
+        "可擴展的技能與工作流程"
+      ]
+    },
+    {
+      "slug": "ecommerce-concept",
+      "title": "電商網站概念",
+      "description": "規劃展示商品探索、購物流程與產品設計，尚未完成公開網站。",
+      "category": "Product Concept",
+      "status": "concept",
+      "symbol": "▤",
+      "palette": "gold",
+      "highlights": [
+        "商品與分類",
+        "購物車及結帳 UX",
+        "前後端架構規劃"
+      ]
+    }
+  ],
+  "gallery": [
+    {
+      "title": "森之旅人",
+      "symbol": "✧",
+      "palette": "teal",
+      "description": "森林角色的視覺設計方向（示意圖，尚未上傳正式原畫）。"
+    },
+    {
+      "title": "赤紅斗篷",
+      "symbol": "☾",
+      "palette": "red",
+      "description": "黑暗童話角色視覺方向（示意圖，非正式小說封面）。"
+    },
+    {
+      "title": "魔法古書",
+      "symbol": "✦",
+      "palette": "gold",
+      "description": "幻想書籍與魔法視覺方向（示意）。"
+    },
+    {
+      "title": "深海之歌",
+      "symbol": "≈",
+      "palette": "blue",
+      "description": "深海幻想場景概念方向（示意）。"
+    },
+    {
+      "title": "銀色魔鏡",
+      "symbol": "◇",
+      "palette": "rose",
+      "description": "黑暗童話場景概念方向（示意）。"
+    },
+    {
+      "title": "夜色星軌",
+      "symbol": "✳",
+      "palette": "blue",
+      "description": "科技奇幻品牌視覺（示意）。"
+    }
+  ],
+  "journal": [
+    {
+      "title": "LUCAS LAB：從工具到創作宇宙",
+      "date": "2026-10-09",
+      "description": "記錄網站的起點、設計原則與功能規劃。這是一篇首發介紹，而非已完成的技術研究報告。",
+      "slug": "origin"
+    }
+  ]
+}
