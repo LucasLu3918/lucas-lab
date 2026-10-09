@@ -91,11 +91,12 @@ docs/                內容與技術規範
 
 ## 原創《白雪公主：血色魔鏡》封面與瀏覽器驗收
 
-- 新增 `assets/snow-white-cover.svg` 原創向量插畫，直接顯示於首頁精選作品、故事卡片及正式小說詳情頁；來源檔與建置後資產的一致性由 `npm run check` 驗證。沒有外部圖片 CDN 或 AI API Key。
+- 新增本機原創 AI 城堡與故事封面 `assets/images/moonlit-castle.webp`、`assets/images/snow-white-portrait.webp`；首頁主視覺與故事封面都由靜態建置複製至 `dist/assets`，`npm run check` 會比對源檔與建置產物。
+- 網站採暗黑奇幻、月光藍與古金色系，首頁使用全幅城堡主視覺與中文標題；導覽品牌以本機 SVG 羅盤呈現，無外部字型或圖像服務依賴。
 - 現有純靜態網站仍不依賴任何執行期套件；Chrome 自動測試工具只於獨立 GitHub Actions 工作流程暫時安裝，不參與 Cloudflare 正式站部署。
-- `npm run test:visual` 使用本機 Chromium + Playwright (需預先安裝)，檢查 320、360、390、480、720、768、900、1024、1440px 的核心頁面，避免水平溢出、封面載入失敗，並測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽。
+- `npm run test:visual` 使用本機 Chromium + Playwright (需預先安裝)，檢查 320、360、390、480、720、768、900、1024、1440px 的核心頁面，避免水平溢出，並確認城堡與封面載入，測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽。
 - `.github/workflows/visual.yml` 會在 PR / main 更新時執行，保留桌面、平板、手機三種寬度的自動測試截圖供檢視；此流程提供 Chromium 模擬驗證，不等同於實際 iPhone Safari、Android Chrome 或真人操作驗收。
-- 封面為本站原創黑暗奇幻插畫，與任何現有影視、遊戲或書籍的官方視覺並無關係。
+- 城堡與封面插畫是本站原創視覺，與既有影視、遊戲或書籍的官方視覺無關。
 
 - 獨立 Chromium CI 另外使用 `@axe-core/playwright` 在 390px 與 1440px 的首頁、小說目錄、首章與搜尋頁自動執行 WCAG 2.1 A/AA 檢查；此測試不等於真人螢幕閱讀器與實體裝置的驗收。
 

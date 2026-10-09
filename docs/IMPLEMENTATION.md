@@ -44,6 +44,14 @@
 - Lighthouse、axe-core、鍵盤導覽、CSP/HTTP headers。
 - 遵守發布審批流程，不把私有內容或未知授權作品直接公開。
 
+## 第四階段：暗黑奇幻視覺更新
+
+- 首頁使用原創月夜城堡 WebP 全幅主視覺，覆以暗色漸層確保標題與按鈕可讀；導覽採本機 SVG 羅盤、襯線品牌字與「暗黑科技 × 奇幻宇宙」副標。
+- 共用設計色為夜幕藍黑、月光冷藍、古金與酒紅；套用至分類入口、作品卡、小說詳情、閱讀工具與導覽狀態。
+- 《白雪公主：血色魔鏡》採原創角色 WebP 封面；圖片以 WebP 壓縮並由 `scripts/build.cjs` 從 `assets/` 複製到 `dist/assets/`，不依賴外部圖床或圖像執行期服務。
+- 既有響應式斷點、閱讀主題、鍵盤操作、觸控尺寸與 reduced-motion 偏好維持可用；`scripts/check.cjs` 驗證圖片與建置輸出一致，`scripts/visual-audit.cjs` 檢查首頁城堡、封面及各 viewport 的版面。
+- 產生的圖片為新插畫，不宣稱為真人或既有作品角色官方素材；網站功能狀態與章節內容未因視覺更新而改變。
+
 ## 正式部署與 SEO
 - 正式來源：`https://lucas-lab.owl3918.workers.dev/`，使用 Cloudflare Workers Static Assets。
 - Worker 名稱與靜態輸出目錄由 `wrangler.jsonc` 管理；`dist/` 應由 `npm run build` 生成。
