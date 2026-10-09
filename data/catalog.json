@@ -31,7 +31,13 @@
             "她抬頭時，孩子已不見蹤影。只剩前方的霧氣裡，亮起一盞溫暖得過分的燈。"
           ]
         }
-      ]
+      ],
+      "cover": "assets/images/mist-letters.webp",
+      "coverSmall": "assets/images/mist-letters-small.webp",
+      "coverAlt": "月夜霧林裡的封蠟信件與遠方旅人，原創 AI 封面插畫",
+      "coverTitle": "霧林來信",
+      "coverSubtitle": "時間之外的森林",
+      "coverSeries": "ORIGINAL FICTION"
     },
     {
       "slug": "dark-red-hood",
@@ -50,7 +56,13 @@
       ],
       "manuscript": "content/stories/dark-red-hood.md",
       "expectedChapters": 16,
-      "expectedUnits": 19
+      "expectedUnits": 19,
+      "cover": "assets/images/dark-red-hood.webp",
+      "coverSmall": "assets/images/dark-red-hood-small.webp",
+      "coverAlt": "披緋紅斗篷的成年女子、蝕月與林間狼影，原創 AI 封面插畫",
+      "coverTitle": "紅帽",
+      "coverSubtitle": "噬月森林",
+      "coverSeries": "DARK TALES · I"
     },
     {
       "slug": "dark-snow-white",
@@ -69,7 +81,12 @@
         "死亡與悲劇"
       ],
       "manuscript": "content/stories/dark-snow-white.md",
-      "cover": "assets/images/snow-white-portrait.webp"
+      "cover": "assets/images/snow-white-portrait.webp",
+      "coverSmall": "assets/images/snow-white-portrait-small.webp",
+      "coverAlt": "黑髮成年女子手持紅蘋果，身後是銀鏡與月夜城堡，原創 AI 封面插畫",
+      "coverTitle": "白雪公主",
+      "coverSubtitle": "血色魔鏡",
+      "coverSeries": "DARK TALES · II"
     },
     {
       "slug": "dark-cinderella",
@@ -88,7 +105,13 @@
       ],
       "manuscript": "content/stories/dark-cinderella.md",
       "expectedChapters": 13,
-      "expectedUnits": 16
+      "expectedUnits": 16,
+      "cover": "assets/images/dark-cinderella.webp",
+      "coverSmall": "assets/images/dark-cinderella-small.webp",
+      "coverAlt": "成年女子手持焦黑金冠，站在灰燼覆蓋的午夜宮殿，原創 AI 封面插畫",
+      "coverTitle": "灰燼王冠",
+      "coverSubtitle": "午夜之後，無人倖免",
+      "coverSeries": "DARK TALES · III"
     },
     {
       "slug": "dark-aladdin",
@@ -108,7 +131,13 @@
       ],
       "manuscript": "content/stories/dark-aladdin.md",
       "expectedChapters": 14,
-      "expectedUnits": 16
+      "expectedUnits": 16,
+      "cover": "assets/images/dark-aladdin.webp",
+      "coverSmall": "assets/images/dark-aladdin-small.webp",
+      "coverAlt": "成年旅人手持古銅神燈，煙霧盤旋於月夜沙漠宮殿，原創 AI 封面插畫",
+      "coverTitle": "阿拉丁",
+      "coverSubtitle": "願望的屍骨",
+      "coverSeries": "DARK TALES · IV"
     },
     {
       "slug": "dark-mermaid",
@@ -128,7 +157,13 @@
       ],
       "manuscript": "content/stories/dark-mermaid.md",
       "expectedChapters": 18,
-      "expectedUnits": 20
+      "expectedUnits": 20,
+      "cover": "assets/images/dark-mermaid.webp",
+      "coverSmall": "assets/images/dark-mermaid-small.webp",
+      "coverAlt": "身披鱗甲的成年人魚抱著古老王冠，坐於沉沒王廷，原創 AI 封面插畫",
+      "coverTitle": "小美人魚",
+      "coverSubtitle": "沉默者的王冠",
+      "coverSeries": "DARK TALES · V"
     },
     {
       "slug": "dark-mulan",
@@ -148,7 +183,13 @@
       ],
       "manuscript": "content/stories/dark-mulan.md",
       "expectedChapters": 21,
-      "expectedUnits": 23
+      "expectedUnits": 23,
+      "cover": "assets/images/dark-mulan.webp",
+      "coverSmall": "assets/images/dark-mulan-small.webp",
+      "coverAlt": "身披玄鐵鎧甲的成年女戰士、舊軍籍木牌與霧中城門，原創 AI 封面插畫",
+      "coverTitle": "花木蘭",
+      "coverSubtitle": "葬名之歌",
+      "coverSeries": "DARK FANTASY · VI"
     }
   ],
   "tools": [
@@ -262,13 +303,14 @@
       "status": "repo",
       "symbol": "✳",
       "palette": "rose",
-      "href": "https://github.com/LucasLu3918/ai-product-system",
+      "href": "https://lucaslu3918.github.io/ai-product-system/",
       "repo": "https://github.com/LucasLu3918/ai-product-system",
       "highlights": [
         "AI 協作流程",
         "品質檢查與治理",
         "可擴展的技能與工作流程"
-      ]
+      ],
+      "hrefLabel": "閱讀 AIPS 說明文件"
     },
     {
       "slug": "ecommerce-concept",

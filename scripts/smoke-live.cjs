@@ -28,9 +28,14 @@ async function verify(){
   if(addedNovels.some(([slug])=>route==='/stories/'+slug+'/'))assert.ok(body.includes('內容提示：')&&body.includes('第一章：'),'new novel contents/warnings missing: '+route);
   for(const [slug,total] of addedNovels)if(route==='/stories/'+slug+'/chapters/'+String(total-1).padStart(2,'0')+'/')assert.ok(body.includes('FULL STORY')&&body.includes('class="readerpage manuscript"'),'final novel chapter unavailable: '+route);
  }
- const cover=await get('/assets/images/snow-white-portrait.webp');
- assert.match(cover.response.headers.get('content-type')||'',/image\/webp/i,'deployed book cover has incorrect MIME');
- assert.ok(cover.body.byteLength>10000,'book-cover image is empty or corrupted');
+ const catalog=require('../data/catalog.json');
+ for(const story of catalog.stories){
+  for(const asset of [story.cover,story.coverSmall]){
+   const cover=await get('/'+asset);
+   assert.match(cover.response.headers.get('content-type')||'',/image\/webp/i,'deployed cover has incorrect MIME: '+asset);
+   assert.ok(cover.body.byteLength>5000,'cover image is empty or corrupted: '+asset);
+  }
+ }
  const hero=await get('/assets/images/moonlit-castle.webp');
  assert.match(hero.response.headers.get('content-type')||'',/image\/webp/i,'deployed castle hero has incorrect MIME');
  assert.ok(hero.body.byteLength>10000,'castle hero image is empty or corrupted');
