@@ -27,6 +27,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('#room-puzzle').click();
    assert.equal(await page.locator('.picture-tile').count(),9);
    for(let wanted=0;wanted<9;wanted++){
+    if(await page.locator('#code').count())break; // Solving the last misplaced tile auto-advances the modal.
     const positions=await page.locator('.picture-tile').evaluateAll(els=>els.map(el=>Number(el.getAttribute('aria-label').match(/圖塊 (\d+)/)[1])-1));
     if(positions[wanted]===wanted)continue;
     const target=positions.indexOf(wanted);
