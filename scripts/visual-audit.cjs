@@ -71,7 +71,7 @@ async function audit(){
    await page.goto(origin+'/search/',{waitUntil:'domcontentloaded'});
    await page.locator('[data-search]').fill('白雪');
    assert.ok(await page.locator('[data-item]:visible').count()>0,'full story absent from search at '+width);
-   await page.locator('[data-search]').fill('匯率');
+   await page.locator('[data-search]').fill('翻譯');
    assert.ok(await page.locator('a[href^="https://lucas-tools.owl3918.workers.dev/"]:visible').count()>0,'Lucas Tools absent from search at '+width);
    await page.goto(origin+'/stories/dark-snow-white/chapters/00/',{waitUntil:'domcontentloaded'});
    const reader=page.locator('[data-reader]');
