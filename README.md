@@ -6,7 +6,7 @@
 
 ## 啟動
 
-需要 Node.js 22+；**不需要 npm install，也不需要任何外部 AI API Key**。
+需要 Node.js 22+；執行 `npm run check`、`npm start` **不需要 npm install**，網站執行時不依賴外部套件或 AI API Key。Cloudflare 部署 CLI `wrangler` 則明確固定在 `devDependencies`，需先 `npm install` 才能從本機執行 `npm run deploy`。
 
 ```bash
 npm run check
@@ -75,3 +75,5 @@ docs/                內容與技術規範
 - GitHub Actions 每日約在台灣時間 10:23 檢查正式網站，也可透過 `workflow_dispatch` 手動執行。GitHub 排程可能延遲。
 - 版本或路由檢查失敗時，請在 Cloudflare Dashboard 的 Workers Builds 檢查 Git 來源、分支、建置命令及部署紀錄；GitHub Action **不會**替 Cloudflare 執行部署。
 - 全站搜尋包含公開 Lucas Tools 項目，但工具仍由原網站提供，不複製、不代理其程式碼。
+
+> 部署穩定性：`wrangler` 已固定版本；這降低 CLI 更新漂移，但不代表已修復 Cloudflare Workers Builds 的既有失敗。仍需查看 Cloudflare Build log，確認錯誤後才能合併部署。
