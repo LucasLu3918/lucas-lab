@@ -38,3 +38,5 @@
 @media(prefers-reduced-motion:reduce){
  .pipe-piece>span,.picture-tile,.rune-key{transition:none}
 }
+/* Preserve WCAG contrast in the game footer on dark backgrounds. */
+footer>span:nth-child(2){color:#b9ada2}
