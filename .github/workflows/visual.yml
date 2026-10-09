@@ -21,10 +21,10 @@ jobs:
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 @axe-core/playwright@4.10.2
           npx playwright install --with-deps chromium
-      - name: Audit responsive layout and interactions
-        run: npm run test:visual
       - name: Exercise Blood Mirror full five-chapter game in Chromium
         run: node scripts/blood-mirror.browser.cjs
+      - name: Audit responsive layout and interactions
+        run: npm run test:visual
       - name: Preserve representative viewport screenshots
         if: always()
         uses: actions/upload-artifact@v4
