@@ -2,7 +2,7 @@
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -32,11 +32,19 @@
   const coverBuilt=fs.readFileSync(path.join(dist,'assets/snow-white-cover.svg'),'utf8');
   assert.equal(coverBuilt,coverSource,'book-cover file must be copied unchanged to dist');
   assert.ok(coverSource.startsWith('<svg')&&coverSource.includes('viewBox="0 0 800 1080"'),'invalid book cover SVG');
+ const newCoverSource=fs.readFileSync(path.join(root,'assets/images/snow-white-portrait.webp'));
+ const newCoverBuilt=fs.readFileSync(path.join(dist,'assets/images/snow-white-portrait.webp'));
+ assert.ok(newCoverBuilt.equals(newCoverSource),'generated book-cover image must be copied unchanged to dist');
+ const heroSource=fs.readFileSync(path.join(root,'assets/images/moonlit-castle.webp'));
+ const heroBuilt=fs.readFileSync(path.join(dist,'assets/images/moonlit-castle.webp'));
+ assert.ok(heroBuilt.equals(heroSource),'hero image must be copied unchanged to dist');
+ assert.ok(fs.readFileSync(path.join(dist,'index.html'),'utf8').includes('assets/images/moonlit-castle.webp'),'home page must show the castle hero');
+ assert.ok(fs.readFileSync(path.join(dist,'stories/dark-snow-white/index.html'),'utf8').includes('assets/images/snow-white-portrait.webp'),'story details must show the generated portrait');
   assert.ok(!/<script\b|\bonload\s*=|https?:\/\//i.test(coverSource.replace('xmlns="http://www.w3.org/2000/svg"','')),'unexpected external or script-backed book asset');
   const novelBook=fs.readFileSync(path.join(dist,'stories/dark-snow-white/index.html'),'utf8');
   const featuredBook=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  for(const text of [novelBook,featuredBook])assert.ok(text.includes('/assets/snow-white-cover.svg'),'original book-cover image missing from public page');
-  assert.ok(catalog.stories.find(s=>s.slug==='dark-snow-white')?.cover==='assets/snow-white-cover.svg','published book missing cover catalog property');
+  for(const text of [novelBook,featuredBook])assert.ok(text.includes('/assets/images/snow-white-portrait.webp'),'original book-cover image missing from public page');
+  assert.ok(catalog.stories.find(s=>s.slug==='dark-snow-white')?.cover==='assets/images/snow-white-portrait.webp','published book missing cover catalog property');
  const newManuscripts=[
   ['dark-red-hood','b4b2f3ff4864d140f93882403d382dced8e413ca251df4aad6695c9912698143',16,19,'尾聲：寫在故事之外'],
   ['dark-cinderella','a0fdb50fbabea74dfd398df9550f8de11fdddcf35d130137a78f019448d157e5',13,16,'尾聲：寫在灰燼上的名字'],

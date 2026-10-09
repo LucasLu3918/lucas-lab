@@ -14,6 +14,14 @@ const origin='http://127.0.0.1:4173';
 const widths=[320,360,390,480,720,768,900,1024,1440];
 const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/'];
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function decodeImages(page){
+ const images=page.locator('img');
+ for(let i=0;i<await images.count();i++){
+  const image=images.nth(i);
+  await image.scrollIntoViewIfNeeded();
+  await image.evaluate(img=>img.decode());
+ }
+}
 
 async function ready(){
  for(let i=0;i<40;i++){
@@ -39,20 +47,24 @@ async function audit(){
    for(const route of routes){
     const response=await page.goto(origin+route,{waitUntil:'load'});
     assert.equal(response.status(),200,width+' '+route+' did not respond 200');
-    const covers=page.locator('img[src*="snow-white-cover.svg"]');
+    const covers=page.locator('img[src*="snow-white-portrait.webp"]');
     for(let k=0;k<await covers.count();k++){
      await covers.nth(k).scrollIntoViewIfNeeded();
      await covers.nth(k).evaluate(img=>img.decode());
     }
     const result=await page.evaluate(()=>{
      const doc=document.documentElement;
-     const images=[...document.images].filter(img=>img.getAttribute('src')?.includes('snow-white-cover.svg'));
+     const images=[...document.images].filter(img=>img.getAttribute('src')?.includes('snow-white-portrait.webp'));
      return {width:window.innerWidth,documentWidth:doc.scrollWidth,bodyWidth:document.body.scrollWidth,lang:doc.lang,main:!!document.querySelector('#main'),badImages:images.filter(i=>!i.complete||i.naturalWidth===0).length};
     });
     assert.equal(result.lang,'zh-Hant','wrong document language at '+route);
     assert.ok(result.main,'missing main landmark '+route);
     assert.ok(Math.max(result.documentWidth,result.bodyWidth)<=result.width+2,'horizontal overflow at '+width+'px '+route+' doc='+result.documentWidth+' body='+result.bodyWidth);
     assert.equal(result.badImages,0,'cover image failed to load at '+width+'px '+route);
+    if(route==='/'){
+     const heroImage=await page.locator('.hero-art').evaluate(async img=>{await img.decode();return {loaded:img.naturalWidth>0,width:img.naturalWidth}});
+     assert.ok(heroImage.loaded&&heroImage.width===1536,'castle hero image failed to load at '+width+'px');
+    }
     inspected++;
    }
    await page.goto(origin+'/',{waitUntil:'domcontentloaded'});
@@ -62,7 +74,7 @@ async function audit(){
     await menu.click();
     assert.equal(await menu.getAttribute('aria-expanded'),'true','mobile menu did not open at '+width);
     assert.ok(await page.locator('#site-nav').isVisible(),'expanded menu not visible at '+width);
-    await page.keyboard.press('Escape');
+   await page.keyboard.press('Escape');
     assert.equal(await menu.getAttribute('aria-expanded'),'false','menu Escape handling broken at '+width);
     assert.ok(await menu.evaluate(e=>e===document.activeElement),'menu focus not restored at '+width);
    }else{
@@ -82,9 +94,18 @@ async function audit(){
    assert.equal(await page.locator('[data-size]').textContent(),'19px','font-size control failed at '+width);
    assert.ok(await page.locator('.chapternav a[href*="/chapters/01/"]').count()>0,'next-chapter link missing at '+width);
    if([390,768,1440].includes(width)){
-    await page.goto(origin+'/',{waitUntil:'domcontentloaded'});
+   await page.goto(origin+'/',{waitUntil:'domcontentloaded'});
+    const featureCover=page.locator('.feature .cover-visual img');
+    assert.equal(await featureCover.getAttribute('loading'),'eager','featured cover should have priority loading');
+    await decodeImages(page);
+    assert.ok(await featureCover.evaluate(img=>img.naturalWidth===900),'featured cover failed to decode at '+width);
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.waitForFunction(()=>window.scrollY===0);
     await page.screenshot({path:path.join(captures,'home-'+width+'.png'),fullPage:true,animations:'disabled'});
     await page.goto(origin+'/stories/dark-snow-white/',{waitUntil:'domcontentloaded'});
+    await decodeImages(page);
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.waitForFunction(()=>window.scrollY===0);
     await page.screenshot({path:path.join(captures,'novel-'+width+'.png'),fullPage:true,animations:'disabled'});
    }
    if(width===390){
