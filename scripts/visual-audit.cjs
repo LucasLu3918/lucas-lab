@@ -12,7 +12,7 @@ const root=path.resolve(__dirname,'..');
 const captures=path.join(root,'visual-audit-artifacts');
 const origin='http://127.0.0.1:4173';
 const widths=[320,360,390,480,720,768,900,1024,1440];
-const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/','/games/','/games/'+JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8')).games[0].slug+'/','/projects/','/projects/aips/','/404.html','/journal/','/journal/origin/','/about/','/legal/','/style-guide/'];
+const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/','/games/','/games/blood-mirror/play/','/games/'+JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8')).games[0].slug+'/','/projects/','/projects/aips/','/404.html','/journal/','/journal/origin/','/about/','/legal/','/style-guide/'];
 const stories=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8')).stories;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function decodeImages(page){

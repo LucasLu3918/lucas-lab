@@ -2,7 +2,7 @@
  const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
  const root=path.resolve(__dirname,'../dist');
  if(!fs.existsSync(path.join(root,'index.html'))){console.error('Run npm run build first.');process.exit(1)}
- const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.svg':'image/svg+xml'};
+ const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg'};
  const port=Number(process.env.PORT||4173);
  http.createServer((req,res)=>{
   let name;
