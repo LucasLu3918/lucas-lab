@@ -9,9 +9,9 @@ function loadMarkdownChapters(relativePath){
  const file=path.resolve(root,relativePath);
  if(!file.startsWith(sourceRoot+path.sep))throw new Error('Story manuscript must stay inside content/stories');
  const source=fs.readFileSync(file,'utf8').replace(/\r\n?/g,'\n');
- const headings=[...source.matchAll(/^(## (?:序章|尾聲)：[^\n]+|### 第[一二三四五六七八九十]+章：[^\n]+)$/gm)];
+ const headings=[...source.matchAll(/^(## (?:序章|序幕|終章|尾聲)：[^\n]+|### 第[一二三四五六七八九十百]+章：[^\n]+)$/gm)];
  const parts=[...source.matchAll(/^## 第[一二三四五六七八九十]+部：[^\n]+$/gm)];
- if(headings.length<3||!headings[0][0].startsWith('## 序章：')||!headings.at(-1)[0].startsWith('## 尾聲：'))throw new Error('Manuscript needs prologue, chapters and epilogue: '+relativePath);
+ if(headings.length<3||!/^## (?:序章|序幕)：/.test(headings[0][0])||!/^## (?:終章|尾聲)：/.test(headings.at(-1)[0]))throw new Error('Manuscript needs prologue and complete ending: '+relativePath);
  const chapters=headings.map((match,index)=>{
   const next=headings[index+1]?.index??source.length;
   const body=source.slice(match.index+match[0].length,next);
@@ -25,8 +25,12 @@ function loadMarkdownChapters(relativePath){
    paragraphs
   };
  });
- const numeric=chapters.filter(c=>c.title.startsWith('第')&&c.title.includes('章：'));
- if(numeric.length!==headings.length-2)throw new Error('Chapter numbering mismatch: '+relativePath);
+ const numeric=chapters.filter(c=>/^第[一二三四五六七八九十百]+章：/.test(c.title));
+ if(numeric.length<1||numeric.length>50)throw new Error('Invalid main chapter count: '+relativePath);
+ const ended=chapters.slice(1+numeric.length);
+ if(!ended.length||ended.length>2||ended.some(c=>!/^終章：|^尾聲：/.test(c.title)))throw new Error('Missing or ambiguous ending: '+relativePath);
+ if(chapters.length!==numeric.length+1+ended.length)throw new Error('Unexpected section order: '+relativePath);
+
  return chapters;
 }
 module.exports={loadMarkdownChapters};

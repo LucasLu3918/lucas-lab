@@ -35,17 +35,22 @@
     },
     {
       "slug": "dark-red-hood",
-      "title": "暗黑小紅帽",
-      "subtitle": "黑暗童話",
-      "description": "穿越失序的森林，在人性、魔法與命運之間尋找出路。完整劇本尚待匯入與校稿。",
+      "title": "紅帽：噬月森林",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "二十五歲的伊芙琳重返噬月森林，追尋失蹤的母親、被奪走名字的孩子與黑暗魔法議會的祕密。完整原稿包含序章、十六章、終章及尾聲。",
       "category": "黑暗童話",
       "symbol": "☾",
       "palette": "red",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "殘酷暴力",
+        "兒童受害與死亡",
+        "成人情慾張力",
+        "心理創傷與犧牲"
+      ],
+      "manuscript": "content/stories/dark-red-hood.md",
+      "expectedChapters": 16,
+      "expectedUnits": 19
     },
     {
       "slug": "dark-snow-white",
@@ -68,59 +73,82 @@
     },
     {
       "slug": "dark-cinderella",
-      "title": "暗黑灰姑娘",
-      "subtitle": "黑暗童話",
-      "description": "午夜的鐘聲是命運轉折，也是代價的開始。劇本尚待匯入。",
+      "title": "灰燼王冠：午夜之後，無人倖免",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "艾拉從灰燼與魔法血契的枷鎖中追尋母親遭處刑的真相，踏入白鐘、王室與午夜之後的革命。完整原稿包含序幕、十三章、終章及尾聲。",
       "category": "黑暗童話",
       "symbol": "✦",
       "palette": "blue",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "殘酷暴力",
+        "奴役與權力剝削",
+        "成人情慾張力",
+        "死亡與悲劇"
+      ],
+      "manuscript": "content/stories/dark-cinderella.md",
+      "expectedChapters": 13,
+      "expectedUnits": 16
     },
     {
       "slug": "dark-aladdin",
-      "title": "暗黑阿拉丁",
-      "subtitle": "黑暗童話",
-      "description": "當所有願望都需要交換，誰有資格決定代價？劇本尚待匯入。",
+      "title": "阿拉丁：願望的屍骨",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "神燈裡的願望需要陌生人付出生命；阿拉丁、茉莉與賈方捲入帝國的交易、奴役與魔法債務。完整原稿包含序章、十四章及終章。",
       "category": "黑暗童話",
       "symbol": "◇",
       "palette": "gold",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "殘酷暴力",
+        "兒童剝削與傷害",
+        "奴役",
+        "成人情慾張力",
+        "死亡與悲劇"
+      ],
+      "manuscript": "content/stories/dark-aladdin.md",
+      "expectedChapters": 14,
+      "expectedUnits": 16
     },
     {
       "slug": "dark-mermaid",
-      "title": "暗黑小美人魚",
-      "subtitle": "黑暗童話",
-      "description": "深海用沉默交換秘密，岸上的人卻聽不見潮汐的告別。劇本尚待匯入。",
+      "title": "小美人魚：沉默者的王冠",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "人魚黎瑟追查被奪走歌聲的同胞，揭開七鐘塔、海底王廷與陸地權力背後的生命交易。完整原稿包含序章、十八章及終章。",
       "category": "黑暗童話",
       "symbol": "≈",
       "palette": "teal",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "殘酷暴力",
+        "未成年人受害",
+        "身體自主與剝削",
+        "成人情慾張力",
+        "戰爭與死亡"
+      ],
+      "manuscript": "content/stories/dark-mermaid.md",
+      "expectedChapters": 18,
+      "expectedUnits": 20
     },
     {
       "slug": "dark-mulan",
-      "title": "暗黑花木蘭",
-      "subtitle": "黑暗奇幻",
-      "description": "硝煙中的忠誠、抉擇與魔法，不會只用勝敗衡量。劇本尚待匯入。",
+      "title": "花木蘭：葬名之歌",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "木蘭為了父親踏上戰場，卻發現皇朝以真名、死者與軍籍維繫永生的殘酷魔法。完整原稿包含序章、二十一章及尾聲。",
       "category": "黑暗奇幻",
       "symbol": "⚔",
       "palette": "red",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "戰爭殘酷暴力",
+        "未成年人傷亡",
+        "政治壓迫與奴役",
+        "成人愛情",
+        "死亡與悲劇"
+      ],
+      "manuscript": "content/stories/dark-mulan.md",
+      "expectedChapters": 21,
+      "expectedUnits": 23
     }
   ],
   "tools": [

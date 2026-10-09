@@ -37,6 +37,40 @@
   const featuredBook=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   for(const text of [novelBook,featuredBook])assert.ok(text.includes('/assets/snow-white-cover.svg'),'original book-cover image missing from public page');
   assert.ok(catalog.stories.find(s=>s.slug==='dark-snow-white')?.cover==='assets/snow-white-cover.svg','published book missing cover catalog property');
+ const newManuscripts=[
+  ['dark-red-hood','b4b2f3ff4864d140f93882403d382dced8e413ca251df4aad6695c9912698143',16,19,'尾聲：寫在故事之外'],
+  ['dark-cinderella','a0fdb50fbabea74dfd398df9550f8de11fdddcf35d130137a78f019448d157e5',13,16,'尾聲：寫在灰燼上的名字'],
+  ['dark-aladdin','9cd9d0cc3e45814627a169419de2a3f1f9438b3b0f4fa6ec6899942755d82253',14,16,'終章：如果我們從來沒有遇見'],
+  ['dark-mermaid','274d8d687bc047f47e2b944dc5ecabdf956ee463b11beaecea1fa2d725f8dab5',18,20,'終章：獻給那些沒有名字的人'],
+  ['dark-mulan','b338aed3beee31d4f21de650348d588ff1bf2471dcabf2a5cea679fcd5c5ed4f',21,23,'尾聲：春天仍然會來']
+  ];
+  for(const [slug,hash,mainCount,units,ending] of newManuscripts){
+   const story=catalog.stories.find(x=>x.slug===slug);
+   assert.ok(story&&story.status==='complete'&&story.manuscript==='content/stories/'+slug+'.md','new story catalog entry not published: '+slug);
+   assert.equal(story.expectedChapters,mainCount,'wrong chapter metadata: '+slug);
+   assert.equal(story.expectedUnits,units,'wrong reading unit metadata: '+slug);
+   const raw=fs.readFileSync(path.join(root,story.manuscript),'utf8');
+   assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),hash,'original DOCX-derived source altered: '+slug);
+   const chapters=loadMarkdownChapters(story.manuscript);
+   assert.equal(chapters.length,units,'missing reading unit '+slug);
+   assert.equal(chapters.filter(c=>/^第[一二三四五六七八九十百]+章：/.test(c.title)).length,mainCount,'main chapters lost '+slug);
+   assert.equal(chapters.at(-1).title,ending,'missing original ending '+slug);
+   assert.equal(new Set(chapters.map(c=>c.id)).size,units,'duplicate routes '+slug);
+   const index=fs.readFileSync(path.join(dist,'stories',slug,'index.html'),'utf8');
+   assert.ok(index.includes(story.title)&&index.includes('內容提示：')&&index.includes('第一章：'),'novel index or warnings missing '+slug);
+   assert.ok(index.includes('/stories/'+slug+'/chapters/00/'),'prologue not linked '+slug);
+   for(const c of chapters){
+    const html=fs.readFileSync(path.join(dist,'stories',slug,'chapters',c.id,'index.html'),'utf8');
+    assert.ok(html.includes('class="readerpage manuscript"')&&html.includes(c.title),'missing reader HTML for '+slug+'/'+c.id);
+    const escape=p=>p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    assert.ok(html.includes(escape(c.paragraphs[0])),'first paragraph missing '+slug+'/'+c.id);
+    assert.ok(html.includes(escape(c.paragraphs.at(-1))),'last paragraph missing '+slug+'/'+c.id);
+   }
+  }
+  const storyArchive=fs.readFileSync(path.join(dist,'stories/index.html'),'utf8');
+  for(const [slug] of newManuscripts)assert.ok(storyArchive.includes('/stories/'+slug+'/'),'missing story archive entry '+slug);
+  const globalSearch=fs.readFileSync(path.join(dist,'search/index.html'),'utf8');
+  for(const [slug] of newManuscripts)assert.ok(globalSearch.includes('/stories/'+slug+'/'),'missing global search entry '+slug);
  const fullStory=catalog.stories.find(s=>s.slug==='dark-snow-white');
  assert.ok(fullStory&&fullStory.status==='complete','complete Snow White catalog metadata missing');
  const manuscript=fs.readFileSync(path.join(root,fullStory.manuscript),'utf8');
@@ -78,5 +112,5 @@
  assert.ok(typeof info.commit==='string'&&info.commit.length>0,'missing deploy commit');
  const js=fs.readFileSync(path.join(dist,'assets/app.js'),'utf8');
  assert.ok(js.includes('toggle.focus()')&&js.includes('matchMedia'),'nav Escape/resize handling missing');
- console.log('PASS: '+all.length+' pages, complete 22-part Snow White source integrity, navigation, links, mobile UI, search, SEO and Cloudflare config');
+ console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config');
 })();

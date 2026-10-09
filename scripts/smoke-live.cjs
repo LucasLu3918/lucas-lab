@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
 const site=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\/+$/,'');
 const expected=(process.env.EXPECTED_COMMIT||'').trim();
 const retries=Number(process.env.SMOKE_RETRIES||3);
+const addedNovels=[['dark-red-hood',19],['dark-cinderella',16],['dark-aladdin',16],['dark-mermaid',20],['dark-mulan',23]];
 assert.match(site,/^https:\/\/[^/]+$/,'SITE_URL must be an HTTPS origin');
 assert.ok(Number.isInteger(retries)&&retries>=0&&retries<=10,'SMOKE_RETRIES must be 0..10');
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -15,7 +16,7 @@ async function get(route){
  return {response,body:await response.text()};
 }
 async function verify(){
- const routes=['/','/tools/','/stories/','/games/','/projects/','/gallery/','/search/','/stories/mist-letters/chapters/01/','/stories/dark-snow-white/',...Array.from({length:22},(_,i)=>'/stories/dark-snow-white/chapters/'+String(i).padStart(2,'0')+'/')];
+ const routes=['/','/tools/','/stories/','/games/','/projects/','/gallery/','/search/','/stories/mist-letters/chapters/01/','/stories/dark-snow-white/',...Array.from({length:22},(_,i)=>'/stories/dark-snow-white/chapters/'+String(i).padStart(2,'0')+'/'),...addedNovels.flatMap(([slug,total])=>['/stories/'+slug+'/',...Array.from({length:total},(_,i)=>'/stories/'+slug+'/chapters/'+String(i).padStart(2,'0')+'/')])];
  for(const route of routes){
   const {response,body}=await get(route);
   assert.match(response.headers.get('content-type')||'',/text\/html/i,route+' was not HTML');
@@ -23,6 +24,8 @@ async function verify(){
   if(route==='/search/')assert.ok(body.includes('https://lucas-tools.owl3918.workers.dev/'),'/search/ missing tools');
   if(route==='/stories/dark-snow-white/')assert.ok(body.includes('內容提示：')&&body.includes('序章：當鏡子第一次說謊')&&body.includes('/assets/snow-white-cover.svg'),'novel contents, warnings or illustrated cover missing');
   if(route==='/stories/dark-snow-white/chapters/21/')assert.ok(body.includes('《白雪公主：血色魔鏡》——全文完。'),'novel epilogue not deployed');
+  if(addedNovels.some(([slug])=>route==='/stories/'+slug+'/'))assert.ok(body.includes('內容提示：')&&body.includes('第一章：'),'new novel contents/warnings missing: '+route);
+  for(const [slug,total] of addedNovels)if(route==='/stories/'+slug+'/chapters/'+String(total-1).padStart(2,'0')+'/')assert.ok(body.includes('FULL STORY')&&body.includes('class="readerpage manuscript"'),'final novel chapter unavailable: '+route);
  }
  const cover=await get('/assets/snow-white-cover.svg');
  assert.match(cover.response.headers.get('content-type')||'',/image\/svg\+xml/i,'deployed book cover has incorrect MIME');
@@ -39,7 +42,7 @@ async function verify(){
  }else if(!/^[a-f0-9]{40}$/.test(info.commit)){
   console.warn('WARN: deployed commit not known; code version parity not proven');
  }
- console.log('PASS: live routes, illustrated book-cover MIME, mobile CSS, sitemap and deployed revision '+info.commit);
+ console.log('PASS: live routes, 94 additional manuscript chapters, illustrated book-cover MIME, mobile CSS, sitemap and deployed revision '+info.commit);
 }
 (async()=>{
  for(let i=0;i<=retries;i++){
