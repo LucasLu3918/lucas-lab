@@ -5,10 +5,11 @@
   "description": "Responsive AI creator portfolio and digital library, without external runtime dependencies.",
   "scripts": {
     "build": "node scripts/build.cjs",
-    "check": "node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node scripts/build.cjs && node scripts/check.cjs",
+    "check": "node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node --check scripts/visual-audit.cjs && node scripts/build.cjs && node scripts/check.cjs",
     "start": "node scripts/serve.cjs",
     "smoke:live": "node scripts/smoke-live.cjs",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test:visual": "node scripts/visual-audit.cjs"
   },
   "devDependencies": {
     "wrangler": "4.129.1"
