@@ -11,7 +11,7 @@ export function pipeIsSolved(rotations){return rotations.length===5&&rotations.e
 export function glassIsSolved(left,right){return left.length===8&&right.length===8&&left.every((x,i)=>x===right[i^1]);}
 export function startChallenge(id,{modal,success,playCue}){
  const done=()=>{complete(id);playCue('solve');success();};
- const show=(title,subtitle,html)=>modal(title,subtitle,'<div class="challenge" data-challenge="'+id+'">'+html+'</div>');
+ const show=(title,subtitle,html)=>{const active=document.activeElement;const attr=['data-pos','data-pipe','data-rune','data-memory','data-reflection'].find(k=>active?.hasAttribute(k));const selector=attr?'['+attr+'="'+active.getAttribute(attr)+'"]':null;modal(title,subtitle,'<div class="challenge" data-challenge="'+id+'">'+html+'</div>');if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});};
  const feedback=(s)=>{const el=document.querySelector('.challenge-feedback');if(el)el.textContent=s;};
  if(id==='library'){
   const picture='assets/snow-white.webp';let tiles=[4,0,8,2,6,1,3,7,5],selected=-1;
