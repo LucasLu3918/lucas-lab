@@ -21,9 +21,12 @@ async function verify(){
   assert.match(response.headers.get('content-type')||'',/text\/html/i,route+' was not HTML');
   assert.ok(body.includes('<main id="main">')&&body.includes('LUCAS LAB'),route+' is not a LUCAS LAB page');
   if(route==='/search/')assert.ok(body.includes('https://lucas-tools.owl3918.workers.dev/'),'/search/ missing tools');
-  if(route==='/stories/dark-snow-white/')assert.ok(body.includes('內容提示：')&&body.includes('序章：當鏡子第一次說謊'),'novel table of contents or warnings missing');
+  if(route==='/stories/dark-snow-white/')assert.ok(body.includes('內容提示：')&&body.includes('序章：當鏡子第一次說謊')&&body.includes('/assets/snow-white-cover.svg'),'novel contents, warnings or illustrated cover missing');
   if(route==='/stories/dark-snow-white/chapters/21/')assert.ok(body.includes('《白雪公主：血色魔鏡》——全文完。'),'novel epilogue not deployed');
  }
+ const cover=await get('/assets/snow-white-cover.svg');
+ assert.match(cover.response.headers.get('content-type')||'',/image\/svg\+xml/i,'deployed book cover has incorrect MIME');
+ assert.ok(cover.body.startsWith('<svg')&&cover.body.includes('白雪公主：血色魔鏡'),'book-cover illustration missing or corrupted');
  const css=await get('/assets/style.css');
  assert.ok(css.body.includes('max-width:480px'),'deployed CSS missing mobile rules');
  const sitemap=await get('/sitemap.xml');
@@ -36,7 +39,7 @@ async function verify(){
  }else if(!/^[a-f0-9]{40}$/.test(info.commit)){
   console.warn('WARN: deployed commit not known; code version parity not proven');
  }
- console.log('PASS: live routes, mobile CSS, sitemap and deployed revision '+info.commit);
+ console.log('PASS: live routes, illustrated book-cover MIME, mobile CSS, sitemap and deployed revision '+info.commit);
 }
 (async()=>{
  for(let i=0;i<=retries;i++){
