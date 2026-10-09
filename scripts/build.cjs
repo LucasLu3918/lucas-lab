@@ -1,6 +1,8 @@
 (function build(){
  const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process');
+ const {loadMarkdownChapters}=require('./story-source.cjs');
  const root=path.resolve(__dirname,'..'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
+ for(const story of catalog.stories)if(story.manuscript)story.chapters=loadMarkdownChapters(story.manuscript);
  const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});
  for(const f of ['style.css','app.js'])fs.copyFileSync(path.join(root,'assets',f),path.join(out,'assets',f));
  const base=('/'+(process.env.BASE_PATH||'/').replace(/^\/+|\/+$/g,'')+'/').replace('//','/');
@@ -8,7 +10,7 @@
  const url=r=>base+r.replace(/^\/+/,'');const ext=String(home).replace(/\/+$/,'');
  const e=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
  const navItems=[['tools/','工具'],['stories/','故事'],['games/','遊戲'],['projects/','作品'],['gallery/','藝廊'],['journal/','日誌']];
- const stateLabel=s=>({demo:'原創示範',pending:'劇本待匯入',concept:'概念規劃',live:'已公開',repo:'公開專案'})[s]||s;
+ const stateLabel=s=>({demo:'原創示範',pending:'劇本待匯入',concept:'概念規劃',complete:'完整作品',live:'已公開',repo:'公開專案'})[s]||s;
  const view=(symbol,palette='blue')=>`<div class="visual ${e(palette)}" aria-hidden="true"><span>${e(symbol)}</span></div>`;
  const tag=(text)=>`<span class="status">${e(text)}</span>`;
  const card=(obj,kind)=>{
@@ -31,8 +33,8 @@
  const cats=[['tools/','⚙','小工具館','實用工具與生活靈感'],['stories/','📖','故事藏書館','黑暗童話與原創奇幻'],['games/','🎮','互動遊戲館','選擇與探索的新體驗'],['projects/','◫','軟體作品集','產品設計與工程實踐'],['gallery/','✦','AI 視覺藝廊','角色與藝術探索'],['journal/','✎','創作與開發日誌','記錄背後的故事']];
  const categoryMarkup=cats.map(([route,s,title,desc])=>`<a class="cat" href="${url(route)}"><span class="symbol" aria-hidden="true">${s}</span><strong>${title} ↗</strong><span>${desc}</span></a>`).join('');
  const hero=`<section class="wrap hero"><div><div class="eyebrow">A CREATIVE DIGITAL PLAYGROUND</div><h1>CODE.<br>CREATE.<br><span class="gradient">IMAGINE.</span></h1><p>從一行程式，到一個奇幻世界。這裡收藏著工具、故事、遊戲與數位作品，每一個想法，都值得被實現。</p><div class="btnrow"><a class="btn primary" href="${url('search/')}">探索所有作品 ↗</a><a class="btn" href="${url('stories/')}">進入故事世界 →</a></div><p class="hero-note"><small>✳ AI-assisted creations &nbsp; · &nbsp; Made with imagination</small></p></div><div class="art" role="img" aria-label="紫色星球與青色軌道組成的奇幻宇宙插畫"><div class="planet"></div><div class="orbit"></div><div class="floatbadge a">⌘ CODE / BUILD</div><div class="floatbadge b">✦ WORLD / 01</div><div class="floatbadge c">◇ EXPLORE / PLAY</div><div class="artword">INFINITE POSSIBILITIES</div></div></section>`;
- const selected=[card(catalog.stories[0],'story'),card(catalog.stories[1],'story'),card(catalog.projects[0],'project')].join('');
- const feature=`<div class="feature">${view('✉','teal')}<div class="featurecopy"><div class="eyebrow">FEATURED STORY / READER DEMO</div><h2>霧林來信</h2><p>走進一座失去時間感的森林。兩章原創示範，支援閱讀模式、字體調整與章節切換。</p><a class="btn primary" href="${url('stories/mist-letters/')}">開始閱讀 →</a></div></div>`;
+ const selected=[card(catalog.stories.find(x=>x.slug==='dark-snow-white'),'story'),card(catalog.stories[0],'story'),card(catalog.projects[0],'project')].join('');
+ const feature=`<div class="feature">${view('♛','rose')}<div class="featurecopy"><div class="eyebrow">FEATURED STORY / COMPLETE NOVEL</div><h2>白雪公主：血色魔鏡</h2><p>序章、二十章與尾聲已完整上架。踏入魔鏡、魔法學院與王國權力的黑暗真相；含成人議題及暴力內容。</p><a class="btn primary" href="${url('stories/dark-snow-white/')}">閱讀完整故事 →</a></div></div>`;
  const homeHtml=hero+section('DISCOVER THE UNIVERSE','探索創作宇宙','依照興趣開始探索六個不同的世界。',null,`<div class="cats">${categoryMarkup}</div>`)+section('SELECTED CREATIONS','精選創作','真實專案、原創示範與概念作品均明確標示。','search/',`<div class="cards">${selected}</div>`)+section('STORY SPOTLIGHT','走進故事世界','用更舒適的方式閱讀故事。','stories/',feature)+section('ORIGINAL TOOLS','實用工具，一鍵開啟','保留原 Lucas Tools 網站，不搬移程式碼。','tools/',`<div class="tools">${catalog.tools.slice(0,3).map(toolCard).join('')}</div>`)+`<section class="section"><div class="wrap callout"><div class="eyebrow">BEHIND THE SCENES</div><h2>不只是作品，更是創造的過程。</h2><p class="muted">查看產品規劃、技術實驗與 AI 創作背後的想法。</p><a class="btn" href="${url('journal/')}">前往開發日誌 ↗</a></div></section>`;
  write('',page('用程式實現想法，用 AI 創造世界','LUCAS LAB 個人 AI 創作平台：小工具、原創故事、互動遊戲、軟體作品與視覺藝廊。','home',homeHtml));
  write('tools',page('小工具館','探索 Lucas Tools 現有公開工具，直接開啟原網站使用。','tools',intro('TOOLS / OPEN ORIGINAL','實用工具，一鍵直達','工具由原本的 Lucas Tools 網站提供；本站只展示介紹與入口，不複製工具程式碼。')+`<div class="wrap"><div class="warning">外部工具會在新分頁開啟。部分工具需網路或第三方資料來源，實際可用狀態以原網站為準。</div></div>`+library(catalog.tools,toolCard,'tools')+`<div class="wrap section"><a class="btn primary" href="https://lucas-tools.owl3918.workers.dev/" target="_blank" rel="noopener noreferrer">前往完整 Lucas Tools 網站 ↗</a></div>`,'tools'));
@@ -48,8 +50,8 @@
  write('legal',page('內容、隱私與授權','網站的作品狀態、內容授權與隱私說明。','about',intro('POLICY','內容與授權說明','尊重創作內容、角色、圖片與程式碼權利。')+`<section class="wrap section"><h2>內容狀態</h2><p class="muted">示範作品為本站原創演示內容；尚未匯入或尚未經權利審查的劇本不提供正文。視覺圖形目前為 CSS 與符號概念佔位。</p><h2>原有工具</h2><p class="muted">Lucas Tools 由其原站獨立提供，使用工具時請依原站說明。本站不會代理或儲存工具輸入內容。</p><h2>隱私</h2><p class="muted">本站未加入第三方分析或會員系統。閱讀主題與文字大小可保存在此瀏覽器的 localStorage；清除網站資料即可移除。</p><h2>授權</h2><p class="muted">此網站原始碼授權依儲存庫授權文件為準；未另行標示的故事、視覺和品牌內容保留原作者權利。公開前應逐項確認第三方素材使用權。</p></section>`,'legal'));
  for(const s of catalog.stories){
    const ready=Array.isArray(s.chapters)&&s.chapters.length>0;
-   const items=ready?s.chapters.map(c=>`<li><a href="${url('stories/'+s.slug+'/chapters/'+c.id+'/')}">${e(c.title)}<span>開始閱讀 ↗</span></a></li>`).join(''):'<li><span>章節內容待匯入與校稿<span>尚未開放</span></span></li>';
-   const warning=s.warnings?.length?`<div class="warning">內容提示：${e(s.warnings.join('、'))}。此作品目前尚未開放章節內容。</div>`:'';
+   const items=ready?s.chapters.map((c,i)=>`${c.part&&c.part!==s.chapters[i-1]?.part?'<li class="part-heading">'+e(c.part)+'</li>':''}<li><a href="${url('stories/'+s.slug+'/chapters/'+c.id+'/')}">${e(c.title)}<span>開始閱讀 ↗</span></a></li>`).join(''):'<li><span>章節內容待匯入與校稿<span>尚未開放</span></span></li>';
+   const warning=s.warnings?.length?`<div class="warning" role="note">內容提示：${e(s.warnings.join('、'))}。${ready?'請評估是否適合閱讀。':'此作品目前尚未開放章節內容。'}</div>`:'';
    const html=`<div class="wrap"><div class="crumb"><a href="${url('stories/')}">故事藏書館</a> / ${e(s.title)}</div><div class="detail"><div class="cover">${view(s.symbol,s.palette)}</div><div><div class="eyebrow">${e(s.subtitle)}</div><h1>${e(s.title)}</h1><p>${e(s.description)}</p><p class="label">狀態：${e(stateLabel(s.status))}</p>${warning}<h2>章節目錄</h2><ol class="chapterlist">${items}</ol>${ready?`<a class="btn primary" href="${url('stories/'+s.slug+'/chapters/'+s.chapters[0].id+'/')}">開始閱讀 →</a>`:`<a class="btn" href="${url('stories/')}">返回故事清單 →</a>`}</div></div></div>`;
    write('stories/'+s.slug,page(s.title,s.description,'stories',html,'stories/'+s.slug,{noindex:!ready}));
    if(!ready)continue;
@@ -57,7 +59,7 @@
      const prev=s.chapters[i-1],next=s.chapters[i+1];
      const back=url('stories/'+s.slug+'/');
      const controls=`<div class="readerbar"><div><button type="button" data-theme="paper" aria-pressed="true">紙張</button> <button type="button" data-theme="night" aria-pressed="false">夜間</button></div><div class="reader-buttons"><button type="button" data-font="-1" aria-label="縮小字體">A−</button> <span data-size>18px</span> <button type="button" data-font="1" aria-label="放大字體">A＋</button></div></div>`;
-     const content=`<div class="readerwrap"><div class="crumb"><a href="${url('stories/')}">故事藏書館</a> / <a href="${back}">${e(s.title)}</a> / ${e(c.title)}</div>${controls}<article class="readerpage" data-reader><div class="chaptermeta">LUCAS LAB · ORIGINAL DEMO</div><h1>${e(c.title)}</h1>${c.paragraphs.map(p=>`<p>${e(p)}</p>`).join('')}<p style="text-indent:0;text-align:center;font-size:13px;opacity:.6">— 本章完 —</p></article><nav class="chapternav" aria-label="章節導覽"><a class="btn" href="${prev?url('stories/'+s.slug+'/chapters/'+prev.id+'/'):back}">${prev?'← 上一章':'← 返回目錄'}</a><a class="btn primary" href="${next?url('stories/'+s.slug+'/chapters/'+next.id+'/'):back}">${next?'下一章 →':'返回目錄 →'}</a></nav></div>`;
+     const content=`<div class="readerwrap"><div class="crumb"><a href="${url('stories/')}">故事藏書館</a> / <a href="${back}">${e(s.title)}</a> / ${e(c.title)}</div>${controls}<article class="readerpage${s.manuscript?' manuscript':''}" data-reader><div class="chaptermeta">LUCAS LAB · ${s.manuscript?'FULL STORY':'ORIGINAL DEMO'}${c.part?' · '+e(c.part):''}</div><h1>${e(c.title)}</h1>${c.paragraphs.map(p=>`<p>${e(p)}</p>`).join('')}${s.manuscript?'':'<p style="text-indent:0;text-align:center;font-size:13px;opacity:.6">— 本章完 —</p>'}</article><nav class="chapternav" aria-label="章節導覽"><a class="btn" href="${prev?url('stories/'+s.slug+'/chapters/'+prev.id+'/'):back}">${prev?'← 上一章':'← 返回目錄'}</a><a class="btn primary" href="${next?url('stories/'+s.slug+'/chapters/'+next.id+'/'):back}">${next?'下一章 →':'返回目錄 →'}</a></nav></div>`;
      write('stories/'+s.slug+'/chapters/'+c.id,page(c.title+' — '+s.title,s.description,'stories',content,'stories/'+s.slug+'/chapters/'+c.id));
    });
  }
