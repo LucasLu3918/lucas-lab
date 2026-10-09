@@ -1,5 +1,5 @@
 (function build(){
- const fs=require('node:fs'),path=require('node:path');
+ const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process');
  const root=path.resolve(__dirname,'..'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
  const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});
  for(const f of ['style.css','app.js'])fs.copyFileSync(path.join(root,'assets',f),path.join(out,'assets',f));
@@ -70,11 +70,14 @@
    const html=`<div class="wrap"><div class="crumb"><a href="${url('projects/')}">軟體作品集</a> / ${e(p.title)}</div><div class="detail"><div class="cover">${view(p.symbol,p.palette)}</div><div><div class="eyebrow">${e(p.category)}</div><h1>${e(p.title)}</h1><p>${e(p.description)}</p><div class="label">狀態：${e(stateLabel(p.status))}</div><h2>作品重點</h2><ul>${p.highlights.map(x=>`<li>${e(x)}</li>`).join('')}</ul>${p.status==='concept'?'<div class="warning">此作品目前只是規劃概念，尚無公開可操作的 Demo。</div>':''}<div class="btnrow">${links||`<a class="btn" href="${url('projects/')}">返回作品清單 →</a>`}</div></div></div></div>`;
    write('projects/'+p.slug,page(p.title,p.description,'projects',html,'projects/'+p.slug,{noindex:p.status==='concept'}));
  }
- const searchable=[...catalog.stories.map(x=>({...x,kind:'story'})),...catalog.games.map(x=>({...x,kind:'game'})),...catalog.projects.map(x=>({...x,kind:'project'}))];
- const searchHtml=intro('ALL CREATIONS','全站作品搜尋','搜尋故事、遊戲、專案與工具。此版本提供本機即時篩選，不傳送搜尋內容至外部服務。')+library(searchable,x=>card(x,x.kind),'cards')+`<section class="wrap section"><h2>更多實用工具</h2><p class="muted">所有工具直接連至 Lucas Tools 原站。</p><div class="tools">${catalog.tools.slice(0,6).map(toolCard).join('')}</div></section>`;
+ const searchable=[...catalog.stories.map(x=>({...x,kind:'story'})),...catalog.games.map(x=>({...x,kind:'game'})),...catalog.projects.map(x=>({...x,kind:'project'})),...catalog.tools.map(x=>({...x,kind:'tool'}))];
+ const searchHtml=intro('ALL CREATIONS','全站作品搜尋','搜尋故事、遊戲、專案與工具；公開工具會直接連結至 Lucas Tools 原站，搜尋內容只在瀏覽器處理。')+library(searchable,x=>x.kind==='tool'?toolCard(x):card(x,x.kind),'cards');
  write('search',page('搜尋作品','搜尋故事、遊戲、工程作品與工具。','search',searchHtml,'search',{noindex:true}));
+ let commit=process.env.SOURCE_COMMIT||process.env.GITHUB_SHA||process.env.CF_PAGES_COMMIT_SHA||'unknown';
+ if(commit==='unknown'){try{commit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()}catch{}}
+ fs.writeFileSync(path.join(out,'_build.json'),JSON.stringify({commit,site:ext})+'\n');
  fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${ext}/sitemap.xml\n`);
- const listed=['','tools','stories','games','projects','gallery','journal','journal/origin','about','legal','search',...catalog.stories.map(x=>'stories/'+x.slug),...catalog.projects.map(x=>'projects/'+x.slug),...catalog.games.map(x=>'games/'+x.slug)];
+ const listed=['','tools','stories','games','projects','gallery','journal','journal/origin','about','legal',...catalog.stories.filter(x=>(x.chapters||[]).length>0).map(x=>'stories/'+x.slug),...catalog.projects.filter(x=>x.status!=='concept').map(x=>'projects/'+x.slug),...catalog.stories.flatMap(x=>(x.chapters||[]).map(c=>'stories/'+x.slug+'/chapters/'+c.id))];
  fs.writeFileSync(path.join(out,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+listed.map(x=>`<url><loc>${e(ext+'/'+(x?x+'/':''))}</loc></url>`).join('')+'</urlset>');
  fs.writeFileSync(path.join(out,'404.html'),page('找不到頁面','此頁面不存在，請返回首頁。','',`<div class="wrap pageintro"><div class="eyebrow">404 / NOT FOUND</div><h1>這個世界暫時沒有入口。</h1><p>你尋找的頁面可能已被移動。</p><a class="btn primary" href="${url('')}">返回首頁 →</a></div>`,'404',{noindex:true}));
  console.log('Built '+listed.length+' routes + '+catalog.stories[0].chapters.length+' reader chapters into dist/');
