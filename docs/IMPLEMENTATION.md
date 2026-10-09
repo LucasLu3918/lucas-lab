@@ -60,3 +60,13 @@
 - `_build.json` 公開部署來源 Commit SHA 和網站來源，`npm run smoke:live` 使用唯讀 HTTPS 偵測正式網站主路由、內容與 Cloudflare 部署版本是否落後。
 - GitHub Actions 驗證 source/build；`schedule` 與 `workflow_dispatch` 另執行 live smoke。Cloudflare Git integration 仍是唯一正式部署來源。
 - 這些改善不等同於真實螢幕截圖測試；iOS Safari、Android Chrome、平板及桌面仍需人工驗收。
+
+## 第三階段：完整小說《白雪公主：血色魔鏡》
+
+- 完整原稿保存在 `content/stories/dark-snow-white.md`；以檔案 checksum 驗證與使用者提供的原文一致，建置工具不得重新生成或補寫。
+- `scripts/story-source.cjs` 將序章、二十章及尾聲解析為 22 個固定閱讀網址（`/stories/dark-snow-white/chapters/00/` 至 `/21/`），並保留五部原始分組。
+- 內容以原始換行逐行展示；完整稿加上專用閱讀排版樣式，沿用夜間/紙張主題、字體調整、前後章導覽。
+- 搜尋、首頁、故事館及 sitemap 可收錄已完成且可閱讀的正式故事；未完成作品繼續維持 pending/concept 和既有 noindex 設計。
+- 對成人情慾張力、殘酷暴力、兒童死亡與傷害、階級壓迫與悲劇等議題展示內容警示；不發布其他尚未提供的完整劇本。
+- `npm run check` 同時檢查原稿 SHA-256、章節數、章節網址、原文起始與結束及內容警示。
+- Cloudflare 發布與實際跨裝置驗收仍獨立進行；原稿完成不等於正式圖片與遊戲也完成。

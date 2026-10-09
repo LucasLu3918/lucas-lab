@@ -11,3 +11,11 @@
 .menu[aria-expanded="true"]{border-color:var(--purple);color:var(--mint)}
 @media(max-width:720px){.nav{max-height:calc(100vh - 66px);max-height:calc(100dvh - 66px);overflow-y:auto;overscroll-behavior:contain}}
 @media(max-width:480px){.toolbar{align-items:stretch}.search{width:100%;flex-basis:100%}.filters{width:100%;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;padding-bottom:6px;scrollbar-width:thin}.filter{flex:0 0 auto}.card .body{min-width:0}}
+
+/* Full manuscript: honor line-by-line narration and keep mobile reading comfortable. */
+.chapterlist .part-heading{list-style:none;padding:17px 5px 9px;color:var(--mint);font-weight:800;letter-spacing:.04em;background:#ffffff06}
+.readerpage.manuscript{line-height:1.95}
+.readerpage.manuscript p{margin:0 0 .42em;text-indent:0;overflow-wrap:anywhere}
+.readerpage.manuscript .chaptermeta{line-height:1.6;overflow-wrap:anywhere}
+.readerpage.manuscript h1{overflow-wrap:anywhere}
+@media(max-width:480px){.readerpage.manuscript{padding:25px 19px}.readerpage.manuscript p{line-height:1.88;margin-bottom:.46em}.chapterlist a{align-items:center;flex-wrap:wrap}}

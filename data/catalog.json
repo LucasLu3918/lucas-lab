@@ -49,17 +49,21 @@
     },
     {
       "slug": "dark-snow-white",
-      "title": "暗黑白雪公主",
-      "subtitle": "黑暗童話",
-      "description": "當魔鏡不再說出真話，王國的每一道陰影都有自己的聲音。劇本尚待匯入。",
+      "title": "白雪公主：血色魔鏡",
+      "subtitle": "完整黑暗奇幻長篇",
+      "description": "白雪在黑鐘學院、霜棘王國與血色魔鏡之間追查生命魔法的代價。完整內容包含序章、二十章及尾聲。",
       "category": "黑暗童話",
       "symbol": "♛",
       "palette": "rose",
-      "status": "pending",
+      "status": "complete",
       "warnings": [
-        "暴力",
-        "成人議題"
-      ]
+        "殘酷暴力",
+        "兒童死亡與傷害",
+        "階級壓迫",
+        "成人情慾張力",
+        "死亡與悲劇"
+      ],
+      "manuscript": "content/stories/dark-snow-white.md"
     },
     {
       "slug": "dark-cinderella",

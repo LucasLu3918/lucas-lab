@@ -40,8 +40,10 @@ npm start
 
 ```text
 assets/              CSS 設計系統和無框架互動功能
-data/catalog.json    所有公開作品的清單與章節示範
+data/catalog.json    公開作品清單、狀態與原稿引用
+content/stories/     完整小說 Markdown 原稿（保留原文）
 scripts/build.cjs    產生 dist/ 下的靜態 HTML 網站
+scripts/story-source.cjs  將完整原稿分章，不修改原文
 scripts/check.cjs    驗證連結、頁面與響應式斷點
 scripts/serve.cjs    本機純 Node 靜態預覽伺服器
 .github/workflows/   GitHub CI 檢查（Cloudflare 負責部署）
@@ -55,7 +57,7 @@ docs/                內容與技術規範
 ## 內容與版權
 
 - 「霧林來信」是用於閱讀器的本站原創示範短篇（兩章）。
-- 黑暗童話的正文尚未自 ChatGPT 劇本專案匯入，現在只提供待匯入的內容頁。
+- 《白雪公主：血色魔鏡》已從提供的完整 Markdown 原稿上架，共序章、20 章、尾聲（22 個閱讀單元），附成人與暴力內容提示；其餘黑暗童話仍待完整原稿與校稿。
 - 遊戲與電商概念仍在規劃階段。
 - 藝廊目前採 CSS/符號佔位，尚未匯入正式插畫。
 - 未明確授權的第三方作品、素材不得直接公開。
@@ -77,3 +79,12 @@ docs/                內容與技術規範
 - 全站搜尋包含公開 Lucas Tools 項目，但工具仍由原網站提供，不複製、不代理其程式碼。
 
 > 部署穩定性：`wrangler` 已固定版本；這降低 CLI 更新漂移，但不代表已修復 Cloudflare Workers Builds 的既有失敗。仍需查看 Cloudflare Build log，確認錯誤後才能合併部署。
+
+## 正式小說匯入（第二階段）
+
+- 完整稿：`content/stories/dark-snow-white.md`，由讀者提供的原稿原樣保存（SHA-256 `9d123d04b2f7e3e033d25705637a4f2edab101be34b82b6fbcc14941faead602`）。
+- `data/catalog.json` 使用 `manuscript` 欄位連結原稿，建置時解析 `序章`、`第一章`至`第二十章`、`尾聲`，自動產生章節路由。
+- 首頁及故事館優先展示完成稿；尚未提供完整稿件的故事維持待匯入，沒有自行補寫或創作佔位正文。
+- 內容包含成人情慾張力、暴力、兒童受害及死亡議題，網站公開清楚的內容提示。
+- **不將文件中的《哈利波特》氛圍描述視為該系列的官方授權或合作關係。** 正文使用自己的魔法世界設定。
+- 更換原稿需同步更新 `scripts/check.cjs` 的 SHA-256 驗證值並經過內容審查，避免無意修改已上架文本。
