@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-label="血色王冠：黑髮女王繼承王座，在猩紅魔鏡前重演血之契約">
+<defs><radialGradient id="hall"><stop stop-color="#7b2c3b"/><stop offset=".46" stop-color="#32131f"/><stop offset="1" stop-color="#09060e"/></radialGradient><linearGradient id="robe" x2="1" y2="1"><stop stop-color="#9c233b"/><stop offset=".55" stop-color="#350c19"/><stop offset="1" stop-color="#14101a"/></linearGradient><radialGradient id="glass"><stop stop-color="#f45d60" stop-opacity=".8"/><stop offset="1" stop-color="#8d132c" stop-opacity=".03"/></radialGradient></defs>
+<rect width="1200" height="700" fill="url(#hall)"/><circle cx="600" cy="248" r="330" fill="url(#glass)"/>
+<g fill="#0c0911" stroke="#8c3f47" stroke-width="8"><path d="M0 700V112l165-147 161 147v588zM874 700V112L1038-35l162 147v588z"/><path d="M327 520V70L600-76 871 70v450z" fill="#27101b"/></g>
+<g fill="#6d1c32" stroke="#d68c70" stroke-width="6"><path d="M405 482V148l195-168 195 168v334z"/><path d="M442 458V167L600 28l159 139v291z" fill="#221019"/></g>
+<g stroke="#aa5261" stroke-width="7" fill="none"><path d="M600 27v441M444 224h312M489 129l216 263M708 131 488 392"/></g>
+<circle cx="600" cy="232" r="165" fill="url(#glass)"/>
+<path d="M430 559h338l-52-95-230 0z" fill="#1c1118" stroke="#b88268" stroke-width="12"/>
+<path d="M476 474V331q0-120 124-120t124 120v143z" fill="#27101b" stroke="#bb8d62" stroke-width="15"/>
+<path d="M468 484h264v108H468z" fill="#3d1822" stroke="#c69c6b" stroke-width="8"/>
+<path d="M0 609Q233 573 466 614 600 646 739 612q223-38 461-4v92H0z" fill="#250e17"/>
+<g transform="translate(600 232)"><path d="M-145 360q15-148 110-174 35 8 68 0 96 24 116 175l65 110h-423z" fill="url(#robe)" stroke="#c76c76" stroke-width="6"/><path d="M-74 18Q-94-72-13-85 84-76 77 13l10 155-36-23-112 5z" fill="#12101a"/><ellipse cx="0" cy="59" rx="65" ry="89" fill="#ecd2c7"/><path d="M-52 66q26-16 48-4m25 0q25-15 47-1" stroke="#7c3842" stroke-width="6" fill="none"/><path d="M-17 127q20 11 37 0" stroke="#a04155" stroke-width="5" fill="none"/><path d="M-79-7-64-42-31-25-7-60 19-25 58-48 77-3 57 14-59 14z" fill="#cca45f" stroke="#edce86" stroke-width="7"/><g fill="#e54d66"><circle cx="-49" cy="-5" r="10"/><circle cx="1" cy="-12" r="13"/><circle cx="50" cy="-6" r="10"/></g><path d="M-62 161q-126-6-159 152" stroke="#441b27" stroke-width="51" fill="none"/><path d="M63 164q133 3 167 150" stroke="#441b27" stroke-width="51" fill="none"/></g>
+<g fill="#cd5968"><path d="M145 560q-36-46-4-80 57 13 28 68 31-52 70-28-5 55-72 47z"/><path d="M1053 560q36-46 4-80-57 13-28 68-31-52-70-28 5 55 72 47z"/></g>
+<g fill="#c23e55" opacity=".7"><circle cx="250" cy="160" r="7"/><circle cx="314" cy="267" r="5"/><circle cx="904" cy="167" r="8"/><circle cx="981" cy="298" r="6"/><circle cx="814" cy="88" r="4"/></g>
+</svg>
