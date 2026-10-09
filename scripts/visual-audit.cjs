@@ -36,8 +36,13 @@ async function audit(){
    const errors=[];
    page.on('pageerror',error=>errors.push(error.message));
    for(const route of routes){
-    const response=await page.goto(origin+route,{waitUntil:'domcontentloaded'});
+    const response=await page.goto(origin+route,{waitUntil:'load'});
     assert.equal(response.status(),200,width+' '+route+' did not respond 200');
+    const covers=page.locator('img[src*="snow-white-cover.svg"]');
+    for(let k=0;k<await covers.count();k++){
+     await covers.nth(k).scrollIntoViewIfNeeded();
+     await covers.nth(k).evaluate(img=>img.decode());
+    }
     const result=await page.evaluate(()=>{
      const doc=document.documentElement;
      const images=[...document.images].filter(img=>img.getAttribute('src')?.includes('snow-white-cover.svg'));
