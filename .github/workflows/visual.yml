@@ -19,7 +19,7 @@ jobs:
         run: npm run check
       - name: Install isolated browser testing tools
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 @axe-core/playwright@4.10.2
           npx playwright install --with-deps chromium
       - name: Audit responsive layout and interactions
         run: npm run test:visual

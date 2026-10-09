@@ -96,3 +96,5 @@ docs/                內容與技術規範
 - `npm run test:visual` 使用本機 Chromium + Playwright (需預先安裝)，檢查 320、360、390、480、720、768、900、1024、1440px 的核心頁面，避免水平溢出、封面載入失敗，並測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽。
 - `.github/workflows/visual.yml` 會在 PR / main 更新時執行，保留桌面、平板、手機三種寬度的自動測試截圖供檢視；此流程提供 Chromium 模擬驗證，不等同於實際 iPhone Safari、Android Chrome 或真人操作驗收。
 - 封面為本站原創黑暗奇幻插畫，與任何現有影視、遊戲或書籍的官方視覺並無關係。
+
+- 獨立 Chromium CI 另外使用 `@axe-core/playwright` 在 390px 與 1440px 的首頁、小說目錄、首章與搜尋頁自動執行 WCAG 2.1 A/AA 檢查；此測試不等於真人螢幕閱讀器與實體裝置的驗收。

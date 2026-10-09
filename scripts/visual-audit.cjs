@@ -7,6 +7,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
 const {chromium}=require('playwright');
+const AxeBuilder=require('@axe-core/playwright').default;
 const root=path.resolve(__dirname,'..');
 const captures=path.join(root,'visual-audit-artifacts');
 const origin='http://127.0.0.1:4173';
@@ -93,10 +94,18 @@ async function audit(){
     await page.locator('[data-dialog-close]').click();
     assert.ok(!(await page.locator('#gallery-dialog').evaluate(el=>el.open)),'gallery dialog did not close');
    }
+   if(width===390||width===1440){
+    for(const route of ['/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/search/']){
+     await page.goto(origin+route,{waitUntil:'load'});
+     const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+     const violations=result.violations.map(v=>v.id+' ('+v.impact+'): '+v.nodes.slice(0,4).map(n=>n.target.join(' ')).join(', ')).join('; ');
+     assert.equal(result.violations.length,0,'WCAG accessibility violations at '+width+' '+route+': '+violations);
+    }
+   }
    assert.deepEqual(errors,[],'browser JavaScript errors at '+width);
    await context.close();
   }
-  console.log('PASS: '+inspected+' page/viewport renders, cover images, no horizontal overflow, menu keyboard and touch, global search, reader controls, gallery dialog');
+  console.log('PASS: '+inspected+' page/viewport renders, cover images, no horizontal overflow, menu keyboard and touch, global search, reader controls, gallery dialog, WCAG axe audits');
   console.log('Chromium screenshots: '+captures+' (3 home + 3 full-novel layouts)');
  }finally{
   if(browser)await browser.close();
