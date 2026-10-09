@@ -74,7 +74,7 @@ docs/                內容與技術規範
 
 - `npm run smoke:live` 唯讀檢查正式網站的主要路由、CSS、sitemap 與 `/_build.json`。
 - `EXPECTED_COMMIT=$(git rev-parse HEAD) npm run smoke:live` 額外要求 Cloudflare 部署版本與指定 Git Commit 一致。
-- GitHub Actions 每日約在台灣時間 10:23 檢查正式網站，也可透過 `workflow_dispatch` 手動執行。GitHub 排程可能延遲。
+- GitHub Actions 每次 `main` 推送且原始碼驗證通過後，會自動重試確認正式網站已更新至對應 Commit；另每日約在台灣時間 10:23 巡檢，也可使用 `workflow_dispatch` 手動執行。GitHub 排程可能延遲。
 - 版本或路由檢查失敗時，請在 Cloudflare Dashboard 的 Workers Builds 檢查 Git 來源、分支、建置命令及部署紀錄；GitHub Action **不會**替 Cloudflare 執行部署。
 - 全站搜尋包含公開 Lucas Tools 項目，但工具仍由原網站提供，不複製、不代理其程式碼。
 
