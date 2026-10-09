@@ -15,12 +15,14 @@ async function get(route){
  return {response,body:await response.text()};
 }
 async function verify(){
- const routes=['/','/tools/','/stories/','/games/','/projects/','/gallery/','/search/','/stories/mist-letters/chapters/01/'];
+ const routes=['/','/tools/','/stories/','/games/','/projects/','/gallery/','/search/','/stories/mist-letters/chapters/01/','/stories/dark-snow-white/',...Array.from({length:22},(_,i)=>'/stories/dark-snow-white/chapters/'+String(i).padStart(2,'0')+'/')];
  for(const route of routes){
   const {response,body}=await get(route);
   assert.match(response.headers.get('content-type')||'',/text\/html/i,route+' was not HTML');
   assert.ok(body.includes('<main id="main">')&&body.includes('LUCAS LAB'),route+' is not a LUCAS LAB page');
   if(route==='/search/')assert.ok(body.includes('https://lucas-tools.owl3918.workers.dev/'),'/search/ missing tools');
+  if(route==='/stories/dark-snow-white/')assert.ok(body.includes('內容提示：')&&body.includes('序章：當鏡子第一次說謊'),'novel table of contents or warnings missing');
+  if(route==='/stories/dark-snow-white/chapters/21/')assert.ok(body.includes('《白雪公主：血色魔鏡》——全文完。'),'novel epilogue not deployed');
  }
  const css=await get('/assets/style.css');
  assert.ok(css.body.includes('max-width:480px'),'deployed CSS missing mobile rules');
