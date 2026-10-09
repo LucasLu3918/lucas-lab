@@ -29,5 +29,14 @@
  assert.ok(!tools.includes('CY MySQL'),'private extension tool must not be shown');
  const reader=fs.readFileSync(path.join(dist,'stories/mist-letters/chapters/01/index.html'),'utf8');
  assert.match(reader,/data-reader/);assert.match(reader,/data-font/);assert.match(reader,/data-theme/);
- console.log('PASS: '+all.length+' pages, links, responsive CSS, original-tool URLs, reader controls');
+ const cfg=JSON.parse(fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8'));
+ assert.equal(cfg.name,'lucas-lab','unexpected Worker name');
+ assert.equal(cfg.assets.directory,'./dist','Cloudflare assets directory must be dist');
+ assert.equal(cfg.assets.not_found_handling,'404-page');
+ assert.equal(cfg.assets.html_handling,'auto-trailing-slash');
+ const origin=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\\/+$/,'');
+ const homeHtml=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+ assert.ok(homeHtml.includes('<link rel="canonical" href="'+origin+'/">'),'incorrect production canonical URL');
+ assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes(origin+'/'),'incorrect sitemap domain');
+ console.log('PASS: '+all.length+' pages, links, responsive CSS, original-tool URLs, reader controls, Cloudflare config and SEO origin');
 })();

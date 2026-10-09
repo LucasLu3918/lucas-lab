@@ -4,7 +4,7 @@
  const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});
  for(const f of ['style.css','app.js'])fs.copyFileSync(path.join(root,'assets',f),path.join(out,'assets',f));
  const base=('/'+(process.env.BASE_PATH||'/').replace(/^\/+|\/+$/g,'')+'/').replace('//','/');
- const home=process.env.SITE_URL||'https://lucaslu3918.github.io/lucas-lab';
+ const home=process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev';
  const url=r=>base+r.replace(/^\/+/,'');const ext=String(home).replace(/\/+$/,'');
  const e=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
  const navItems=[['tools/','工具'],['stories/','故事'],['games/','遊戲'],['projects/','作品'],['gallery/','藝廊'],['journal/','日誌']];

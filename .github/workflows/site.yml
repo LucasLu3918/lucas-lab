@@ -1,4 +1,4 @@
-name: Build and deploy LUCAS LAB
+name: Validate LUCAS LAB (Cloudflare Workers)
 on:
   push:
     branches: [main]
@@ -14,26 +14,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate code and generate site
+      - name: Verify Cloudflare-ready static build
         run: npm run check
-      - name: Verify GitHub Pages path
-        run: BASE_PATH=/lucas-lab/ SITE_URL=https://lucaslu3918.github.io/lucas-lab npm run check
-      - name: Upload generated website
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: verify
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

@@ -29,17 +29,24 @@
 - 理由：內容與資料規模仍小，簡化部署、降低首次上線不確定性與載入負擔。
 - **與先前規劃的 Astro + Vue 不同**：本版先以零依賴靜態生成落地；待作品量、內容管理需求、複雜互動確立後，再評估遷移 Astro Content Collections 與 Vue Islands。
 - `npm run check` 會執行語法檢查、建置、內部連結檢查與公共工具鏈結檢查。
-- GitHub Actions 在 PR 執行驗證，在 main 執行驗證與 Pages 部署。
+- GitHub Actions 僅在 PR/main 執行驗證；正式部署交由已連結 GitHub 的 Cloudflare Workers Builds，避免 GitHub Pages 雙軌部署。
 
 ## 後續階段
 1. 真正作品封面與插畫匯入、授權與檔案最佳化。
 2. 劇本分章、角色資料、世界觀，以及正式上架流程。
 3. 第一款可遊玩的互動文字冒險與本機存檔。
 4. 個人化收藏、閱讀進度、進階搜尋、國際化。
-5. 內容量大後評估 Astro/Vue、Cloudflare Workers、R2 或 D1。
+5. 內容量大後評估 Astro/Vue、Cloudflare R2 或 D1；Cloudflare Workers 已是正式部署平台。
 
 ## 上線前額外人工驗收
 - 真實 iOS Safari、Android Chrome、桌面 Chromium／Firefox。
 - 360、390、768、1024、1440 px 檢查橫向捲動、字體裁切、選單與觸控區。
 - Lighthouse、axe-core、鍵盤導覽、CSP/HTTP headers。
 - 遵守發布審批流程，不把私有內容或未知授權作品直接公開。
+
+## 正式部署與 SEO
+- 正式來源：`https://lucas-lab.owl3918.workers.dev/`，使用 Cloudflare Workers Static Assets。
+- Worker 名稱與靜態輸出目錄由 `wrangler.jsonc` 管理；`dist/` 應由 `npm run build` 生成。
+- Cloudflare Git integration 使用 `main`，Build command 為 `npm run build`、Deploy command 為 `npx wrangler deploy`。
+- 不再使用 GitHub Pages 部署流程。若啟用自訂網域，再更新 `SITE_URL`。
+- 網站實際是否已部署、Build 過程是否成功，應以 Cloudflare Dashboard 為準，不能以 GitHub CI 成功代替驗證。

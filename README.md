@@ -15,12 +15,26 @@ npm start
 
 瀏覽 `http://localhost:4173`。
 
-## GitHub Pages
+## 正式網站：Cloudflare Workers
 
-推送到 `main` 會由 `.github/workflows/site.yml` 執行建置與部署。
-第一次使用時，請在 Repository → Settings → Pages 中把 Source 設為 **GitHub Actions**。
+網址：[https://lucas-lab.owl3918.workers.dev/](https://lucas-lab.owl3918.workers.dev/)
 
-預期網站位址：`https://lucaslu3918.github.io/lucas-lab/`（需 Pages 設定與部署成功才會生效）。
+本站以 **Cloudflare Workers Static Assets** 為唯一正式部署平台，GitHub Pages 不再使用。
+
+- GitHub `main` 更新：GitHub Actions 執行 `npm run check`，不執行 Pages 部署。
+- Cloudflare 已連接 GitHub 的情況下，正式部署由 **Cloudflare Workers Builds / Git integration** 處理，避免第二套部署權限與 token。
+- Worker 設定在 `wrangler.jsonc`：`name: lucas-lab`、`assets.directory: ./dist`，使用 SSG 分頁路由及 404 頁。
+- Cloudflare 建置指令：`npm run build`（驗證需求較高可改 `npm run check`）。
+- Cloudflare 部署指令：`npx wrangler deploy`。
+- 建置結果預設使用 Cloudflare 網址產生 canonical、Open Graph 與 sitemap；未來改正式自訂網域時可用 `SITE_URL` 覆寫。
+- 在 Cloudflare Dashboard 檢查 Worker 的 Git 來源、分支與 Build/Deploy 設定；此儲存庫無法代替 Cloudflare 控制台確認部署結果。
+
+本機預覽：
+
+```bash
+npm run check
+npm start
+```
 
 ## 架構
 
@@ -30,7 +44,7 @@ data/catalog.json    所有公開作品的清單與章節示範
 scripts/build.cjs    產生 dist/ 下的靜態 HTML 網站
 scripts/check.cjs    驗證連結、頁面與響應式斷點
 scripts/serve.cjs    本機純 Node 靜態預覽伺服器
-.github/workflows/   CI 與 Pages 自動部署
+.github/workflows/   GitHub CI 檢查（Cloudflare 負責部署）
 docs/                內容與技術規範
 ```
 
