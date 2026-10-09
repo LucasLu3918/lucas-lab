@@ -11,7 +11,7 @@ const currentTrack=()=>view==='home'?'home':view==='ending'?(state.ending||'dawn
 const save=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));saveFailed=false}catch{saveFailed=true}$('#save-indicator').textContent=saveFailed?'◇ 無法存檔；請保持本頁開啟':'◇ 進度已儲存在此裝置';};
 const formatTime=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>$('#toast').classList.remove('visible'),3200)}
-function modal(title,eyebrow,html){lastFocus=document.activeElement;$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;const d=$('#modal');if(!d.open)d.showModal();d.scrollTop=0;}
+function modal(title,eyebrow,html){const d=$('#modal');if(!d.open)lastFocus=document.activeElement;$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;if(!d.open)d.showModal();d.scrollTop=0;}
 function closeModal(){$('#modal').close();if(lastFocus?.isConnected)lastFocus.focus()}
 $('#modal-close').onclick=closeModal;
 $('#modal').addEventListener('click',e=>{if(e.target===$('#modal')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal()}});
