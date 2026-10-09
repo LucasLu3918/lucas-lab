@@ -23,6 +23,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Audit responsive layout and interactions
         run: npm run test:visual
+      - name: Exercise Blood Mirror full five-chapter game in Chromium
+        run: node scripts/blood-mirror.browser.cjs
       - name: Preserve representative viewport screenshots
         if: always()
         uses: actions/upload-artifact@v4
