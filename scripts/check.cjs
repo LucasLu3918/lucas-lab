@@ -1,7 +1,7 @@
 (function check(){
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','assets/style.css','assets/app.js','sitemap.xml','robots.txt','404.html'];
+ const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','assets/style.css','assets/app.js','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -38,5 +38,17 @@
  const homeHtml=fs.readFileSync(path.join(dist,'index.html'),'utf8');
  assert.ok(homeHtml.includes('<link rel="canonical" href="'+origin+'/">'),'incorrect production canonical URL');
  assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes(origin+'/'),'incorrect sitemap domain');
- console.log('PASS: '+all.length+' pages, links, responsive CSS, original-tool URLs, reader controls, Cloudflare config and SEO origin');
+ const searchPage=fs.readFileSync(path.join(dist,'search/index.html'),'utf8');
+ for(const t of catalog.tools)assert.ok(searchPage.includes(t.href),'tool absent from global search: '+t.title);
+ const sitemap=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
+ assert.ok(!sitemap.includes(origin+'/search/'),'noindex search must not be in sitemap');
+ for(const s of catalog.stories.filter(x=>!(x.chapters||[]).length))assert.ok(!sitemap.includes(origin+'/stories/'+s.slug+'/'),'pending story in sitemap: '+s.slug);
+ for(const g of catalog.games)assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
+ for(const p of catalog.projects.filter(x=>x.status==='concept'))assert.ok(!sitemap.includes(origin+'/projects/'+p.slug+'/'),'concept project in sitemap: '+p.slug);
+ const info=JSON.parse(fs.readFileSync(path.join(dist,'_build.json'),'utf8'));
+ assert.equal(info.site,origin,'incorrect deploy manifest origin');
+ assert.ok(typeof info.commit==='string'&&info.commit.length>0,'missing deploy commit');
+ const js=fs.readFileSync(path.join(dist,'assets/app.js'),'utf8');
+ assert.ok(js.includes('toggle.focus()')&&js.includes('matchMedia'),'nav Escape/resize handling missing');
+ console.log('PASS: '+all.length+' pages, links, responsive UI, global tool search, reader controls, sitemap, deploy manifest and Cloudflare config');
 })();
