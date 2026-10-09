@@ -19,6 +19,8 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
    await page.goto(ORIGIN+'/games/blood-mirror/play/');
    await page.locator('#start').click();
    await page.locator('#intro-explore').click();
+   const hit=await page.evaluate(()=>{const el=document.querySelector('[data-spot="watch"]'),r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,at=document.elementFromPoint(x,y);return {x,y,rect:{left:r.left,top:r.top,width:r.width,height:r.height},at:at?.outerHTML.slice(0,180),layer:getComputedStyle(document.querySelector('#hotspots')).pointerEvents,button:getComputedStyle(el).pointerEvents};});
+   console.log('Scene hit-test:',JSON.stringify(hit));
    await page.locator('[data-spot="watch"]').click();
    await page.locator('#take-item').click();
    await page.locator('#room-puzzle').click();
