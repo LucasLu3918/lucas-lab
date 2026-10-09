@@ -34,7 +34,7 @@
  assert.equal(cfg.assets.directory,'./dist','Cloudflare assets directory must be dist');
  assert.equal(cfg.assets.not_found_handling,'404-page');
  assert.equal(cfg.assets.html_handling,'auto-trailing-slash');
- const origin=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\\/+$/,'');
+ const origin=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\/+$/,'');
  const homeHtml=fs.readFileSync(path.join(dist,'index.html'),'utf8');
  assert.ok(homeHtml.includes('<link rel="canonical" href="'+origin+'/">'),'incorrect production canonical URL');
  assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes(origin+'/'),'incorrect sitemap domain');
