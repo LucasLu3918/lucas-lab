@@ -50,3 +50,13 @@
 - Cloudflare Git integration 使用 `main`，Build command 為 `npm run build`、Deploy command 為 `npx wrangler deploy`。
 - 不再使用 GitHub Pages 部署流程。若啟用自訂網域，再更新 `SITE_URL`。
 - 網站實際是否已部署、Build 過程是否成功，應以 Cloudflare Dashboard 為準，不能以 GitHub CI 成功代替驗證。
+
+## 第二階段優化：搜尋、手機體驗與上線驗證
+
+- 全站搜尋整合公開 Lucas Tools 工具清單、故事、遊戲及專案，搜尋詞不傳至後端；工具皆保留外站新分頁連結。
+- 小螢幕篩選標籤列可橫向捲動，作品卡及工具動作連結維持至少 44px 的可操作高度。
+- 手機導覽 Esc 關閉後返回選單按鈕，螢幕切至桌面尺寸時清除展開狀態。
+- 搜尋頁、未完成的遊戲／劇本／專案概念頁仍可從站內開啟，但不列入 sitemap，避免與 `noindex` 衝突。
+- `_build.json` 公開部署來源 Commit SHA 和網站來源，`npm run smoke:live` 使用唯讀 HTTPS 偵測正式網站主路由、內容與 Cloudflare 部署版本是否落後。
+- GitHub Actions 驗證 source/build；`schedule` 與 `workflow_dispatch` 另執行 live smoke。Cloudflare Git integration 仍是唯一正式部署來源。
+- 這些改善不等同於真實螢幕截圖測試；iOS Safari、Android Chrome、平板及桌面仍需人工驗收。
