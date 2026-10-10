@@ -98,3 +98,11 @@ node scripts/blood-mirror.browser.cjs
 旋轉立即更新現有 DOM，不重建彈窗。提供最多 50 步撤銷、重設、三段提示、方向鍵換格及 Tab／Enter 操作；完成後需按「啟動城市供暖」才進入原本的冷水→熱泉→城市封印。進行中的旋轉、撤銷與提示只保留在本次頁面記憶體，關閉再開啟謎題會保留；重新整理頁面或開始新旅程則重置。原有 v1 故事存檔與 v2 已完成關卡紀錄保持相容。
 
 `package.json` 的原生 check 已納入全部 blood-mirror 單元測試，包含 1024 種旋轉組合窮舉、方向等價性、漏接／邊界與無效輸入。`scripts/blood-mirror-pipes.browser.cjs` 驗證 360／390／768／1280px 的觸控、鍵盤、撤銷／重設、重新開啟、提示、明確供暖、原封印與舊存檔。
+
+## 2026-10-10 發布最佳化
+
+- 場景與白雪立繪 WebP 以 `cwebp` 重新壓縮（場景 `-q 72`，立繪 `-q 80`），尺寸不變；每張場景由約 380 KB 降至約 180–225 KB。來源版本仍可由 git 歷史取回。
+- 概念展板 `design-board-4` 補上 WebP 衍生檔（與 1、3 相同來源 PNG）。
+- 原始 PNG 保留在 repo 作為來源；建置時若存在同名 WebP，PNG 不會發布到 `dist/`。`scripts/site/games.cjs` 負責此規則，`scripts/check.cjs` 會確認輸出中沒有 PNG。
+- `dawn.png` 同樣只保留為來源，結局插畫實際使用 `dawn.webp`。
+

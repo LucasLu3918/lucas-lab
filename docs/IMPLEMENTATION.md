@@ -99,3 +99,13 @@
 - 遊戲頁加入返回遊戲館與原著全文連結，經 `url()` 轉換以支援 BASE_PATH。移除外部 Google Fonts，使用平台本機字體。
 - 五幕解鎖、道具需求、錯誤答案、損壞存檔與三結局由原生 Node 測試驗證；素材、route、metadata 與跨分區導覽由 check 驗證；visual CI 納入遊玩路由的各尺寸檢查。
 - 小說原稿未改寫；遊戲有明確改編說明。存檔依 origin 保留，不宣稱不同網址或裝置自動同步。
+
+## 站點優化（2026-10-10）
+
+- 建置程式拆分為 `scripts/site/` 模組；重構階段以 212 個輸出檔的 SHA-256 比對確認輸出不變，之後才加入功能。
+- 首頁主視覺改用 AVIF/WebP 多尺寸；遊戲場景重新壓縮；站台 CSS/JS 產生內容指紋，搭配 `dist/_headers` 的安全標頭與快取規則。
+- 新增 JSON-LD（WebSite、Book、Article、VideoGame、BreadcrumbList）、預設分享圖、git 歷史推導的 sitemap lastmod。
+- 閱讀進度與繼續閱讀、章節頁下一章卡片與鍵盤切換、章節搜尋（標題與摘要，非全文）、離線閱讀 Service Worker。
+- `catalog.json` 建置時驗證；新增 5 篇開發日誌；藝廊佔位標示為「構思中」並展示遊戲企劃展板。
+- 驗證：`npm run check`、`npm run test:visual`、`npm run test:site`、`npm run test:perf` 與既有遊戲瀏覽器測試。完整內容見 [SITE_OPTIMIZATION_PLAN.md](design/SITE_OPTIMIZATION_PLAN.md)。
+- 尚未完成：真機驗收、PWA 的 PNG 圖示、移除 `style-src 'unsafe-inline'`、流量統計與自訂網域的決定。
