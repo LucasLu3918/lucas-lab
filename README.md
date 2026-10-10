@@ -42,7 +42,8 @@ npm start
 assets/              CSS 設計系統和無框架互動功能
 data/catalog.json    公開作品清單、狀態與原稿引用
 content/stories/     完整小說 Markdown 原稿（保留原文）
-scripts/build.cjs    產生 dist/ 下的靜態 HTML 網站
+scripts/build.cjs    建置協調器：依序執行 scripts/site/ 內各頁面模組，產生 dist/
+scripts/site/        各頁面模組（catalog 驗證、資產指紋、版面、故事、遊戲、離線 SW 等）
 scripts/components.cjs  共用 SVG、封面、狀態與閱讀控制元件
 scripts/story-source.cjs  將完整原稿分章，不修改原文
 scripts/check.cjs    驗證連結、頁面與響應式斷點
@@ -68,6 +69,15 @@ docs/                內容與技術規範
 ## 目前的實作取捨
 
 先前曾規劃 Astro + Vue，但第一版選擇無依賴靜態生成，以優先完成高品質響應式體驗與可部署網站。日後有更複雜內容管理和互動需求時，再引入框架。
+
+## 站點優化與瀏覽器驗收
+
+完整規劃、量測數據與取捨見 [docs/design/SITE_OPTIMIZATION_PLAN.md](docs/design/SITE_OPTIMIZATION_PLAN.md)。
+
+- `npm run test:site`：閱讀進度、繼續閱讀、章節搜尋、離線閱讀、CSP 與結構化資料（需先 `npm run build`）。
+- `npm run test:perf`：首頁、故事、章節、搜尋與遊戲頁的傳輸量、請求數、LCP、CLS 預算。
+- 兩者與 `npm run test:visual` 一樣使用 Playwright；若要指定本機 Chromium，可設定 `BROWSER_EXECUTABLE`。
+- `dist/_headers` 由建置產生，包含安全標頭與快取規則；`npm start` 會依同一份規則回應，方便本機檢查。
 
 ## 正式部署驗證
 

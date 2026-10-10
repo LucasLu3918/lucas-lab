@@ -173,5 +173,64 @@
   assert.ok(searchPage.includes(prefix+route),'game absent from search');
   assert.ok(novelIndex.includes(prefix+route),'original story lacks related game entry');
  }
- console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config');
+ // Optimisation pass: headers, fingerprints, structured data, offline worker, search index, media and module graph.
+ const headers=fs.readFileSync(path.join(dist,'_headers'),'utf8');
+ for(const required of ["Content-Security-Policy: default-src 'self'","script-src 'self'","X-Content-Type-Options: nosniff","X-Frame-Options: DENY","/static/*","immutable","/assets/style.css\n  Cache-Control: no-cache"])assert.ok(headers.includes(required),'_headers missing '+required);
+ for(const f of all){
+  const html=fs.readFileSync(path.join(dist,f),'utf8');
+  for(const [,attrs] of html.matchAll(/<script(?![^>]*\btype="application\/ld\+json")([^>]*)>/g))assert.match(attrs,/\bsrc=/,'inline script blocked by CSP in '+f);
+  for(const [,ref] of html.matchAll(/<(?:link|script)[^>]*\b(?:href|src)="([^"]+)"/g)){
+   if(!ref.startsWith(prefix)||ref.startsWith('https://'))continue;
+   assert.ok(fs.existsSync(path.join(dist,ref.slice(prefix.length))),'missing asset '+ref+' in '+f);
+  }
+ }
+ const fingerprints=[...fs.readdirSync(path.join(dist,'static'))];
+ assert.equal(fingerprints.length,2,'expected one fingerprint directory per site entry asset');
+ for(const [file,name] of [['assets/style.css','style.css'],['assets/app.js','app.js']]){
+  const hashed=fingerprints.find(hash=>fs.existsSync(path.join(dist,'static',hash,name)));
+  assert.ok(hashed,'fingerprinted copy missing for '+file);
+  assert.ok(fs.readFileSync(path.join(dist,'static',hashed,name)).equals(fs.readFileSync(path.join(root,file))),'fingerprinted copy differs from source '+file);
+ }
+ const storyHtml=fs.readFileSync(path.join(dist,'stories/dark-snow-white/index.html'),'utf8');
+ const ldOf=html=>[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+ assert.ok(ldOf(storyHtml).some(x=>x['@type']==='Book'),'Book structured data missing on story page');
+ const chapterHtml=fs.readFileSync(path.join(dist,'stories/dark-snow-white/chapters/01/index.html'),'utf8');
+ assert.ok(ldOf(chapterHtml).some(x=>x['@type']==='Article'&&x.position===2),'Article structured data missing on chapter');
+ assert.match(chapterHtml,/約 \d+ 分鐘/,'reading time missing on chapter');
+ assert.ok(chapterHtml.includes('data-story="dark-snow-white"')&&chapterHtml.includes('data-next'),'reader progress hooks missing');
+ assert.ok(ldOf(fs.readFileSync(path.join(dist,'games/blood-mirror/index.html'),'utf8')).some(x=>x['@type']==='VideoGame'),'VideoGame structured data missing');
+ assert.ok(ldOf(fs.readFileSync(path.join(dist,'games/blood-mirror/index.html'),'utf8')).length>=2,'game breadcrumb missing');
+ const homeHtmlNow=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+ assert.ok(homeHtmlNow.includes('<picture')&&homeHtmlNow.includes('moonlit-castle-640.avif')&&homeHtmlNow.includes('moonlit-castle-1024.webp'),'responsive hero sources missing');
+ for(const image of ['moonlit-castle-640.avif','moonlit-castle-1024.avif','moonlit-castle-640.webp','moonlit-castle-1024.webp','moonlit-castle.avif','og-default.jpg'])assert.ok(fs.existsSync(path.join(dist,'assets/images',image)),'missing hero variant '+image);
+ assert.ok(homeHtmlNow.includes('property="og:image"')&&homeHtmlNow.includes('twitter:card'),'default social image or twitter card missing');
+ assert.ok(fs.readFileSync(path.join(dist,'assets/images/og-default.jpg')).length<300000,'default social image too large');
+ const sitemapNow=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
+ assert.ok(sitemapNow.includes(origin+'/journal/cloudflare-workers/'),'journal article missing from sitemap');
+ if(fs.existsSync(path.join(root,'.git')))assert.match(sitemapNow,/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/,'sitemap lastmod missing');
+ const index=JSON.parse(fs.readFileSync(path.join(dist,'search-index.json'),'utf8'));
+ const expectedChapters=catalog.stories.reduce((sum,s)=>sum+(s.manuscript?loadMarkdownChapters(s.manuscript):(s.chapters||[])).length,0);
+ assert.equal(index.length,expectedChapters,'chapter search index incomplete');
+ for(const item of index)assert.ok(fs.existsSync(path.join(dist,item.u.replace(prefix,'')))||fs.existsSync(path.join(dist,item.u.replace(prefix,''),'index.html')),'search index links to missing chapter '+item.u);
+ assert.ok(index.every(item=>item.x.length<=80),'search excerpt longer than 80 characters');
+ const sw=fs.readFileSync(path.join(dist,'sw.js'),'utf8');
+ assert.ok(!sw.includes("'__BUILD_ID__'")&&!sw.includes("'__BASE__'")&&sw.includes("const CACHE='lucas-lab-"),'service worker placeholders not filled');
+ assert.ok(!sw.includes('games/')||sw.includes("startsWith(BASE+'games/')"),'service worker must bypass game files');
+ const manifest=JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
+ assert.equal(manifest.name,'LUCAS LAB');
+ assert.ok(homeHtmlNow.includes('rel="manifest"')&&homeHtmlNow.includes('data-sw='),'manifest or service worker not declared');
+ const galleryHtml=fs.readFileSync(path.join(dist,'gallery/index.html'),'utf8');
+ assert.ok(galleryHtml.includes('· 構思中')&&!galleryHtml.includes('· 概念</strong>'),'gallery placeholders not labelled as in progress');
+ const publishedGame=path.join(dist,'games/blood-mirror/play/assets');
+ const pngs=[];(function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,entry.name);if(entry.isDirectory())walk(full);else if(entry.name.endsWith('.png'))pngs.push(full)}})(publishedGame);
+ assert.deepEqual(pngs,[],'PNG originals must not be published when a WebP derivative exists');
+ for(const board of [1,3,4])assert.ok(fs.existsSync(path.join(publishedGame,'concepts/design-board-'+board+'.webp'))&&galleryHtml.includes('design-board-'+board+'.webp'),'concept board '+board+' not published or linked');
+ const playDir=path.join(dist,'games/blood-mirror/play');
+ for(const file of fs.readdirSync(playDir).filter(f=>f.endsWith('.js'))){
+  const source=fs.readFileSync(path.join(playDir,file),'utf8');
+  for(const [,target] of source.matchAll(/(?:from\s+|import\()\s*'\.\/([^']+)'/g))assert.ok(fs.existsSync(path.join(playDir,target)),'game module '+file+' imports missing '+target);
+ }
+ const journalArticle=fs.readFileSync(path.join(dist,'journal/cloudflare-workers/index.html'),'utf8');
+ assert.ok(journalArticle.includes('從 GitHub Pages 遷移到 Cloudflare Workers'),'journal article not rendered');
+ console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config, plus reading, headers, structured data, offline and media checks');
 })();

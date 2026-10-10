@@ -41,6 +41,8 @@ async function verify(){
  assert.ok(hero.body.byteLength>10000,'castle hero image is empty or corrupted');
  const css=await get('/assets/style.css');
  assert.ok(css.body.includes('max-width:480px'),'deployed CSS missing mobile rules');
+ const home=await get('/');
+ assert.ok(/script-src 'self'/.test(home.response.headers.get('content-security-policy')||''),'production Content-Security-Policy header missing');
  const sitemap=await get('/sitemap.xml');
  assert.ok(sitemap.body.includes('<urlset')&&!sitemap.body.includes(site+'/search/'),'invalid sitemap');
  const manifest=await get('/_build.json');
