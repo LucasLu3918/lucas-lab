@@ -11,6 +11,10 @@
 | 鏡中之國 | 反寫手稿映照 | 從「見證者手稿」開啟；逐列顯示映照進度，完成後才能閱讀與收取手稿 |
 
 新的關卡完成後才開啟原本的文字封印；原先已解開封印的存檔不受影響。五幕的互動謎題都改由證據熱點開啟（房間資料 `evidence`、`evidenceButton`、`evidenceGate`）；證據修復前，封印只顯示引導。第一至四幕解封後出現 `after:'solved'` 熱點（契約、甦醒的礦工、轉過頭的倒影、母親的最後記憶）。原肖像拼圖畫面移至藝廊「魔鏡前的公主肖像」。
+
+取得任一結局後，五幕各出現一段 `after:'ending'` 的人物記憶（`memory:true`），收藏紀錄保存在 `blood-mirror-v1` 的 `memories` 欄位，開始新旅程也會保留。設定中的「攜帶存檔」由 `savefile.js` 匯出或匯入故事與互動謎題進度。
+
+效能：`concept-art.js` 的小圖讀取 `design-board-1.webp`、`design-board-3.webp`（由 PNG 以 `cwebp -q 82` 轉出，尺寸相同），結局與藝廊的黎明 CG 讀取 `endings/dawn.webp`。PNG 原檔保留給藝廊完整檢視。
 獨立完成紀錄保存在同瀏覽器的 `blood-mirror-challenges-v2`；開始新旅程會清除該紀錄。
 
 ## 音樂檔案路徑

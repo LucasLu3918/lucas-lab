@@ -1,10 +1,11 @@
-import {rooms,items,endings,visibleSpots} from './engine.js';
+import {rooms,items,endings,visibleSpots,memorySpots} from './engine.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
 export function spotText(spot,restored=false){return restored&&spot.restoredText?spot.restoredText:spot.text;}
 
 export function journeyGuide(state,challengeComplete=false){
- const room=rooms[state.room],done=state.solved.includes(state.room),spots=visibleSpots(state);
+ // Optional post-game memories never count toward progress or appear in the guide.
+ const room=rooms[state.room],done=state.solved.includes(state.room),spots=visibleSpots(state).filter(spot=>!spot.memory);
  const discovered=spots.filter(spot=>!spot.lock&&state.seen.includes(spot.id)).length;
  const total=spots.filter(spot=>!spot.lock).length;
  // Newly revealed spots lead first: an uncollected item, or an unread scene change.
@@ -36,5 +37,27 @@ export function journeyGuide(state,challengeComplete=false){
 }
 
 export function journalChapters(state,isRestored=()=>false){
- return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,room.evidence===spot.id&&isRestored(room.id))}))})).filter(section=>section.index<=state.unlocked);
+ return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&!spot.memory&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,room.evidence===spot.id&&isRestored(room.id))}))})).filter(section=>section.index<=state.unlocked);
+}
+
+// Memories persist across journeys; unfound ones only reveal which act holds them.
+export function memoryCollection(state){
+ const found=state.memories||[];
+ return memorySpots.map(spot=>({id:spot.id,room:spot.room,chapter:rooms[spot.room].chapter,title:rooms[spot.room].title,found:found.includes(spot.id),label:found.includes(spot.id)?spot.label:null,text:found.includes(spot.id)?spot.text:null}));
+}
+
+const causes={
+ dawn:state=>['妳帶著赫索的工程藍圖，選擇先讓蒸汽塔取代結界，再交出名字。',state.seen.includes('miners')?'妳記得赫索的話：先把塔蓋好，再拆掉結界。':'工程與遷移完成之後，解除契約才不會讓任何城市被霜潮吞沒。'],
+ frost:state=>['妳選擇立刻交出名字，所有生命抵押在同一刻終止。',state.seen.includes('miners')?'赫索說過順序錯了，死的會是整座城。妳聽見了，卻沒有等。':'蒸汽塔還沒完成，結界卻一同消失。'],
+ crown:state=>['妳保住了自己的名字，也繼承了王冠。',state.inventory.includes('contract')?'妳讀過父親簽下的契約，卻仍戴上了同一頂王冠。':'王冠底下的生命帳簿，因此翻開了新的一頁。']
+};
+export function journeyRecap(state){
+ if(!state.ending||!causes[state.ending])return null;
+ const memories=memoryCollection(state),found=memories.filter(m=>m.found).length,missingEndings=Object.keys(endings).length-state.endings.length;
+ const scenes=rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).filter(spot=>state.seen.includes(spot.id)).length;
+ const hints=Object.values(state.hints||{}).reduce((sum,n)=>sum+(Number(n)||0),0);
+ const next=missingEndings?'回到最後的選擇，看看另外 '+missingEndings+' 種代價。'
+  :found<memories.length?'重返五幕，還有 '+(memories.length-found)+' 段人物記憶等妳發現：'+memories.filter(m=>!m.found).map(m=>m.chapter).join('、')+'。'
+  :'妳已看見這面鏡子裡的全部真相。';
+ return {cause:causes[state.ending](state),scenes,sceneTotal:rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).length,hints,memories:found,memoryTotal:memories.length,next};
 }

@@ -8,11 +8,14 @@ const ids=['library','mine','crypt','queen','mirror'];
 let volatile=new Set(),pipeAttempt=null;
 function stored(){try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return new Set(Array.isArray(value)?value.filter(x=>ids.includes(x)):[]);}catch{return new Set(volatile);}}
 export function isChallengeComplete(id){return stored().has(id);}
+export function completedChallenges(){return [...stored()];}
+export function setChallenges(list){const done=new Set(list.filter(x=>ids.includes(x)));volatile=new Set(done);pipeAttempt=null;try{localStorage.setItem(KEY,JSON.stringify([...done]));}catch{}}
 export function resetChallenges(){volatile.clear();pipeAttempt=null;try{localStorage.removeItem(KEY);}catch{}}
 function complete(id){const done=stored();done.add(id);volatile=new Set(done);try{localStorage.setItem(KEY,JSON.stringify([...done]));}catch{}}
 export function puzzleIsSolved(order){return order.length===9&&order.every((v,i)=>v===i);}
 export function glassIsSolved(left,right){return left.length===8&&right.length===8&&left.every((x,i)=>x===right[i^1]);}
-export function startChallenge(id,{modal,success,playCue}){
+export function startChallenge(id,{modal,success,playCue,fresh=false}){
+ if(fresh&&id==='mine')pipeAttempt=null;
  const done=()=>{complete(id);playCue('solve');success();};
  const show=(title,subtitle,html)=>{const active=document.activeElement;const attr=['data-pos','data-pipe','data-rune','data-memory','data-reflection'].find(k=>active?.hasAttribute(k));const selector=attr?'['+attr+'="'+active.getAttribute(attr)+'"]':null;modal(title,subtitle,'<div class="challenge" data-challenge="'+id+'">'+html+'</div>');if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});};
  const feedback=(s)=>{const el=document.querySelector('.challenge-feedback');if(el)el.textContent=s;};
