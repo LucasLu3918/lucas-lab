@@ -48,3 +48,7 @@ body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{anim
 .ending-recap-stats{margin:10px 0 0;color:var(--muted);font-size:13px}
 .ending-recap-next{margin:6px 0 0;color:var(--text)}
 .settings-pair{display:flex;gap:8px}
+/* Queen's free answers: Vera's responses */
+.queen-response{margin:0 0 14px;padding:10px 14px;border-left:2px solid var(--gold);color:var(--text);font-family:var(--serif);line-height:1.8;background:#0d0b0d99}
+.queen-responses{margin:4px 0 12px;padding-left:20px;line-height:1.8;font-family:var(--serif)}
+.ending-recap h2+ul+h2,.ending-recap ul+h2{margin-top:12px}

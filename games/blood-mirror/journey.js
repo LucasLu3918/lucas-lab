@@ -1,4 +1,4 @@
-import {rooms,items,endings,visibleSpots,memorySpots} from './engine.js';
+import {rooms,items,endings,visibleSpots,memorySpots,validAnswers} from './engine.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
 export function spotText(spot,restored=false){return restored&&spot.restoredText?spot.restoredText:spot.text;}
@@ -51,6 +51,12 @@ const causes={
  frost:state=>['妳選擇立刻交出名字，所有生命抵押在同一刻終止。',state.seen.includes('miners')?'赫索說過順序錯了，死的會是整座城。妳聽見了，卻沒有等。':'蒸汽塔還沒完成，結界卻一同消失。'],
  crown:state=>['妳保住了自己的名字，也繼承了王冠。',state.inventory.includes('contract')?'妳讀過父親簽下的契約，卻仍戴上了同一頂王冠。':'王冠底下的生命帳簿，因此翻開了新的一頁。']
 };
+// What the player told the queen, set against the ending they chose (answers: crown, child, remembered).
+const echoes={
+ dawn:a=>[a[1]==='third'?'妳曾對王后說，要尋找第三種方法。蒸汽塔，就是妳找到的那一種。':'妳曾說會犧牲一個孩子去救一千人；最後，妳讓被犧牲的人成了自己。',a[2]==='yes'?'妳曾說即使世界不知道，妳仍願意。如今，世界真的忘了妳。':'妳曾說妳需要被記住。最後，妳仍把名字交了出去。'],
+ frost:a=>[a[1]==='third'?'妳曾說要尋找第三種方法，卻沒有等到它完成。':'妳曾說會犧牲一個孩子去救一千人。這一次，被犧牲的是北方七座城市。'],
+ crown:a=>[a[0]==='yes'?'妳曾告訴王后，妳想繼承王冠。妳做到了。':'妳曾告訴王后，妳不想成為女王，最後卻戴上了王冠。',a[2]==='no'?'妳曾說妳需要被記住。王冠讓所有人都記得妳。':'妳曾說即使世界不知道也願意，卻選了一個永遠會被記住的結局。']
+};
 export function journeyRecap(state){
  if(!state.ending||!causes[state.ending])return null;
  const memories=memoryCollection(state),found=memories.filter(m=>m.found).length,missingEndings=Object.keys(endings).length-state.endings.length;
@@ -59,5 +65,6 @@ export function journeyRecap(state){
  const next=missingEndings?'回到最後的選擇，看看另外 '+missingEndings+' 種代價。'
   :found<memories.length?'重返五幕，還有 '+(memories.length-found)+' 段人物記憶等妳發現：'+memories.filter(m=>!m.found).map(m=>m.chapter).join('、')+'。'
   :'妳已看見這面鏡子裡的全部真相。';
- return {cause:causes[state.ending](state),scenes,sceneTotal:rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).length,hints,memories:found,memoryTotal:memories.length,next};
+ const answers=validAnswers(state.answers)?echoes[state.ending](state.answers):[];
+ return {cause:causes[state.ending](state),answers,scenes,sceneTotal:rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).length,hints,memories:found,memoryTotal:memories.length,next};
 }

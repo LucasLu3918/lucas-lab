@@ -14,6 +14,8 @@
 
 取得任一結局後，五幕各出現一段 `after:'ending'` 的人物記憶（`memory:true`），收藏紀錄保存在 `blood-mirror-v1` 的 `memories` 欄位，開始新旅程也會保留。設定中的「攜帶存檔」由 `savefile.js` 匯出或匯入故事與互動謎題進度。
 
+王后三問（房間資料 `free:true`）接受任何回答組合，每個選項以 `response` 提供薇菈的回應；回答存於 `answers`，用於解鎖敘述（`unlockEcho`）與結局回顧。
+
 效能：`concept-art.js` 的小圖讀取 `design-board-1.webp`、`design-board-3.webp`（由 PNG 以 `cwebp -q 82` 轉出，尺寸相同），結局與藝廊的黎明 CG 讀取 `endings/dawn.webp`。PNG 原檔保留給藝廊完整檢視。
 獨立完成紀錄保存在同瀏覽器的 `blood-mirror-challenges-v2`；開始新旅程會清除該紀錄。
 
