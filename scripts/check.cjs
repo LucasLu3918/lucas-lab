@@ -214,7 +214,7 @@
  for(const item of index)assert.ok(fs.existsSync(path.join(dist,item.u.replace(prefix,'')))||fs.existsSync(path.join(dist,item.u.replace(prefix,''),'index.html')),'search index links to missing chapter '+item.u);
  assert.ok(index.every(item=>item.x.length<=80),'search excerpt longer than 80 characters');
  const sw=fs.readFileSync(path.join(dist,'sw.js'),'utf8');
- assert.ok(!sw.includes("'__BUILD_ID__'")&&!sw.includes("'__BASE__'")&&sw.includes("const CACHE='lucas-lab-"),'service worker placeholders not filled');
+ assert.ok(!/__(BUILD_ID|BASE|PRECACHE)__/.test(sw)&&sw.includes("const SHELL_CACHE='lucas-lab-shell-'+BUILD")&&sw.includes("const BOOKS_CACHE='lucas-lab-books'"),'service worker placeholders not filled');
  assert.ok(!sw.includes('games/')||sw.includes("startsWith(BASE+'games/')"),'service worker must bypass game files');
  const manifest=JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
  assert.equal(manifest.name,'LUCAS LAB');
@@ -232,5 +232,80 @@
  }
  const journalArticle=fs.readFileSync(path.join(dist,'journal/cloudflare-workers/index.html'),'utf8');
  assert.ok(journalArticle.includes('從 GitHub Pages 遷移到 Cloudflare Workers'),'journal article not rendered');
- console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config, plus reading, headers, structured data, offline and media checks');
+ // Launch hardening: weight budgets, metadata on every indexable page, feeds, offline files, the analytics gate and the strict CSP.
+ const listDist=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?listDist(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+ const distFiles=listDist(dist).map(file=>({file,name:path.relative(dist,file).split(path.sep).join('/'),bytes:fs.statSync(file).size}));
+ const MB=1024*1024;
+ for(const {name,bytes} of distFiles){
+  if(name.endsWith('.png'))assert.ok(name.startsWith('assets/icons/'),'PNG may only be published as a PWA icon: '+name);
+  if(/\.(webp|avif|jpe?g)$/.test(name))assert.ok(bytes<=500*1024,'bitmap exceeds the 500 KB budget: '+name+' ('+Math.round(bytes/1024)+' KB)');
+  if(name.endsWith('.mp3'))assert.ok(bytes<=2.5*MB,'audio file exceeds the 2.5 MB budget: '+name);
+ }
+ const weight=prefixName=>distFiles.filter(f=>f.name.startsWith(prefixName)).reduce((sum,f)=>sum+f.bytes,0);
+ const gamesWeight=weight('games/');
+ assert.ok(gamesWeight<=11*MB,'dist/games exceeds 11 MB: '+(gamesWeight/MB).toFixed(1)+' MB');
+ console.log('dist weight: '+(distFiles.reduce((sum,f)=>sum+f.bytes,0)/MB).toFixed(1)+' MB total, '+(gamesWeight/MB).toFixed(1)+' MB games, '+distFiles.length+' files');
+ const htmlFiles=distFiles.filter(f=>f.name.endsWith('.html'));
+ const token=(process.env.CF_ANALYTICS_TOKEN||'').trim();
+ const pageText=new Map(htmlFiles.map(f=>[f.name,fs.readFileSync(f.file,'utf8')]));
+ for(const [name,html] of pageText){
+  assert.ok(!/\sstyle="/.test(html),'inline style attributes would need unsafe-inline under the CSP: '+name);
+  assert.ok(!/<style[\s>]/.test(html),'inline <style> element in '+name);
+  // The gameplay shell is hand-written HTML; every generated page carries the shared metadata.
+  if(!name.includes('/play/'))assert.ok(html.includes('property="og:locale" content="zh_TW"'),'og:locale missing in '+name);
+  const beacons=html.match(/static\.cloudflareinsights\.com\/beacon\.min\.js/g)||[];
+  if(token){
+   assert.equal(beacons.length,1,'analytics beacon must appear exactly once in '+name);
+   assert.ok(html.includes(`data-cf-beacon='{"token":"${token}"}'`),'analytics token missing in '+name);
+  }else assert.equal(beacons.length,0,'analytics beacon shipped without CF_ANALYTICS_TOKEN: '+name);
+  for(const [,ld] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>JSON.parse(ld),'invalid JSON-LD in '+name);
+  if(html.includes('<meta name="robots" content="index,follow">')){
+   assert.match(html,/<link rel="canonical" href="[^"]+">/,'canonical missing in '+name);
+   assert.match(html,/<meta name="description" content="[^"]+">/,'description missing in '+name);
+   const image=html.match(/<meta property="og:image" content="([^"]+)">/);
+   assert.ok(image,'og:image missing in '+name);
+   assert.ok(fs.existsSync(path.join(dist,image[1].slice(origin.length).replace(/^\/+/,''))),'og:image file missing for '+name+': '+image[1]);
+  }
+ }
+ const legalNow=pageText.get('legal/index.html');
+ assert.ok(token?legalNow.includes('Cloudflare Web Analytics'):legalNow.includes('此版本未啟用流量統計'),'privacy text does not describe the analytics setting');
+ assert.ok(!headers.includes("'unsafe-inline'"),'style-src must not allow unsafe-inline');
+ assert.ok(headers.includes("script-src 'self' https://static.cloudflareinsights.com")&&headers.includes("connect-src 'self' https://cloudflareinsights.com"),'analytics origins missing from CSP');
+ for(const cached of ['/manifest.webmanifest','/sitemap.xml','/_build.json','/search-index.json','/journal/feed.xml'])assert.ok(headers.includes(prefix.replace(/\/$/,'')+cached+'\n  Cache-Control: public, max-age=0, must-revalidate'),'revalidation header missing for '+cached);
+ assert.match(homeHtmlNow,/<link rel="preload" as="image" type="image\/avif"[^>]*imagesrcset="[^"]*moonlit-castle-640\.avif 640w/,'hero preload missing');
+ const feed=fs.readFileSync(path.join(dist,'journal/feed.xml'),'utf8');
+ assert.ok(feed.startsWith('<?xml')&&feed.includes('<feed xmlns="http://www.w3.org/2005/Atom"'),'journal feed is not Atom');
+ assert.equal((feed.match(/<entry>/g)||[]).length,catalog.journal.length,'feed entry count differs from the journal');
+ assert.ok(!/&(?!amp;|lt;|gt;|quot;|#39;)/.test(feed),'journal feed contains an unescaped ampersand');
+ assert.ok(fs.readFileSync(path.join(dist,'journal/index.html'),'utf8').includes('application/atom+xml'),'journal page does not link its feed');
+ assert.ok(homeHtmlNow.includes('最新更新')&&homeHtmlNow.includes('latest-updates'),'latest updates section missing on the home page');
+ assert.ok(fs.statSync(path.join(dist,'search-index.json')).size<=50*1024,'chapter search index exceeds 50 KB');
+ assert.equal((searchPage.match(/class="search-group"/g)||[]).length,4,'search results must be grouped into four sections');
+ const offlinePage=pageText.get('offline/index.html');
+ assert.ok(offlinePage&&offlinePage.includes('noindex,follow')&&offlinePage.includes('data-offline-list'),'offline fallback page missing');
+ const precache=JSON.parse(sw.match(/const PRECACHE=(\[.*?\]);/)[1]);
+ for(const entry of precache){
+  const target=entry.slice(prefix.length)||'';
+  assert.ok(fs.existsSync(path.join(dist,target,target===''||target.endsWith('/')?'index.html':'')),'precache entry missing from dist: '+entry);
+ }
+ assert.ok(precache.includes('/offline/')&&precache.some(p=>/\/static\/[^/]+\/style\.css$/.test(p))&&precache.some(p=>/\/static\/[^/]+\/app\.js$/.test(p)),'precache must include the offline page and fingerprinted CSS/JS');
+ for(const icon of manifest.icons.filter(i=>i.type==='image/png')){
+  const [width,height]=icon.sizes.split('x').map(Number),bytes=fs.readFileSync(path.join(dist,icon.src.slice(prefix.length)));
+  assert.equal(bytes.toString('ascii',1,4),'PNG','manifest icon is not a PNG: '+icon.src);
+  assert.equal(bytes.readUInt32BE(16),width,'manifest icon width: '+icon.src);
+  assert.equal(bytes.readUInt32BE(20),height,'manifest icon height: '+icon.src);
+ }
+ const appleIcon=fs.readFileSync(path.join(dist,'assets/icons/apple-touch-icon.png'));
+ assert.equal(appleIcon.readUInt32BE(16),180,'apple touch icon must be 180 px');
+ for(const story of catalog.stories){
+  const chapters=story.manuscript?loadMarkdownChapters(story.manuscript):(story.chapters||[]);
+  if(!chapters.length)continue;
+  const offline=JSON.parse(fs.readFileSync(path.join(dist,'stories',story.slug,'offline.json'),'utf8'));
+  const expectedUrls=[`${prefix}stories/${story.slug}/`,...chapters.map(c=>`${prefix}stories/${story.slug}/chapters/${c.id}/`)];
+  for(const url of expectedUrls)assert.ok(offline.urls.includes(url),'offline manifest misses '+url);
+  for(const url of offline.urls){const target=url.slice(prefix.length);assert.ok(fs.existsSync(path.join(dist,target,target.endsWith('/')?'index.html':'')),'offline manifest points to a missing file: '+url)}
+  assert.ok(pageText.get('stories/'+story.slug+'/index.html').includes('data-offline-save="'+story.slug+'"'),'offline saving control missing for '+story.slug);
+ }
+ for(const story of catalog.stories.filter(s=>s.warnings?.length&&(s.chapters?.length||s.manuscript)))assert.ok(pageText.get('stories/'+story.slug+'/index.html').includes('data-content-warning="'+story.slug+'"'),'content warning acknowledgement missing for '+story.slug);
+ console.log('PASS: '+all.length+' pages, 5 new manuscripts / 94 reading units plus 22-part Snow White, content checksums, navigation, UI and Cloudflare config, plus reading, headers, structured data, offline, media, analytics and CSP checks');
 })();

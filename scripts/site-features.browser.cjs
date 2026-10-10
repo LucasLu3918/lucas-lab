@@ -11,7 +11,10 @@ const STORY='/stories/dark-snow-white/';
 const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ let server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ // Offline means the origin is unreachable: stopping the server also cuts the service worker's own fetches (context.setOffline does not).
+ const stopServer=async()=>{server.kill();await pause(500)};
+ const startServer=async()=>{server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200)}};
  let browser;
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
@@ -92,11 +95,11 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   assert.ok(registered,'service worker not registered');
   await page.evaluate(()=>navigator.serviceWorker.ready);
   await pause(500);
-  await context.setOffline(true);
+  await stopServer();
   const offline=await page.goto(ORIGIN+CHAPTER('02'),{waitUntil:'load'});
   assert.equal(offline.status(),200,'offline chapter not served from cache');
   assert.match(await page.locator('h1').first().textContent(),/第二章|章/);
-  await context.setOffline(false);
+  await startServer();
   console.log('✓ previously read chapter opens offline through the service worker');
 
   // 9. Gallery: placeholders are labelled as in progress; concept boards load.
@@ -112,6 +115,69 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   assert.match(await page.locator('h1').textContent(),/Cloudflare/);
   await page.goto(ORIGIN+'/games/blood-mirror/play/',{waitUntil:'load'});
   await pause(500);
+
+  // 11. Resume: a chapter left halfway offers to return there, and only moves when the reader asks.
+  await page.goto(ORIGIN+CHAPTER('03'),{waitUntil:'load'});
+  await page.evaluate(()=>{const el=document.querySelector('[data-reader]'),r=el.getBoundingClientRect(),span=r.height-innerHeight;window.scrollTo(0,r.top+scrollY+span*0.5)});
+  await pause(1000);
+  await page.goto(ORIGIN+CHAPTER('03'),{waitUntil:'load'});
+  await pause(300);
+  assert.equal(await page.locator('[data-resume]').isVisible(),true,'resume prompt missing');
+  assert.equal(await page.evaluate(()=>window.scrollY),0,'reader jumped without being asked');
+  await page.locator('[data-resume-action]').click();
+  await pause(900);
+  const resumed=await page.locator('[data-reading-percent]').textContent();
+  assert.ok(Number.parseInt(resumed,10)>=35&&Number.parseInt(resumed,10)<=65,'resume landed at '+resumed);
+  assert.equal(await page.locator('[data-resume]').isHidden(),true,'resume prompt stays after use');
+  console.log('✓ resume prompt returns to the saved position on request only');
+
+  // 12. Content warning: acknowledged once per work, collapsed afterwards; progress summary on the story page.
+  await page.goto(ORIGIN+STORY,{waitUntil:'load'});
+  await pause(200);
+  assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isVisible(),true,'warning hidden before acknowledgement');
+  await page.locator('[data-content-warning="dark-snow-white"] [data-warning-ack]').click();
+  assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isHidden(),true,'acknowledged warning still shown');
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isHidden(),true,'acknowledgement not remembered');
+  assert.match(await page.locator('[data-story-progress]').textContent(),/讀到：.+ · 已讀 \d+ \/ \d+ 章/,'progress summary missing');
+  console.log('✓ content warning is acknowledged once and progress summary shows the last chapter');
+
+  // 13. Offline saving: a whole book saved online stays readable offline; an unsaved page shows the offline page.
+  await page.goto(ORIGIN+STORY,{waitUntil:'load'});
+  await pause(200);
+  assert.equal(await page.locator('[data-offline-save="dark-snow-white"]').isVisible(),true,'offline saving control hidden');
+  await page.locator('[data-offline-action]').click();
+  await page.waitForFunction(()=>/已離線保存/.test(document.querySelector('[data-offline-status]')?.textContent||''),null,{timeout:90000});
+  await stopServer();
+  const savedChapter=await page.goto(ORIGIN+CHAPTER('10'),{waitUntil:'load'});
+  assert.equal(savedChapter.status(),200,'saved chapter not served offline');
+  assert.ok((await page.locator('.readerpage h1').first().textContent()).length>0,'saved chapter has no title');
+  await page.goto(ORIGIN+'/tools/',{waitUntil:'load'});
+  assert.equal(await page.locator('[data-offline-list]').count(),1,'unsaved page did not fall back to the offline page');
+  await startServer();
+  await page.goto(ORIGIN+STORY,{waitUntil:'load'});
+  await pause(200);
+  await page.locator('[data-offline-action]').click();
+  await page.waitForFunction(()=>/把整本書保存/.test(document.querySelector('[data-offline-status]')?.textContent||''),null,{timeout:10000});
+  console.log('✓ saved book reads offline; unsaved pages fall back to the offline page; removal works');
+
+  // 14. Search: spacing and full-width differences are ignored, groups appear, and the query never enters the URL.
+  await page.goto(ORIGIN+'/search/',{waitUntil:'load'});
+  await page.locator('[data-region] [data-search]').fill('白雪 公主');
+  await pause(300);
+  assert.equal(new URL(page.url()).search,'','search query leaked into the URL');
+  const groups=await page.locator('.search-group:not([hidden]) .group-title').allTextContents();
+  assert.ok(groups.includes('故事'),'story group missing from results: '+groups.join('、'));
+  console.log('✓ search groups results and never writes the query into the URL');
+
+  // 15. Chapter pages: the game bridge appears for the story with a playable game; clearing reading records works.
+  await page.goto(ORIGIN+CHAPTER('00'),{waitUntil:'load'});
+  assert.equal(await page.locator('.game-bridge').count(),1,'game bridge missing');
+  await page.goto(ORIGIN+'/legal/',{waitUntil:'load'});
+  await page.locator('[data-clear-progress]').click();
+  assert.equal(await page.evaluate(()=>localStorage.getItem('lucaslab.progress.v1')),null,'reading records not cleared');
+  assert.match(await page.locator('[data-clear-status]').textContent(),/已清除/);
+  console.log('✓ game bridge on chapters and clearing reading records from the privacy page');
 
   const cspErrors=errors.filter(t=>/Content Security Policy|Refused to/.test(t));
   assert.deepEqual(cspErrors,[],'CSP violations in console');
