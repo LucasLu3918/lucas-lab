@@ -82,7 +82,7 @@
      write('games/'+g.slug,page(g.title,g.description,'games',html,'games/'+g.slug,{image:g.cover,imageAlt:g.coverAlt}));
      const source=path.join(root,'games',g.slug),destination=path.join(out,playRoute);
      fs.mkdirSync(destination,{recursive:true});
-     for(const file of ['app.js','engine.js','style.css','challenges.css','challenges.js','pipes.js','soundtrack.js','gallery.js','gallery.css','concept-art.js','concept-art.css','ui.js','favicon.svg'])fs.copyFileSync(path.join(source,file),path.join(destination,file));
+     for(const file of ['app.js','engine.js','journey.js','style.css','challenges.css','challenges.js','pipes.js','soundtrack.js','gallery.js','gallery.css','concept-art.js','concept-art.css','ui.js','favicon.svg'])fs.copyFileSync(path.join(source,file),path.join(destination,file));
      fs.cpSync(path.join(source,'assets'),path.join(destination,'assets'),{recursive:true});
      const gameHtml=fs.readFileSync(path.join(source,'index.html'),'utf8').replaceAll('__LAB_GAMES_URL__',url('games/')).replaceAll('__LAB_STORY_URL__',url('stories/'+story.slug+'/'));
      fs.writeFileSync(path.join(destination,'index.html'),gameHtml);
