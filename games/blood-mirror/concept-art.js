@@ -1,5 +1,6 @@
-// CSS sprites reuse user-supplied boards without altering or duplicating their bytes.
-const board=(number)=>({src:`assets/concepts/design-board-${number}.png`,width:1536,height:1024});
+// CSS sprites read WebP copies of the user-supplied boards (~300KB vs 2.6MB PNG);
+// the original PNGs stay as the full-resolution gallery archive.
+const board=(number)=>({src:`assets/concepts/design-board-${number}.webp`,width:1536,height:1024});
 export const conceptArt={
  portrait:{...board(1),rect:[470,0,320,274],label:'魔鏡前的公主肖像'},
  clock:{...board(3),rect:[281,327,238,210],label:'古老的金色機關盤'},

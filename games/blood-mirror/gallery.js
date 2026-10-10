@@ -4,7 +4,7 @@ import {soundtrackFiles} from './soundtrack.js';
 export const galleryCategories=[{id:'all',label:'全部作品'},{id:'character',label:'角色'},{id:'scene',label:'場景'},{id:'concept',label:'概念圖'},{id:'ending',label:'結局 CG'}];
 export const galleryAssets=[
  {id:'snow-white',category:'character',title:'白雪公主',src:'assets/snow-white.webp',alt:'白雪公主戴著王冠，在燭光與魔鏡之間握著紅蘋果',description:'旅程的主視覺。'},
- {id:'portrait',category:'character',title:'魔鏡前的公主肖像',src:'assets/concepts/design-board-1.png',sprite:'portrait',alt:'白雪公主站在魔鏡前的肖像',description:'取自企劃概念展板的肖像。早期版本曾作為黑鐘書庫的拼圖畫面。'},
+ {id:'portrait',category:'character',title:'魔鏡前的公主肖像',src:'assets/concepts/design-board-1.webp',sprite:'portrait',alt:'白雪公主站在魔鏡前的肖像',description:'取自企劃概念展板的肖像。早期版本曾作為黑鐘書庫的拼圖畫面。'},
  {id:'library',category:'scene',title:'黑鐘書庫',src:'assets/chamber.webp',alt:'幽暗的哥德式書庫與古老陳設',description:'第一幕，午夜第十三聲鐘響後的探索場景。'},
  {id:'mine',category:'scene',title:'銀骨礦坑',src:'assets/mine.webp',alt:'銀骨礦坑的地下工程場景',description:'第二幕，蒸汽工程與被遺忘的名字。'},
  {id:'crypt',category:'scene',title:'玻璃棺室',src:'assets/crypt.webp',alt:'玻璃棺室的冰冷幽暗場景',description:'第三幕，沉睡與符印的交界。'},
@@ -13,7 +13,7 @@ export const galleryAssets=[
  {id:'design-board-1',category:'concept',unlockEndings:['dawn','frost','crown'],title:'遊戲全面升級 · 概念展板',src:'assets/concepts/design-board-1.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
  {id:'design-board-3',category:'concept',unlockEndings:['dawn','frost','crown'],title:'多樣解謎 · 概念展板',src:'assets/concepts/design-board-3.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
  {id:'design-board-4',category:'concept',unlockEndings:['dawn','frost','crown'],title:'三種命運 · 概念展板',src:'assets/concepts/design-board-4.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
- {id:'dawn',category:'ending',ending:'dawn',title:'無名的黎明',src:'assets/endings/dawn.svg',preferredSrc:'assets/endings/dawn.png',alt:'無名的黎明結局插畫',description:'春天沒有記住她。'},
+ {id:'dawn',category:'ending',ending:'dawn',title:'無名的黎明',src:'assets/endings/dawn.svg',preferredSrc:'assets/endings/dawn.webp',alt:'無名的黎明結局插畫',description:'春天沒有記住她。'},
  {id:'frost',category:'ending',ending:'frost',title:'霜潮',src:'assets/endings/frost.svg',sprite:'frost',alt:'霜潮結局插畫',description:'沒有名字的冬天。'},
  {id:'crown',category:'ending',ending:'crown',title:'血色王冠',src:'assets/endings/crown.svg',sprite:'crown',alt:'血色王冠結局插畫',description:'永恆的契約。'}
 ];
