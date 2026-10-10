@@ -25,6 +25,10 @@ jobs:
         run: node scripts/blood-mirror.browser.cjs
       - name: Audit responsive layout and interactions
         run: npm run test:visual
+      - name: Verify reading, offline, search and CSP behaviour in Chromium
+        run: npm run test:site
+      - name: Enforce page weight and layout-stability budgets
+        run: npm run test:perf
       - name: Preserve representative viewport screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -255,4 +255,24 @@ button,a,input,select {outline-offset:4px}
  .readerwrap {width:calc(100% - 30px)}.readerpage {padding:26px 20px}.readerpage.manuscript {line-height:1.9}.readerbar .control-group {gap:5px}.readerbar button {padding-inline:10px}.chapternav {flex-direction:column}.chapternav .btn {width:100%}
  .chapterlist a {padding:15px;flex-wrap:wrap}.gallery {gap:12px}.gallery .visual:not(.book-art) {height:165px}.gallery>button>strong {font-size:12px;padding:12px}.callout,.component-panel {padding:24px}.featurecopy h2 {font-size:1.9rem}
 }
+/* Reading progress, continue reading, chapter search, next-chapter card and concept boards */
+.hero-picture {display:contents}
+[hidden] {display:none!important}
+.read-flag {display:inline-flex;align-items:center;margin-left:10px;padding:2px 9px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-size:12px;line-height:1.6;white-space:nowrap}
+.continue-note {margin:20px 0}
+.continue-shelf {padding-top:28px}
+.shelf-head {margin-bottom:12px}
+.shelf-list,.chapter-results {list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.shelf-list {grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.shelf-list a,.chapter-results a,.next-card {display:grid;gap:4px;padding:16px 18px;min-height:56px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:inherit;text-decoration:none}
+.shelf-list a:hover,.chapter-results a:hover,.shelf-list a:focus-visible,.chapter-results a:focus-visible,.next-card:hover,.next-card:focus-visible {border-color:var(--gold-bright)}
+.shelf-list strong,.chapter-results strong,.next-card strong {font-family:var(--font-display);font-size:1.15rem;font-weight:600}
+.shelf-list span,.chapter-results span {color:var(--muted);font-size:14px}
+.chapter-results p {margin:0;color:var(--muted);font-size:14px}
+.next-card {margin-top:28px;padding:20px 22px;border-color:var(--gold)}
+.next-card .label {color:var(--gold)}
+.keyhint {font-size:13px;margin:14px 0 0;text-align:center}
+.concept-boards {display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.concept-board {margin:0}
+.concept-board img {width:100%;height:auto;border:1px solid var(--line);border-radius:var(--radius)}
 @media(prefers-reduced-motion:reduce) {*,*::before,*::after {scroll-behavior:auto!important;transition:none!important;animation:none!important}}

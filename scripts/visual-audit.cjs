@@ -38,7 +38,7 @@ async function audit(){
  try{
   await ready();
   fs.mkdirSync(captures,{recursive:true});
-  browser=await chromium.launch({headless:true});
+  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   let inspected=0;
   for(const width of widths){
    const context=await browser.newContext({viewport:{width,height:900},deviceScaleFactor:1,hasTouch:width<=920,isMobile:width<=480,reducedMotion:'reduce'});
@@ -64,8 +64,9 @@ async function audit(){
     assert.equal(result.badImages,0,'cover image failed to load at '+width+'px '+route);
     if(route==='/projects/aips/')assert.equal(await page.getByRole('link',{name:'閱讀 AIPS 說明文件'}).getAttribute('href'),'https://lucaslu3918.github.io/ai-product-system/');
     if(route==='/'){
-     const heroImage=await page.locator('.hero-art').evaluate(async img=>{await img.decode();return {loaded:img.naturalWidth>0,width:img.naturalWidth}});
-     assert.ok(heroImage.loaded&&heroImage.width===1536,'castle hero image failed to load at '+width+'px');
+     // naturalWidth is density-adjusted for srcset candidates, so assert on the chosen source instead.
+     const heroImage=await page.locator('.hero-art').evaluate(async img=>{await img.decode();return {loaded:img.complete&&img.naturalWidth>0,source:img.currentSrc}});
+     assert.ok(heroImage.loaded&&/moonlit-castle(-640|-1024)?\.(avif|webp)$/.test(heroImage.source),'castle hero image failed to load at '+width+'px: '+heroImage.source);
     }
     inspected++;
    }

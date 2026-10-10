@@ -10,9 +10,9 @@ export const galleryAssets=[
  {id:'crypt',category:'scene',title:'玻璃棺室',src:'assets/crypt.webp',alt:'玻璃棺室的冰冷幽暗場景',description:'第三幕，沉睡與符印的交界。'},
  {id:'queen',category:'scene',title:'王后寢宮',src:'assets/queen.webp',alt:'王后寢宮的哥德式室內場景',description:'第四幕，縫線、記憶與她最後的謊言。'},
  {id:'mirror',category:'scene',title:'鏡中之國',src:'assets/mirror.webp',alt:'鏡中之國的奇幻倒影場景',description:'第五幕，名字與契約的終點。'},
- {id:'design-board-1',category:'concept',unlockEndings:['dawn','frost','crown'],title:'遊戲全面升級 · 概念展板',src:'assets/concepts/design-board-1.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
- {id:'design-board-3',category:'concept',unlockEndings:['dawn','frost','crown'],title:'多樣解謎 · 概念展板',src:'assets/concepts/design-board-3.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
- {id:'design-board-4',category:'concept',unlockEndings:['dawn','frost','crown'],title:'三種命運 · 概念展板',src:'assets/concepts/design-board-4.png',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
+ {id:'design-board-1',category:'concept',unlockEndings:['dawn','frost','crown'],title:'遊戲全面升級 · 概念展板',src:'assets/concepts/design-board-1.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
+ {id:'design-board-3',category:'concept',unlockEndings:['dawn','frost','crown'],title:'多樣解謎 · 概念展板',src:'assets/concepts/design-board-3.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
+ {id:'design-board-4',category:'concept',unlockEndings:['dawn','frost','crown'],title:'三種命運 · 概念展板',src:'assets/concepts/design-board-4.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
  {id:'dawn',category:'ending',ending:'dawn',title:'無名的黎明',src:'assets/endings/dawn.svg',preferredSrc:'assets/endings/dawn.webp',alt:'無名的黎明結局插畫',description:'春天沒有記住她。'},
  {id:'frost',category:'ending',ending:'frost',title:'霜潮',src:'assets/endings/frost.svg',sprite:'frost',alt:'霜潮結局插畫',description:'沒有名字的冬天。'},
  {id:'crown',category:'ending',ending:'crown',title:'血色王冠',src:'assets/endings/crown.svg',sprite:'crown',alt:'血色王冠結局插畫',description:'永恆的契約。'}
