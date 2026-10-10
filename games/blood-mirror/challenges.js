@@ -1,3 +1,4 @@
+import {conceptStyle,conceptMarkup,conceptArt} from './concept-art.js';
 // Five tactile puzzles complement the original story seals. No external dependencies.
 const KEY='blood-mirror-challenges-v2';
 const ids=['library','mine','crypt','queen','mirror'];
@@ -14,8 +15,8 @@ export function startChallenge(id,{modal,success,playCue}){
  const show=(title,subtitle,html)=>{const active=document.activeElement;const attr=['data-pos','data-pipe','data-rune','data-memory','data-reflection'].find(k=>active?.hasAttribute(k));const selector=attr?'['+attr+'="'+active.getAttribute(attr)+'"]':null;modal(title,subtitle,'<div class="challenge" data-challenge="'+id+'">'+html+'</div>');if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});};
  const feedback=(s)=>{const el=document.querySelector('.challenge-feedback');if(el)el.textContent=s;};
  if(id==='library'){
-  const picture='assets/snow-white.webp';let tiles=[4,0,8,2,6,1,3,7,5],selected=-1;
-  const draw=()=>{show('破碎的公主肖像','INTERACTIVE SEAL · 九格拼圖','<p class="challenge-help">鏡子打散了公主的面容。點選兩塊碎片交換位置，將畫像完整復原。</p><div class="tile-board">'+tiles.map((v,i)=>'<button class="picture-tile '+(i===selected?'selected':'')+'" data-pos="'+i+'" aria-label="第'+(i+1)+'格碎片，圖塊 '+(v+1)+'" aria-pressed="'+(i===selected)+'" style="background-image:url('+picture+');background-position:'+((v%3)*50)+'% '+(Math.floor(v/3)*50)+'%"></button>').join('')+'</div><p class="challenge-feedback" role="status">選取任意兩塊碎片進行交換。</p><button id="puzzle-reset" class="secondary-button">重新打散拼圖</button>');
+  let tiles=[4,0,8,2,6,1,3,7,5],selected=-1;
+  const draw=()=>{show('破碎的公主肖像','INTERACTIVE SEAL · 九格拼圖','<p class="challenge-help">鏡子打散了公主的面容。點選兩塊碎片交換位置，將畫像完整復原。</p><figure class="concept-reference">'+conceptMarkup('portrait')+'<figcaption>還原這幅肖像</figcaption></figure><div class="tile-board">'+tiles.map((v,i)=>'<button class="picture-tile '+(i===selected?'selected':'')+'" data-pos="'+i+'" aria-label="第'+(i+1)+'格碎片，圖塊 '+(v+1)+'" aria-pressed="'+(i===selected)+'" style="'+conceptStyle('portrait',v)+'"></button>').join('')+'</div><p class="challenge-feedback" role="status">選取任意兩塊碎片進行交換。</p><button id="puzzle-reset" class="secondary-button">重新打散拼圖</button>');
    document.querySelectorAll('[data-pos]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.pos);if(selected<0){selected=i;draw();return;}if(selected===i){selected=-1;draw();return;}[tiles[i],tiles[selected]]=[tiles[selected],tiles[i]];selected=-1;if(puzzleIsSolved(tiles)){done();return;}playCue('click');draw();});
    document.querySelector('#puzzle-reset').onclick=()=>{tiles=[8,1,5,3,0,7,4,2,6];selected=-1;draw();};
   };draw();return;
@@ -32,8 +33,8 @@ export function startChallenge(id,{modal,success,playCue}){
   draw();return;
  }
  if(id==='queen'){
-  const faces=['♕','❀','♧','☾','❀','☾','♕','♧'];let revealed=[],matched=new Set(),locked=false;
-  const draw=()=>{show('王后遺落的記憶','INTERACTIVE SEAL · 記憶配對','<p class="challenge-help">翻開八張舊日的記憶卡。找出四組相同的印記，拼湊王后的證詞。</p><div class="memory-board">'+faces.map((g,i)=>'<button data-memory="'+i+'" class="memory-card '+(revealed.includes(i)||matched.has(i)?'turned':'')+'" aria-label="第'+(i+1)+'張記憶卡">'+(revealed.includes(i)||matched.has(i)?g:'?')+'</button>').join('')+'</div><p class="challenge-feedback" role="status">已復原 '+matched.size/2+' / 4 組記憶。</p>');
+  const faces=['♕','❀','♧','☾','❀','☾','♕','♧'],artwork=['vial','feather','apple','key','feather','key','vial','apple'];let revealed=[],matched=new Set(),locked=false;
+  const draw=()=>{show('王后遺落的記憶','INTERACTIVE SEAL · 記憶配對','<p class="challenge-help">翻開八張舊日的記憶卡。找出四組相同的印記，拼湊王后的證詞。</p><div class="memory-board">'+faces.map((g,i)=>'<button data-memory="'+i+'" class="memory-card '+(revealed.includes(i)||matched.has(i)?'turned':'')+'" aria-label="第'+(i+1)+'張記憶卡'+(revealed.includes(i)||matched.has(i)?'，'+conceptArt[artwork[i]].label:'，尚未翻開')+'">'+(revealed.includes(i)||matched.has(i)?conceptMarkup(artwork[i],{decorative:true})+'<span class="memory-symbol">'+g+'</span>':'?')+'</button>').join('')+'</div><p class="challenge-feedback" role="status">已復原 '+matched.size/2+' / 4 組記憶。</p>');
    document.querySelectorAll('[data-memory]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.memory);if(locked||matched.has(i)||revealed.includes(i))return;revealed.push(i);playCue('click');draw();if(revealed.length!==2)return;const [a,c]=revealed;if(faces[a]===faces[c]){matched.add(a);matched.add(c);revealed=[];if(matched.size===8){done();return;}draw();}else{locked=true;setTimeout(()=>{locked=false;revealed=[];if(document.querySelector('[data-challenge="queen"]'))draw();},690);}});
   };draw();return;
  }

@@ -1,11 +1,11 @@
 /* Responsive, low-latency tactile puzzle interface */
 .challenge{color:#e8ddcc;padding:4px 0 10px}
-.challenge-help{font-size:13px;line-height:1.9;color:#c6b5a0;margin:0 0 17px}
+.challenge-help{font-size:14px;line-height:1.9;color:#c6b5a0;margin:0 0 17px}
 .challenge-feedback{min-height:26px;font-size:12px;letter-spacing:.4px;color:#d8be8f}
 .challenge button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tile-board,.pipes-board,.reflection-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(100%,385px);margin:12px auto 16px;padding:7px;background:#070709;border:1px solid #b59c6c88;border-radius:3px;box-shadow:0 12px 38px #0007}
 .tile-board{aspect-ratio:1}.picture-tile{background-size:300% 300%;background-repeat:no-repeat;aspect-ratio:1;border:2px solid #b49a6655;border-radius:1px;min-width:0;transition:border-color .08s,filter .08s;filter:sepia(.18)}
-.picture-tile.selected{border:3px solid #eed8a3;filter:brightness(1.3);z-index:2;box-shadow:inset 0 0 12px #eed8a35a}
+.picture-tile.selected{border:2px solid #eed8a3;filter:brightness(1.3);z-index:2;box-shadow:inset 0 0 12px #eed8a35a}
 .picture-tile:active{filter:brightness(1.35)}
 .pipes-board{aspect-ratio:1;background:radial-gradient(ellipse,#2f231b,#121118)}
 .pipe-empty,.pipe-piece{min-height:70px;display:grid;place-items:center;border:1px solid #8c6d4744;background:radial-gradient(ellipse,#3c2b21,#151116);font-size:55px;color:#d1ac71;line-height:1}
@@ -27,7 +27,7 @@
 .hotspot{touch-action:manipulation}
 .hotspot:active{background:#754950;box-shadow:0 0 0 10px #c3ac8033}
 @media (max-width:640px){
- .challenge-help{font-size:12px}
+ .challenge-help{font-size:14px}
  .tile-board,.pipes-board,.reflection-board{width:min(100%,315px)}
  .pipe-piece{font-size:45px;min-height:58px}
  .rune-key{min-height:56px;font-size:29px}
