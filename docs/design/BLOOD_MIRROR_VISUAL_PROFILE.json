@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "scope": "/games/blood-mirror/play/",
+  "status": "VERIFIED_CHROMIUM",
+  "direction": {
+    "source": "docs/design/PROJECT_VISUAL_PROFILE.yaml",
+    "preserved": [
+      "cinematic gothic artwork",
+      "antique gold details",
+      "burgundy actions",
+      "local serif and sans typography"
+    ]
+  },
+  "tokens": {
+    "source": "games/blood-mirror/style.css",
+    "bg": "#100f10",
+    "panel": "#191619",
+    "gold": "#c3ac80",
+    "muted": "#b5aaa0",
+    "red": "#8d2d3b"
+  },
+  "components": {
+    "navigation": "ui.js responsive menu with Escape and focus restore",
+    "dialog": "fixed heading/close with scrollable body",
+    "objective": "above scene with true progress value",
+    "controls": "44px minimum target; consistent border radius",
+    "gallery": "contain original images; keyboard stays in dialog",
+    "preferences": "optional local large text/reduced motion; separate from story save",
+    "steam_pipe_challenge": "True reciprocal-port source-to-city graph, 180-degree straight equivalence, live flow/status, explicit supply confirmation, session attempt, undo/reset/hints and keyboard navigation"
+  },
+  "required_viewports": [
+    360,
+    390,
+    768,
+    1280,
+    1440
+  ],
+  "state_rules": [
+    "selected borders retain width",
+    "visible focus outlines",
+    "story text expands for largeText",
+    "OS reduced motion respected",
+    "continue journey is primary when save exists",
+    "Steam flow conveyed by both color and ◆ 通汽 label; fixed endpoints visible"
+  ],
+  "validation": [
+    "scripts/blood-mirror-ui.browser.cjs",
+    "scripts/blood-mirror.browser.cjs",
+    "scripts/blood-mirror-pipes.browser.cjs"
+  ],
+  "limitations": [
+    "Chrome on macOS verified; Safari/Firefox and real-device touch not independently verified"
+  ],
+  "last_verified_commit": "281648fa355e9b5892c0eec5be7d7de72a30709f",
+  "watch_paths": [
+    "games/blood-mirror/",
+    "scripts/build.cjs",
+    "assets/favicon.svg"
+  ]
+}
