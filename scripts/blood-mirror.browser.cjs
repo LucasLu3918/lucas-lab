@@ -100,7 +100,11 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.match(await page.locator('#modal-body').innerText(),/我不想成為女王/);
    await page.locator('#modal-close').click();
    await page.locator('#room-puzzle').click();
-   for(const ans of ['no','third','yes'])await page.locator('[data-answer="'+ans+'"]').click();
+   const replies=width<600?['no','third','yes']:['yes','sacrifice','no'];
+   assert.match(await page.locator('#modal-body').innerText(),/沒有標準答案/);
+   for(const [i,ans] of replies.entries()){await page.locator('[data-answer="'+ans+'"]').click();if(i<2)assert.ok((await page.locator('.queen-response').innerText()).length>10,'Vera answers each reply');}
+   assert.equal(await page.locator('.queen-responses li').count(),3);
+   assert.match(await page.locator('#modal-body').innerText(),width<600?/一模一樣/:/和當年的白雪不同/);
    await afterSeal('母親的最後記憶');
    await tapSpot(page,'witness',width<600);
    assert.equal(await page.locator('#take-item').count(),0,'reversed manuscript cannot be taken before it is mirrored');
@@ -119,6 +123,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
     assert.ok(new RegExp(ending+'\\.(svg|png|webp)').test(await page.locator('.ending-art').getAttribute('style')));
     const image=await page.request.get(ORIGIN+'/games/blood-mirror/play/assets/endings/'+ending+'.svg');
     assert.equal(image.status(),200,'missing CG '+ending);
+    if(ending==='crown')assert.match(await page.locator('#ending-recap').innerText(),width<600?/不想成為女王，最後卻戴上了王冠/:/想繼承王冠。妳做到了/);
     if(ending!=='crown')await page.locator('[data-action="reconsider"]').click();
    }
    assert.deepEqual(pageErrors,[],'browser error at '+width);

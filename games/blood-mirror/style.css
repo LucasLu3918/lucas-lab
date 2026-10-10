@@ -38,3 +38,17 @@ body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{anim
 .playlog-table th{color:var(--gold);font-weight:400;letter-spacing:1px}
 .playlog-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .playlog-actions button{flex:1 1 auto;min-height:44px}
+/* Post-game: memories, ending recap, portable save */
+.hotspot.memory{border-color:#a9b8d6;color:#dfe6f5;box-shadow:0 0 0 6px #a9b8d61a,0 0 30px #a9b8d644}
+.journal-entry.memory-entry h4{color:#c9d3ea}
+.journal-entry.memory-entry.locked{opacity:.62}
+.ending-recap{margin:18px 0 6px;padding:14px 16px;border:1px solid var(--line);background:#0d0b0dcc;text-align:left}
+.ending-recap h2{font:400 15px/1.5 var(--serif);letter-spacing:2px;color:var(--gold);margin:0 0 8px}
+.ending-recap ul{margin:0;padding-left:20px;line-height:1.8}
+.ending-recap-stats{margin:10px 0 0;color:var(--muted);font-size:13px}
+.ending-recap-next{margin:6px 0 0;color:var(--text)}
+.settings-pair{display:flex;gap:8px}
+/* Queen's free answers: Vera's responses */
+.queen-response{margin:0 0 14px;padding:10px 14px;border-left:2px solid var(--gold);color:var(--text);font-family:var(--serif);line-height:1.8;background:#0d0b0d99}
+.queen-responses{margin:4px 0 12px;padding-left:20px;line-height:1.8;font-family:var(--serif)}
+.ending-recap h2+ul+h2,.ending-recap ul+h2{margin-top:12px}
