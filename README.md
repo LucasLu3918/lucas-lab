@@ -78,6 +78,11 @@ docs/                內容與技術規範
 - `npm run test:perf`：首頁、故事、章節、搜尋與遊戲頁的傳輸量、請求數、LCP、CLS 預算。
 - 兩者與 `npm run test:visual` 一樣使用 Playwright；若要指定本機 Chromium，可設定 `BROWSER_EXECUTABLE`。
 - `dist/_headers` 由建置產生，包含安全標頭與快取規則；`npm start` 會依同一份規則回應，方便本機檢查。
+- 安全標頭採嚴格 CSP：`style-src 'self'`，站內頁面與遊戲都沒有 inline `style` 屬性（遊戲的熱點與概念圖以 CSSOM 設定）。`check` 會擋住會重新引入 `unsafe-inline` 的寫法。
+- 素材規則：遊戲的 PNG 原檔放在 `games/blood-mirror/source-art/`，不在 `assets/` 內，不會發布；`dist/` 中只允許 PWA 圖示（`assets/icons/`）使用 PNG，其他點陣圖上限 500 KB，單一音檔上限 2.5 MB。
+- 流量統計：建置時若設定環境變數 `CF_ANALYTICS_TOKEN`（Cloudflare Web Analytics 的 token，不寫入程式碼），才會輸出無 cookie 的統計 beacon；未設定時不輸出，`/legal/` 的隱私說明會依此切換。
+- 離線與 PWA：`sw.js` 由 `scripts/site/service-worker.template.js` 產生。新版本需使用者按「重新整理」才會啟用；開發時在本機網址加上 `?nosw` 可停用並移除 Service Worker。
+- 離線測試須實際停止伺服器（`context.setOffline` 不會阻擋 Service Worker 的請求）；`npm run test:site` 已依此方式驗證。
 
 ## 正式部署驗證
 

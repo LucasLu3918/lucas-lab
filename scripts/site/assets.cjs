@@ -7,7 +7,10 @@ function fingerprintOf(bytes){return crypto.createHash('sha256').update(bytes).d
 
 function securityAndCacheHeaders(base){
  const p=base==='/'?'':base.replace(/\/$/,'');
- const csp=["default-src 'self'","script-src 'self'","style-src 'self' 'unsafe-inline'","img-src 'self' data:","media-src 'self'","font-src 'self'","connect-src 'self'","manifest-src 'self'","worker-src 'self'","object-src 'none'","base-uri 'self'","form-action 'self'","frame-ancestors 'none'"].join('; ');
+ // Styles carry no inline attributes (the game places its sprites through CSSOM), so style-src needs no 'unsafe-inline'.
+ // The analytics origins are the only third-party hosts allowed; they are unused unless CF_ANALYTICS_TOKEN is set at build time.
+ const csp=["default-src 'self'","script-src 'self' https://static.cloudflareinsights.com","style-src 'self'","img-src 'self' data:","media-src 'self'","font-src 'self'","connect-src 'self' https://cloudflareinsights.com","manifest-src 'self'","worker-src 'self'","object-src 'none'","base-uri 'self'","form-action 'self'","frame-ancestors 'none'"].join('; ');
+ // Each header is set by one rule per path so Cloudflare never has to merge duplicate values.
  return [
   '/*',
   '  X-Content-Type-Options: nosniff',
@@ -27,8 +30,21 @@ function securityAndCacheHeaders(base){
   '  Cache-Control: no-cache',
   p+'/sw.js',
   '  Cache-Control: no-cache',
+  // Deploy metadata, feeds, the search index and the web manifest must be revalidated on every visit.
+  p+'/manifest.webmanifest',
+  '  Cache-Control: public, max-age=0, must-revalidate',
+  p+'/sitemap.xml',
+  '  Cache-Control: public, max-age=0, must-revalidate',
+  p+'/_build.json',
+  '  Cache-Control: public, max-age=0, must-revalidate',
+  p+'/search-index.json',
+  '  Cache-Control: public, max-age=0, must-revalidate',
+  p+'/journal/feed.xml',
+  '  Cache-Control: public, max-age=0, must-revalidate',
   '',
   p+'/assets/images/*',
+  '  Cache-Control: public, max-age=604800',
+  p+'/assets/icons/*',
   '  Cache-Control: public, max-age=604800',
   p+'/games/blood-mirror/play/assets/*',
   '  Cache-Control: public, max-age=604800',
@@ -38,10 +54,11 @@ function securityAndCacheHeaders(base){
 
 module.exports=function copyAssets(ctx){
  const {fs,path,root,out}=ctx;
+ // Top-level files and the image and icon folders are published as they are (one level deep, no subfolders of folders).
  for(const f of fs.readdirSync(path.join(root,'assets'))){
   const source=path.join(root,'assets',f);
   if(fs.statSync(source).isFile())fs.copyFileSync(source,path.join(out,'assets',f));
-  else if(f==='images'){
+  else if(f==='images'||f==='icons'){
    const destination=path.join(out,'assets',f);fs.mkdirSync(destination,{recursive:true});
    for(const image of fs.readdirSync(source))if(fs.statSync(path.join(source,image)).isFile())fs.copyFileSync(path.join(source,image),path.join(destination,image));
   }

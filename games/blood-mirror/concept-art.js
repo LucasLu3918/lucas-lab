@@ -20,6 +20,10 @@ export function conceptStyle(id,tile=null){
 }
 export function conceptMarkup(id,{decorative=false,className=''}={}){
  const art=conceptArt[id];if(!art)return '';
- return `<span class="concept-sprite ${className}" data-concept="${id}" ${decorative?'aria-hidden="true"':`role="img" aria-label="${art.label}"`} style="${conceptStyle(id)}"></span>`;
+ return `<span class="concept-sprite ${className}" data-concept="${id}" ${decorative?'aria-hidden="true"':`role="img" aria-label="${art.label}"`}></span>`;
+}
+// Sprite regions are applied with CSSOM after the markup is inserted: style attributes in markup would need 'unsafe-inline' under the site CSP.
+export function placeConcepts(root){
+ for(const el of root.querySelectorAll('.concept-sprite[data-concept]'))el.style.cssText=conceptStyle(el.dataset.concept);
 }
 export const itemArtwork={watch:'clock',apple:'apple'};

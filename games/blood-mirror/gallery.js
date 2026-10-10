@@ -1,4 +1,4 @@
-import {conceptMarkup} from './concept-art.js';
+import {conceptMarkup,placeConcepts} from './concept-art.js';
 import {soundtrackFiles} from './soundtrack.js';
 // Original artwork archive; boards include design proposals and ending spoilers.
 export const galleryCategories=[{id:'all',label:'全部作品'},{id:'character',label:'角色'},{id:'scene',label:'場景'},{id:'concept',label:'概念圖'},{id:'ending',label:'結局 CG'}];
@@ -46,7 +46,7 @@ export function createGallery({getEndings,openModal,closeModal,onPreviewStart,on
   filters.innerHTML=galleryCategories.map(c=>`<button type="button" data-gallery-filter="${c.id}" aria-pressed="${c.id===category}">${c.label}</button>`).join('');
   const assets=filterArtwork(category),discovered=getEndings();
   status.textContent=`${assets.length} 件作品 · 結局收藏 ${galleryAssets.filter(a=>a.ending&&canViewArtwork(a,discovered)).length} / 3`;
-  grid.innerHTML=assets.map(asset=>canViewArtwork(asset,discovered)?`<button class="artwork-card" data-artwork="${asset.id}" aria-label="檢視${asset.title}">${asset.sprite?conceptMarkup(asset.sprite):`<img data-artwork-image="${asset.id}" src="${asset.src}" alt="${asset.alt}" loading="lazy" decoding="async">`}<span class="artwork-caption"><span>${galleryCategories.find(c=>c.id===asset.category).label}</span><strong>${asset.title}</strong><span>放大檢視 ↗</span></span></button>`:`<article class="artwork-card artwork-locked" aria-label="尚未解鎖的${asset.category==='concept'?'概念展板':'結局插畫'}"><div aria-hidden="true">◇</div><span class="artwork-caption"><strong>${asset.category==='concept'?'含結局內容的概念展板':'尚未解鎖的結局'}</strong><span>${asset.category==='concept'?'發現三種結局後即可檢視完整展板。':'完成對應結局後，插畫將留在這裡。'}</span></span></article>`).join('')||'<p class="gallery-empty">這裡將收藏旅程之外的靈感與概念作品。</p>';
+  grid.innerHTML=assets.map(asset=>canViewArtwork(asset,discovered)?`<button class="artwork-card" data-artwork="${asset.id}" aria-label="檢視${asset.title}">${asset.sprite?conceptMarkup(asset.sprite):`<img data-artwork-image="${asset.id}" src="${asset.src}" alt="${asset.alt}" loading="lazy" decoding="async">`}<span class="artwork-caption"><span>${galleryCategories.find(c=>c.id===asset.category).label}</span><strong>${asset.title}</strong><span>放大檢視 ↗</span></span></button>`:`<article class="artwork-card artwork-locked" aria-label="尚未解鎖的${asset.category==='concept'?'概念展板':'結局插畫'}"><div aria-hidden="true">◇</div><span class="artwork-caption"><strong>${asset.category==='concept'?'含結局內容的概念展板':'尚未解鎖的結局'}</strong><span>${asset.category==='concept'?'發現三種結局後即可檢視完整展板。':'完成對應結局後，插畫將留在這裡。'}</span></span></article>`).join('')||'<p class="gallery-empty">這裡將收藏旅程之外的靈感與概念作品。</p>';placeConcepts(grid);
   bindImages(grid);
  };
  const preview=id=>{

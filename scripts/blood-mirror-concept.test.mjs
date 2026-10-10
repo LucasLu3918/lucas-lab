@@ -13,7 +13,7 @@ test('every concept region fits its WebP sprite, which matches the original PNG 
  for(const art of Object.values(conceptArt)){
   assert.match(art.src,/\.webp$/);
   const webp=readFileSync(new URL('../games/blood-mirror/'+art.src,import.meta.url));
-  const png=readFileSync(new URL('../games/blood-mirror/'+art.src.replace(/\.webp$/,'.png'),import.meta.url));
+  const png=readFileSync(new URL('../games/blood-mirror/source-art/'+art.src.replace(/^assets\//,'').replace(/\.webp$/,'.png'),import.meta.url));
   assert.equal(webp.toString('ascii',0,4),'RIFF');assert.deepEqual(webpSize(webp),[art.width,art.height]);
   assert.equal(png.readUInt32BE(16),art.width);assert.equal(png.readUInt32BE(20),art.height);
   assert.ok(webp.length<png.length/4,'sprite source should be much lighter than the PNG');
