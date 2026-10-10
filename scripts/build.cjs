@@ -31,7 +31,7 @@
  const page=(title,desc,current,html,route='',opts={})=>{
    const clean=route.replace(/^\/|\/$/g,'');const canonical=ext+'/'+(clean?clean+'/':'');
    const noindex=opts.noindex?'<meta name="robots" content="noindex,follow">':'<meta name="robots" content="index,follow">';
-   return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080e16"><meta name="description" content="${e(desc)}">${noindex}<title>${e(title)}｜LUCAS LAB</title><link rel="canonical" href="${e(canonical)}"><meta property="og:type" content="website"><meta property="og:title" content="${e(title)}｜LUCAS LAB"><meta property="og:description" content="${e(desc)}"><meta property="og:url" content="${e(canonical)}">${opts.image?`<meta property="og:image" content="${e(ext+url(opts.image))}"><meta property="og:image:alt" content="${e(opts.imageAlt||title)}">`:""}<link rel="stylesheet" href="${url('assets/style.css')}"><script src="${url('assets/app.js')}" defer></script></head><body>${header(current)}<main id="main">${html}</main>${footer()}</body></html>`;
+   return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080e16"><meta name="description" content="${e(desc)}">${noindex}<title>${e(title)}｜LUCAS LAB</title><link rel="icon" href="${url('assets/favicon.svg')}" type="image/svg+xml"><link rel="canonical" href="${e(canonical)}"><meta property="og:type" content="website"><meta property="og:title" content="${e(title)}｜LUCAS LAB"><meta property="og:description" content="${e(desc)}"><meta property="og:url" content="${e(canonical)}">${opts.image?`<meta property="og:image" content="${e(ext+url(opts.image))}"><meta property="og:image:alt" content="${e(opts.imageAlt||title)}">`:""}<link rel="stylesheet" href="${url('assets/style.css')}"><script src="${url('assets/app.js')}" defer></script></head><body>${header(current)}<main id="main">${html}</main>${footer()}</body></html>`;
  };
  const write=(route,html)=>{const dir=path.join(out,route);fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'index.html'),html,'utf8')};
  const intro=(eyebrow,title,desc)=>`<div class="wrap pageintro"><div class="eyebrow">${e(eyebrow)}</div><h1>${e(title)}</h1><p>${e(desc)}</p></div>`;
@@ -82,7 +82,7 @@
      write('games/'+g.slug,page(g.title,g.description,'games',html,'games/'+g.slug,{image:g.cover,imageAlt:g.coverAlt}));
      const source=path.join(root,'games',g.slug),destination=path.join(out,playRoute);
      fs.mkdirSync(destination,{recursive:true});
-     for(const file of ['app.js','engine.js','style.css','challenges.css','challenges.js','soundtrack.js','favicon.svg'])fs.copyFileSync(path.join(source,file),path.join(destination,file));
+     for(const file of ['app.js','engine.js','style.css','challenges.css','challenges.js','pipes.js','soundtrack.js','gallery.js','gallery.css','concept-art.js','concept-art.css','ui.js','favicon.svg'])fs.copyFileSync(path.join(source,file),path.join(destination,file));
      fs.cpSync(path.join(source,'assets'),path.join(destination,'assets'),{recursive:true});
      const gameHtml=fs.readFileSync(path.join(source,'index.html'),'utf8').replaceAll('__LAB_GAMES_URL__',url('games/')).replaceAll('__LAB_STORY_URL__',url('stories/'+story.slug+'/'));
      fs.writeFileSync(path.join(destination,'index.html'),gameHtml);

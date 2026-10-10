@@ -1,0 +1,1143 @@
+{
+  "version": 1,
+  "mode": "V2",
+  "status": "pass_with_comments",
+  "target": {
+    "routes": [
+      "/games/blood-mirror/play/",
+      "/ (favicon only)"
+    ],
+    "components": [
+      "Navigation",
+      "Dialog",
+      "Objective and progress",
+      "Buttons and focus",
+      "Gallery",
+      "Favicon"
+    ]
+  },
+  "baseline_source": "docs/design/PROJECT_VISUAL_PROFILE.yaml",
+  "component_inventory": [
+    {
+      "component": "Navigation",
+      "source": "games/blood-mirror/ui.js and index.html"
+    },
+    {
+      "component": "Dialog",
+      "source": "games/blood-mirror/app.js and style.css"
+    },
+    {
+      "component": "Objective and progress",
+      "source": "games/blood-mirror/app.js and style.css"
+    },
+    {
+      "component": "Buttons and focus",
+      "source": "games/blood-mirror/style.css"
+    },
+    {
+      "component": "Gallery",
+      "source": "games/blood-mirror/gallery.js and gallery.css"
+    },
+    {
+      "component": "Favicon",
+      "source": "assets/favicon.svg and games/blood-mirror/favicon.svg"
+    }
+  ],
+  "findings": [
+    {
+      "id": "UI-001",
+      "component": "Navigation",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Mobile navigation had no accessible opener",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/style.css",
+        "style": "nav @850",
+        "mechanism": "display:none without menu control"
+      },
+      "fix": "Responsive menu with aria-expanded, inert and Escape",
+      "status": "closed"
+    },
+    {
+      "id": "UI-002",
+      "component": "Objective",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Objective followed scene on mobile",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/index.html",
+        "style": ".objective-block",
+        "mechanism": "Objective existed in sidebar after scene"
+      },
+      "fix": "Move objective and true progress above scene",
+      "status": "closed"
+    },
+    {
+      "id": "UI-003",
+      "component": "Dialog",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Closing control scrolls away in long dialog",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/style.css",
+        "style": ".modal-shell",
+        "mechanism": "Entire modal shell scrolled"
+      },
+      "fix": "Fixed header with independently scrollable body",
+      "status": "closed"
+    },
+    {
+      "id": "UI-004",
+      "component": "Typography",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Small low contrast text",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/style.css",
+        "style": ".narrative-block p",
+        "mechanism": "Several 9–12px body/status values"
+      },
+      "fix": "Larger text, consistent muted color and saved large-text preference",
+      "status": "closed"
+    },
+    {
+      "id": "UI-005",
+      "component": "Home action",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "New journey was primary despite existing progress",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/app.js",
+        "style": "renderHome",
+        "mechanism": "Primary class hard-coded to start button"
+      },
+      "fix": "Continue journey primary when save exists",
+      "status": "closed"
+    },
+    {
+      "id": "UI-006",
+      "component": "Puzzle selection",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Selection changes border geometry",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/challenges.css",
+        "style": ".picture-tile.selected",
+        "mechanism": "Selected border 3px versus default 2px"
+      },
+      "fix": "Retain 2px border; use color and shadow",
+      "status": "closed"
+    },
+    {
+      "id": "UI-007",
+      "component": "Gallery",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Portrait crops conceal the full artwork",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/gallery.css",
+        "style": ".artwork-card img",
+        "mechanism": "object-fit:cover on 4/3 cards"
+      },
+      "fix": "Use contain with dark letterboxing",
+      "status": "closed"
+    },
+    {
+      "id": "UI-008",
+      "component": "Favicon",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Main site lacked favicon",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "scripts/build.cjs",
+        "style": "page head",
+        "mechanism": "No rel=icon in generated head"
+      },
+      "fix": "Local compass SVG on site; crowned mirror SVG on game",
+      "status": "closed"
+    },
+    {
+      "id": "PIPE-001",
+      "component": "Steam pipe puzzle",
+      "route": "/games/blood-mirror/play/",
+      "symptom": "Angle-only hidden solution rejects visually equivalent straight pipes; no source/city or actual reference diagram",
+      "classification": "outlier",
+      "valid_variant": false,
+      "approved_exception": false,
+      "root_cause": {
+        "source": "games/blood-mirror/challenges.js",
+        "style": ".pipes-board",
+        "mechanism": "rotations.every(x=>x%4===0) used instead of reciprocal connectivity"
+      },
+      "fix": "pipes.js traces reciprocal ports from fixed spring to city; SVG ports, live flow, leak location, undo/reset/progressive hints and confirm button reflect the same model",
+      "status": "closed"
+    }
+  ],
+  "verification": {
+    "required_viewports": [
+      "mobile",
+      "tablet",
+      "desktop"
+    ],
+    "required_states": [
+      "default",
+      "connected"
+    ],
+    "before": [
+      {
+        "id": "home-390-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-390-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:25.872194+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "home-768-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-768-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.515326+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "home-1280-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-1280-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:27.203335+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "game-390-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-390-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:25.999549+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "game-768-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-768-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.661591+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "game-1280-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-1280-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:27.347094+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "puzzle-390-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-390-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.130847+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "puzzle-768-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-768-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.774662+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "puzzle-1280-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-1280-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:27.475056+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "gallery-390-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-390-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.224019+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "gallery-768-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-768-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:26.900971+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "gallery-1280-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-1280-before.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + prior-asset-integration baseline",
+          "captured_at": "2026-10-10T04:55:27.587544+00:00",
+          "command": "/tmp/blood-mirror-ui-baseline.cjs"
+        }
+      },
+      {
+        "id": "pipes-390-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-390-before.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 (before pipe repair)",
+          "captured_at": "2026-10-10T05:27:59.485172+00:00",
+          "command": "/tmp/blood-mirror-pipes-baseline.cjs"
+        }
+      },
+      {
+        "id": "pipes-1280-before",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-1280-before.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 (before pipe repair)",
+          "captured_at": "2026-10-10T05:27:59.851564+00:00",
+          "command": "/tmp/blood-mirror-pipes-baseline.cjs"
+        }
+      }
+    ],
+    "after": [
+      {
+        "id": "home-360-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-360-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:04.647397+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "home-390-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-390-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:05.676885+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "home-768-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-768-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:06.601457+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "home-1280-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-1280-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:07.632359+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "home-1440-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#home",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1440,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/home-1440-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:08.569480+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "game-360-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-360-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:04.981875+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "game-390-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-390-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:05.879667+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "game-768-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-768-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:06.850975+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "game-1280-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-1280-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:07.775635+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "game-1440-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#game",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1440,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/game-1440-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:08.729112+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "puzzle-360-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-360-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:05.178615+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "puzzle-390-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-390-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:06.076467+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "puzzle-768-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-768-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:07.063161+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "puzzle-1280-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-1280-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:08.002545+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "puzzle-1440-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#puzzle",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1440,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/puzzle-1440-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:08.946219+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "gallery-360-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-360-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:05.408631+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "gallery-390-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-390-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:06.305094+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "gallery-768-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-768-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:07.309119+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "gallery-1280-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-1280-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:08.242859+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "gallery-1440-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#gallery",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1440,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-ui-audit/gallery-1440-after.png",
+        "input_assets": [
+          "games/blood-mirror/assets/snow-white.webp",
+          "games/blood-mirror/assets/chamber.webp"
+        ],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "281648fa355e9b5892c0eec5be7d7de72a30709f + working-tree UI changes",
+          "captured_at": "2026-10-10T05:00:09.205235+00:00",
+          "command": "scripts/blood-mirror-ui.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-360-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-360-after.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:57.286742+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-360-connected",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "connected",
+        "viewport": {
+          "label": "mobile",
+          "width": 360,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-360-connected.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:57.869041+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-390-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-390-after.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:58.368499+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-390-connected",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "connected",
+        "viewport": {
+          "label": "mobile",
+          "width": 390,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-390-connected.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:58.925118+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-768-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-768-after.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:59.401763+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-768-connected",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "connected",
+        "viewport": {
+          "label": "tablet",
+          "width": 768,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-768-connected.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:34:59.948801+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-1280-after",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "default",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-1280-after.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:35:00.450202+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      },
+      {
+        "id": "pipes-1280-connected",
+        "kind": "screenshot",
+        "target": "/games/blood-mirror/play/#mine-pipes",
+        "state": "connected",
+        "viewport": {
+          "label": "desktop",
+          "width": 1280,
+          "height": 850
+        },
+        "artifact": "/tmp/blood-mirror-pipes-preview/pipes-1280-connected.png",
+        "input_assets": [],
+        "provenance": {
+          "provider": "Playwright / installed Google Chrome",
+          "source_revision": "e9c34c8849ce449cfb85c4893e3ca6cbf8b8cdc9 + working-tree pipe repair",
+          "captured_at": "2026-10-10T05:35:01.001525+00:00",
+          "command": "scripts/blood-mirror-pipes.browser.cjs"
+        }
+      }
+    ]
+  },
+  "review": {
+    "decision": "PASS_WITH_COMMENTS",
+    "quality_assessed_by": "agent_eval",
+    "checks": [
+      {
+        "area": "Mobile/desktop scene and objective composition",
+        "result": "pass",
+        "evidence": [
+          "game-390-before",
+          "game-390-after",
+          "game-1280-after"
+        ]
+      },
+      {
+        "area": "Home, modal and gallery typography, geometry, original artwork",
+        "result": "pass",
+        "evidence": [
+          "home-390-after",
+          "home-1280-after",
+          "puzzle-390-after",
+          "gallery-768-after"
+        ]
+      },
+      {
+        "area": "Pipe model/visual parity, readable endpoints and contiguous highlighted route",
+        "result": "pass",
+        "evidence": [
+          "pipes-390-after",
+          "pipes-390-connected",
+          "pipes-1280-connected"
+        ]
+      }
+    ],
+    "notes": [
+      "Primary agent visually assessed rendered screenshots; no independent human review claimed.",
+      "360/390/768/1280/1440px functional checks passed.",
+      "Real-device Safari/Firefox and comprehensive WCAG audit remain unverified.",
+      "Real pipe connectivity verified by exhaustive 1024 configurations; 360/390/768/1280 touch/keyboard, undo/reset/reopen, hints, confirmation and legacy completion saves pass."
+    ]
+  },
+  "profile_updated": true,
+  "remaining_material_findings": []
+}

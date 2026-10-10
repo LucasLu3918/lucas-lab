@@ -1,16 +1,16 @@
 /* Responsive, low-latency tactile puzzle interface */
 .challenge{color:#e8ddcc;padding:4px 0 10px}
-.challenge-help{font-size:13px;line-height:1.9;color:#c6b5a0;margin:0 0 17px}
+.challenge-help{font-size:14px;line-height:1.9;color:#c6b5a0;margin:0 0 17px}
 .challenge-feedback{min-height:26px;font-size:12px;letter-spacing:.4px;color:#d8be8f}
 .challenge button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tile-board,.pipes-board,.reflection-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(100%,385px);margin:12px auto 16px;padding:7px;background:#070709;border:1px solid #b59c6c88;border-radius:3px;box-shadow:0 12px 38px #0007}
 .tile-board{aspect-ratio:1}.picture-tile{background-size:300% 300%;background-repeat:no-repeat;aspect-ratio:1;border:2px solid #b49a6655;border-radius:1px;min-width:0;transition:border-color .08s,filter .08s;filter:sepia(.18)}
-.picture-tile.selected{border:3px solid #eed8a3;filter:brightness(1.3);z-index:2;box-shadow:inset 0 0 12px #eed8a35a}
+.picture-tile.selected{border:2px solid #eed8a3;filter:brightness(1.3);z-index:2;box-shadow:inset 0 0 12px #eed8a35a}
 .picture-tile:active{filter:brightness(1.35)}
-.pipes-board{aspect-ratio:1;background:radial-gradient(ellipse,#2f231b,#121118)}
-.pipe-empty,.pipe-piece{min-height:70px;display:grid;place-items:center;border:1px solid #8c6d4744;background:radial-gradient(ellipse,#3c2b21,#151116);font-size:55px;color:#d1ac71;line-height:1}
-.pipe-empty{opacity:.3;font-size:20px}.pipe-piece{position:relative;overflow:hidden}
-.pipe-piece>span{transition:transform .08s ease-out;display:block}.pipe-piece small{font:11px Georgia,serif;position:absolute;right:7px;bottom:7px;color:#f4dfb6}
+.pipes-board{aspect-ratio:1;width:min(100%,385px);padding:2px;gap:2px;background:#6e573d;border:1px solid #b59c6c88}
+.pipe-empty,.pipe-piece,.pipe-terminal{min-height:0;min-width:0;aspect-ratio:1;display:grid;place-items:center;padding:0;border:1px solid transparent;background:radial-gradient(ellipse,#3c2b21,#151116);color:#d1ac71;line-height:1;position:relative}
+.pipe-empty{font-size:12px;color:#aa9683;background:repeating-linear-gradient(135deg,#171419,#171419 9px,#211c22 9px,#211c22 18px)}.pipe-piece{overflow:hidden;border-radius:0}
+.pipe-coordinate{font:10px Georgia,serif;position:absolute;left:5px;top:5px;color:#c9b795;z-index:2}.pipe-glyph{display:block;width:100%;height:100%;transition:transform .12s ease-out;transform-origin:50% 50%;transform-box:view-box;pointer-events:none}.pipe-shadow{stroke:#08070a;stroke-width:24}.pipe-metal{stroke:#ac7848;stroke-width:16}.pipe-core{stroke:#ddb57c;stroke-width:5}.flowing .pipe-metal{stroke:#c3a866}.flowing .pipe-core{stroke:#b9eeed;stroke-width:6;filter:drop-shadow(0 0 3px #69d4d0)}.pipe-terminal-mark{fill:#171318;stroke:#d2b77f;stroke-width:3}.flowing .pipe-terminal-mark{fill:#336365}.pipe-terminal strong{position:absolute;top:7px;left:7px;font-size:13px;color:#edd9b7}.pipe-terminal-status{position:absolute;bottom:7px;left:7px;font-size:10px;color:#cfb994}.pipe-connected{position:absolute;right:4px;bottom:5px;color:#b9eeed;font-size:10px;padding:2px 3px;background:#132328e8}.pipe-connected[hidden]{display:none}.pipe-piece:focus-visible{outline:3px solid #f0d49e;outline-offset:-4px;z-index:2}.pipe-piece:hover{background:#463127}.pipe-legend{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:#c6b5a0}.pipe-legend span:first-child{color:#b9eeed}.pipe-explanation,.pipe-keyboard,.pipe-hint{font-size:12px;color:#c6b5a0;line-height:1.9}.pipe-keyboard{color:#aa9d8e}.pipe-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pipe-actions .secondary-button{font-size:12px;letter-spacing:0;padding:10px 5px}.pipe-hint:empty{display:none}
 .rune-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px auto;max-width:440px}
 .rune-key{aspect-ratio:1;min-height:56px;border:1px solid #ad8e6570;background:#201a22;display:grid;place-items:center;color:#c1a982;font-size:38px;transition:background .08s,box-shadow .08s}
 .rune-key.illuminated{background:#a65360;box-shadow:0 0 30px #cf758999;color:#fff;border-color:#ffc9d4}
@@ -27,16 +27,16 @@
 .hotspot{touch-action:manipulation}
 .hotspot:active{background:#754950;box-shadow:0 0 0 10px #c3ac8033}
 @media (max-width:640px){
- .challenge-help{font-size:12px}
+ .challenge-help{font-size:14px}
  .tile-board,.pipes-board,.reflection-board{width:min(100%,315px)}
- .pipe-piece{font-size:45px;min-height:58px}
+ .pipe-terminal strong{font-size:12px}.pipe-actions{gap:6px}.pipe-actions .secondary-button{font-size:11px}
  .rune-key{min-height:56px;font-size:29px}
  .memory-card{min-height:57px;font-size:26px}
  .reflection-cell{min-height:55px}
  .ending-art{background-position:center 30%}
 }
 @media(prefers-reduced-motion:reduce){
- .pipe-piece>span,.picture-tile,.rune-key{transition:none}
+ .pipe-glyph,.picture-tile,.rune-key{transition:none}
 }
 /* Preserve WCAG contrast in the game footer on dark backgrounds. */
 footer>span:nth-child(2){color:#b9ada2}

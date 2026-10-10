@@ -1,11 +1,12 @@
 // Optional mastered MP3s with an instant, offline WebAudio orchestral fallback.
-const files={
+export const soundtrackFiles={
  home:'00_title_The_Mirror_Lied_First.mp3',library:'01_library_Black_Bell_Archive.mp3',
  mine:'02_mine_Seven_Forgotten_Names.mp3',crypt:'03_crypt_Glass_Sleep.mp3',
  queen:'04_queen_The_Queens_Lament.mp3',mirror:'05_mirror_A_Name_for_a_Life.mp3',
  dawn:'06_dawn_Nameless_Dawn.mp3',frost:'07_frost_Winter_Without_Names.mp3',
  crown:'08_crown_Crown_of_Blood.mp3'
 };
+const files=soundtrackFiles;
 const themes={
  home:{bass:55,notes:[0,3,7,3,10,7,3,0],rate:740,wave:'triangle'},
  library:{bass:65.4,notes:[0,1,7,6,3,1,0,-2],rate:620,wave:'sine'},
@@ -41,6 +42,7 @@ export function createSoundtrack(){
  const stopClip=()=>{if(clip){clip.pause();clip.src='';clip=null;}};
  const changeDrone=()=>{
   if(!ctx||!master)return;
+  master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(.20,ctx.currentTime);
   if(drone){try{drone.stop();}catch{}drone.disconnect();droneGain.disconnect();}
   const t=themes[scene]||themes.home;
   drone=ctx.createOscillator();droneGain=ctx.createGain();
@@ -54,11 +56,11 @@ export function createSoundtrack(){
   clip=player;player.loop=true;player.preload='auto';player.volume=0;
   player.addEventListener('canplay',()=>{
    if(!active||id!==generation||clip!==player)return;
-   player.play().then(()=>{player.dataset.ready='yes';const start=performance.now();
+   player.play().then(()=>{if(!active||id!==generation||clip!==player){player.pause();return;}player.dataset.ready='yes';master.gain.setTargetAtTime(0,ctx.currentTime,.12);const start=performance.now();
     const fade=()=>{if(!active||clip!==player)return;player.volume=Math.min(.36,(performance.now()-start)/1000*.36);if(player.volume<.36)requestAnimationFrame(fade);};fade();
    }).catch(()=>{});
   },{once:true});
-  player.addEventListener('error',()=>{if(clip===player){clip=null;}},{once:true});
+  player.addEventListener('error',()=>{if(clip===player){clip=null;if(active&&ctx&&master){master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(.20,ctx.currentTime);}}},{once:true});
   player.load();
  };
  const start=async(current)=>{
@@ -75,5 +77,6 @@ export function createSoundtrack(){
  };
  const stop=()=>{active=false;generation++;stopClip();clearInterval(interval);interval=null;
   if(drone){try{drone.stop();}catch{}drone.disconnect();droneGain.disconnect();drone=null;}ctx?.suspend().catch(()=>{});};
- return {start,select,stop};
+ const getStatus=()=>({scene,active,source:active?(clip?.dataset.ready==='yes'?'mp3':'synth'):'silent',currentTime:clip?.currentTime||0,loop:clip?.loop||false,synthGain:master?.gain.value??0});
+ return {start,select,stop,getStatus};
 }
