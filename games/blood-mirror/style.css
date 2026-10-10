@@ -22,3 +22,19 @@ body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{anim
 .journey-guide{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:-6px 0 22px;padding:14px 18px;border-left:2px solid var(--gold);background:#c3ac8009}.journey-guide>div{min-width:0}.journey-guide h2{font:500 12px/1.6 var(--sans);color:var(--gold);margin:0 0 4px}.journey-guide p{font-size:13px;margin:0;color:var(--muted);overflow-wrap:anywhere}.journey-guide button{flex-shrink:0;margin:0;min-height:44px;font-size:13px;padding:8px 14px;border:1px solid var(--line);border-radius:5px}
 .journal-controls label{display:block;margin-bottom:8px;color:var(--gold);font-size:13px}.journal-controls select{width:100%;min-height:48px;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:5px;font:inherit}.journal-controls select:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.journal-chapter>h3{font:400 17px/1.8 var(--serif);color:var(--gold);margin:22px 0 12px}.journal-entry h4{font:500 15px/1.8 var(--sans);margin:0 0 8px}.large-text .journey-guide p,.large-text .resume-card p{font-size:17px}
 @media(max-width:600px){.resume-card{margin:24px 16px 0;padding:20px;flex-direction:column;align-items:stretch;gap:12px}.resume-card h2{font-size:21px}.resume-card button{width:100%}.journey-guide{padding:12px 14px;flex-direction:column;align-items:stretch;gap:10px}.journey-guide button{align-self:flex-start;max-width:100%;white-space:normal;text-align:left}.journey-guide p{font-size:13px}}
+/* M2: scene consequences — solved seal, damaged evidence, newly revealed spot */
+.hotspot.seal.solved{border-color:#c3ac8099;color:#e9d7b0;box-shadow:0 0 0 6px #c3ac8014}
+.hotspot.damaged:not(.seen){border-style:dashed}
+.hotspot.damaged.seen{border-style:dashed;border-color:#d4b783aa}
+.hotspot.revealed{border-color:#eed8a3;color:#f4e3bd}
+.hotspot.revealed:not(.seen){animation:spot-reveal 1.6s ease-out 1}
+@keyframes spot-reveal{from{opacity:0;transform:translate(-50%,-50%) scale(.4);box-shadow:0 0 0 0 #eed8a300}60%{opacity:1;box-shadow:0 0 0 22px #eed8a322}to{transform:translate(-50%,-50%) scale(1)}}
+@media(prefers-reduced-motion:reduce){.hotspot.revealed{animation:none}}
+/* Solo playtest log (settings) */
+.settings-hint{display:block;font-size:.78em;color:var(--muted);margin-top:2px}
+.playlog-panel{margin:4px 0 14px;padding:10px 12px;border:1px solid var(--line);background:#0d0b0d}
+.playlog-table{width:100%;border-collapse:collapse;font-size:13px}
+.playlog-table th,.playlog-table td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}
+.playlog-table th{color:var(--gold);font-weight:400;letter-spacing:1px}
+.playlog-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.playlog-actions button{flex:1 1 auto;min-height:44px}

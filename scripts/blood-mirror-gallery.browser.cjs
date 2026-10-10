@@ -10,7 +10,7 @@ const origin='http://127.0.0.1:4173',root=require('node:path').resolve(__dirname
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:850},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/games/blood-mirror/play/');
-   await page.locator('.gallery-invite button').click();assert.equal(await page.locator('[data-artwork]').count(),6);assert.equal(await page.locator('.artwork-locked').count(),6);
+   await page.locator('.gallery-invite button').click();assert.equal(await page.locator('[data-artwork]').count(),7);assert.equal(await page.locator('.artwork-locked').count(),6);
    assert.equal(await page.locator('#gallery img[src*="endings"]').count(),0);
    await page.locator('[data-gallery-filter="scene"]').click();assert.equal(await page.locator('[data-artwork]').count(),5);
    await page.locator('[data-artwork="library"]').click();await page.locator('.artwork-preview img').evaluate(img=>img.decode());

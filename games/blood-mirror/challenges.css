@@ -47,3 +47,25 @@ footer>span:nth-child(2){color:#b9ada2}
 .scene-caption{z-index:2}
 #hotspots{position:absolute;inset:0;z-index:50;pointer-events:auto}
 #hotspots .hotspot{pointer-events:auto;z-index:51}
+/* Black Bell Archive: torn birth record (typeset SVG, see ledger.js) */
+.ledger{display:block;width:100%;height:100%}
+.ledger-tile{padding:0;background:#d6c39b;overflow:hidden;filter:none}
+.ledger-tile.placed{border-color:#d9bf8a99}
+.ledger-tile.selected{filter:brightness(1.12)}
+.ledger-paper{fill:#d8c59c}
+.ledger-stain{fill:#8a6a3a;opacity:.13}
+.ledger-frame{fill:none;stroke:#5b4128;stroke-width:2}
+.ledger-frame.thin{stroke-width:.8;opacity:.7}
+.ledger-rule{stroke:#5b4128;stroke-width:.8;opacity:.6}
+.ledger text{font-family:var(--serif);fill:#2e2016}
+.ledger-title{font-size:23px;font-weight:700;letter-spacing:3px}
+.ledger-small{font-size:12px;letter-spacing:1px}
+.ledger-line{font-size:17px;letter-spacing:2px}
+.ledger .ledger-number{font-size:34px;font-weight:700;fill:#7a1f28;letter-spacing:2px}
+.ledger-mark{font-size:11px;opacity:.75}
+.ledger-blot{fill:#140d0b;opacity:.88}
+.ledger-seal{fill:#7a1f28}
+.ledger .ledger-seal-mark{fill:#e9c9a6;font-size:20px}
+.ledger-figure{width:min(100%,300px);margin:4px auto 14px;border:1px solid #b59c6c88;box-shadow:0 12px 38px #0007}
+.rune-carving{margin:4px 0 12px;padding:8px 12px;border:1px dashed #b59c6c88;color:#e7d6b3;text-align:center;letter-spacing:1px}
+.memory-fragments{margin:6px 0 0;padding-left:20px;color:#e7d6b3;line-height:1.7}

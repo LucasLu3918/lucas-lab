@@ -1,8 +1,15 @@
 import {analyzePipes,pipePorts,initialPipeRotations} from '../games/blood-mirror/pipes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {ledgerTile,ledgerMarkup,ledgerPieces} from '../games/blood-mirror/ledger.js';
 import {puzzleIsSolved,pipeIsSolved,glassIsSolved,resetChallenges,isChallengeComplete} from '../games/blood-mirror/challenges.js';
-test('3x3 portrait puzzle requires every piece in the right place',()=>{
+test('ledger pieces are distinct crops of one typeset page',()=>{
+ const boxes=ledgerPieces.map((_,i)=>ledgerTile(i).match(/viewBox="([^"]+)"/)[1]);
+ assert.equal(new Set(boxes).size,9);assert.equal(boxes[0],'0 0 100 100');assert.equal(boxes[8],'200 200 100 100');
+ for(const bad of [-1,9,1.5,'x',null])assert.equal(ledgerTile(bad),'');
+ assert.match(ledgerMarkup(),/七十三/);assert.match(ledgerMarkup(),/aria-label/);
+});
+test('3x3 ledger puzzle requires every piece in the right place',()=>{
  assert.equal(puzzleIsSolved([0,1,2,3,4,5,6,7,8]),true);
  assert.equal(puzzleIsSolved([0,2,1,3,4,5,6,7,8]),false);
  assert.equal(puzzleIsSolved([0,1]),false);
