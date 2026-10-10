@@ -1,8 +1,8 @@
 # 《白雪公主：血色魔鏡》漸進改善路線
 
-日期：2026-10-10。狀態：M1 已驗證並以 `7359fc1` 推送遠端 main；後續項目為提案，尚未完成。
+日期：2026-10-10。狀態：M1 已驗證並以 `7359fc1` 推送遠端 main；M2 黑鐘書庫樣板與 M3 五幕推廣（含單人遊玩保障與本機試玩紀錄）已實作並通過自動驗證，待真人或單人自測；M4 之後仍為提案。
 
-完整後續方向與建議順序見 [BLOOD_MIRROR_OPTIMIZATION_PLAN.md](BLOOD_MIRROR_OPTIMIZATION_PLAN.md)。本文件保留 M1 邊界與里程碑記錄。
+完整後續方向與建議順序見 [BLOOD_MIRROR_OPTIMIZATION_PLAN.md](BLOOD_MIRROR_OPTIMIZATION_PLAN.md)。本文件保留 M1 邊界與里程碑記錄。M2 黑鐘書庫樣板的工作卡見 [BLOOD_MIRROR_M2_LIBRARY_PLAN.md](BLOOD_MIRROR_M2_LIBRARY_PLAN.md)。
 
 ## 方向與範圍
 

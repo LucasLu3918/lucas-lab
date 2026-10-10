@@ -26,7 +26,9 @@
     "controls": "44px minimum target; consistent border radius",
     "gallery": "contain original images; keyboard stays in dialog",
     "preferences": "optional local large text/reduced motion; separate from story save",
-    "steam_pipe_challenge": "True reciprocal-port source-to-city graph, 180-degree straight equivalence, live flow/status, explicit supply confirmation, session attempt, undo/reset/hints and keyboard navigation"
+    "steam_pipe_challenge": "True reciprocal-port source-to-city graph, 180-degree straight equivalence, live flow/status, explicit supply confirmation, session attempt, undo/reset/hints and keyboard navigation",
+    "evidence_ledger": "Black Bell Archive evidence restoration: typeset SVG parchment (ledger.js) cropped into 9 tiles; paper #d8c59c, ink #2e2016, frame #5b4128, key figure and wax seal #7a1f28; text is live SVG text in --serif, never baked into images; placed pieces gain a gold border and the status line counts placed pieces",
+    "hotspot_states": "unseen: gold ring + glow; seen: ✓ badge, no glow; damaged evidence: dashed ring; seal: red ring; solved seal: muted gold ring; revealed (after:'solved'): bright gold ring with a one-time scale-in that is disabled under reduced motion"
   },
   "required_viewports": [
     360,
@@ -41,7 +43,8 @@
     "story text expands for largeText",
     "OS reduced motion respected",
     "continue journey is primary when save exists",
-    "Steam flow conveyed by both color and ◆ 通汽 label; fixed endpoints visible"
+    "Steam flow conveyed by both color and ◆ 通汽 label; fixed endpoints visible",
+    "Hotspot state is conveyed by ring style and badge plus the clue-list label (探索／已查看／待修復／已修復／已收取／封印已解), never by color alone"
   ],
   "validation": [
     "scripts/blood-mirror-ui.browser.cjs",

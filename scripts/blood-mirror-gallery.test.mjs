@@ -10,7 +10,7 @@ test('every game image is catalogued with a valid local file and unique id',()=>
 test('only discovered endings are visible and categories retain the archive',()=>{
  const cg=filterArtwork('ending');assert.equal(cg.length,3);
  for(const asset of cg){assert.equal(canViewArtwork(asset),false);assert.equal(canViewArtwork(asset,[asset.ending]),true);assert.equal(canViewArtwork(asset,['other']),false);}
- assert.equal(filterArtwork('scene').length,5);assert.equal(filterArtwork('all').length,12);
+ assert.equal(filterArtwork('scene').length,5);assert.equal(filterArtwork('all').length,13);
  assert.equal(filterArtwork('concept').length,3);assert.ok(filterArtwork('character').every(a=>canViewArtwork(a)));
 });
 
