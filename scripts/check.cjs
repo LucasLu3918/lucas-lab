@@ -165,7 +165,7 @@
    assert.ok(fs.existsSync(target),'broken game asset/link '+href);
   }
   const gameSource=path.join(root,'games',g.slug);
-  for(const file of ['app.js','engine.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
+  for(const file of ['app.js','engine.js','journey.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
    assert.ok(fs.readFileSync(path.join(gameSource,file)).equals(fs.readFileSync(path.join(dist,play,file))),'game source/output mismatch: '+file);
   }
   assert.ok(!fs.readFileSync(path.join(gameSource,'style.css'),'utf8').includes('fonts.googleapis'),'game must use local fonts');
