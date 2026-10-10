@@ -129,6 +129,8 @@ docs/                內容與技術規範
 
 ## 第一款可遊玩遊戲：血色魔鏡（2026-10-10）
 
+後續完整優化方向見 [血色魔鏡優化計畫](docs/design/BLOOD_MIRROR_OPTIMIZATION_PLAN.md)，涵蓋玩法、劇情與重玩、UI、美術、聲音、存檔、效能、架構及驗收；目前僅規劃，未實作後續功能。第一批回訪體驗的邊界與驗證記錄見 [漸進改善路線](docs/design/BLOOD_MIRROR_ROADMAP.md)。
+
 - `/games/`：完成遊戲優先展示；概念作品維持原有標籤。
 - `/games/blood-mirror/`：作品介紹、內容提示、原著連結與開始遊戲。
 - `/games/blood-mirror/play/`：五幕密室、道具／筆記／分層提示、自動存檔與三種結局。
