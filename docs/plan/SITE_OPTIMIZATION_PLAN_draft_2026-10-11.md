@@ -246,3 +246,17 @@
 - 項目 14：iOS Safari 與 Android Chrome 真機驗收（加入主畫面、離線保存、遊戲音樂與觸控）。
 - 項目 15：`docs/IMPLEMENTATION.md` 目前有未提交的修改（移除了「站點優化」段落），是否保留請你決定。
 - SW 更新提示（banner）目前只在真實部署的兩個版本之間才會出現，本機測試未覆蓋。
+
+### 第二輪核對（2026-10-11）
+
+逐項對照程式碼與建置輸出後，剩餘事項如下。`npm run check` 本機通過（37 項單元測試、143 頁、所有站點檢查）。
+
+| 項目 | 狀態 | 仍未完成的部分與原因 |
+| --- | --- | --- |
+| 04 快取 | 部分完成 | `/static/<hash>/` 指紋 CSS／JS 已存在並以 `immutable` 快取。圖片（`/assets/images/*`）仍為 7 天快取，未改 `immutable`：檔名不含內容 hash，替換圖片後舊版會在快取中留到一年。改為 `immutable` 需要先建立圖片 hash 清單與檢查，待決定是否接受這個工作量 |
+| 15 文件 | 部分完成 | 本輪已修正 `UI_COVER_PLAN.md` 的後續建議（閱讀進度已完成，改列真機驗收）。`docs/IMPLEMENTATION.md` 仍寫「藝廊：CSS/符號視覺佔位」與「後續階段」，但該檔有使用者未提交的修改，本輪未動，需使用者決定是否保留 |
+| 14 預算 | 部分完成 | 預算以 Playwright 實作，未引入 Lighthouse（已記錄的偏離）。iOS Safari、Android Chrome 真機驗收需要使用者執行 |
+| 09 統計 | 待使用者 | 需在 Cloudflare Dashboard 建立 Web Analytics 網站，並於 Workers Builds 設定 `CF_ANALYTICS_TOKEN` |
+| SW banner | 測試缺口 | 本機無法同時提供兩個已部署版本；需另行設計測試方式 |
+
+未在本輪處理的其他事項：`docs/plan/DOCS_CLEANUP_PLAN.md` 的兩個舊 worktree 移除（權限檢查拒絕，需使用者決定）；Blood Mirror 的 M2 項目 13、14、16（正式美術與配樂，需要素材）、18 與 M6（實機）、20（模組化，計畫明定等分支需求確定後再做）、21（真人試玩）。這些都需要使用者提供資料、素材或裝置，無法由程式碼單獨完成。
