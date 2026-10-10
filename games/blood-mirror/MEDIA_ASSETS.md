@@ -69,7 +69,7 @@ node scripts/blood-mirror.browser.cjs
 ## 本輪原始素材來源與限制
 
 - 使用者提供完整試聽包 ZIP：音樂檔案原樣保留；曲目資訊見 `assets/music/playlist.json`，原始音源授權說明見 `assets/music/SOURCE_NOTES.md`。說明記載 TimGM6mb.sf2 與 GPL-2，公開散布前仍須確認對錄音輸出的適用義務；本輪只做本機整合，未部署。
-- 使用者分享 https://chatgpt.com/s/m_6ac9c03669708191a3bb0e3a547573be ：四張 PNG 原檔，三張完整展板存於 `assets/concepts/`，茶館黎明原畫存於 `assets/endings/dawn.png`；未從展板裁切圖片冒充完整 CG。展板文字為設計提案，不代表遊戲已具備其中所有玩法。
+- 使用者分享 https://chatgpt.com/s/m_6ac9c03669708191a3bb0e3a547573be ：四張 PNG 原檔，三張完整展板存於 `source-art/concepts/`，茶館黎明原畫存於 `source-art/endings/dawn.png`；未從展板裁切圖片冒充完整 CG。展板文字為設計提案，不代表遊戲已具備其中所有玩法。
 - MP3 載入成功後淡出備援合成音，避免持續低音重疊；背景／靜音仍停止播放。尚未重新母帶製作或保證試聽檔的無縫循環。
 
 ## 概念素材的遊戲內使用
@@ -103,6 +103,7 @@ node scripts/blood-mirror.browser.cjs
 
 - 場景與白雪立繪 WebP 以 `cwebp` 重新壓縮（場景 `-q 72`，立繪 `-q 80`），尺寸不變；每張場景由約 380 KB 降至約 180–225 KB。來源版本仍可由 git 歷史取回。
 - 概念展板 `design-board-4` 補上 WebP 衍生檔（與 1、3 相同來源 PNG）。
-- 原始 PNG 保留在 repo 作為來源；建置時若存在同名 WebP，PNG 不會發布到 `dist/`。`scripts/site/games.cjs` 負責此規則，`scripts/check.cjs` 會確認輸出中沒有 PNG。
+- 原始 PNG 移到 `games/blood-mirror/source-art/`（`concepts/` 與 `endings/`），不在 `assets/` 內，因此建置的複製步驟不會發布它們；`scripts/check.cjs` 會確認 `dist/` 中沒有 PNG 點陣素材。原檔仍受版本控制，不做修改。
 - `dawn.png` 同樣只保留為來源，結局插畫實際使用 `dawn.webp`。
+- 原始 PNG 路徑：`source-art/concepts/design-board-{1,3,4}.png`、`source-art/endings/dawn.png`；`scripts/blood-mirror-concept.test.mjs` 以此路徑比對 WebP 尺寸。
 

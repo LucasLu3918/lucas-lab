@@ -1,6 +1,6 @@
 # 《血色魔鏡》M2 黑鐘書庫樣板：實作規劃
 
-日期：2026-10-10｜狀態：WC-01–WC-08 已實作並通過自動驗證；真人試玩尚未進行｜上層文件：[BLOOD_MIRROR_ROADMAP.md](BLOOD_MIRROR_ROADMAP.md)、[BLOOD_MIRROR_OPTIMIZATION_PLAN.md](BLOOD_MIRROR_OPTIMIZATION_PLAN.md)
+日期：2026-10-10｜狀態：WC-01–WC-08 已實作並通過自動驗證；真人試玩尚未進行｜上層文件：[BLOOD_MIRROR_ROADMAP.md](../design/BLOOD_MIRROR_ROADMAP.md)、[BLOOD_MIRROR_OPTIMIZATION_PLAN.md](../design/BLOOD_MIRROR_OPTIMIZATION_PLAN.md)
 
 依優化方案「建議批次」第 1–2 批，本文件把**建立基準（01、13、21）**與**黑鐘書庫樣板（02、03、04、07、12、14、15、16，同步 18、19）**拆成可驗收的工作卡。第一幕驗收通過後，才依「後續推廣」一節擴到其餘四幕（M3）。
 
@@ -114,7 +114,7 @@ WC-01、WC-02（可同時進行）→ WC-03 → WC-04 → WC-05 → WC-06 → WC
 | Q1 | 序章是否可以刪除具體數字與「父親的簽名」？ | 同意。序章改以「帳簿的最後幾頁被撕走了」收尾 |
 | Q2 | 肖像拼圖改為出生紀錄碎片，原本的肖像要怎麼處理？ | 依整體規劃安置：移到藝廊「角色」分類的「魔鏡前的公主肖像」（無結局內容，不上鎖） |
 | Q3 | 是否新增「王室契約」道具？ | 新增 `contract` |
-| Q4 | 試玩由誰執行、預計幾場？ | 由實作方設計：新手 3、熟手 2，見 [BLOOD_MIRROR_PLAYTEST_KIT.md](BLOOD_MIRROR_PLAYTEST_KIT.md) |
+| Q4 | 試玩由誰執行、預計幾場？ | 由實作方設計：新手 3、熟手 2，見 [BLOOD_MIRROR_PLAYTEST_KIT.md](../design/BLOOD_MIRROR_PLAYTEST_KIT.md) |
 
 ## 五、實作紀錄（2026-10-10）
 

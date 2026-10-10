@@ -43,6 +43,22 @@ async function verify(){
  assert.ok(css.body.includes('max-width:480px'),'deployed CSS missing mobile rules');
  const home=await get('/');
  assert.ok(/script-src 'self'/.test(home.response.headers.get('content-security-policy')||''),'production Content-Security-Policy header missing');
+ // Hashed site assets are immutable; the offline worker and manifest are revalidated on every visit.
+ const fingerprint=home.body.match(/href="\/?(static\/[^"]+\/style\.css)"/);
+ assert.ok(fingerprint,'home page does not reference a fingerprinted stylesheet');
+ const immutable=await get('/'+fingerprint[1]);
+ assert.match(immutable.response.headers.get('cache-control')||'','immutable','fingerprinted CSS is not immutable');
+ const worker=await get('/sw.js');
+ assert.match(worker.body,/const PRECACHE=\[/,'offline worker missing or not built');
+ assert.equal(worker.response.headers.get('cache-control'),'no-cache','offline worker must be revalidated');
+ const webManifest=await get('/manifest.webmanifest');
+ assert.ok(JSON.parse(webManifest.body).icons?.length>=3,'web manifest icons missing');
+ const offlinePage=await get('/offline/');
+ assert.ok(offlinePage.body.includes('data-offline-list'),'offline fallback page missing');
+ const feed=await get('/journal/feed.xml');
+ assert.ok(feed.body.startsWith('<?xml')&&feed.body.includes('<feed'),'journal feed invalid');
+ const csp=home.response.headers.get('content-security-policy')||'';
+ assert.ok(!csp.includes("'unsafe-inline'"),'production CSP still allows inline styles');
  const sitemap=await get('/sitemap.xml');
  assert.ok(sitemap.body.includes('<urlset')&&!sitemap.body.includes(site+'/search/'),'invalid sitemap');
  const manifest=await get('/_build.json');
