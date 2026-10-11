@@ -6,19 +6,20 @@ import {lullaby} from '../games/blood-mirror/puzzles/musicbox.js';
 import {endings} from '../games/blood-mirror/data/endings.js';
 import {secretEpilogue} from '../games/blood-mirror/data/secret-epilogue.js';
 
-const mirror=rooms[4];
+const at=id=>rooms.findIndex(room=>room.id===id);
+const mirror=rooms[at('mirror')];
 const spec=mirror.interrogation;
 const correct=[...mirror.answer];
 
 // Solves the first four acts (queen answered with the given reply) and stands in the mirror act.
-function reachMirror(queenAnswer=rooms[3].answer){
+function reachMirror(queenAnswer=rooms[at('queen')].answer){
  const s=initialState();s.started=true;
- for(let i=0;i<4;i++){
+ for(let i=0;i<at('mirror');i++){
   travel(s,i);const r=rooms[i];
   if(r.requires){const spot=r.spots.find(p=>p.item===r.requires);inspect(s,spot.id);collect(s,spot.id);}
-  solve(s,i===3?queenAnswer:r.answer);
+  solve(s,r.id==='queen'?queenAnswer:r.answer);
  }
- travel(s,4);
+ travel(s,at('mirror'));
  return s;
 }
 
@@ -47,13 +48,13 @@ test('a duplicated word cannot fill both rejected blanks',()=>{
 test('wrong seals count as misses, and only the full statement opens the mirror',()=>{
  const s=reachMirror();
  const one=[...correct];one[3]='throne';
- assert.equal(solve(s,one).ok,false);assert.equal(s.misses[4],1);
- assert.equal(s.solved.includes(4),false);
- assert.equal(solve(s,correct).ok,true);assert.ok(s.solved.includes(4));
+ assert.equal(solve(s,one).ok,false);assert.equal(s.misses[at('mirror')],1);
+ assert.equal(s.solved.includes(at('mirror')),false);
+ assert.equal(solve(s,correct).ok,true);assert.ok(s.solved.includes(at('mirror')));
 });
 
 test('the clue notebook fills from the scene; the heir word waits for the restored manuscript',()=>{
- const s=initialState();s.room=4;
+ const s=initialState();s.room=at('mirror');
  inspect(s,'witness');
  assert.deepEqual([...s.clues].sort(),['blood','forgotten']);
  assert.equal(s.clues.includes('heir'),false);
@@ -92,7 +93,7 @@ test('judgement feedback names only a count, never a blank',()=>{
 });
 
 test('shards are collected once, persist into a new journey, and never enter the notebook',()=>{
- const s=initialState();s.room=4;
+ const s=initialState();s.room=at('mirror');
  inspect(s,'shard-mirror');inspect(s,'shard-mirror');
  assert.deepEqual(s.shards,['shard-mirror']);
  assert.deepEqual(s.clues,[]);
@@ -110,19 +111,19 @@ test('every act ships one shard, and the prologue adds one more',()=>{
 
 test('new save fields round trip, and saves without them restore to empty collections',()=>{
  const s=reachMirror();
- s.clues=['blood'];s.shards=['shard-mirror'];s.achievements=['first-seal'];s.glowRooms=[0];s.misses[4]=2;
+ s.clues=['blood'];s.shards=['shard-mirror'];s.achievements=['first-seal'];s.glowRooms=[0];s.misses[at('mirror')]=2;
  const loaded=fromSaveV2(JSON.parse(JSON.stringify(toSaveV2(s,['prologue','library']))));
  assert.deepEqual(loaded.state.clues,['blood']);
  assert.deepEqual(loaded.state.shards,['shard-mirror']);
  assert.deepEqual(loaded.state.achievements,['first-seal']);
  assert.deepEqual(loaded.state.glowRooms,[0]);
- assert.equal(loaded.state.misses[4],2);
+ assert.equal(loaded.state.misses[at('mirror')],2);
  assert.deepEqual([...loaded.puzzles].sort(),['library','prologue']);
  const legacy=JSON.parse(JSON.stringify(toSaveV2(initialState(),[])));
  for(const key of ['clues','shards','achievements','glowRooms','misses'])delete legacy[key];
  const old=fromSaveV2(legacy).state;
  assert.deepEqual([old.clues,old.shards,old.achievements,old.glowRooms],[[],[],[],[]]);
- assert.equal(old.misses[4],0);
+ assert.equal(old.misses[at('mirror')],0);
  assert.deepEqual(parseSave(exportSave(s,['prologue'])).state.shards,['shard-mirror']);
 });
 

@@ -19,9 +19,9 @@ test('v2 saves store chapter ids, not indices, and restore to the same progress'
  const state=progressThrough(2);
  const save=toSaveV2(state,['library']);
  assert.equal(save.version,2);
- assert.equal(save.chapter,'mine');
- assert.deepEqual(save.solved,['library','mine']);
- assert.deepEqual(save.unlocked,['library','mine','crypt']);
+ assert.equal(save.chapter,'ballroom');
+ assert.deepEqual(save.solved,['library','ballroom']);
+ assert.deepEqual(save.unlocked,['library','ballroom','hunter']);
  assert.deepEqual(save.puzzles,['library']);
  const loaded=fromSaveV2(JSON.parse(JSON.stringify(save)));
  assert.deepEqual(loaded.state.solved,[0,1]);
@@ -34,7 +34,8 @@ test('v2 loading drops unknown chapters and cannot skip a chapter',()=>{
  const loaded=fromSaveV2({version:2,chapter:'nowhere',solved:['library','queen'],unlocked:['library','ghost'],puzzles:['library','ghost','library']});
  assert.deepEqual(loaded.state.solved,[0]);
  assert.equal(loaded.state.room,0);
- assert.equal(loaded.state.unlocked,1);
+ // Library cleared, queen claimed: the two catch-up acts may stay open, the mine is the next real step.
+ assert.equal(loaded.state.unlocked,rooms.findIndex(room=>room.id==='mine'));
  assert.deepEqual(loaded.puzzles,['library']);
  assert.equal(fromSaveV2({version:1}),null);
  assert.equal(fromSaveV2(null),null);
@@ -52,12 +53,15 @@ test('loadSave prefers the current v2 key and writes it back on the next save',(
 });
 
 test('v1 browser saves migrate once and keep their original keys as a fallback',()=>{
- const legacy=progressThrough(2);
- const store=storage({[LEGACY_SAVE_KEY]:JSON.stringify({...legacy,version:1}),[LEGACY_PUZZLE_KEY]:JSON.stringify(['library','bogus'])});
+ // A real v1 save counts the five original acts: 0 library, 1 mine. The mine has since moved to index 3.
+ const legacy={version:1,started:true,room:1,solved:[0,1],inventory:['watch','valve'],seen:[],hints:{1:2},misses:{},endings:[]};
+ const store=storage({[LEGACY_SAVE_KEY]:JSON.stringify(legacy),[LEGACY_PUZZLE_KEY]:JSON.stringify(['library','bogus'])});
  const loaded=loadSave(store);
+ const mine=rooms.findIndex(room=>room.id==='mine');
  assert.equal(loaded.migrated,true);
- assert.deepEqual(loaded.state.solved,[0,1]);
- assert.equal(loaded.state.room,1);
+ assert.deepEqual(loaded.state.solved,[0,mine],'the two new acts stay open to catch up on');
+ assert.equal(loaded.state.room,mine);
+ assert.equal(loaded.state.hints[mine],2,'per-act values follow the act, not the old index');
  assert.deepEqual(loaded.puzzles,['library']);
  assert.equal(store.has(LEGACY_SAVE_KEY),true,'v1 key must not be deleted');
  assert.equal(store.has(LEGACY_PUZZLE_KEY),true,'v1 puzzle key must not be deleted');

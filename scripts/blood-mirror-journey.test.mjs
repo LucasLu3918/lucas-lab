@@ -8,9 +8,10 @@ test('guidance distinguishes viewing from collecting and does not reveal answers
  assert.equal(journeyGuide(state).next.spot,'watch');
  inspect(state,'watch');assert.match(journeyGuide(state).next.text,/還未收取/);
  collect(state,'watch');assert.equal(journeyGuide(state).next.spot,'bells');
- inspect(state,'bells');inspect(state,'birth');
+ const explorable=rooms[0].spots.filter(spot=>!spot.lock&&!spot.after&&!spot.memory&&!spot.shard);
+ for(const spot of explorable)inspect(state,spot.id);
  assert.equal(journeyGuide(state).next.spot,'birth');assert.equal(journeyGuide(state).next.label,'拼回帳頁');
- assert.equal(journeyGuide(state).discovered,3);assert.equal(journeyGuide(state).total,3);
+ assert.equal(journeyGuide(state).discovered,explorable.length);assert.equal(journeyGuide(state).total,explorable.length);
  assert.equal(journeyGuide(state,true).next.kind,'puzzle');assert.equal(journeyGuide(state,true).next.label,'解開封印');
  assert.ok(!journeyGuide(state,true).next.text.includes(rooms[0].answer));
  const before=JSON.stringify(state);journeyGuide(state);journalChapters(state);assert.equal(JSON.stringify(state),before);
@@ -20,8 +21,7 @@ test('old saves resume solved chapters, missing items and the final choice corre
  const state=initialState();collect(state,'watch');solve(state,rooms[0].answer);
  let restored=restoreState(JSON.stringify(state));assert.equal(journeyGuide(restored).next.spot,'contract');
  collect(restored,'contract');assert.equal(journeyGuide(restored).next.room,1);
- travel(restored,1);assert.equal(journeyGuide(restored).next.spot,'valve');
- for(let i=1;i<rooms.length;i++){travel(restored,i);const room=rooms[i];if(room.requires)collect(restored,room.spots.find(spot=>spot.item===room.requires).id);solve(restored,room.answer);}
+ for(let i=1;i<rooms.length;i++){travel(restored,i);const room=rooms[i];if(room.id==='mine')assert.equal(journeyGuide(restored).next.spot,'valve');if(room.requires)collect(restored,room.spots.find(spot=>spot.item===room.requires).id);solve(restored,room.answer);}
  assert.equal(journeyGuide(restored).next.kind,'fate');
  chooseEnding(restored,'dawn');assert.equal(journeyGuide(restored).next.kind,'ending');
  assert.equal(journeyGuide(restored).endingTitle,'春天沒有記住她');
@@ -54,7 +54,7 @@ test('the opened seal reveals the contract and the father signature only afterwa
  assert.ok(!rooms[0].unlock.includes('父親'));
  collect(state,'watch');solve(state,rooms[0].answer);
  assert.ok(visibleSpots(state).some(spot=>spot.id==='contract'));
- assert.equal(journeyGuide(state).total,4);
+ assert.equal(journeyGuide(state).total,rooms[0].spots.filter(spot=>!spot.lock&&!spot.memory&&!spot.shard).length);
  assert.equal(journeyGuide(state).next.spot,'contract');
  inspect(state,'contract');assert.match(journeyGuide(state).next.text,/還未收取/);
  assert.equal(collect(state,'contract'),true);assert.ok(state.inventory.includes('contract'));

@@ -19,7 +19,7 @@ const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
     await wait(()=>soundtrack.getStatus().source==='mp3'&&soundtrack.getStatus().currentTime>0);
     const player=players.at(-1);await new Promise(r=>setTimeout(r,650));
     const status=soundtrack.getStatus();if(status.synthGain>.001)throw Error('synth did not fade out');
-    if(!player.loop||player.duration<30||player.duration>40)throw Error('invalid preview duration '+player.duration);
+    if(!player.loop||player.duration<30||player.duration>160)throw Error('invalid preview duration '+player.duration);
     player.currentTime=player.duration-.15;await wait(()=>player.currentTime<2);
     await new Promise(r=>setTimeout(r,1700));// the previous track cross-fades out over 1.5 s
     if(players.slice(0,-1).some(p=>!p.paused))throw Error('previous track still playing');
@@ -27,9 +27,9 @@ const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
    }
    soundtrack.stop();if(players.some(p=>!p.paused)||soundtrack.getStatus().active)throw Error('audio did not stop');
    window.Audio=NativeAudio;return results;
-  });console.log('✓ All nine MP3s decode, loop and switch without synth overlap:',JSON.stringify(result));
+  });console.log('✓ All scene MP3s decode, loop and switch without synth overlap:',JSON.stringify(result));
   await page.locator('.gallery-invite button').click();await page.locator('#gallery-listening summary').click();
-  assert.equal(await page.locator('#gallery-track option').count(),7); // 6 scene tracks + compilation; endings stay hidden.
+  assert.equal(await page.locator('#gallery-track option').count(),9); // 8 scene tracks + compilation; endings stay hidden.
   await page.locator('#gallery-track').selectOption('assets/music/11_theme_full_Who_Deserves_to_Live.mp3');
   await page.locator('#gallery-audio').evaluate(a=>a.play());await page.waitForFunction(()=>document.querySelector('#gallery-audio').currentTime>0);
   await page.locator('#sound').click();assert.ok(await page.locator('#gallery-audio').evaluate(a=>a.paused));

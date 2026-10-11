@@ -131,8 +131,8 @@ body.reduce-motion .chapter-opening{animation:none}
  .tray{left:auto;right:24px;bottom:24px;width:390px;padding:12px 14px;border:1px solid var(--stage-line);border-radius:6px;background:var(--stage-panel)}
  .tray .inventory{flex-wrap:wrap;overflow:visible}
  .tray .inventory button{flex:0 0 auto}
- #room-tabs{display:flex;position:absolute;left:24px;top:calc(env(safe-area-inset-top,0px) + 128px);z-index:4;gap:6px;flex-wrap:wrap;max-width:min(520px,calc(100vw - 480px))}
- #room-tabs button{min-height:36px;padding:4px 10px;border:1px solid var(--stage-line);border-radius:2px;background:rgba(16,15,16,.7);font-size:12px;color:var(--stage-muted)}
+ #room-tabs{display:flex;position:absolute;left:24px;top:calc(env(safe-area-inset-top,0px) + 128px);z-index:4;gap:6px;flex-wrap:wrap;max-width:min(760px,calc(100vw - 48px));flex-wrap:nowrap}
+ #room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;border:1px solid var(--stage-line);border-radius:2px;background:rgba(16,15,16,.7);font-size:12px;color:var(--stage-muted)}
  #room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
  #room-tabs button:disabled{opacity:.4}
  .journey-guide{left:auto;right:24px;width:360px;top:calc(env(safe-area-inset-top,0px) + 128px)}
@@ -250,3 +250,10 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 @media (max-width:720px){
  .journey-guide{top:calc(env(safe-area-inset-top,0px) + 236px)}
 }
+
+/* Views: arrows on both sides of the scene (the arrow keys switch views too) */
+.view-arrow{position:absolute;top:46%;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid var(--stage-line);background:rgba(16,15,16,.55);color:var(--stage-gold-hi);font:26px/1 Georgia,serif;display:grid;place-items:center;padding:0}
+.view-arrow[hidden]{display:none}
+#view-prev{left:8px}#view-next{right:8px}
+.view-arrow:hover,.view-arrow:focus-visible{background:rgba(16,15,16,.85);border-color:var(--stage-gold-hi)}
+.clue-view{font-style:normal;color:var(--stage-muted);font-size:11px}

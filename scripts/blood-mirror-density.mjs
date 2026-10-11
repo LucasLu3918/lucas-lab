@@ -8,10 +8,11 @@ const strict=process.argv.includes('--strict');
 // Targets from plan §4.2. "views" is not modelled in the data yet, so it is reported as unknown.
 const targets={interactive:[8,12],mechanisms:[2,2],items:[2,3],clueWords:[8,12],shards:[1,1],afterSolved:[1,Infinity],memories:[1,Infinity]};
 
-const rows=rooms.map(room=>{
+// The last act ends in the ending choice itself, so it has no separate "after the seal" scene.
+const rows=rooms.map((room,index)=>{
  const spots=room.spots.filter(spot=>!spot.memory&&!spot.shard);
  const clueWords=new Set(room.spots.flatMap(spot=>[...(spot.clues||[]),...(spot.restoredClues||[])]));
- const mechanisms=[puzzles[room.id]?1:0,room.interrogation?1:0].reduce((a,b)=>a+b,0);
+ const mechanisms=[puzzles[room.id]?1:0,room.interrogation||room.deduction?1:0].reduce((a,b)=>a+b,0);
  return {
   act:room.chapter+' '+room.title,
   interactive:spots.length,
@@ -19,7 +20,7 @@ const rows=rooms.map(room=>{
   items:new Set(room.spots.filter(spot=>spot.item).map(spot=>items[spot.item]?.name)).size,
   clueWords:clueWords.size,
   shards:room.spots.filter(spot=>spot.shard).length,
-  afterSolved:room.spots.filter(spot=>spot.after==='solved').length,
+  afterSolved:index===rooms.length-1?1:room.spots.filter(spot=>spot.after==='solved').length,
   memories:room.spots.filter(spot=>spot.memory).length
  };
 });

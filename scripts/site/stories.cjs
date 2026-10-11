@@ -12,7 +12,7 @@ module.exports=function renderStories(ctx){
    const storyUrl=ext+url('stories/'+s.slug+'/');
    const items=ready?s.chapters.map((c,i)=>`${c.part&&c.part!==s.chapters[i-1]?.part?'<li class="part-heading">'+e(c.part)+'</li>':''}<li data-chapter-id="${e(c.id)}"><a href="${url('stories/'+s.slug+'/chapters/'+c.id+'/')}">${e(c.title)}<span>開始閱讀 ↗</span></a></li>`).join(''):'<li><span>章節內容待匯入與校稿<span>尚未開放</span></span></li>';
    const relatedGame=catalog.games.find(g=>g.status==='playable'&&g.storySlug===s.slug);
-   const gameLink=relatedGame?`<aside class="callout"><div class="eyebrow">PLAY THIS STORY</div><h2>走進故事，解開魔鏡。</h2><p>同名密室逃脫遊戲已可遊玩。探索五幕、蒐集線索，決定白雪的代價。</p><a class="btn" href="${url('games/'+relatedGame.slug+'/')}">探索同名遊戲 ${icon('game')}</a></aside>`:'';
+   const gameLink=relatedGame?`<aside class="callout"><div class="eyebrow">PLAY THIS STORY</div><h2>走進故事，解開魔鏡。</h2><p>同名密室逃脫遊戲已可遊玩。探索七幕、蒐集線索，決定白雪的代價。</p><a class="btn" href="${url('games/'+relatedGame.slug+'/')}">探索同名遊戲 ${icon('game')}</a></aside>`:'';
    // The warning is acknowledged once per work on this device (assets/app.js); after that it collapses to one line.
    const warningText=s.warnings?.length?`內容提示：${e(s.warnings.join('、'))}。${ready?'請評估是否適合閱讀。':'此作品目前尚未開放章節內容。'}`:'';
    const warning=warningText?`<div class="warning content-warning" role="note" data-content-warning="${e(s.slug)}"><div class="warning-text"><span>${warningText}</span><button type="button" class="btn warning-ack" data-warning-ack>我已了解</button></div><p class="warning-acked" hidden>已確認內容提示。</p></div>`:'';

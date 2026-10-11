@@ -1,7 +1,7 @@
-import {rooms,items,endings,visibleSpots,memorySpots,validAnswers} from './engine/index.js';
+import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant} from './engine/index.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
-export function spotText(spot,restored=false){return restored&&spot.restoredText?spot.restoredText:spot.text;}
+export function spotText(spot,restored=false,state=null){return restored&&spot.restoredText?spot.restoredText:(state&&choiceVariant(spot,state))||spot.text;}
 
 export function journeyGuide(state,challengeComplete=false){
  // Optional post-game memories and mirror shards are collectibles: they never count toward
@@ -38,7 +38,7 @@ export function journeyGuide(state,challengeComplete=false){
 }
 
 export function journalChapters(state,isRestored=()=>false){
- return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&!spot.memory&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,room.evidence===spot.id&&isRestored(room.id))}))})).filter(section=>section.index<=state.unlocked);
+ return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&!spot.memory&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,room.evidence===spot.id&&isRestored(room.id),state)}))})).filter(section=>section.index<=state.unlocked);
 }
 
 // Memories persist across journeys; unfound ones only reveal which act holds them.
@@ -64,8 +64,9 @@ export function journeyRecap(state){
  const scenes=rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).filter(spot=>state.seen.includes(spot.id)).length;
  const hints=Object.values(state.hints||{}).reduce((sum,n)=>sum+(Number(n)||0),0);
  const next=missingEndings?'回到最後的選擇，看看另外 '+missingEndings+' 種代價。'
-  :found<memories.length?'重返五幕，還有 '+(memories.length-found)+' 段人物記憶等妳發現：'+memories.filter(m=>!m.found).map(m=>m.chapter).join('、')+'。'
+  :found<memories.length?'重返各幕，還有 '+(memories.length-found)+' 段人物記憶等妳發現：'+memories.filter(m=>!m.found).map(m=>m.chapter).join('、')+'。'
   :'妳已看見這面鏡子裡的全部真相。';
  const answers=validAnswers(state.answers)?echoes[state.ending](state.answers):[];
- return {cause:causes[state.ending](state),answers,scenes,sceneTotal:rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).length,hints,memories:found,memoryTotal:memories.length,next};
+ const choices=Object.entries(choiceDefs).map(([key,def])=>({def,picked:def.options.find(option=>option.id===state.choices?.[key])})).filter(item=>item.picked).map(({def,picked})=>def.title+'：'+picked.label+'。');
+ return {cause:causes[state.ending](state),answers,choices,scenes,sceneTotal:rooms.flatMap(room=>room.spots.filter(spot=>spot.after==='solved')).length,hints,memories:found,memoryTotal:memories.length,next};
 }

@@ -18,20 +18,20 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/design-board-[13]\.png|dawn\.png/.test(r.url()))png.push(r.url());});
    await context.addInitScript(s=>{if(sessionStorage.getItem('seeded'))return;sessionStorage.setItem('seeded','1');localStorage.setItem('blood-mirror-v1',s);localStorage.setItem('blood-mirror-challenges-v2','["library","mine","crypt","queen","mirror"]');},JSON.stringify(done));
    await page.goto(origin+'/games/blood-mirror/play/');
-   assert.match(await page.locator('#home-progress').innerText(),/人物記憶 0 \/ 5/);
+   assert.match(await page.locator('#home-progress').innerText(),/人物記憶 0 \/ 7/);
    await page.locator('#continue').click();
    const recap=await page.locator('#ending-recap').innerText();
    assert.match(recap,/工程藍圖/);assert.match(recap,/赫索的話/);assert.match(recap,/使用提示 3 次/);assert.match(recap,/另外 2 種代價/);
    await page.locator('#ending-recap').screenshot({path:out+'/recap-'+width+'.png'});
-   await page.locator('#ending [data-action="home"]').click();await page.locator('[data-chapter="1"]').click();
+   await page.locator('#ending [data-action="home"]').click();await page.locator('[data-chapter="3"]').click();
    assert.equal(await page.locator('.hotspot.memory').count(),1);
-   assert.match(await page.locator('#scene-progress').innerText(),/人物記憶 0 \/ 5/);
+   assert.match(await page.locator('#scene-progress').innerText(),/人物記憶 0 \/ 7/);
    await page.locator('#scene').screenshot({path:out+'/memory-scene-'+width+'.png'});
    await page.locator('[data-clue="nyla"]').evaluate(el=>el.click());
    assert.equal(await page.locator('#modal-eyebrow').innerText(),'MEMORY · 人物記憶');assert.match(await page.locator('#modal-body').innerText(),/別死在門口/);
    await page.locator('#modal-close').click();
    await page.locator('.game-tools [data-action="journal"]').click();await page.locator('#journal-chapter').selectOption('memories');
-   assert.match(await page.locator('#journal-summary').innerText(),/1 \/ 5/);assert.equal(await page.locator('.memory-entry.locked').count(),4);
+   assert.match(await page.locator('#journal-summary').innerText(),/1 \/ 7/);assert.equal(await page.locator('.memory-entry.locked').count(),6);
    assert.ok(!(await page.locator('#journal-entries').innerText()).includes('伊萊第一次'),'unfound memories must not leak');
    await page.keyboard.press('Escape');
    // Replay a solved chapter's puzzle without touching progress.
@@ -40,7 +40,7 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    for(const [i,count] of [1,2,2,2,2].entries())for(let n=0;n<count;n++)await page.locator('[data-pipe="'+i+'"]').click();
    await page.locator('#pipes-confirm').click();assert.equal(await page.locator('#modal-title').innerText(),'斷裂的蒸汽管');await page.locator('#modal-close').click();
    // Queen memory cards render from the light WebP board.
-   await page.locator('[data-room="3"]').click();await page.locator('[data-clue="letter"]').evaluate(el=>el.click());await page.locator('#replay-evidence').click();await page.locator('[data-memory="0"]').click();
+   await page.locator('[data-room="5"]').click();await page.locator('[data-clue="letter"]').evaluate(el=>el.click());await page.locator('#replay-evidence').click();await page.locator('[data-memory="0"]').click();
    await page.locator('[data-memory="0"] [data-concept="vial"]').waitFor();await page.keyboard.press('Escape');
    // Export, wipe, import.
    await page.locator('#pause').click();await page.locator('#pause-settings').click();
@@ -53,9 +53,9 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    await fresh.goto(origin+'/games/blood-mirror/play/');assert.equal(await fresh.locator('#continue').isHidden(),true);
    await fresh.locator('.settings-toggle').click();await fresh.locator('#save-file').setInputFiles(file);
    await fresh.locator('#import-confirm').waitFor({timeout:5000}).catch(async()=>{throw new Error('import dialog missing; toast: '+await fresh.locator('#toast').innerText());});
-   assert.match(await fresh.locator('#modal-body').innerText(),/真相 5 \/ 5 · 結局 1 \/ 3 · 人物記憶 1 \/ 5/);
+   assert.match(await fresh.locator('#modal-body').innerText(),/真相 5 \/ 7 · 結局 1 \/ 3 · 人物記憶 1 \/ 7/);
    await fresh.locator('#import-confirm').click();
-   assert.match(await fresh.locator('#home-progress').innerText(),/人物記憶 1 \/ 5/);
+   assert.match(await fresh.locator('#home-progress').innerText(),/人物記憶 1 \/ 7/);
    assert.equal(await fresh.evaluate(()=>JSON.parse(localStorage.getItem('blood-mirror-v2')).puzzles.length),5);
    await fresh.locator('.settings-toggle').click();await fresh.locator('#save-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"format":"other"}')});
    await fresh.waitForFunction(()=>document.querySelector('#toast').textContent.includes('不是血色魔鏡'));

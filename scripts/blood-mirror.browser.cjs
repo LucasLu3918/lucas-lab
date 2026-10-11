@@ -21,6 +21,8 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    const context=await browser.newContext({viewport:{width,height:850},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});
    const page=await context.newPage(),pageErrors=[];
    page.on('pageerror',e=>pageErrors.push(e.message));
+   // Each act's pre-seal deduction: gather its clue words from the scene, then fill the blanks in order.
+   const deduce=async(spots,words)=>{for(const id of spots){await tapSpot(page,id,width<600);try{await page.locator('#modal-close').click({timeout:4000});}catch(e){console.log('FAIL spot',id,await page.evaluate(()=>document.querySelector('#modal')?.className+' | '+document.querySelector('#modal-title')?.innerText));await page.screenshot({path:'/tmp/claude-dbg.png'});throw e;}}await page.locator('#room-puzzle').click();assert.equal(await page.locator('#modal-title').innerText(),'魔鏡審問');assert.equal(await page.locator('#modal .modal-portrait').count(),1,'the mirror speaks with its portrait');for(const word of words)await page.locator('#modal [data-word="'+word+'"]').click();await page.locator('#interrogation-submit').click();};
    await page.goto(ORIGIN+'/games/blood-mirror/play/');
    await page.locator('#start').click();
    await page.locator('#prologue-skip').click();await page.locator('#intro-explore').click();
@@ -48,7 +50,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.ok((await page.locator('#modal-body').innerText()).includes('七十三'));
    assert.equal(await page.locator('#modal .ledger-page').count(),1);
    await page.locator('#modal-close').click();
-   await page.locator('#room-puzzle').click();
+   await deduce(['bells','waxseal'],['twelve','thirteenth','children73','king']);
    assert.equal(await page.locator('#modal [data-concept="clock"]').count(),1);
    await page.locator('#code').fill('1373');
    await page.locator('#code-form button[type=submit]').click();
@@ -61,6 +63,56 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('#room-next').click();
    const openEvidenceFromSeal=async()=>{await page.locator('#room-puzzle').click();assert.equal(await page.locator('#seal-evidence').count(),1,'seal must point to evidence');await page.locator('#seal-evidence').click();await page.locator('#restore-evidence').click();};
    const afterSeal=async(title)=>{assert.equal(await page.locator('#modal-title').innerText(),'封印已解開');await page.locator('#success-next').click();assert.equal(await page.locator('#modal-title').innerText(),title);await page.locator('#modal-close').click();await page.locator('#room-next').click();};
+   // Act 2, the ball: match every mask to a guest, state the truth to the mirror, then pick the last dance.
+   // Views: arrows and arrow keys step through the ball's three images; each hotspot lives in one of them.
+   assert.equal(await page.locator('#view-next').isVisible(),true);
+   await page.locator('#view-next').click();
+   assert.match(await page.locator('#scene-image').getAttribute('src'),/mirror-hall\.webp/);
+   assert.equal(await page.locator('[data-spot="hallmirrors"]').count(),1);assert.equal(await page.locator('[data-spot="invite"]').count(),0);
+   await page.keyboard.press('ArrowRight');
+   assert.match(await page.locator('#scene-image').getAttribute('src'),/balcony\.webp/);
+   assert.equal(await page.locator('[data-spot="glove"]').count(),1);
+   await page.keyboard.press('ArrowLeft');await page.keyboard.press('ArrowLeft');
+   assert.match(await page.locator('#scene-image').getAttribute('src'),/ballroom\.webp/);
+   // A character spot shows a painted portrait (loaded only when opened).
+   await tapSpot(page,'prince',width<600);
+   await page.locator('#modal .modal-portrait').waitFor();
+   assert.ok(await page.locator('#modal .modal-portrait').evaluate(img=>img.decode().then(()=>img.naturalWidth>0,()=>false)),'portrait decodes');
+   await page.locator('#modal-close').click();
+   await tapSpot(page,'guests',width<600);
+   assert.equal(await page.locator('#take-item').count(),0);
+   await page.locator('#restore-evidence').click();
+   assert.equal(await page.locator('[data-mask]').count(),6);
+   await page.locator('[data-mask="0"]').selectOption('1');await page.locator('#masks-confirm').click();
+   assert.match(await page.locator('.challenge-feedback').innerText(),/還有面具沒有選人/);
+   for(const i of [0,1,2,3,4,5])await page.locator('[data-mask="'+i+'"]').selectOption(String(i));
+   await page.locator('#masks-confirm').click();
+   // Stage two, the mirror light path: the beam leaves through the top until every mirror is flipped.
+   assert.equal(await page.locator('[data-mirror]').count(),4);
+   assert.match(await page.locator('.challenge-feedback').innerText(),/上方/);
+   for(const i of [0,1,2,3])await page.locator('[data-mirror="'+i+'"]').click();
+   assert.match(await page.locator('#modal-body').innerText(),/黑天鵝是伊萊/);
+   await page.locator('#modal-close').click();
+   await deduce(['invite','prince','bigmirror'],['queen','prince','eli','mirrorhall']);
+   assert.equal(await page.locator('#modal-title').innerText(),'最後一支舞');
+   await page.locator('[data-choice="eli"]').click();
+   assert.match(await page.locator('#modal-body').innerText(),/黑手套/);
+   await page.locator('#choice-next').click();
+   await afterSeal('鏡廳的入口');
+   // Act 3, the hunter: light the seven runes by jumping over two, then name whose heart is in the glass.
+   await tapSpot(page,'heart',width<600);
+   await page.locator('#restore-evidence').click();
+   assert.equal(await page.locator('[data-node]').count(),7);
+   await page.locator('[data-node="1"]').click();
+   assert.match(await page.locator('.challenge-feedback').innerText(),/熄滅/);
+   for(const n of [0,3,6,2,5,1,4])await page.locator('[data-node="'+n+'"]').click();
+   assert.match(await page.locator('#modal-body').innerText(),/托比/);
+   await page.locator('#modal-close').click();
+   await deduce(['notes','fire'],['queen','snowwhite','toby','hide']);
+   assert.equal(await page.locator('#modal-title').innerText(),'托比的心臟');
+   await page.locator('[data-choice="take"]').click();
+   await page.locator('#choice-next').click();
+   await afterSeal('通往黑松林的小徑');
    await tapSpot(page,'valve',width<600);
    await page.locator('#take-item').click();
    await openEvidenceFromSeal();
@@ -70,7 +122,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('#pipes-confirm').click();
    assert.match(await page.locator('#modal-body').innerText(),/壓力錶同時跳動/);
    await page.locator('#modal-close').click();
-   await page.locator('#room-puzzle').click();
+   await deduce(['minebook','blueprintwall','furnace','cart'],['names','barrier','heatenergy','frost']);
    for(const opt of ['water','heat','city'])await page.locator('[data-option="'+opt+'"]').click();
    await page.locator('#submit-seq').click();
    await afterSeal('甦醒的礦工');
@@ -84,7 +136,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    for(const n of [3,0,3,1,3,2])await page.locator('[data-rune="'+n+'"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/每一次心跳之後/);
    await page.locator('#modal-close').click();
-   await page.locator('#room-puzzle').click();
+   await deduce(['coffin','kiss'],['seventytwo','prince','unchanged','mirrorrealm']);
    for(const opt of ['moon','apple','mirror'])await page.locator('[data-option="'+opt+'"]').click();
    await page.locator('#submit-seq').click();
    await afterSeal('轉過頭的倒影');
@@ -101,7 +153,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    }
    assert.match(await page.locator('#modal-body').innerText(),/我不想成為女王/);
    await page.locator('#modal-close').click();
-   await page.locator('#room-puzzle').click();
+   await deduce(['rabbit','portrait','agreement'],['queen','lover','contract']);
    const replies=width<600?['no','third','yes']:['yes','sacrifice','no'];
    assert.match(await page.locator('#modal-body').innerText(),/沒有標準答案/);
    for(const [i,ans] of replies.entries()){await page.locator('[data-answer="'+ans+'"]').click();if(i<2)assert.ok((await page.locator('.queen-response').innerText()).length>10,'Vera answers each reply');}
@@ -118,7 +170,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    // The mirror interrogation: gather the clue words from the scene, answer wrongly once, then fix two blanks.
    for(const id of ['lucy','heatplan']){await tapSpot(page,id,width<600);await page.locator('#modal-close').click();}
    await page.locator('#room-puzzle').click();
-   assert.equal(await page.locator('.bank-word').count(),7,'the notebook holds the seven words gathered so far');
+   assert.ok(await page.locator('.bank-word').count()>=7,'the notebook holds every word gathered across the journey so far');
    for(const word of ['heir','queen','prince','throne','remembered'])await page.locator('[data-word="'+word+'"]').click();
    await page.locator('#interrogation-submit').click();
    await page.locator('#modal').screenshot({path:'/tmp/blood-mirror-concept-preview/interrogation-'+width+'.png'});
@@ -141,7 +193,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.deepEqual(pageErrors,[],'browser error at '+width);
    const dims=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth}));
    assert.ok(dims.scrollWidth<=dims.width+2,'horizontal overflow '+width+': '+JSON.stringify(dims));
-   console.log('✓ Blood Mirror interactive journey, 5 challenges, 3 CG endings @ '+width+'px');
+   console.log('✓ Blood Mirror interactive journey, 7 chapters, 3 CG endings @ '+width+'px');
    await context.close();
   }
  }finally{if(browser)await browser.close();server.kill('SIGTERM');}

@@ -6,6 +6,7 @@ export const soundtrackFiles={
  home:'10_theme_intro_Who_Deserves_to_Live.mp3',
  library:'01_library_Black_Bell_Archive.mp3',mine:'02_mine_Seven_Forgotten_Names.mp3',
  crypt:'03_crypt_Glass_Sleep.mp3',queen:'04_queen_The_Queens_Lament.mp3',
+ ballroom:'12_ballroom_Blood_Waltz.mp3',hunter:'13_hunter_The_Hunters_Heart.mp3',
  mirror:'05_mirror_A_Name_for_a_Life.mp3',dawn:'06_dawn_Nameless_Dawn.mp3',
  frost:'07_frost_Winter_Without_Names.mp3',crown:'08_crown_Crown_of_Blood.mp3'
 };
@@ -21,6 +22,8 @@ const themes={
  mine:{bass:49,notes:[0,0,5,3,0,8,5,3],rate:570,wave:'sawtooth'},
  crypt:{bass:58.3,notes:[0,7,5,1,0,7,8,5],rate:880,wave:'sine'},
  queen:{bass:69.3,notes:[0,3,7,10,7,3,2,0],rate:760,wave:'triangle'},
+ ballroom:{bass:73.4,notes:[0,4,7,4,0,3,7,3],rate:690,wave:'triangle'},
+ hunter:{bass:55,notes:[0,0,3,0,7,3,0,-2],rate:960,wave:'sine'},
  mirror:{bass:51.9,notes:[0,1,6,7,0,10,6,1],rate:540,wave:'triangle'},
  dawn:{bass:73.4,notes:[0,4,7,12,11,7,4,2],rate:790,wave:'sine'},
  frost:{bass:55,notes:[0,3,5,1,-2,0,3,-2],rate:930,wave:'sine'},

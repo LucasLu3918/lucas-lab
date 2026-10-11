@@ -116,3 +116,10 @@ node scripts/blood-mirror.browser.cjs
 - 鏡之碎片與收藏、成就、祕密尾聲皆為文字與 CSS 呈現，未新增圖片素材。
 - 尚缺：角色立繪（M4 對話場景與 M6 的人物）、M6 兩個新章節（血色舞會、獵人的心臟）的場景圖與三首 MiniMax 配樂。需於本機影像與音訊工具產出後，依 plan 第 8.2 節的人工審查流程加入。
 
+## 第二幕・第三幕新增素材（M6）
+
+- 場景圖（1664×944 WebP，均 ≤ 130 KB；PNG 母檔在 `source-art/m6/`，不發布）：`ballroom.webp`、`hunter-cabin.webp` 為章節場景；`mirror-hall.webp`、`balcony.webp`、`black-pine-path.webp` 目前只在魔鏡藝廊展示。
+- 產生方式：本機 ComfyUI（Z-Image Turbo，8 步，經 AIPS `creative` 流程），逐張目視審查；獵人小屋與黑松林各重做一次（玻璃心臟須為器官形狀、整體維持油畫質感）。這不是使用者驗收。
+- 配樂：`assets/music/12_ballroom_Blood_Waltz.mp3`（150 秒）、`13_hunter_The_Hunters_Heart.mp3`（58.6 秒），本機 MiniMax Music 3 產生，來源與授權見 `assets/music/SOURCE_NOTES.md`；尚未人工聆聽。
+- 人物立繪（`assets/portraits/*.webp`，640×936，各 ≤ 42 KB；PNG 母檔在 `source-art/m6/portraits/`）：eli、orion、nyla、heso、lucy、hunter、vera、mirror。本機 ComfyUI Z-Image Turbo 文字生圖，逐張目視審查通過（魔鏡倒影有一張面孔，與「無臉」的原設定略有出入）；無圖像編輯模型，故沒有白雪。人工驗收待你確認。
+

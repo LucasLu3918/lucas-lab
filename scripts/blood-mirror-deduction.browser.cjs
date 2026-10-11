@@ -32,7 +32,7 @@ const noOverflow=async(page,label)=>assert.ok(await page.evaluate(()=>document.d
    await page.locator('#pause').click();
    await page.locator('#pause-journal').click();
    await page.locator('#journal-chapter').selectOption('collection');
-   assert.match(await page.locator('#journal-entries').innerText(),/鏡之碎片 1 \/ 6/,'the prologue shard is kept');
+   assert.match(await page.locator('#journal-entries').innerText(),/鏡之碎片 1 \/ 8/,'the prologue shard is kept');
    assert.equal(await page.locator('#secret-epilogue').isDisabled(),true,'the secret epilogue waits for every shard');
    await page.locator('#journal-chapter').selectOption('clues');
    assert.match(await page.locator('#journal-entries').innerText(),/推理簿|線索詞|尚未|還是空的|收錄/);
