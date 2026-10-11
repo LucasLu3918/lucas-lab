@@ -1,5 +1,7 @@
 # LUCAS LAB 網站優化計畫
 
+> 注意：本文件為第二輪規劃草稿，其中的項目已於後續 PR 實作；第一輪成果與目前狀態以 [SITE_OPTIMIZATION_PLAN.md](../design/SITE_OPTIMIZATION_PLAN.md) 為準。
+
 日期：2026-10-11｜狀態：規劃完成，尚未實作。
 
 ## 範圍與決策紀錄

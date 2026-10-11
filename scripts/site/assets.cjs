@@ -48,6 +48,13 @@ function securityAndCacheHeaders(base){
   '  Cache-Control: public, max-age=604800',
   p+'/games/blood-mirror/play/assets/*',
   '  Cache-Control: public, max-age=604800',
+  // Game scripts and styles are not fingerprinted, so they stay revalidated (ETag) and a deploy is never masked.
+  p+'/games/blood-mirror/play/*.js',
+  '  Cache-Control: no-cache',
+  p+'/games/blood-mirror/play/*.css',
+  '  Cache-Control: no-cache',
+  p+'/games/blood-mirror/play/*/*.js',
+  '  Cache-Control: no-cache',
   ''
  ].join('\n');
 }
