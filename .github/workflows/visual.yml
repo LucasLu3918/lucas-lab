@@ -23,6 +23,10 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Exercise Blood Mirror full five-chapter game in Chromium
         run: node scripts/blood-mirror.browser.cjs
+      - name: Exercise Blood Mirror prologue, notebook and collection
+        run: node scripts/blood-mirror-deduction.browser.cjs
+      - name: Exercise Blood Mirror endings, credits and secret epilogue with axe-core
+        run: node scripts/blood-mirror-ending.browser.cjs
       - name: Audit responsive layout and interactions
         run: npm run test:visual
       - name: Verify reading, offline, search and CSP behaviour in Chromium

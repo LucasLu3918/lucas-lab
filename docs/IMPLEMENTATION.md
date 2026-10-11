@@ -109,3 +109,11 @@
 - `catalog.json` 建置時驗證；新增 5 篇開發日誌；藝廊佔位標示為「構思中」並展示遊戲企劃展板。
 - 驗證：`npm run check`、`npm run test:visual`、`npm run test:site`、`npm run test:perf` 與既有遊戲瀏覽器測試。完整內容見 [SITE_OPTIMIZATION_PLAN.md](design/SITE_OPTIMIZATION_PLAN.md)。
 - 尚未完成：真機驗收、PWA 的 PNG 圖示、移除 `style-src 'unsafe-inline'`、流量統計與自訂網域的決定。
+
+## 第七階段：血色魔鏡 M4–M8（部分完成）
+
+- 玩法與內容：魔鏡審問（五格陳述、推理簿線索詞、解謎／故事模式判定）、序章音樂盒、三個結局的可操作尾聲、片尾名單（完整主題曲）、祕密尾聲（兩段選擇）。
+- 收藏與重玩：六個鏡之碎片、十二個本機成就、收藏頁籤；碎片與成就跨旅程保留；存檔 v2 新增選填欄位，舊存檔無需遷移。
+- 驗證：單元測試 67 項（含 `blood-mirror-epilogue.test.mjs`）、既有與新增的瀏覽器套件、結局與片尾的 axe-core 稽核（WCAG 2A/2AA，`scripts/blood-mirror-ending.browser.cjs`）。
+- 內容密度報告：`node scripts/blood-mirror-density.mjs` 以唯讀方式列出每幕對照 plan §4.2 的缺口。目前五幕皆未達標（機關、線索詞、物品與解封後變化仍不足）。
+- 尚未完成：第一、二、四幕的新機關與視角特寫、其餘封印改由審問推得、M6 兩個新章節（需場景美術與配樂）、WebKit 測試、中階手機效能稽核、3 人試玩時長與主題曲循環的真人聆聽。完整紀錄見 [plan-improve.md](../games/blood-mirror/plan-improve/plan-improve.md) 第 14 節。
