@@ -46,6 +46,9 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
     await page.locator('[data-pos="'+wanted+'"]').click();
     await page.locator('[data-pos="'+target+'"]').click();
    }
+   // Stage two, the pocket watch: three meshed gears, solved by turning the minute and second gears twice each.
+   assert.equal(await page.locator('[data-gear]').count(),3);
+   for(const i of [1,1,2,2])await page.locator('[data-gear="'+i+'"]').click();
    assert.equal(await page.locator('#modal-title').innerText(),'出生紀錄');
    assert.ok((await page.locator('#modal-body').innerText()).includes('七十三'));
    assert.equal(await page.locator('#modal .ledger-page').count(),1);
@@ -120,6 +123,12 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    for(const [i,count] of [1,2,2,2,2].entries())for(let n=0;n<count;n++)await page.locator('[data-pipe="'+i+'"]').click();
    assert.equal(await page.locator('#pipes-confirm').isEnabled(),true);
    await page.locator('#pipes-confirm').click();
+   // Stage two, the seven names: one wrong guess first, then the order the testimonies fix.
+   assert.equal(await page.locator('[data-bed]').count(),7);
+   await page.locator('#names-confirm').click();
+   assert.match(await page.locator('.challenge-feedback').innerText(),/還有床位沒有刻上名字/);
+   for(const [bed,miner] of [4,1,3,2,0,5,6].entries())await page.locator('[data-bed="'+bed+'"]').selectOption(String(miner));
+   await page.locator('#names-confirm').click();
    assert.match(await page.locator('#modal-body').innerText(),/壓力錶同時跳動/);
    await page.locator('#modal-close').click();
    await deduce(['minebook','blueprintwall','furnace','cart'],['names','barrier','heatenergy','frost']);
@@ -134,6 +143,12 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('#rune-carving').click();
    assert.match(await page.locator('.rune-carving').innerText(),/心跳 → 月亮 → 心跳 → 蘋果 → 心跳 → 鏡子/);
    for(const n of [3,0,3,1,3,2])await page.locator('[data-rune="'+n+'"]').click();
+   // Stage two, the rubbing: reveal all eight patches, reject a seal that is carved, name the missing one.
+   assert.equal(await page.locator('[data-rub]').count(),8);
+   for(let i=0;i<8;i++)await page.locator('[data-rub="'+i+'"]').click();
+   await page.locator('[data-seal="日"]').click();
+   assert.match(await page.locator('.challenge-feedback').last().innerText(),/已經好好地刻在棺蓋上/);
+   await page.locator('[data-seal="名"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/每一次心跳之後/);
    await page.locator('#modal-close').click();
    await deduce(['coffin','kiss'],['seventytwo','prince','unchanged','mirrorrealm']);
@@ -151,6 +166,9 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
     await page.locator('[data-memory="'+pair[0]+'"]').click();
     await page.locator('[data-memory="'+pair[1]+'"]').click();
    }
+   // Stage two, the stitches: the front of the ear mirrors the back (columns flipped).
+   assert.equal(await page.locator('[data-stitch]').count(),16);
+   for(const [r,c] of [[0,3],[0,2],[0,1],[1,1],[2,2],[3,2],[3,1]])await page.locator('[data-stitch="'+r+','+c+'"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/我不想成為女王/);
    await page.locator('#modal-close').click();
    await deduce(['rabbit','portrait','agreement'],['queen','lover','contract']);
@@ -165,6 +183,9 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('#restore-evidence').click();
    assert.equal(await page.locator('.reflection-cell').count(),16);
    for(const k of [1,4,5,6,7])await page.locator('[data-reflection="'+k+'"]').click();
+   // Stage two, the mirror corridor: left and right are swapped for the reflection.
+   assert.equal(await page.locator('.maze-cell').count(),15);
+   for(const input of ['L','D','L','L','D'])await page.locator('[data-walk="'+input+'"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/失蹤的公主/);
    await page.locator('#take-item').click();
    // The mirror interrogation: gather the clue words from the scene, answer wrongly once, then fix two blanks.
