@@ -4,8 +4,9 @@ import {rooms,items,endings,visibleSpots,memorySpots,validAnswers} from './engin
 export function spotText(spot,restored=false){return restored&&spot.restoredText?spot.restoredText:spot.text;}
 
 export function journeyGuide(state,challengeComplete=false){
- // Optional post-game memories never count toward progress or appear in the guide.
- const room=rooms[state.room],done=state.solved.includes(state.room),spots=visibleSpots(state).filter(spot=>!spot.memory);
+ // Optional post-game memories and mirror shards are collectibles: they never count toward
+ // progress or pull the guide away from the act's own clues.
+ const room=rooms[state.room],done=state.solved.includes(state.room),spots=visibleSpots(state).filter(spot=>!spot.memory&&!spot.shard);
  const discovered=spots.filter(spot=>!spot.lock&&state.seen.includes(spot.id)).length;
  const total=spots.filter(spot=>!spot.lock).length;
  // Newly revealed spots lead first: an uncollected item, or an unread scene change.

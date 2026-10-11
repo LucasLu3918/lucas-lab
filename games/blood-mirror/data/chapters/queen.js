@@ -76,6 +76,15 @@ export default {
       clue: true
     },
     {
+      id: 'shard-queen',
+      label: '鏡之碎片',
+      icon: 'gem',
+      x: 14,
+      y: 32,
+      shard: true,
+      text: '縫線盒的底層，一片碎鏡裹在白線裡。線頭穿過鏡面的裂痕，像是有人在這裡縫過一隻兔子的耳朵。'
+    },
+    {
       id: 'vera',
       label: '記憶：雪為什麼是白的',
       icon: 'gem',

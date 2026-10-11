@@ -25,7 +25,9 @@ test('following only the next-step guide finishes every act and unlocks every en
  const {next,step}=followGuide(state,restored);
  assert.equal(next.kind,'fate');assert.deepEqual(state.solved,[0,1,2,3,4]);assert.ok(step<60,'too many steps: '+step);
  assert.deepEqual([...restored].sort(),rooms.map(r=>r.id).sort());
- for(const room of rooms)for(const spot of visibleSpots(state,rooms.indexOf(room)).filter(s=>!s.lock))assert.ok(state.seen.includes(spot.id),'guide skipped '+spot.id);
+ // Shards are optional collectibles, so the guide never needs them; each act still ships one.
+ for(const room of rooms)for(const spot of visibleSpots(state,rooms.indexOf(room)).filter(s=>!s.lock&&!s.shard))assert.ok(state.seen.includes(spot.id),'guide skipped '+spot.id);
+ for(const room of rooms)assert.equal(room.spots.filter(s=>s.shard).length,1,room.id+' needs one shard');
  for(const id of ['dawn','frost','crown'])assert.equal(chooseEnding(state,id),true,id);
 });
 

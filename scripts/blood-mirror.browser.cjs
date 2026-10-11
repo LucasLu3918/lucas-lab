@@ -7,6 +7,7 @@ const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
+const noOverflow=async(page,label)=>assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),label+' overflows');
 // On phones the 16:9 scene is wider than the screen, so a hotspot may sit off-screen: pan like a player would.
 const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'"]');await spot.scrollIntoViewIfNeeded();const {width:vw,height:vh}=page.viewportSize();for(let i=0;i<6;i++){const box=await spot.boundingBox();if(!box)throw new Error('Missing hotspot '+id);const cx=box.x+box.width/2;if(cx>24&&cx<vw-24)break;const y=vh*0.35;await page.mouse.move(vw/2,y);await page.mouse.down();await page.mouse.move(vw/2+(vw/2-cx),y,{steps:6});await page.mouse.up();}const box=await spot.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;if(touch)await page.touchscreen.tap(x,y);else await page.mouse.click(x,y);};
 (async()=>{
@@ -22,7 +23,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    page.on('pageerror',e=>pageErrors.push(e.message));
    await page.goto(ORIGIN+'/games/blood-mirror/play/');
    await page.locator('#start').click();
-   await page.locator('#intro-explore').click();
+   await page.locator('#prologue-skip').click();await page.locator('#intro-explore').click();
    const hit=await page.evaluate(()=>{const el=document.querySelector('[data-spot="watch"]'),r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,at=document.elementFromPoint(x,y);return {x,y,rect:{left:r.left,top:r.top,width:r.width,height:r.height},at:at?.outerHTML.slice(0,180),layer:getComputedStyle(document.querySelector('#hotspots')).pointerEvents,button:getComputedStyle(el).pointerEvents};});
    console.log('Scene hit-test:',JSON.stringify(hit));
    await tapSpot(page,'watch',width<600);
@@ -114,8 +115,18 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    for(const k of [1,4,5,6,7])await page.locator('[data-reflection="'+k+'"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/失蹤的公主/);
    await page.locator('#take-item').click();
+   // The mirror interrogation: gather the clue words from the scene, answer wrongly once, then fix two blanks.
+   for(const id of ['lucy','heatplan']){await tapSpot(page,id,width<600);await page.locator('#modal-close').click();}
    await page.locator('#room-puzzle').click();
-   await page.locator('[data-name="snow"]').click();
+   assert.equal(await page.locator('.bank-word').count(),7,'the notebook holds the seven words gathered so far');
+   for(const word of ['heir','queen','prince','throne','remembered'])await page.locator('[data-word="'+word+'"]').click();
+   await page.locator('#interrogation-submit').click();
+   await page.locator('#modal').screenshot({path:'/tmp/blood-mirror-concept-preview/interrogation-'+width+'.png'});
+   await noOverflow(page,'interrogation '+width);
+   assert.match(await page.locator('#feedback').innerText(),/還有兩個謊言/);
+   await page.locator('[data-blank="3"]').click();await page.locator('[data-word="blood"]').click();
+   await page.locator('[data-blank="4"]').click();await page.locator('[data-word="forgotten"]').click();
+   await page.locator('#interrogation-submit').click();
    await page.locator('#success-next').click();
    for(const ending of ['dawn','frost','crown']){
     await page.locator('[data-fate="'+ending+'"]').click();
