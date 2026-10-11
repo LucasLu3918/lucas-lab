@@ -107,3 +107,12 @@ node scripts/blood-mirror.browser.cjs
 - `dawn.png` 同樣只保留為來源，結局插畫實際使用 `dawn.webp`。
 - 原始 PNG 路徑：`source-art/concepts/design-board-{1,3,4}.png`、`source-art/endings/dawn.png`；`scripts/blood-mirror-concept.test.mjs` 以此路徑比對 WebP 尺寸。
 
+## M4–M8 音訊與收藏素材（2026-10）
+
+- 音樂清單（`assets/music/`）：`10_theme_intro_Who_Deserves_to_Live.mp3`（39 秒前奏循環，標題畫面）、`11_theme_full_Who_Deserves_to_Live.mp3`（約 5 分鐘完整版，聆聽室與片尾名單，片尾以內部音軌鍵 `credits` 播放）。
+- `00_title_The_Mirror_Lied_First.mp3` 為舊版標題曲，目前程式已不引用，留待下一次清理時移除。
+- 母帶 `source-audio/main_theme_Who_Deserves_to_Live.mp3`（約 9.3 MB）超過 8 MB 的提交守衛上限，未納入版本控制；`highlights.mp3` 已移出發布。
+- 場景環境音與音效全部由 WebAudio 即時合成（`audio/ambience.js`、`audio/sfx.js`），沒有額外音檔。
+- 鏡之碎片與收藏、成就、祕密尾聲皆為文字與 CSS 呈現，未新增圖片素材。
+- 尚缺：角色立繪（M4 對話場景與 M6 的人物）、M6 兩個新章節（血色舞會、獵人的心臟）的場景圖與三首 MiniMax 配樂。需於本機影像與音訊工具產出後，依 plan 第 8.2 節的人工審查流程加入。
+

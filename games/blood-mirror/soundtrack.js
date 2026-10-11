@@ -11,6 +11,8 @@ export const soundtrackFiles={
 };
 // The full theme (about five minutes) is used by the listening room and the credits, never as a loop.
 export const fullThemeFile='11_theme_full_Who_Deserves_to_Live.mp3';
+// Internal track map: the public soundtrackFiles stays as the listening room lists it, and the credits add one more entry.
+const trackFiles={...soundtrackFiles,credits:fullThemeFile};
 
 const CROSSFADE=1.5,TRACK_LEVEL=0.36;
 const themes={
@@ -86,21 +88,21 @@ export function createSoundtrack({mixer=createMixer()}={}){
  };
 
  const play=id=>{
-  if(!active||!soundtrackFiles[id])return;
+  if(!active||!trackFiles[id])return;
   if(current&&current.id===id)return;
   const token=++generation,old=current;
-  current=playFile(id,soundtrackFiles[id],token);
+  current=playFile(id,trackFiles[id],token);
   retire(old);
  };
 
  const start=async current=>{
-  if(current&&soundtrackFiles[current])scene=current;
+  if(current&&trackFiles[current])scene=current;
   await mixer.resume();
   active=true;
   play(scene);
  };
  const select=id=>{
-  if(!soundtrackFiles[id])return;
+  if(!trackFiles[id])return;
   scene=id;
   if(active){
    if(!current||current.id!==id)play(id);

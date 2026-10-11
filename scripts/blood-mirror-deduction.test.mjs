@@ -193,5 +193,5 @@ test('each ending offers two distinct gestures, and the secret epilogue has text
   assert.equal(ending.epilogue.options.length,2,id);
   assert.notEqual(ending.epilogue.options[0].text,ending.epilogue.options[1].text,id);
  }
- assert.ok(secretEpilogue.paragraphs.length>=3);
+ assert.equal(secretEpilogue.scenes.length,2);
 });
