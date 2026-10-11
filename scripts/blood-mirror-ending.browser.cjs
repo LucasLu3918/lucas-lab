@@ -10,7 +10,7 @@ const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
-const shardIds=['shard-library','shard-mine','shard-crypt','shard-queen','shard-mirror','shard-prologue'];
+const shardIds=['shard-library','shard-ballroom','shard-hunter','shard-mine','shard-crypt','shard-queen','shard-mirror','shard-prologue'];
 const solvedSave={
  version:2,started:true,chapter:'mirror',unlocked:['library','mine','crypt','queen','mirror'],
  solved:['library','mine','crypt','queen','mirror'],puzzles:['prologue','library','mine','crypt','queen','mirror'],

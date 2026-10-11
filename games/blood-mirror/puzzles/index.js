@@ -8,12 +8,19 @@ import {mountRune} from './rune.js';
 import {mountMemory} from './memory.js';
 import {mountReflection,glassIsSolved} from './reflection.js';
 import {mountMusicBox,lullaby} from './musicbox.js';
-export {puzzleIsSolved,pipeIsSolved,glassIsSolved,lullaby};
+import {mountMasks,masksSolved} from './masks.js';
+import {mountRuneHeart,heartPathValid} from './runeheart.js';
+import {mountLight,lightSolved} from './light.js';
+export {puzzleIsSolved,pipeIsSolved,glassIsSolved,lullaby,masksSolved,heartPathValid,lightSolved};
 
 export const puzzles={
  // The prologue is not a chapter: its completion is stored beside the chapters (engine/save.js).
  prologue:{id:'prologue',title:'音樂盒的搖籃曲',subtitle:'PROLOGUE · 序章',mount:mountMusicBox},
  library:{id:'library',title:'撕碎的出生紀錄',subtitle:'EVIDENCE · 修復帳頁',mount:mountLedger},
+ ballroom:{id:'ballroom',title:'面具下的賓客',subtitle:'EVIDENCE · 面具與光路',
+  // Two stages in one evidence: name the masks, then guide the moonlight to the hidden door.
+  mount:ctx=>mountMasks({...ctx,done:()=>{ctx.playCue('door');mountLight(ctx);}})},
+ hunter:{id:'hunter',title:'玻璃心臟法陣',subtitle:'EVIDENCE · 符文順序',mount:mountRuneHeart},
  mine:{id:'mine',title:'重接銀骨蒸汽管',subtitle:'EVIDENCE · 修復管網',mount:mountPipes},
  crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印記憶',mount:mountRune},
  queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶配對',mount:mountMemory},
@@ -36,7 +43,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false}){
  if(!entry){complete();return;}
  const render=html=>{
   const active=document.activeElement;
-  const attr=['data-pos','data-pipe','data-rune','data-memory','data-reflection','data-pin'].find(k=>active?.hasAttribute(k));
+  const attr=['data-pos','data-pipe','data-rune','data-memory','data-reflection','data-pin','data-mask','data-node','data-mirror'].find(k=>active?.hasAttribute(k));
   const selector=attr?'['+attr+'="'+active.getAttribute(attr)+'"]':null;
   modal(entry.title,entry.subtitle,'<div class="challenge" data-challenge="'+id+'">'+html+'</div>');
   if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});

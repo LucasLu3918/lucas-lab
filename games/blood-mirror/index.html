@@ -14,11 +14,11 @@
 <section id="home" class="home">
 <div class="hero">
 <div class="hero-art"><img src="assets/snow-white.webp" alt="黑髮公主戴著金色王冠，在魔鏡與燭光之間握著血紅蘋果" fetchpriority="high"><div class="art-vignette"></div><span class="art-tag">EVERY MIRROR HIDES A TRUTH.</span></div>
-<div class="hero-content"><div class="eyebrow"><span class="eyebrow-line"></span> 暗黑童話・沉浸式密室逃脫</div><p class="pretitle">白雪公主</p><h1>血色<span>魔鏡</span></h1><p class="english-title">SNOW WHITE : THE BLOOD MIRROR</p><div class="ornament"><span></span>◇<span></span></div><p class="hero-quote">「魔鏡啊，魔鏡……<br>這一次，誰值得活下去？」</p><p class="hero-description">走入被詛咒的霜棘王國，找回失落的記憶。<br>解開謎題，揭穿謊言。每一道門後，都有代價。</p><div class="hero-buttons"><button id="start" class="primary-button">踏入魔鏡 <span>⟶</span></button><button id="continue" class="text-button hidden">繼續旅程 <span>↗</span></button></div><p class="gallery-invite"><button data-action="gallery" class="text-button">魔鏡藝廊 · 收藏旅程中的畫作 ↗</button></p><p id="home-progress" class="home-progress"></p><div class="game-meta"><span>◷ 約 25–40 分鐘</span><span>◇ 五幕探索</span><span>♧ 三種結局</span></div><p class="content-note"><span>16+</span> 心理恐怖・黑暗敘事・建議配戴耳機</p></div>
+<div class="hero-content"><div class="eyebrow"><span class="eyebrow-line"></span> 暗黑童話・沉浸式密室逃脫</div><p class="pretitle">白雪公主</p><h1>血色<span>魔鏡</span></h1><p class="english-title">SNOW WHITE : THE BLOOD MIRROR</p><div class="ornament"><span></span>◇<span></span></div><p class="hero-quote">「魔鏡啊，魔鏡……<br>這一次，誰值得活下去？」</p><p class="hero-description">走入被詛咒的霜棘王國，找回失落的記憶。<br>解開謎題，揭穿謊言。每一道門後，都有代價。</p><div class="hero-buttons"><button id="start" class="primary-button">踏入魔鏡 <span>⟶</span></button><button id="continue" class="text-button hidden">繼續旅程 <span>↗</span></button></div><p class="gallery-invite"><button data-action="gallery" class="text-button">魔鏡藝廊 · 收藏旅程中的畫作 ↗</button></p><p id="home-progress" class="home-progress"></p><div class="game-meta"><span>◷ 約 25–40 分鐘</span><span>◇ 七幕探索</span><span>♧ 三種結局</span></div><p class="content-note"><span>16+</span> 心理恐怖・黑暗敘事・建議配戴耳機</p></div>
 <div class="hero-bottom"><span>一段被遺忘的名字，一場無法逃避的交易。</span><button data-action="chapters">探索章節 <span>↓</span></button></div>
 </div>
 <section id="resume-card" class="resume-card hidden" aria-labelledby="resume-title"><div><p class="eyebrow">旅程回顧</p><h2 id="resume-title"></h2><p id="resume-summary"></p><p id="resume-next"></p></div><button id="resume-action" class="primary-button"></button></section>
-<section class="chapters-section" id="chapters"><div class="section-heading"><div><p class="eyebrow">THE JOURNEY INTO DARKNESS</p><h2>每一扇門，都是一個祕密。</h2></div><p>五幕不同機關，五種互動謎題。一條逐漸破碎的真相。</p></div><div id="chapter-cards" class="chapter-cards"></div></section>
+<section class="chapters-section" id="chapters"><div class="section-heading"><div><p class="eyebrow">THE JOURNEY INTO DARKNESS</p><h2>每一扇門，都是一個祕密。</h2></div><p>七幕不同機關，七種互動謎題。一條逐漸破碎的真相。</p></div><div id="chapter-cards" class="chapter-cards"></div></section>
 <section class="story-strip"><span class="small-ornament">✦</span><p>在這個國度，魔法不是奇蹟。<br><em>魔法是一門生意。而有人，替你付了錢。</em></p><button data-action="story" class="text-button">閱讀故事序章 <span>⟶</span></button></section>
 <footer><span>白雪公主：血色魔鏡</span><span>改編自同名黑暗童話 · 互動密室遊戲</span><button data-action="guide">遊玩指南 ↗</button></footer>
 </section>
@@ -31,9 +31,10 @@
 <div id="hotspots"></div>
 </div>
 </div>
+<button id="view-prev" class="view-arrow" aria-label="上一個視角" hidden>‹</button><button id="view-next" class="view-arrow" aria-label="下一個視角" hidden>›</button>
 <header class="hud">
 <div class="hud-chapter"><span id="room-chapter" class="hud-kicker"></span><h1 id="room-title"></h1><p id="scene-subtitle" class="hud-subtitle"></p></div>
-<div class="hud-center"><p class="hud-objective"><span class="hud-label">目標</span> <span id="objective"></span></p><p class="hud-meta"><span id="truth-count">真相 0 / 5</span><progress id="truth-progress" max="5" value="0" aria-label="真相收集進度"></progress><time id="timer" aria-label="遊玩時間">00:00</time></p></div>
+<div class="hud-center"><p class="hud-objective"><span class="hud-label">目標</span> <span id="objective"></span></p><p class="hud-meta"><span id="truth-count">真相 0 / 7</span><progress id="truth-progress" max="7" value="0" aria-label="真相收集進度"></progress><time id="timer" aria-label="遊玩時間">00:00</time></p></div>
 <div class="hud-tools game-tools">
 <button data-action="hint" class="tool-button" aria-label="查看提示"><span aria-hidden="true">✧</span><span class="tool-label">提示</span></button>
 <button id="glow" class="tool-button" aria-pressed="false" aria-label="燭光：照亮所有可互動處"><span aria-hidden="true">☼</span><span class="tool-label" id="glow-label">燭光</span></button>

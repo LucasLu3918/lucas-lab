@@ -23,7 +23,7 @@ function followGuide(state,restored){
 test('following only the next-step guide finishes every act and unlocks every ending',()=>{
  const state=initialState(),restored=new Set();
  const {next,step}=followGuide(state,restored);
- assert.equal(next.kind,'fate');assert.deepEqual(state.solved,[0,1,2,3,4]);assert.ok(step<60,'too many steps: '+step);
+ assert.equal(next.kind,'fate');assert.deepEqual(state.solved,rooms.map((_,i)=>i));assert.ok(step<90,'too many steps: '+step);
  assert.deepEqual([...restored].sort(),rooms.map(r=>r.id).sort());
  // Shards are optional collectibles, so the guide never needs them; each act still ships one.
  for(const room of rooms)for(const spot of visibleSpots(state,rooms.indexOf(room)).filter(s=>!s.lock&&!s.shard))assert.ok(state.seen.includes(spot.id),'guide skipped '+spot.id);
@@ -44,7 +44,7 @@ test('every act ships the solo safety net: evidence, gate copy, three hints, rea
 });
 
 test('the key fact of each act stays hidden until its evidence is restored',()=>{
- const spoilers={library:'七十三',mine:null,crypt:'每一次心跳之後',queen:'我不想成為女王',mirror:'失蹤的公主'};
+ const spoilers={library:'七十三',ballroom:'黑天鵝是伊萊',hunter:'他的名字是托比',mine:null,crypt:'每一次心跳之後',queen:'我不想成為女王',mirror:'失蹤的公主'};
  for(const room of rooms){
   const word=spoilers[room.id];if(!word)continue;
   const early=room.spots.filter(spot=>!spot.after).map(spot=>spot.text).join('\n')+room.intro+room.objective;
@@ -54,7 +54,7 @@ test('the key fact of each act stays hidden until its evidence is restored',()=>
 });
 
 test('the journal swaps in restored text only for the restored room',()=>{
- const state=initialState();state.solved=[0,1,2];state.unlocked=3;state.room=3;
+ const state=initialState();state.solved=[0,1,2,3,4];state.unlocked=5;state.room=5;
  for(const id of ['birth','pipes','coffin','letter'])state.seen.push(id);
  const sections=journalChapters(state,id=>id==='queen');
  const text=id=>sections.flatMap(s=>s.entries).find(e=>e.id===id).text;

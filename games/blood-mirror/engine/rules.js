@@ -93,9 +93,30 @@ export function solve(state,answer){
  }
  if(r.free)state.answers=[...answer];
  state.solved.push(state.room);
- state.unlocked=Math.min(state.room+1,lastIndex());
+ state.skipped=(state.skipped||[]).filter(i=>i!==state.room);
+ state.unlocked=Math.max(state.unlocked??0,Math.min(state.room+1,lastIndex()));
  for(const item of r.grants||[])if(!state.inventory.includes(item))state.inventory.push(item);
  return {ok:true};
+}
+
+// Story choices (選擇與後果). Each act may define `choice: {key, prompt, options:[{id,label,text}]}`;
+// the pick is stored under state.choices[key] and only changes text, never the puzzle route.
+export const choiceDefs=Object.fromEntries(rooms.filter(room=>room.choice).map(room=>[room.choice.key,room.choice]));
+export function choose(state,key,optionId){
+ const def=choiceDefs[key];
+ if(!def||!def.options.some(option=>option.id===optionId))return false;
+ const room=rooms.findIndex(r=>r.choice?.key===key);
+ if(!state.solved.includes(room))return false;
+ state.choices={...(state.choices||{}),[key]:optionId};
+ return true;
+}
+// Text of a spot, with the variant that matches an earlier choice when the spot defines one.
+export function choiceVariant(spot,state){
+ for(const [key,variants] of Object.entries(spot.byChoice||{})){
+  const picked=state.choices?.[key];
+  if(picked&&variants[picked])return variants[picked];
+ }
+ return null;
 }
 
 export function travel(state,index){
@@ -104,8 +125,12 @@ export function travel(state,index){
  return true;
 }
 
+// An act flagged `catchUp` (added after the first release) never blocks the ending for a journey that
+// already passed it; reaching the final act is what counts. New journeys still clear every act in order.
+export const journeyComplete=state=>state.solved.includes(lastIndex());
+
 export function chooseEnding(state,id){
- if(state.solved.length!==rooms.length||!endings[id])return false;
+ if(!journeyComplete(state)||!endings[id])return false;
  if(id==='dawn'&&!state.inventory.includes('blueprint'))return false;
  state.ending=id;
  if(!state.endings.includes(id))state.endings.push(id);
