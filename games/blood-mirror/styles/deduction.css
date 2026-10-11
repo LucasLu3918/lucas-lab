@@ -1,0 +1,86 @@
+/* Deduction, prologue and collection surfaces (plan §5.3, §5.7). Colors come from the stage tokens. */
+
+.interrogation { display: grid; gap: 14px; }
+.interrogation-statement {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 2.1;
+  color: var(--ink, #efe6dc);
+}
+.interrogation-statement > span { white-space: normal; }
+.interrogation-blank {
+  display: inline-block;
+  min-width: 4.6em;
+  margin: 0 4px;
+  padding: 2px 10px;
+  border: 0;
+  border-bottom: 2px dashed var(--gold, #d7ad62);
+  background: rgba(215, 173, 98, 0.08);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.interrogation-blank.selected { background: rgba(215, 173, 98, 0.22); box-shadow: 0 0 0 2px rgba(215, 173, 98, 0.45) inset; }
+.interrogation-blank.wrong { border-bottom-color: #c75a5a; color: #ffb8b8; text-decoration: line-through; }
+.interrogation-blank:focus-visible,
+.bank-word:focus-visible,
+.music-pin:focus-visible { outline: 2px solid var(--gold, #d7ad62); outline-offset: 2px; }
+
+.interrogation-bank { border: 1px solid rgba(215, 173, 98, 0.25); border-radius: 10px; padding: 10px 12px; }
+.interrogation-bank legend { padding: 0 6px; font-size: .85rem; color: var(--gold, #d7ad62); }
+.bank-group + .bank-group { margin-top: 8px; }
+.bank-group h4 { margin: 0 0 6px; font-size: .8rem; font-weight: 600; letter-spacing: .08em; opacity: .75; }
+.bank-words { display: flex; flex-wrap: wrap; gap: 8px; }
+.bank-word {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid rgba(215, 173, 98, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.bank-word:hover { background: rgba(215, 173, 98, 0.12); }
+
+.interrogation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.interrogation-confirm { margin: 0; flex-basis: 100%; }
+
+.clue-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: .9rem; }
+.clue-chips span {
+  padding: 2px 10px;
+  border: 1px solid rgba(215, 173, 98, 0.45);
+  border-radius: 999px;
+  color: var(--gold, #d7ad62);
+}
+
+.musicbox-pins { display: flex; gap: 12px; justify-content: center; margin: 14px 0; }
+.music-pin {
+  width: 56px;
+  height: 84px;
+  border: 1px solid rgba(215, 173, 98, 0.5);
+  border-radius: 28px;
+  background: rgba(20, 14, 18, 0.7);
+  color: var(--gold, #d7ad62);
+  font: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.music-pin.raised { background: rgba(215, 173, 98, 0.2); }
+.lullaby-score { letter-spacing: .15em; color: var(--gold, #d7ad62); }
+
+.ending-epilogue { margin: 18px 0; display: grid; gap: 10px; }
+.ending-epilogue h2 { margin: 0; font-size: 1rem; letter-spacing: .08em; }
+.epilogue-prompt { margin: 0; opacity: .9; }
+.epilogue-options { display: grid; gap: 8px; }
+.epilogue-text { min-height: 1.6em; margin: 0; }
+
+.clue-book { margin: 0; padding-left: 1.2em; }
+.shard-list,
+.achievement-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.shard-list li { opacity: .55; }
+.shard-list li.found { opacity: 1; color: var(--gold, #d7ad62); }
+.achievement-list li { padding: 10px 12px; border: 1px solid rgba(215, 173, 98, 0.2); border-radius: 10px; display: grid; gap: 2px; }
+.achievement-list li.locked strong { opacity: .6; }
+.achievement-list li.unlocked { border-color: rgba(215, 173, 98, 0.55); }
+.achievement-list span { font-size: .92rem; opacity: .85; }

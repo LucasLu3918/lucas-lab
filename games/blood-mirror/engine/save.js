@@ -1,5 +1,7 @@
 // Save format v2: chapters are stored by id, so inserting a chapter never shifts saved progress.
 // Version 1 (chapter indices, separate puzzle key) is read once and then superseded by v2.
+// Fields added after v2 shipped (clues, shards, achievements, glowRooms, misses) are optional:
+// a save without them restores to empty collections, so no version bump is needed.
 import {chapters} from '../data/chapters/index.js';
 import {restoreState} from './state.js';
 
@@ -7,9 +9,12 @@ export const SAVE_KEY='blood-mirror-v2';
 export const LEGACY_SAVE_KEY='blood-mirror-v1';
 export const LEGACY_PUZZLE_KEY='blood-mirror-challenges-v2';
 export const SAVE_FORMAT='blood-mirror-save',MAX_SAVE_BYTES=100000;
+// The prologue (序章) is a puzzle, not a chapter, so its completion is stored beside the chapters.
+export const PROLOGUE_PUZZLE='prologue';
 
 const chapterIds=()=>chapters.map(c=>c.id);
-const knownIds=list=>Array.isArray(list)?[...new Set(list.filter(id=>chapterIds().includes(id)))]:[];
+const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE];
+const knownIds=list=>Array.isArray(list)?[...new Set(list.filter(id=>puzzleIds().includes(id)))]:[];
 
 // Engine state -> v2 object. `puzzles` lists the hands-on puzzles completed so far.
 export function toSaveV2(state,puzzles=[]){
@@ -24,7 +29,12 @@ export function toSaveV2(state,puzzles=[]){
   inventory:[...state.inventory],
   seen:[...state.seen],
   hints:Object.fromEntries(ids.map((id,i)=>[id,state.hints[i]??0])),
+  clues:[...(state.clues||[])],
+  glowRooms:(state.glowRooms||[]).map(i=>ids[i]).filter(Boolean),
+  misses:Object.fromEntries(ids.map((id,i)=>[id,state.misses?.[i]??0])),
   memories:[...(state.memories||[])],
+  shards:[...(state.shards||[])],
+  achievements:[...(state.achievements||[])],
   endings:[...state.endings],
   ending:state.ending,
   answers:state.answers?[...state.answers]:null,
@@ -48,6 +58,11 @@ export function fromSaveV2(data){
   inventory:data.inventory,
   seen:data.seen,
   hints:Object.fromEntries(ids.map((id,i)=>[i,data.hints?.[id]??0])),
+  clues:data.clues,
+  glowRooms:Array.isArray(data.glowRooms)?data.glowRooms.map(id=>ids.indexOf(id)):[],
+  misses:Object.fromEntries(ids.map((id,i)=>[i,data.misses?.[id]??0])),
+  shards:data.shards,
+  achievements:data.achievements,
   elapsed:data.elapsed,
   ending:data.ending,
   endings:data.endings,

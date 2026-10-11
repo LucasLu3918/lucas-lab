@@ -17,7 +17,7 @@ const ROOT=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
    page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith(origin)&&!r.url().startsWith('data:')&&!r.url().startsWith('blob:'))foreign.push(r.url());});
    await page.goto(origin+'/games/blood-mirror/play/');
    assert.equal(await page.evaluate(()=>localStorage.getItem('blood-mirror-playlog-v1')),null,'log must be off by default');
-   await page.locator('#start').click();await page.locator('#intro-explore').click();
+   await page.locator('#start').click();await page.locator('#prologue-skip').click();await page.locator('#intro-explore').click();
    await page.locator('#pause').click();await page.locator('#pause-settings').click();await page.locator('#setting-playlog').click();
    assert.equal(await page.locator('#setting-playlog').getAttribute('aria-pressed'),'true');await page.keyboard.press('Escape');
    for(const id of ['watch','bells'])await page.locator('[data-clue="'+id+'"]').evaluate(el=>el.click()).then(()=>page.keyboard.press('Escape'));
