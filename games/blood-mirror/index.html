@@ -32,6 +32,7 @@
 </div>
 </div>
 <button id="view-prev" class="view-arrow" aria-label="上一個視角" hidden>‹</button><button id="view-next" class="view-arrow" aria-label="下一個視角" hidden>›</button>
+<div class="stage-top">
 <header class="hud">
 <div class="hud-chapter"><span id="room-chapter" class="hud-kicker"></span><h1 id="room-title"></h1><p id="scene-subtitle" class="hud-subtitle"></p></div>
 <div class="hud-center"><p class="hud-objective"><span class="hud-label">目標</span> <span id="objective"></span></p><p class="hud-meta"><span id="truth-count">真相 0 / 7</span><progress id="truth-progress" max="7" value="0" aria-label="真相收集進度"></progress><time id="timer" aria-label="遊玩時間">00:00</time></p></div>
@@ -43,12 +44,19 @@
 <button id="pause" class="tool-button" aria-label="選單" aria-haspopup="dialog"><span aria-hidden="true">≡</span><span class="tool-label">選單</span></button>
 </div>
 </header>
+<div class="stage-subbar">
+<div class="room-tabs" id="room-tabs" aria-label="場景選擇"></div>
+<details id="scene-clues" class="scene-clues"><summary>場景線索</summary><div class="clue-panel"><p class="clue-hint">點選名稱也能探索</p><div id="clue-list" class="clue-list"></div></div></details>
+</div>
+<p id="pause-hint" class="pause-hint hidden">燭光冷卻中</p>
+</div>
+<div class="stage-bottom">
 <section id="journey-guide" class="journey-guide" aria-labelledby="journey-guide-title"><div><h2 id="journey-guide-title">下一步建議</h2><p id="journey-guide-text"></p></div><button id="journey-guide-action" class="secondary-button"></button></section>
+<div class="stage-bottom-row">
 <section class="dialogue" id="dialogue" aria-label="場景敘事"><div class="dialogue-head"><span class="dialogue-portrait" aria-hidden="true">◇</span><p class="speaker">旁白</p><button id="dialogue-toggle" class="text-button dialogue-toggle" aria-expanded="true" aria-controls="narrative">收合對話</button><div class="dialogue-actions"><span id="scene-progress" class="scene-progress"></span><button id="room-puzzle" class="primary-button">檢視封印 ⟶</button><button id="room-next" class="primary-button hidden">走向下一扇門 ⟶</button></div></div><p id="narrative" class="narrative" role="status"></p></section>
 <aside class="tray" aria-labelledby="inventory-title"><div class="inventory-heading"><h2 id="inventory-title">隨身物品</h2><span id="inventory-count">0 件</span></div><div id="inventory" class="inventory"></div><p id="save-indicator" class="save-indicator" role="status">◇ 進度已儲存在此裝置</p></aside>
-<details id="scene-clues" class="scene-clues"><summary>場景線索 · 點選名稱也能探索</summary><div id="clue-list" class="clue-list"></div></details>
-<div class="room-tabs" id="room-tabs" aria-label="場景選擇"></div>
-<p id="pause-hint" class="pause-hint hidden">燭光冷卻中</p>
+</div>
+</div>
 </div>
 </section>
 <section id="ending" class="ending hidden"><div class="ending-art"></div><div class="ending-content"><figure id="ending-concept" class="ending-concept hidden" aria-label="結局插畫"></figure><span class="ending-symbol">◇</span><p class="eyebrow" id="ending-eyebrow"></p><h1 id="ending-title"></h1><p class="ending-quote" id="ending-quote"></p><p id="ending-text"></p><div id="ending-stats" class="ending-stats"></div><section id="ending-epilogue" class="ending-epilogue" aria-label="尾聲"></section><section id="ending-recap" class="ending-recap" aria-label="旅程回顧"></section><div class="ending-buttons"><button data-action="reconsider" class="primary-button">回到最後的選擇 ⟶</button><button data-action="gallery" class="text-button">收藏結局 · 魔鏡藝廊 ↗</button><button data-action="home" class="text-button">返回首頁</button></div><p class="ending-adaptation">互動遊戲改編結局 · 「無名的黎明」承接原作尾聲</p></div></section>

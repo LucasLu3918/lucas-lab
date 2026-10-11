@@ -52,3 +52,11 @@ body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{anim
 .queen-response{margin:0 0 14px;padding:10px 14px;border-left:2px solid var(--gold);color:var(--text);font-family:var(--serif);line-height:1.8;background:#0d0b0d99}
 .queen-responses{margin:4px 0 12px;padding-left:20px;line-height:1.8;font-family:var(--serif)}
 .ending-recap h2+ul+h2,.ending-recap ul+h2{margin-top:12px}
+
+/* Landscape phones and tablets: chapter cards wrap instead of clipping at the edge, the hero stops forcing a tall first screen, and the header slims down. */
+@media(max-width:1150px){.chapter-cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-right:0;padding-right:0;overflow:visible;scroll-snap-type:none}}
+@media(max-height:520px) and (min-width:600px){
+ .hero{height:auto;min-height:0}
+ .hero-content{padding-top:44px;padding-bottom:96px}
+ .site-header{height:60px}
+}
