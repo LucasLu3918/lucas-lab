@@ -1,12 +1,18 @@
-// Optional mastered MP3s with an instant, offline WebAudio orchestral fallback.
+// Scene music on the mixer's music bus. MP3 loops cross-fade over 1.5 s; a synthesised
+// WebAudio fallback takes over when a file cannot load, so the game is never silent by accident.
+import {createMixer} from './audio/mixer.js';
+
 export const soundtrackFiles={
- home:'00_title_The_Mirror_Lied_First.mp3',library:'01_library_Black_Bell_Archive.mp3',
- mine:'02_mine_Seven_Forgotten_Names.mp3',crypt:'03_crypt_Glass_Sleep.mp3',
- queen:'04_queen_The_Queens_Lament.mp3',mirror:'05_mirror_A_Name_for_a_Life.mp3',
- dawn:'06_dawn_Nameless_Dawn.mp3',frost:'07_frost_Winter_Without_Names.mp3',
- crown:'08_crown_Crown_of_Blood.mp3'
+ home:'10_theme_intro_Who_Deserves_to_Live.mp3',
+ library:'01_library_Black_Bell_Archive.mp3',mine:'02_mine_Seven_Forgotten_Names.mp3',
+ crypt:'03_crypt_Glass_Sleep.mp3',queen:'04_queen_The_Queens_Lament.mp3',
+ mirror:'05_mirror_A_Name_for_a_Life.mp3',dawn:'06_dawn_Nameless_Dawn.mp3',
+ frost:'07_frost_Winter_Without_Names.mp3',crown:'08_crown_Crown_of_Blood.mp3'
 };
-const files=soundtrackFiles;
+// The full theme (about five minutes) is used by the listening room and the credits, never as a loop.
+export const fullThemeFile='11_theme_full_Who_Deserves_to_Live.mp3';
+
+const CROSSFADE=1.5,TRACK_LEVEL=0.36;
 const themes={
  home:{bass:55,notes:[0,3,7,3,10,7,3,0],rate:740,wave:'triangle'},
  library:{bass:65.4,notes:[0,1,7,6,3,1,0,-2],rate:620,wave:'sine'},
@@ -18,65 +24,101 @@ const themes={
  frost:{bass:55,notes:[0,3,5,1,-2,0,3,-2],rate:930,wave:'sine'},
  crown:{bass:61.7,notes:[0,1,6,5,3,1,0,-1],rate:630,wave:'sawtooth'}
 };
-export function createSoundtrack(){
- let ctx=null,master=null,active=false,scene='home',clip=null,interval=null,tick=0,drone=null,droneGain=null,generation=0;
+
+export function createSoundtrack({mixer=createMixer()}={}){
+ let active=false,scene='home',current=null,synthTimer=null,synthTick=0,synthGain=null,generation=0;
+
+ const ramp=(gain,to,seconds)=>{const now=mixer.context.currentTime;gain.gain.cancelScheduledValues(now);gain.gain.setValueAtTime(gain.gain.value,now);gain.gain.linearRampToValueAtTime(to,now+seconds);};
+ const retire=track=>{
+  if(!track)return;
+  ramp(track.gain,0,CROSSFADE);
+  setTimeout(()=>{track.element.pause();track.element.removeAttribute('src');track.element.load();track.source.disconnect();track.gain.disconnect();},CROSSFADE*1000+100);
+ };
+
  const tone=(frequency,time,length,wave,volume)=>{
-  if(!ctx||!master)return;
-  const osc=ctx.createOscillator(),gain=ctx.createGain();
+  const context=mixer.context;
+  const osc=context.createOscillator(),gain=context.createGain();
   osc.type=wave;osc.frequency.value=frequency;
-  gain.gain.setValueAtTime(.0001,time);
-  gain.gain.exponentialRampToValueAtTime(Math.max(volume,.0002),time+.035);
-  gain.gain.exponentialRampToValueAtTime(.0001,time+length);
-  osc.connect(gain);gain.connect(master);osc.start(time);osc.stop(time+length+.02);
+  gain.gain.setValueAtTime(0.0001,time);
+  gain.gain.exponentialRampToValueAtTime(Math.max(volume,0.0002),time+0.035);
+  gain.gain.exponentialRampToValueAtTime(0.0001,time+length);
+  osc.connect(gain);gain.connect(synthGain);
+  osc.start(time);osc.stop(time+length+0.02);
   osc.onended=()=>{osc.disconnect();gain.disconnect();};
  };
- const next=()=>{
-  if(!active||!ctx||ctx.state!=='running'||clip?.dataset.ready==='yes')return;
-  const t=themes[scene]||themes.home,n=t.notes[tick%t.notes.length],time=ctx.currentTime+.015;
-  const freq=t.bass*4*Math.pow(2,n/12);
-  tone(freq,time,Math.min(t.rate/1000*1.9,1.5),t.wave,.085);
-  if(tick%4===0)tone(t.bass*2,time,2.2,'sine',.06);
-  if(tick%8===0)tone(t.bass*8,time,.52,'sine',.02);
-  tick++;
+ const nextSynthNote=()=>{
+  const theme=themes[scene]||themes.home,note=theme.notes[synthTick%theme.notes.length];
+  const time=mixer.context.currentTime+0.015;
+  tone(theme.bass*4*Math.pow(2,note/12),time,Math.min(theme.rate/1000*1.9,1.5),theme.wave,0.085);
+  if(synthTick%4===0)tone(theme.bass*2,time,2.2,'sine',0.06);
+  if(synthTick%8===0)tone(theme.bass*8,time,0.52,'sine',0.02);
+  synthTick++;
  };
- const stopClip=()=>{if(clip){clip.pause();clip.src='';clip=null;}};
- const changeDrone=()=>{
-  if(!ctx||!master)return;
-  master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(.20,ctx.currentTime);
-  if(drone){try{drone.stop();}catch{}drone.disconnect();droneGain.disconnect();}
-  const t=themes[scene]||themes.home;
-  drone=ctx.createOscillator();droneGain=ctx.createGain();
-  drone.type='sine';drone.frequency.value=t.bass;droneGain.gain.value=.04;
-  drone.connect(droneGain);droneGain.connect(master);drone.start();
+ const startSynth=()=>{
+  if(!mixer.context||synthGain)return;
+  synthGain=mixer.context.createGain();synthGain.gain.value=0.9;synthGain.connect(mixer.bus('music'));
+  synthTick=0;nextSynthNote();
+  synthTimer=setInterval(nextSynthNote,(themes[scene]||themes.home).rate);
  };
- const loadTrack=()=>{
-  stopClip();if(!active||typeof Audio==='undefined')return;
-  const id=++generation,file=files[scene];if(!file)return;
-  const player=new Audio('assets/music/'+file);
-  clip=player;player.loop=true;player.preload='auto';player.volume=0;
-  player.addEventListener('canplay',()=>{
-   if(!active||id!==generation||clip!==player)return;
-   player.play().then(()=>{if(!active||id!==generation||clip!==player){player.pause();return;}player.dataset.ready='yes';master.gain.setTargetAtTime(0,ctx.currentTime,.12);const start=performance.now();
-    const fade=()=>{if(!active||clip!==player)return;player.volume=Math.min(.36,(performance.now()-start)/1000*.36);if(player.volume<.36)requestAnimationFrame(fade);};fade();
-   }).catch(()=>{});
+ const stopSynth=()=>{
+  clearInterval(synthTimer);synthTimer=null;
+  if(synthGain){const gain=synthGain;synthGain=null;setTimeout(()=>gain.disconnect(),CROSSFADE*1000+100);}
+ };
+
+ const playFile=(id,file,token)=>{
+  const context=mixer.context,element=new Audio('assets/music/'+file);
+  element.loop=true;element.preload='auto';
+  const gain=context.createGain();gain.gain.value=0;
+  const source=context.createMediaElementSource(element);
+  source.connect(gain);gain.connect(mixer.bus('music'));
+  const track={id,element,gain,source,ready:false};
+  element.addEventListener('canplay',()=>{
+   if(token!==generation||current!==track)return;
+   element.play().then(()=>{if(token!==generation)return;track.ready=true;stopSynth();ramp(gain,TRACK_LEVEL,CROSSFADE);}).catch(()=>{});
   },{once:true});
-  player.addEventListener('error',()=>{if(clip===player){clip=null;if(active&&ctx&&master){master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(.20,ctx.currentTime);}}},{once:true});
-  player.load();
+  element.addEventListener('error',()=>{
+   if(current!==track)return;
+   current=null;
+   if(active)startSynth();
+  },{once:true});
+  element.load();
+  return track;
  };
- const start=async(current)=>{
-  if(current&&files[current])scene=current;
-  if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)throw Error('WebAudio unavailable');
-   ctx=new C();master=ctx.createGain();master.gain.value=.20;master.connect(ctx.destination);}
-  active=true;await ctx.resume();changeDrone();
-  clearInterval(interval);tick=0;next();interval=setInterval(next,(themes[scene]||themes.home).rate);
-  loadTrack();
+
+ const play=id=>{
+  if(!active||!soundtrackFiles[id])return;
+  if(current&&current.id===id)return;
+  const token=++generation,old=current;
+  current=playFile(id,soundtrackFiles[id],token);
+  retire(old);
  };
- const select=(id)=>{
-  if(!files[id]||scene===id)return;scene=id;generation++;
-  if(active){clearInterval(interval);tick=0;changeDrone();next();interval=setInterval(next,(themes[scene]||themes.home).rate);loadTrack();}
+
+ const start=async current=>{
+  if(current&&soundtrackFiles[current])scene=current;
+  await mixer.resume();
+  active=true;
+  play(scene);
  };
- const stop=()=>{active=false;generation++;stopClip();clearInterval(interval);interval=null;
-  if(drone){try{drone.stop();}catch{}drone.disconnect();droneGain.disconnect();drone=null;}ctx?.suspend().catch(()=>{});};
- const getStatus=()=>({scene,active,source:active?(clip?.dataset.ready==='yes'?'mp3':'synth'):'silent',currentTime:clip?.currentTime||0,loop:clip?.loop||false,synthGain:master?.gain.value??0});
- return {start,select,stop,getStatus};
+ const select=id=>{
+  if(!soundtrackFiles[id])return;
+  scene=id;
+  if(active){
+   if(!current||current.id!==id)play(id);
+   if(synthGain)stopSynth(),startSynth();
+  }
+ };
+ const stop=()=>{
+  active=false;generation++;
+  stopSynth();
+  if(current){current.element.pause();current=null;}
+  mixer.suspend();
+ };
+ const getStatus=()=>({
+  scene,active,
+  source:active?(current?.ready?'mp3':synthGain?'synth':'silent'):'silent',
+  currentTime:current?.element.currentTime||0,
+  loop:current?.element.loop||false,
+  synthGain:synthGain?.gain.value??0
+ });
+ return {start,select,stop,getStatus,mixer};
 }

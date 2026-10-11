@@ -1,0 +1,252 @@
+/* Immersive stage for the play route (plan-improve §6): full-bleed 16:9 scene, HUD, dialogue
+   and inventory tray. Loaded after style.css, so only the play route's layout is overridden here. */
+
+:root{
+ --stage-gold:#c3ac80;
+ --stage-gold-hi:#e2cc9b;
+ --stage-line:rgba(195,172,128,.26);
+ --stage-text:#eee5d6;
+ --stage-muted:#c9bfb1;
+ --stage-panel:rgba(20,17,20,.94);
+ --stage-frost:#9fb6c8;
+ --serif:'Noto Serif TC','Songti TC',Georgia,serif;
+}
+
+/* The play route has no site frame: the LUCAS LAB bar and site navigation stay on the title screen. */
+body[data-view="game"] .lab-bar,
+body[data-view="game"] .site-header{display:none}
+body[data-view="game"] #main{padding:0;margin:0;max-width:none}
+body[data-view="game"],body[data-view="ending"]{overflow:hidden}
+
+.game{position:relative;height:100vh;height:100dvh;margin:0;padding:0;max-width:none;overflow:hidden;background:#050405;aspect-ratio:auto}
+.stage{position:absolute;inset:0;overflow:hidden}
+
+/* Scene: a 16:9 frame that always covers the viewport. Hotspot percentages are relative to the image, so they stay put when the phone pans. */
+.scene{position:absolute;inset:0;overflow:hidden;background:#050405;aspect-ratio:auto;border:0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.scene.dragging{cursor:grabbing}
+.scene-frame{position:absolute;left:50%;top:50%;width:max(100%,calc(100vh * 16 / 9));width:max(100%,calc(100dvh * 16 / 9));aspect-ratio:16/9;transform:translate(calc(-50% + var(--pan-x,0px)),-50%)}
+.scene-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.scene-shade{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 50%,rgba(0,0,0,.6) 100%),linear-gradient(0deg,rgba(8,6,8,.82) 0%,transparent 28%,transparent 78%,rgba(8,6,8,.38) 100%)}
+#hotspots{position:absolute;inset:0}
+
+/* Hotspots: a 6px glimmer by default; the name shows on hover or focus, and in story mode or while the candle is lit. */
+#hotspots .hotspot{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--stage-gold-hi);display:grid;place-items:center;cursor:pointer;min-height:44px}
+.hotspot::before{content:'';grid-area:1/1;width:6px;height:6px;border-radius:50%;background:var(--stage-gold-hi);box-shadow:0 0 8px 2px rgba(226,204,155,.5);animation:stage-glimmer 5s ease-in-out infinite;transition:opacity .4s,transform .4s}
+.hotspot svg{grid-area:1/1;width:26px;height:26px;opacity:0;transition:opacity .35s;filter:drop-shadow(0 0 6px rgba(0,0,0,.8))}
+.hotspot span{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;line-height:1.5;padding:2px 9px;background:rgba(16,15,16,.88);border:1px solid var(--stage-line);border-radius:2px;opacity:0;pointer-events:none;transition:opacity .25s}
+.hotspot:hover svg,.hotspot:focus-visible svg,.hotspot:hover span,.hotspot:focus-visible span{opacity:1}
+.hotspot:focus-visible{outline:2px solid var(--stage-gold-hi);outline-offset:4px}
+.hotspot.seen::before{opacity:.32}
+.hotspot.seal::before{width:9px;height:9px;background:#d9a46a}
+.hotspot.solved::before{background:var(--stage-frost);box-shadow:0 0 10px 3px rgba(159,182,200,.5)}
+.hotspot.memory::before{background:#d8c9f0;box-shadow:0 0 10px 3px rgba(216,201,240,.45)}
+.hotspot.damaged::before{background:#b8535f;box-shadow:0 0 10px 3px rgba(184,83,95,.45)}
+body.mode-story .hotspot svg,body.mode-story .hotspot span{opacity:.92}
+body.mode-story .hotspot span{opacity:1}
+.stage.glow-on .hotspot svg,.stage.glow-on .hotspot span{opacity:1}
+.stage.glow-on .hotspot::before{opacity:1;transform:scale(1.7);animation:none}
+@keyframes stage-glimmer{0%,84%,100%{opacity:.4;transform:scale(.85)}91%{opacity:1;transform:scale(1.25)}}
+body.reduce-motion .hotspot::before{animation:none}
+
+/* HUD: chapter, objective and tools in one translucent band over the scene. */
+.hud{position:absolute;top:0;left:0;right:0;z-index:4;display:grid;grid-template-columns:auto 1fr auto;gap:12px 18px;align-items:start;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 34px;background:linear-gradient(rgba(8,6,8,.84),rgba(8,6,8,0));pointer-events:none}
+.hud button{pointer-events:auto}
+.hud-chapter{min-width:0;pointer-events:none}
+.hud-kicker{display:block;font:11px/1 Georgia,serif;letter-spacing:3px;color:var(--stage-gold)}
+.hud-chapter h1{margin:6px 0 0;font:600 20px/1.25 var(--serif);letter-spacing:3px;color:var(--stage-text)}
+.hud-subtitle{margin:2px 0 0;font-size:12px;color:var(--stage-muted);letter-spacing:1px}
+.hud-center{justify-self:center;text-align:center;min-width:0;max-width:56ch;pointer-events:none}
+.hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;justify-content:center;gap:8px;align-items:center;padding:6px 16px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.74);font-size:13px;color:var(--stage-text)}
+.hud-label{color:var(--stage-gold);letter-spacing:2px;font-size:11px}
+.hud-meta{margin:6px 0 0;display:flex;justify-content:center;align-items:center;gap:10px;font-size:12px;color:var(--stage-muted);flex-wrap:wrap}
+.hud-meta progress{width:88px;height:6px;accent-color:var(--stage-gold)}
+.hud-tools{display:flex;gap:8px;justify-self:end;flex-wrap:wrap;justify-content:flex-end}
+.hud .tool-button{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;padding:0 12px;border-radius:999px;border:1px solid var(--stage-line);background:rgba(16,15,16,.78);color:var(--stage-gold-hi);font:inherit;font-size:15px;cursor:pointer}
+.hud .tool-button[aria-pressed="true"],.hud .tool-button:disabled{border-color:var(--stage-gold-hi)}
+.hud .tool-button:disabled{opacity:.5}
+.hud .tool-button b{position:absolute;top:-5px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#8d2d3b;color:#fff;font-size:11px;line-height:18px;text-align:center;font-weight:400}
+.tool-label{font-size:13px;letter-spacing:1px}
+#timer{font-variant-numeric:tabular-nums}
+#room-tabs{display:none}
+.pause-hint{position:absolute;right:20px;top:calc(env(safe-area-inset-top,0px) + 118px);margin:0;font-size:12px;color:var(--stage-muted);z-index:4}
+
+/* Story mode keeps the next-step guide; puzzle mode hides it (plan §5.5). */
+.journey-guide{display:none;position:absolute;left:16px;right:16px;top:calc(env(safe-area-inset-top,0px) + 128px);z-index:4;max-width:560px;margin:0 auto;padding:12px 14px;align-items:center;gap:12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:6px}
+body.mode-story .journey-guide{display:flex}
+.journey-guide h2{margin:0 0 4px;font-size:12px;letter-spacing:2px;color:var(--stage-gold)}
+.journey-guide p{margin:0;font-size:13px;line-height:1.7}
+
+/* Dialogue: narrative and actions, bottom-left on desktop and above the tray on phones. */
+.dialogue{position:absolute;z-index:4;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 112px);display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:end;padding:16px 18px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:6px;max-height:44dvh;overflow:auto;overscroll-behavior:contain}
+.dialogue-portrait{width:58px;height:70px;border:1px solid var(--stage-gold);display:grid;place-items:center;font-size:22px;color:var(--stage-gold-hi);background:radial-gradient(circle at 50% 35%,rgba(226,204,155,.2),transparent 65%),#15121a}
+.dialogue-body{min-width:0}
+.speaker{margin:0 0 6px;font-size:12px;letter-spacing:3px;color:var(--stage-gold-hi)}
+.narrative{margin:0;font:16px/1.85 var(--serif);color:var(--stage-text);white-space:pre-line}
+.dialogue-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px}
+.scene-progress{margin-right:auto;font-size:12px;color:var(--stage-muted)}
+.dialogue-actions .primary-button,.dialogue-actions .secondary-button{min-height:44px;padding:10px 18px;font-size:13px}
+
+/* Inventory tray: horizontal row on phones, a 390px panel bottom-right on desktop. */
+.tray{position:absolute;z-index:4;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(rgba(13,12,13,0),rgba(13,12,13,.97) 34%);border-top:1px solid var(--stage-line)}
+.tray .inventory-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.tray .inventory-heading h2{margin:0;font-size:11px;letter-spacing:2px;color:var(--stage-muted)}
+.tray #inventory-count{font-size:11px;color:var(--stage-muted)}
+.tray .inventory{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;scroll-snap-type:x proximity}
+.tray .inventory button{flex:0 0 60px;min-height:60px;width:60px;padding:4px;scroll-snap-align:start;border:1px solid var(--stage-line);border-radius:4px;background:rgba(0,0,0,.4);display:grid;place-items:center;gap:2px;color:var(--stage-gold-hi)}
+.tray .inventory button span{font-size:10px;line-height:1.3;text-align:center}
+.tray .inventory-empty{margin:0;font-size:12px;color:var(--stage-muted)}
+.tray .save-indicator{margin:6px 0 0;font-size:11px;color:var(--stage-muted)}
+
+.scene-clues{position:absolute;z-index:5;right:14px;top:calc(env(safe-area-inset-top,0px) + 124px);width:min(300px,calc(100vw - 28px));max-height:46dvh;overflow:auto;background:rgba(16,15,16,.95);border:1px solid var(--stage-line);border-radius:6px;padding:8px 10px;font-size:13px}
+.scene-clues summary{cursor:pointer;color:var(--stage-gold-hi);min-height:44px;display:flex;align-items:center}
+
+/* Chapter opening card: a full-screen title that shows once when a new act begins. */
+.chapter-opening{position:fixed;inset:0;z-index:60;display:grid;place-content:center;justify-items:center;gap:12px;padding:28px;text-align:center;background:radial-gradient(ellipse at 50% 40%,rgba(52,12,20,.92),#050405 74%);color:var(--stage-text);cursor:pointer;animation:stage-card-in .9s ease both}
+.chapter-opening-number{margin:0;font:12px Georgia,serif;letter-spacing:4px;color:var(--stage-gold)}
+.chapter-opening h2{margin:0;font:600 clamp(28px,6vw,46px)/1.25 var(--serif);letter-spacing:6px}
+.chapter-opening-subtitle{margin:0;color:var(--stage-gold-hi);font-size:16px;letter-spacing:2px}
+.chapter-opening-quote{max-width:34em;margin:6px 0 0;color:var(--stage-muted);font:15px/1.9 var(--serif)}
+.chapter-opening button{margin-top:14px;min-height:44px}
+@keyframes stage-card-in{from{opacity:0}to{opacity:1}}
+body.reduce-motion .chapter-opening{animation:none}
+
+/* Phones: the HUD wraps to two rows, the tray stays at the bottom, the scene is what the eye sees first. */
+@media (max-width:720px){
+ .hud{grid-template-columns:1fr auto;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 30px}
+ .hud-center{grid-column:1 / -1;grid-row:2;max-width:none;justify-self:stretch}
+ .hud-objective{font-size:12px;padding:5px 12px;max-width:100%}
+ .hud-chapter h1{font-size:17px;letter-spacing:2px}
+ .hud .tool-button{min-width:44px;padding:0 10px}
+ .tool-label{display:none}
+ .dialogue{left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 136px);grid-template-columns:1fr;gap:8px;padding:12px 14px;max-height:36dvh}
+ .tray .save-indicator{display:none}
+ .dialogue-portrait{display:none}
+ .narrative{font-size:15px;line-height:1.8}
+ .scene-clues{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 200px);right:10px}
+}
+
+/* Desktop and tablets: dialogue left, tray right, tools with labels. */
+@media (min-width:721px){
+ .dialogue{left:24px;right:auto;width:min(600px,calc(100vw - 480px));bottom:24px}
+ .tray{left:auto;right:24px;bottom:24px;width:390px;padding:12px 14px;border:1px solid var(--stage-line);border-radius:6px;background:var(--stage-panel)}
+ .tray .inventory{flex-wrap:wrap;overflow:visible}
+ .tray .inventory button{flex:0 0 auto}
+ #room-tabs{display:flex;position:absolute;left:24px;top:calc(env(safe-area-inset-top,0px) + 128px);z-index:4;gap:6px;flex-wrap:wrap;max-width:min(520px,calc(100vw - 480px))}
+ #room-tabs button{min-height:36px;padding:4px 10px;border:1px solid var(--stage-line);border-radius:2px;background:rgba(16,15,16,.7);font-size:12px;color:var(--stage-muted)}
+ #room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
+ #room-tabs button:disabled{opacity:.4}
+ .journey-guide{left:auto;right:24px;width:360px;top:calc(env(safe-area-inset-top,0px) + 128px)}
+ body.mode-story .journey-guide{display:flex}
+}
+
+@media (prefers-reduced-motion:reduce){
+ .game *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+
+/* Idle whisper: after a long pause the mirror's hint button glows gently (plan §5.5). */
+.hud .tool-button.whisper{border-color:var(--stage-gold-hi);animation:stage-whisper 2.6s ease-in-out infinite}
+@keyframes stage-whisper{0%,100%{box-shadow:0 0 0 0 rgba(226,204,155,0)}50%{box-shadow:0 0 18px 4px rgba(226,204,155,.42)}}
+body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px rgba(226,204,155,.35)}
+
+/* First-visit pan hint on phones; it fades once the player starts panning. */
+.pause-menu{display:grid;gap:10px}
+@media (max-width:720px){
+ .scene::after{content:'⟷ 左右滑動環顧房間';position:absolute;left:50%;top:44%;transform:translateX(-50%);z-index:3;padding:4px 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.72);color:var(--stage-gold-hi);font-size:12px;pointer-events:none;white-space:nowrap;animation:stage-pan-hint 1s 7s forwards}
+ .scene.panned::after{display:none}
+}
+@keyframes stage-pan-hint{to{opacity:0}}
+
+/* Dialogue layout: a header row with the collapse toggle, the text, then the actions that always stay visible. */
+.dialogue{display:flex;flex-direction:column;gap:8px}
+.dialogue-head{display:flex;align-items:center;gap:12px}
+.dialogue-portrait{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--stage-gold);color:var(--stage-gold-hi);font-size:16px;flex:0 0 auto}
+.dialogue-head .speaker{margin:0;flex:1;min-width:0}
+.dialogue-toggle{min-height:44px;padding:0 4px;font-size:12px;color:var(--stage-gold);letter-spacing:1px}
+.dialogue.collapsed .narrative{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.dialogue-actions{margin-top:0}
+@media (min-width:721px){.dialogue{width:min(600px,calc(100vw - 480px))}}
+@media (max-width:720px){.dialogue-portrait{display:grid}.dialogue-head{gap:10px}}
+
+/* Actions sit in the header row, so a collapsed dialogue is one row tall and most of the scene stays in view (plan §6.2). */
+.dialogue-head{flex-wrap:wrap}
+.dialogue-head .dialogue-actions{margin-left:auto;margin-top:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+@media (max-width:720px){
+ .dialogue{bottom:calc(env(safe-area-inset-bottom,0px) + 118px);max-height:none;padding:10px 12px;gap:6px}
+ .dialogue-portrait,.dialogue-head .scene-progress{display:none}
+ .dialogue-head .dialogue-actions .primary-button{min-height:44px;padding:8px 12px;font-size:12px}
+ .dialogue.collapsed .narrative{display:none}
+ .tray .inventory button{flex-basis:52px;width:52px;min-height:52px}
+}
+
+/* Phones: the closed clue list sits under the HUD, never over the scene's lower hotspots. */
+@media (max-width:720px){
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 118px);bottom:auto;right:10px;width:min(260px,calc(100vw - 20px))}
+}
+
+/* Phones: the HUD keeps the chapter, the objective and the tools; timer and progress bar move out of the way and the clue list sits below the HUD. */
+@media (max-width:720px){
+ #timer,#truth-progress{display:none}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 172px)}
+}
+
+/* Phones: the five tools stay on one row beside the chapter title, so the HUD stays short and nothing sits over the candle button. */
+@media (max-width:720px){
+ .hud{gap:10px 8px}
+ .hud-tools{gap:6px;flex-wrap:nowrap}
+ .hud .tool-button{min-width:44px;padding:0 8px}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 176px)}
+}
+
+/* Phones: act tabs stay available as one scrollable row under the HUD (replaying an act needs them). */
+@media (max-width:720px){
+ #room-tabs{display:flex;position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 176px);z-index:4;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+ #room-tabs button{flex:0 0 auto;min-height:36px;padding:4px 10px;border:1px solid var(--stage-line);border-radius:2px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted)}
+ #room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
+ #room-tabs button:disabled{opacity:.4}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 222px)}
+}
+
+/* Phones: explicit placement keeps the chapter and tools in the first row and the objective in the second. */
+@media (max-width:720px){
+ .hud-chapter{grid-column:1;grid-row:1;min-width:0}
+ .hud-tools{grid-column:2;grid-row:1}
+ .hud-center{grid-column:1 / -1;grid-row:2}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 246px)}
+}
+
+/* Phones: a wrapping flex row is more predictable than a spanning grid here: chapter and tools share the first row, the objective takes the second. */
+@media (max-width:720px){
+ .hud{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 8px}
+ .hud-chapter{flex:1 1 0;min-width:0;grid-column:auto;grid-row:auto}
+ .hud-tools{flex:0 0 auto;grid-column:auto;grid-row:auto}
+ .hud-center{flex:0 0 100%;grid-column:auto;grid-row:auto;max-width:none;justify-self:auto}
+}
+
+/* Phones: fixed positions keep the HUD predictable: chapter top-left, five tools top-right, objective full width below. */
+@media (max-width:720px){
+ .hud{display:block;min-height:118px}
+ .hud-chapter{padding-right:262px;min-width:0}
+ .hud-tools{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;flex-wrap:nowrap;gap:6px}
+ .hud-center{position:absolute;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 66px);max-width:none}
+ #room-tabs{top:calc(env(safe-area-inset-top,0px) + 124px)}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 176px)}
+}
+@media (max-width:720px){
+ .hud-tools{left:auto;width:max-content}
+}
+@media (max-width:720px){
+ .hud .tool-label{display:none!important}
+}
+@media (max-width:720px){
+ #room-tabs{top:calc(env(safe-area-inset-top,0px) + 134px)}
+ .scene-clues{top:calc(env(safe-area-inset-top,0px) + 184px)}
+}
+@media (min-width:721px){
+ .journey-guide{top:calc(env(safe-area-inset-top,0px) + 196px)}
+}
+@media (min-width:721px){
+ .scene-clues{left:24px;right:auto;top:calc(env(safe-area-inset-top,0px) + 172px);width:min(320px,calc(100vw - 480px))}
+}
+@media (max-width:720px){
+ .journey-guide{top:calc(env(safe-area-inset-top,0px) + 236px)}
+}

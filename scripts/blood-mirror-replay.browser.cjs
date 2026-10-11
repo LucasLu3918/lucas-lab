@@ -43,7 +43,7 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    await page.locator('[data-room="3"]').click();await page.locator('[data-clue="letter"]').evaluate(el=>el.click());await page.locator('#replay-evidence').click();await page.locator('[data-memory="0"]').click();
    await page.locator('[data-memory="0"] [data-concept="vial"]').waitFor();await page.keyboard.press('Escape');
    // Export, wipe, import.
-   await page.locator('.settings-toggle').click();
+   await page.locator('#pause').click();await page.locator('#pause-settings').click();
    const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#save-export').click()]);
    const file=out+'/save-'+width+'.json';writeFileSync(file,readFileSync(await download.path()));
    assert.deepEqual(JSON.parse(readFileSync(file,'utf8')).save.memories,['nyla']);

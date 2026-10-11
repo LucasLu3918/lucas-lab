@@ -241,11 +241,12 @@
  for(const {name,bytes} of distFiles){
   if(name.endsWith('.png'))assert.ok(name.startsWith('assets/icons/'),'PNG may only be published as a PWA icon: '+name);
   if(/\.(webp|avif|jpe?g)$/.test(name))assert.ok(bytes<=500*1024,'bitmap exceeds the 500 KB budget: '+name+' ('+Math.round(bytes/1024)+' KB)');
-  if(name.endsWith('.mp3'))assert.ok(bytes<=2.5*MB,'audio file exceeds the 2.5 MB budget: '+name);
+  if(name.endsWith('.mp3'))assert.ok(bytes<=4*MB,'audio file exceeds the 4 MB budget (plan D1): '+name);
  }
  const weight=prefixName=>distFiles.filter(f=>f.name.startsWith(prefixName)).reduce((sum,f)=>sum+f.bytes,0);
  const gamesWeight=weight('games/');
- assert.ok(gamesWeight<=11*MB,'dist/games exceeds 11 MB: '+(gamesWeight/MB).toFixed(1)+' MB');
+ assert.ok(gamesWeight<=26*MB,'dist/games exceeds 26 MB (plan D1): '+(gamesWeight/MB).toFixed(1)+' MB');
+ assert.ok(!distFiles.some(f=>f.name.endsWith('/highlights.mp3')),'highlights.mp3 is a master mix and must not ship (plan D1)');
  console.log('dist weight: '+(distFiles.reduce((sum,f)=>sum+f.bytes,0)/MB).toFixed(1)+' MB total, '+(gamesWeight/MB).toFixed(1)+' MB games, '+distFiles.length+' files');
  const htmlFiles=distFiles.filter(f=>f.name.endsWith('.html'));
  const token=(process.env.CF_ANALYTICS_TOKEN||'').trim();
