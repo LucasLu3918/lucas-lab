@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState,rooms,collect,inspect,solve,travel,restoreState,chooseEnding,visibleSpots} from '../games/blood-mirror/engine.js';
+import {initialState,rooms,collect,inspect,solve,travel,restoreState,chooseEnding,visibleSpots} from '../games/blood-mirror/engine/index.js';
 import {journeyGuide,journalChapters,spotText} from '../games/blood-mirror/journey.js';
 
 test('guidance distinguishes viewing from collecting and does not reveal answers',()=>{
@@ -64,7 +64,7 @@ test('the opened seal reveals the contract and the father signature only afterwa
 
 test('the prologue no longer gives away the code or the signature',async()=>{
  const {readFileSync}=await import('node:fs');
- const app=readFileSync(new URL('../games/blood-mirror/app.js',import.meta.url),'utf8');
+ const app=readFileSync(new URL('../games/blood-mirror/main.js',import.meta.url),'utf8');
  const prologue=app.slice(app.indexOf('function openStory'),app.indexOf('function openGuide'));
  for(const spoiler of ['七十三','第十三下','父親'])assert.ok(!prologue.includes(spoiler),spoiler);
 });

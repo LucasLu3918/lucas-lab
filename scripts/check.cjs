@@ -137,6 +137,8 @@
  const sitemap=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
  assert.ok(!sitemap.includes(origin+'/search/'),'noindex search must not be in sitemap');
  assert.ok(!sitemap.includes(origin+'/style-guide/'),'internal component showcase must not be in sitemap');
+ // Masters, original PNG sources and planning files stay in the repository and never ship.
+ for(const excluded of ['games/blood-mirror/play/source-art','games/blood-mirror/play/source-audio','games/blood-mirror/play/plan-improve'])assert.ok(!fs.existsSync(path.join(dist,excluded)),'master or planning files must not ship: '+excluded);
  for(const s of catalog.stories.filter(x=>!(x.manuscript||(x.chapters||[]).length)))assert.ok(!sitemap.includes(origin+'/stories/'+s.slug+'/'),'pending story in sitemap: '+s.slug);
  for(const g of catalog.games.filter(g=>g.status==='concept'))assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
  for(const p of catalog.projects.filter(x=>x.status==='concept'))assert.ok(!sitemap.includes(origin+'/projects/'+p.slug+'/'),'concept project in sitemap: '+p.slug);
@@ -165,7 +167,7 @@
    assert.ok(fs.existsSync(target),'broken game asset/link '+href);
   }
   const gameSource=path.join(root,'games',g.slug);
-  for(const file of ['app.js','engine.js','journey.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
+  for(const file of ['main.js','engine/index.js','engine/rules.js','engine/state.js','engine/save.js','data/chapters/index.js','data/chapters/library.js','data/items.js','data/endings.js','puzzles/index.js','puzzles/ledger.js','puzzles/pipes.js','journey.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
    assert.ok(fs.readFileSync(path.join(gameSource,file)).equals(fs.readFileSync(path.join(dist,play,file))),'game source/output mismatch: '+file);
   }
   assert.ok(!fs.readFileSync(path.join(gameSource,'style.css'),'utf8').includes('fonts.googleapis'),'game must use local fonts');

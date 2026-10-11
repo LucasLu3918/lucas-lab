@@ -18,9 +18,9 @@ for(const width of [360,390,768,1280]){
  await page.locator('#pipes-reset').click();assert.equal(await page.locator('#pipes-undo').isDisabled(),true);assert.ok((await page.locator('#pipes-status').innerText()).includes('0 / 5'));
  for(const [i,count] of [1,2,2,2,2].entries())for(let n=0;n<count;n++)await page.locator('[data-pipe="'+i+'"]').click();
  assert.equal(await page.locator('#pipes-confirm').isEnabled(),true);assert.equal(await page.locator('.pipe-piece.flowing').count(),5);assert.equal(await page.locator('.pipe-city .pipe-terminal-status').innerText(),'已接通');
- assert.ok(await page.evaluate(()=>!JSON.parse(localStorage.getItem('blood-mirror-challenges-v2')||'[]').includes('mine')),'should not finish before confirmation');
+ assert.ok(await page.evaluate(()=>!(JSON.parse(localStorage.getItem('blood-mirror-v2')||'{"puzzles":[]}').puzzles||[]).includes('mine')),'should not finish before confirmation');
  await page.locator('#modal-body').evaluate(el=>el.scrollTop=0);await page.locator('#modal').screenshot({path:out+'/pipes-'+width+'-connected.png'});
- await page.locator('#pipes-confirm').click();assert.match(await page.locator('#modal-body').innerText(),/壓力錶同時跳動/);await page.locator('#modal-close').click();await page.locator('#room-puzzle').click();assert.equal(await page.locator('[data-option]').count(),3);assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('blood-mirror-challenges-v2')).includes('mine')));
+ await page.locator('#pipes-confirm').click();assert.match(await page.locator('#modal-body').innerText(),/壓力錶同時跳動/);await page.locator('#modal-close').click();await page.locator('#room-puzzle').click();assert.equal(await page.locator('[data-option]').count(),3);assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('blood-mirror-v2')).puzzles.includes('mine')));
  for(const option of ['water','heat','city'])await page.locator('[data-option="'+option+'"]').click();await page.locator('#submit-seq').click();assert.equal(await page.locator('#modal-title').innerText(),'封印已解開');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));assert.deepEqual(errors,[]);console.log('✓ reciprocal flow, touch/keyboard, undo/reset, reopen, hint, explicit confirm, restored evidence and valve seal @ '+width);await context.close();
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots} from '../games/blood-mirror/engine.js';
+import {initialState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots} from '../games/blood-mirror/engine/index.js';
 import {journeyGuide,journalChapters} from '../games/blood-mirror/journey.js';
 import {summarizePlaylog,createPlaylog} from '../games/blood-mirror/playlog.js';
 

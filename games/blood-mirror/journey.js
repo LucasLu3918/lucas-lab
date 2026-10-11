@@ -1,4 +1,4 @@
-import {rooms,items,endings,visibleSpots,memorySpots,validAnswers} from './engine.js';
+import {rooms,items,endings,visibleSpots,memorySpots,validAnswers} from './engine/index.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
 export function spotText(spot,restored=false){return restored&&spot.restoredText?spot.restoredText:spot.text;}

@@ -1,6 +1,7 @@
 'use strict';
 // Playable game entries (copied as a static bundle) and concept-only game pages.
 const GAME_FILE_EXTENSIONS=['.js','.css','.svg'];
+const GAME_DIRECTORIES=['assets','data','engine','puzzles','ui','audio','styles'];
 
 // Original PNG sources live in games/<slug>/source-art/ (see games/blood-mirror/MEDIA_ASSETS.md), outside the copied assets/ tree.
 
@@ -20,7 +21,8 @@ module.exports=function renderGames(ctx){
      fs.mkdirSync(destination,{recursive:true});
      // Every top-level script and stylesheet ships, so a new module can no longer be left out by accident.
      for(const file of fs.readdirSync(source))if(GAME_FILE_EXTENSIONS.includes(path.extname(file)))fs.copyFileSync(path.join(source,file),path.join(destination,file));
-     fs.cpSync(path.join(source,'assets'),path.join(destination,'assets'),{recursive:true});
+     // Only whitelisted folders ship. source-art/, source-audio/ and plan-improve/ are masters and planning files and are never copied.
+     for(const dir of GAME_DIRECTORIES)if(fs.existsSync(path.join(source,dir)))fs.cpSync(path.join(source,dir),path.join(destination,dir),{recursive:true});
      // The same optional analytics beacon as every other page; the game shell is hand-written HTML, so it is added here.
      const gameHtml=fs.readFileSync(path.join(source,'index.html'),'utf8').replaceAll('__LAB_GAMES_URL__',url('games/')).replaceAll('__LAB_STORY_URL__',url('stories/'+story.slug+'/')).replace('</head>',()=>ctx.analyticsTag+'</head>');
      fs.writeFileSync(path.join(destination,'index.html'),gameHtml);

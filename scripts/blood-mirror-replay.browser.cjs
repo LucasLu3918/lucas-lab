@@ -46,7 +46,7 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    await page.locator('.settings-toggle').click();
    const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#save-export').click()]);
    const file=out+'/save-'+width+'.json';writeFileSync(file,readFileSync(await download.path()));
-   assert.deepEqual(JSON.parse(readFileSync(file,'utf8')).story.memories,['nyla']);
+   assert.deepEqual(JSON.parse(readFileSync(file,'utf8')).save.memories,['nyla']);
    assert.deepEqual(png,[],'gameplay must not fetch the 2.6MB PNG boards');assert.deepEqual(errors,[]);await context.close();
    // A second device: fresh browser profile, import the exported file.
    const device=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),fresh=await device.newPage();fresh.on('pageerror',e=>errors.push(e.message));
@@ -56,7 +56,7 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    assert.match(await fresh.locator('#modal-body').innerText(),/真相 5 \/ 5 · 結局 1 \/ 3 · 人物記憶 1 \/ 5/);
    await fresh.locator('#import-confirm').click();
    assert.match(await fresh.locator('#home-progress').innerText(),/人物記憶 1 \/ 5/);
-   assert.equal(await fresh.evaluate(()=>JSON.parse(localStorage.getItem('blood-mirror-challenges-v2')).length),5);
+   assert.equal(await fresh.evaluate(()=>JSON.parse(localStorage.getItem('blood-mirror-v2')).puzzles.length),5);
    await fresh.locator('.settings-toggle').click();await fresh.locator('#save-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"format":"other"}')});
    await fresh.waitForFunction(()=>document.querySelector('#toast').textContent.includes('不是血色魔鏡'));
    assert.match(await fresh.locator('#toast').innerText(),/不是血色魔鏡的存檔/);
