@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots,memorySpots} from '../games/blood-mirror/engine.js';
+import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots,memorySpots} from '../games/blood-mirror/engine/index.js';
 import {journeyGuide,memoryCollection,journeyRecap,journalChapters} from '../games/blood-mirror/journey.js';
-import {exportSave,parseSave,MAX_SAVE_BYTES} from '../games/blood-mirror/savefile.js';
+import {exportSave,parseSave,MAX_SAVE_BYTES} from '../games/blood-mirror/engine/index.js';
 
 function finish(state,{miners=true,contract=true}={}){
  for(let i=0;i<rooms.length;i++){
@@ -54,13 +54,17 @@ test('ending recap explains the outcome from what the player actually did',()=>{
  assert.equal(journeyRecap(initialState()),null);
 });
 
-test('portable saves round-trip and reject foreign, corrupt, oversized or tampered files safely',()=>{
+test('portable saves (v2) round-trip, read v1 files, and reject foreign, corrupt, oversized or tampered input safely',()=>{
  const state=finish(initialState());chooseEnding(state,'dawn');state.memories=['toby'];
  const text=exportSave(state,['library','mine','bogus']);
- const {state:back,challenges}=parseSave(text);
- assert.deepEqual(back.solved,[0,1,2,3,4]);assert.equal(back.ending,'dawn');assert.deepEqual(back.memories,['toby']);assert.deepEqual(challenges,['library','mine']);
- for(const bad of ['','{oops',JSON.stringify({format:'other',version:1,story:state}),JSON.stringify({format:'blood-mirror-save',version:2,story:state}),'x'.repeat(MAX_SAVE_BYTES+1)])assert.throws(()=>parseSave(bad));
- const tampered=JSON.parse(text);tampered.story.solved=[0,4];tampered.story.room=4;tampered.story.ending='crown';
+ const {state:back,puzzles}=parseSave(text);
+ assert.deepEqual(back.solved,[0,1,2,3,4]);assert.equal(back.ending,'dawn');assert.deepEqual(back.memories,['toby']);assert.deepEqual(puzzles,['library','mine']);
+ for(const bad of ['','{oops',JSON.stringify({format:'other',version:2,save:{}}),JSON.stringify({format:'blood-mirror-save',version:3,save:{}}),JSON.stringify({format:'blood-mirror-save',version:2,story:state}),'x'.repeat(MAX_SAVE_BYTES+1)])assert.throws(()=>parseSave(bad));
+ const tampered=JSON.parse(text);tampered.save.solved=['library','queen'];tampered.save.chapter='mirror';tampered.save.ending='crown';
  const safe=parseSave(JSON.stringify(tampered)).state;
  assert.deepEqual(safe.solved,[0]);assert.equal(safe.room,1);assert.equal(safe.ending,null);
+ // Files exported before the v2 format still import, with their puzzle list.
+ const legacy=JSON.stringify({format:'blood-mirror-save',version:1,exported:'2026-01-01T00:00:00.000Z',story:{...state,version:1},challenges:['library','mine','bogus']});
+ const old=parseSave(legacy);
+ assert.deepEqual(old.state.solved,[0,1,2,3,4]);assert.deepEqual(old.puzzles,['library','mine']);
 });
