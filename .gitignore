@@ -3,3 +3,5 @@ dist/
 .DS_Store
 *.log
 visual-audit-artifacts/
+.claude/settings.local.json
+.claude/worktrees/

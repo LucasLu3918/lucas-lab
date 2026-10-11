@@ -26,7 +26,6 @@
 
 ~~~text
 assets/music/
-  00_title_The_Mirror_Lied_First.mp3
   01_library_Black_Bell_Archive.mp3
   02_mine_Seven_Forgotten_Names.mp3
   03_crypt_Glass_Sleep.mp3
@@ -110,7 +109,7 @@ node scripts/blood-mirror.browser.cjs
 ## M4–M8 音訊與收藏素材（2026-10）
 
 - 音樂清單（`assets/music/`）：`10_theme_intro_Who_Deserves_to_Live.mp3`（39 秒前奏循環，標題畫面）、`11_theme_full_Who_Deserves_to_Live.mp3`（約 5 分鐘完整版，聆聽室與片尾名單，片尾以內部音軌鍵 `credits` 播放）。
-- `00_title_The_Mirror_Lied_First.mp3` 為舊版標題曲，目前程式已不引用，留待下一次清理時移除。
+- `00_title_The_Mirror_Lied_First.mp3` 為舊版標題曲，程式已不引用，已移至 `source-audio/`，不再隨遊戲發布。
 - 母帶 `source-audio/main_theme_Who_Deserves_to_Live.mp3`（約 9.3 MB）超過 8 MB 的提交守衛上限，未納入版本控制；`highlights.mp3` 已移出發布。
 - 場景環境音與音效全部由 WebAudio 即時合成（`audio/ambience.js`、`audio/sfx.js`），沒有額外音檔。
 - 鏡之碎片與收藏、成就、祕密尾聲皆為文字與 CSS 呈現，未新增圖片素材。
