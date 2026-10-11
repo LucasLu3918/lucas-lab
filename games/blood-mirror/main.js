@@ -284,16 +284,17 @@ scene.addEventListener('pointerup',endPan);scene.addEventListener('pointercancel
 window.addEventListener('resize',clampPan);
 function openPause(){
  const labHome=document.querySelector('.lab-bar a')?.href||'#';
- modal('暫停','MENU · 選單',`<div class="pause-menu"><button id="pause-resume" class="primary-button">繼續探索 ⟶</button><button id="pause-journal" class="secondary-button">線索筆記</button><button id="pause-settings" class="secondary-button">設定與攜帶存檔</button><button id="pause-title" class="secondary-button">返回標題</button><p class="modal-note"><a href="${labHome}">← 返回 LUCAS LAB 遊戲館</a></p></div>`);
+ modal('暫停','MENU · 選單',`<div class="pause-menu"><button id="pause-resume" class="primary-button">繼續探索 ⟶</button><button id="pause-journal" class="secondary-button">線索筆記</button><button id="pause-gallery" class="secondary-button">魔鏡藝廊</button><button id="pause-settings" class="secondary-button">設定與攜帶存檔</button><button id="pause-title" class="secondary-button">返回標題</button><p class="modal-note"><a href="${labHome}">← 返回 LUCAS LAB 遊戲館</a></p></div>`);
  $('#pause-resume').onclick=closeModal;
  $('#pause-journal').onclick=openJournal;
+ $('#pause-gallery').onclick=()=>{closeModal();openGallery();};
  $('#pause-settings').onclick=openSettings;
  $('#pause-title').onclick=()=>{closeModal();showView('home');};
 }
 // The dialogue opens by default on desktop and starts collapsed on phones, so the scene stays in view.
 let dialogueRoom=null,dialogueOpen=true;
 function setDialogue(open){dialogueOpen=open;$('#dialogue').classList.toggle('collapsed',!open);const toggle=$('#dialogue-toggle');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'收合對話':'展開對話';}
-function syncDialogue(){if(dialogueRoom!==state.room){dialogueRoom=state.room;setDialogue(!matchMedia('(max-width:720px)').matches);}else setDialogue(dialogueOpen);}
+function syncDialogue(){if(dialogueRoom!==state.room){dialogueRoom=state.room;setDialogue(!matchMedia('(max-width:720px),(max-height:520px)').matches);}else setDialogue(dialogueOpen);}
 $('#dialogue-toggle').onclick=()=>setDialogue(!dialogueOpen);
 for(const name of ['master','music','sfx','ambience'])mixer.setLevel(name,ui.preferences.volumes[name]);
 $('#glow').onclick=lightCandles;
