@@ -8,6 +8,8 @@
  --stage-text:#eee5d6;
  --stage-muted:#c9bfb1;
  --stage-panel:rgba(20,17,20,.94);
+ --stage-radius:10px;
+ --stage-radius-sm:6px;
  --stage-frost:#9fb6c8;
  --serif:'Noto Serif TC','Songti TC',Georgia,serif;
 }
@@ -53,7 +55,7 @@ body.reduce-motion .hotspot::before{animation:none}
    positioned with magic offsets and nothing can overlap when text wraps or a bar grows. */
 .stage{--edge-l:max(12px,env(safe-area-inset-left,0px));--edge-r:max(12px,env(safe-area-inset-right,0px))}
 .stage-top,.stage-bottom{position:absolute;left:0;right:0;z-index:4;display:flex;flex-direction:column;gap:8px;padding-left:var(--edge-l);padding-right:var(--edge-r);pointer-events:none}
-.stage-top{top:0;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:26px;background:linear-gradient(rgba(8,6,8,.86),rgba(8,6,8,.5) 62%,rgba(8,6,8,0))}
+.stage-top{top:0;z-index:5;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:26px;background:linear-gradient(rgba(8,6,8,.86),rgba(8,6,8,.5) 62%,rgba(8,6,8,0))}
 .stage-bottom{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
 .stage-bottom-row{display:flex;flex-direction:column;gap:8px;min-width:0}
 .stage-top button,.stage-top summary,.stage-top .clue-panel,.stage-top .hud-objective,.stage-bottom>.journey-guide{pointer-events:auto}
@@ -67,7 +69,7 @@ body.reduce-motion .hotspot::before{animation:none}
 .hud-kicker{display:block;font:11px/1 Georgia,serif;letter-spacing:3px;color:var(--stage-gold)}
 .hud-chapter h1{margin:5px 0 0;font:600 18px/1.25 var(--serif);letter-spacing:2px;color:var(--stage-text);overflow-wrap:anywhere}
 .hud-subtitle{display:none;margin:2px 0 0;font-size:12px;color:var(--stage-muted);letter-spacing:1px}
-.hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;max-width:100%;padding:6px 12px;border:1px solid var(--stage-line);border-radius:14px;background:rgba(16,15,16,.78);font-size:13px;line-height:1.5;color:var(--stage-text)}
+.hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;max-width:100%;padding:6px 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:13px;line-height:1.5;color:var(--stage-text)}
 .hud-label{color:var(--stage-gold);letter-spacing:2px;font-size:11px}
 .hud-meta{margin:0;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--stage-muted);padding-left:4px}
 .hud-meta progress{display:none;width:88px;height:6px;accent-color:var(--stage-gold)}
@@ -83,24 +85,40 @@ body.reduce-motion .hotspot::before{animation:none}
 .stage-subbar{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .room-tabs{flex:1 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border:0;padding:1px 0 2px;-webkit-overflow-scrolling:touch}
 .room-tabs::-webkit-scrollbar{display:none}
-.room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:3px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
+.room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
 .room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
 .room-tabs button:disabled{opacity:.4;cursor:default}
 .scene-clues{position:relative;flex:0 0 auto;margin:0;padding:0;border:0;background:none;font-size:13px}
 .scene-clues summary{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;list-style:none;cursor:pointer;color:var(--stage-gold-hi);white-space:nowrap;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.82);font-size:12px;letter-spacing:1px}
 .scene-clues summary::-webkit-details-marker{display:none}
-.scene-clues summary::after{content:'▾';font-size:10px;transition:transform .2s}
+.scene-clues summary .summary-chevron{display:grid;place-items:center;transition:transform .2s}
+.scene-clues summary .summary-chevron svg{width:14px;height:14px}
 .scene-clues[open] summary{border-color:var(--stage-gold-hi)}
-.scene-clues[open] summary::after{transform:rotate(180deg)}
-.scene-clues .clue-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:6;width:min(340px,calc(100vw - 24px));max-height:min(52dvh,420px);overflow:auto;overscroll-behavior:contain;padding:10px 12px 12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:6px;box-shadow:0 14px 40px rgba(0,0,0,.6)}
-.clue-hint{margin:0 0 8px;font-size:11px;color:var(--stage-muted)}
-.scene-clues .clue-list{margin-top:0;grid-template-columns:repeat(2,minmax(0,1fr))}
-.scene-clues .clue-list button{min-height:44px;color:var(--stage-text)}
+.scene-clues[open] summary .summary-chevron{transform:rotate(180deg)}
+.scene-clues .clue-panel{position:absolute;right:0;top:calc(100% + 8px);z-index:6;width:min(360px,calc(100vw - 24px));max-height:min(calc(100dvh - 300px),460px);min-height:min(220px,60dvh);overflow:auto;overscroll-behavior:contain;padding:12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:var(--stage-radius);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.clue-hint{margin:0 2px 10px;font-size:12px;line-height:1.5;color:var(--stage-muted)}
+.scene-clues .clue-list{display:flex;flex-direction:column;gap:14px;margin:0}
+.clue-group{display:flex;flex-direction:column;gap:4px}
+.clue-group-title{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 2px;font-size:12px;letter-spacing:2px;color:var(--stage-gold-hi)}
+.clue-group-title span{font-size:11px;letter-spacing:0;color:var(--stage-muted);font-variant-numeric:tabular-nums}
+.scene-clues .clue-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;min-height:44px;padding:6px 10px;text-align:left;color:var(--stage-text);border:1px solid transparent;border-radius:var(--stage-radius-sm);background:rgba(255,255,255,.035)}
+.scene-clues .clue-row:hover,.scene-clues .clue-row:focus-visible{background:rgba(226,204,155,.1);border-color:var(--stage-line)}
+.clue-row .clue-icon{display:grid;place-items:center;color:var(--stage-gold)}
+.clue-row .clue-icon svg{width:20px;height:20px}
+.clue-row .clue-name{font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+.clue-row .clue-state{display:inline-flex;align-items:center;gap:6px;font-size:11px;line-height:1;letter-spacing:.5px;white-space:nowrap;color:var(--stage-muted)}
+.clue-row .clue-state::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55}
+.clue-row.new .clue-state{color:var(--stage-gold-hi)}
+.clue-row.new .clue-state::before{opacity:1;box-shadow:0 0 6px rgba(226,204,155,.7)}
+.clue-row.todo .clue-state{color:#e0a8ae}
+.clue-row.todo .clue-state::before{opacity:1}
+.clue-row.done .clue-icon{opacity:.6}
+.scene-clues .clue-count{font-weight:400;font-size:11px;letter-spacing:0;color:var(--stage-muted);font-variant-numeric:tabular-nums}
 .pause-hint{align-self:flex-end;margin:0;font-size:12px;color:var(--stage-muted)}
 .pause-hint.hidden{display:none}
 
 /* Next-step guide (story mode only): one compact card above the dialogue. */
-.journey-guide{display:none;margin:0;padding:10px 12px;align-items:center;gap:6px 12px;grid-template-columns:minmax(0,1fr) auto;background:var(--stage-panel);border:1px solid var(--stage-line);border-left:2px solid var(--stage-gold);border-radius:6px}
+.journey-guide{display:none;margin:0;padding:10px 12px;align-items:center;gap:6px 12px;grid-template-columns:minmax(0,1fr) auto;background:var(--stage-panel);border:1px solid var(--stage-line);border-left:2px solid var(--stage-gold);border-radius:var(--stage-radius)}
 body.mode-story .journey-guide{display:grid}
 .journey-guide>div{min-width:0}
 .journey-guide h2{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -108,7 +126,7 @@ body.mode-story .journey-guide{display:grid}
 .journey-guide button{flex:none;align-self:center;min-height:44px;padding:6px 14px;font-size:13px;white-space:nowrap}
 
 /* Dialogue: header row (speaker, collapse toggle, actions) stays put; only the narrative text scrolls. */
-.dialogue{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px 14px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:6px;overflow:hidden}
+.dialogue{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px 14px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:var(--stage-radius);overflow:hidden}
 .dialogue-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
 .dialogue-portrait{display:none;width:40px;height:40px;flex:0 0 auto;place-items:center;border:1px solid var(--stage-gold);color:var(--stage-gold-hi);font-size:16px;background:radial-gradient(circle at 50% 35%,rgba(226,204,155,.2),transparent 65%),#15121a}
 .speaker{margin:0;flex:1 1 auto;min-width:0;font-size:12px;letter-spacing:3px;color:var(--stage-gold-hi)}
@@ -120,13 +138,13 @@ body.mode-story .journey-guide{display:grid}
 .dialogue.collapsed .narrative{display:none}
 
 /* Inventory tray: label on the left, items scroll sideways. */
-.tray{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0;padding:8px 12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:6px}
+.tray{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0;padding:8px 12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:var(--stage-radius)}
 .tray .inventory-heading{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:0;flex:0 0 auto}
 .tray .inventory-heading h2{margin:0;font-size:11px;letter-spacing:2px;color:var(--stage-muted)}
 .tray #inventory-count{font-size:11px;color:var(--stage-muted)}
 .tray .inventory{display:flex;flex:1 1 0;min-width:0;gap:8px;overflow-x:auto;padding:2px;scroll-snap-type:x proximity;scrollbar-width:thin}
-.tray .inventory button{flex:0 0 52px;width:52px;min-height:52px;padding:4px;scroll-snap-align:start;border:1px solid var(--stage-line);border-radius:4px;background:rgba(0,0,0,.4);display:grid;place-items:center;gap:2px;color:var(--stage-gold-hi)}
-.tray .inventory button span{font-size:10px;line-height:1.3;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tray .inventory button{flex:0 0 68px;width:68px;min-height:60px;padding:4px;scroll-snap-align:start;border:1px solid var(--stage-line);border-radius:var(--stage-radius-sm);background:rgba(0,0,0,.4);display:grid;place-items:center;gap:2px;color:var(--stage-gold-hi)}
+.tray .inventory button span{font-size:11px;line-height:1.3;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 .tray .inventory-empty{margin:0;padding:0;border:0;font-size:12px;line-height:44px;color:var(--stage-muted);text-align:left;white-space:nowrap}
 .tray .save-indicator{display:none;flex:0 0 100%;margin:2px 0 0;font-size:11px;color:var(--stage-muted)}
 
@@ -158,11 +176,12 @@ body.mode-story .journey-guide{display:grid}
  .tray{flex:0 0 clamp(300px,28vw,390px);margin-left:auto;align-items:stretch;flex-direction:column;flex-wrap:nowrap;gap:6px;padding:12px 14px}
  .tray .inventory-heading{flex-direction:row;justify-content:space-between;align-items:center;width:100%}
  .tray .inventory{flex:0 0 auto;flex-wrap:wrap;overflow:visible}
- .tray .inventory button{flex:0 0 60px;width:60px;min-height:60px}
+ .tray .inventory button{flex:0 0 64px;width:64px;min-height:60px}
+ .tray .inventory button span{-webkit-line-clamp:1;overflow-wrap:normal;text-overflow:ellipsis;white-space:nowrap;display:block}
  .tray .inventory-empty{line-height:1.7}
  .tray .save-indicator{display:block}
  .journey-guide{align-self:flex-start;width:min(680px,100%)}
- .scene-clues .clue-panel{width:min(380px,calc(100vw - 48px))}
+ .scene-clues .clue-panel{width:min(380px,calc(100vw - 48px));max-height:min(calc(100dvh - 440px),480px)}
  .view-arrow{top:46%}
 }
 
@@ -244,8 +263,70 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 @keyframes stage-pan-hint{to{opacity:0}}
 
 /* Views: arrows on both sides of the scene (the arrow keys switch views too) */
-.view-arrow{position:absolute;top:46%;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid var(--stage-line);background:rgba(16,15,16,.55);color:var(--stage-gold-hi);font:26px/1 Georgia,serif;display:grid;place-items:center;padding:0}
+.view-arrow{position:absolute;top:46%;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid var(--stage-line);background:rgba(16,15,16,.55);color:var(--stage-gold-hi);display:grid;place-items:center;padding:0;line-height:0}
+.view-arrow>span{display:grid;place-items:center;width:100%;height:100%}
+.view-arrow svg{width:22px;height:22px;display:block}
 .view-arrow[hidden]{display:none}
 #view-prev{left:8px}#view-next{right:8px}
 .view-arrow:hover,.view-arrow:focus-visible{background:rgba(16,15,16,.85);border-color:var(--stage-gold-hi)}
 .clue-view{font-style:normal;color:var(--stage-muted);font-size:11px}
+
+/* One icon family (icons.js): sizes are set here so every glyph in the play route shares a grid and line weight. */
+.stage .ui-icon{display:block;flex:none}
+.hud .tool-icon{display:grid;place-items:center}
+.hud .tool-icon svg{width:22px;height:22px}
+.dialogue-portrait svg{width:22px;height:22px}
+.dialogue-portrait{border-radius:50%}
+.tray .inventory button{gap:3px;color:var(--stage-gold-hi)}
+.tray .inventory button svg{width:24px;height:24px}
+.tray .inventory button:hover:not(:disabled){border-color:var(--stage-gold-hi);background:rgba(226,204,155,.08)}
+.hotspot svg{width:26px;height:26px}
+.game-meta i{display:inline-grid;vertical-align:-3px;margin-right:6px;color:var(--gold)}
+.game-meta i svg{width:15px;height:15px}
+.game-meta span{display:inline-flex;align-items:center}
+.ending-symbol{display:inline-grid;place-items:center}
+.ending-symbol svg,.success-gem svg{width:48px;height:48px}
+.success-gem{display:grid;place-items:center}
+
+/* Title screen: the secondary action matches the primary one in height and shape. */
+.hero-buttons .text-button{min-height:54px;padding:0 24px;border:1px solid var(--line);border-radius:6px;background:transparent}
+.hero-buttons .text-button:hover:not(:disabled){border-color:var(--gold);background:rgba(195,172,128,.08)}
+.hero-buttons button{transition:none}
+
+/* Arrows inside buttons are icons too (see enableButtonArrows). */
+.btn-arrow{display:inline-grid;place-items:center;width:1.25em;height:1.25em;flex:none;line-height:0;font-size:inherit}
+.btn-arrow svg{width:100%;height:100%}
+.primary-button .btn-arrow,.text-button .btn-arrow,.secondary-button .btn-arrow{font-size:1.2em}
+.primary-button span.btn-arrow{font-size:1.2em;line-height:0}
+.modal-shell .primary-button,.dialogue-actions .primary-button,.journey-guide button{gap:10px}
+@media (max-width:600px){
+ .hero-buttons{flex-direction:column;align-items:stretch;gap:10px}
+ .hero-buttons button{justify-content:center;width:100%}
+}
+
+/* Settings: the volume group follows the same row rhythm as the toggles above it. */
+.settings-volume{margin:0;padding:16px 0 8px;border:0;border-bottom:1px solid var(--line);min-width:0}
+.settings-volume legend{padding:0;margin-bottom:6px;font-size:13px;color:var(--text)}
+.settings-slider{display:grid;grid-template-columns:5.5em minmax(0,1fr);align-items:center;gap:14px;min-height:44px;font-size:13px;color:var(--muted)}
+.settings-slider input{width:100%;margin:0;accent-color:var(--gold)}
+
+/* Gallery: every card shows its picture in the same 4:3 frame; the preview dialog still shows the whole image. */
+.artwork-card img{object-fit:cover;object-position:50% 22%}
+.gallery-filters button{border-radius:999px}
+.gallery-listening{padding:4px 18px;border-radius:var(--stage-radius)}
+.gallery-listening[open]{padding-bottom:18px}
+.gallery-listening summary{display:flex;align-items:center}
+.artwork-card{border-radius:var(--stage-radius)}
+.artwork-locked>div svg{width:56px;height:56px}
+
+/* Choice rows (epilogue, seals, last choice): label on the left, arrow pinned right, same height and corners as other buttons. */
+.choice-option{min-height:52px;font-size:14px;border-radius:var(--stage-radius-sm)}
+.choice-option .btn-arrow{float:right;margin:.3em 0 0 12px}
+.choice-option::after{content:'';display:block;clear:both}
+
+/* Ending: breathing room between the recap card and the buttons, and one rhythm for the button stack. */
+.ending-recap{margin:20px 0 24px;border-radius:var(--stage-radius)}
+.ending-buttons{gap:12px}
+.ending-buttons .primary-button,.ending-buttons .text-button{min-height:52px}
+.ending-buttons .text-button{color:var(--gold)}
+.maze-key{display:grid;place-items:center;padding:0}
