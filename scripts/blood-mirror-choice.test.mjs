@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,validAnswers,queenResponses,unlockText} from '../games/blood-mirror/engine.js';
+import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,validAnswers,queenResponses,unlockText} from '../games/blood-mirror/engine/index.js';
 import {journeyRecap} from '../games/blood-mirror/journey.js';
 
 const queen=rooms.findIndex(r=>r.free);

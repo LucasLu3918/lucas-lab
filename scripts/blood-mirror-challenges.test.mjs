@@ -1,8 +1,8 @@
-import {analyzePipes,pipePorts,initialPipeRotations} from '../games/blood-mirror/pipes.js';
+import {analyzePipes,pipePorts,initialPipeRotations} from '../games/blood-mirror/puzzles/pipes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ledgerTile,ledgerMarkup,ledgerPieces} from '../games/blood-mirror/ledger.js';
-import {puzzleIsSolved,pipeIsSolved,glassIsSolved,resetChallenges,isChallengeComplete} from '../games/blood-mirror/challenges.js';
+import {ledgerTile,ledgerMarkup,ledgerPieces} from '../games/blood-mirror/puzzles/ledger.js';
+import {puzzleIsSolved,pipeIsSolved,glassIsSolved,resetPuzzles,isPuzzleComplete} from '../games/blood-mirror/puzzles/index.js';
 test('ledger pieces are distinct crops of one typeset page',()=>{
  const boxes=ledgerPieces.map((_,i)=>ledgerTile(i).match(/viewBox="([^"]+)"/)[1]);
  assert.equal(new Set(boxes).size,9);assert.equal(boxes[0],'0 0 100 100');assert.equal(boxes[8],'200 200 100 100');
@@ -51,6 +51,6 @@ test('four-row mirrored sigil obeys left/right reversal per row',()=>{
  assert.equal(glassIsSolved([],[]),false);
 });
 test('progress helpers safely tolerate browsers without localStorage',()=>{
- resetChallenges();
- assert.equal(isChallengeComplete('library'),false);
+ resetPuzzles();
+ assert.equal(isPuzzleComplete('library'),false);
 });
