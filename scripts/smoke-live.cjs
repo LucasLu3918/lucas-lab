@@ -47,7 +47,7 @@ async function verify(){
  const fingerprint=home.body.match(/href="\/?(static\/[^"]+\/style\.css)"/);
  assert.ok(fingerprint,'home page does not reference a fingerprinted stylesheet');
  const immutable=await get('/'+fingerprint[1]);
- assert.match(immutable.response.headers.get('cache-control')||'','immutable','fingerprinted CSS is not immutable');
+ assert.match(immutable.response.headers.get('cache-control')||'',/immutable/,'fingerprinted CSS is not immutable');
  const worker=await get('/sw.js');
  assert.match(worker.body,/const PRECACHE=\[/,'offline worker missing or not built');
  assert.equal(worker.response.headers.get('cache-control'),'no-cache','offline worker must be revalidated');
