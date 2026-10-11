@@ -1,19 +1,5 @@
 [
   {
-    "key": "00_title",
-    "name": "鏡子第一次說謊",
-    "en": "The Mirror Lied First",
-    "bpm": 68,
-    "seconds": 30.9,
-    "file": "00_title_The_Mirror_Lied_First.mp3",
-    "bytes": 620809,
-    "rms": 0.072,
-    "stage": "首頁主題",
-    "story": "破碎的童謠從音樂盒響起，古老鐘聲預示生命契約。",
-    "instruments": "音樂盒・弦樂・遠鐘",
-    "mood": "詛咒與懸疑"
-  },
-  {
     "key": "01_library",
     "name": "黑鐘書庫・第十三聲",
     "en": "Black Bell Archive",
