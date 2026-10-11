@@ -3,7 +3,7 @@ export default {
   id: 'queen',
   title: '王后寢宮',
   subtitle: '她最後的謊言',
-  chapter: '第四幕',
+  chapter: '第六幕',
   image: 'queen.webp',
   atmosphere: 'queen',
   intro: '鏡子讓妳看見年輕的薇菈。她為了救愛人嫁給國王，卻成為契約的囚徒。床頭那隻灰兔，右耳被一針一線縫好了。',
@@ -25,6 +25,15 @@ export default {
     '妳的三個回答，和當年的她一模一樣。',
     '妳的回答和當年的白雪不同。薇菈沒有阻止，只是把它們一字一字記了下來。'
   ],
+  deduction: {
+    prompt: '魔鏡問：「在回答王后的問題之前，先說說妳認識的那個薇菈。」',
+    template: ['替妳縫好兔耳的人是', 0, '；她為了救', 1, '才嫁給國王，從此成了', 2, '的囚徒。'],
+    blanks: [
+      { group: 'person', answer: 'queen' },
+      { group: 'person', answer: 'lover' },
+      { group: 'concept', answer: 'contract' }
+    ]
+  },
   spots: [
     {
       id: 'rabbit',
@@ -33,6 +42,7 @@ export default {
       x: 23,
       y: 65,
       text: '兔子的右耳總是會掉。每次醒來，耳朵卻又被縫好。\n原來替妳修補它的人，一直是薇菈。',
+      clues: ['queen', 'grayrabbit'],
       clue: true
     },
     {
@@ -44,6 +54,7 @@ export default {
       text: '銀針藏在王后的縫線盒裡。鏡中的回憶顯示，國王曾用另一支銀針刺向伊蓮。證詞可以刺破謊言。',
       item: 'needle',
       itemName: '魔法銀針',
+      clues: ['silverneedle'],
       clue: true
     },
     {
@@ -54,6 +65,7 @@ export default {
       y: 47,
       text: '信紙被淚水暈開，只剩幾個字還看得清：「我不想……」「……第三種……」「即使……」\n角落有薇菈的補註：「她的回答，藏在我們共同的記憶裡。」',
       restoredText: '記憶拼回之後，信上的字重新浮現。白雪曾經這樣回答王后：\n「我不想成為女王。」\n「我會尋找第三種方法。」\n「即使世界不知道，我仍願意。」\n薇菈的補註：這是她當年的回答。如今，請用妳自己的意志回答。',
+      clues: ['thirdway'],
       clue: true
     },
     {
@@ -64,6 +76,47 @@ export default {
       y: 61,
       text: '魔鏡重複著王后的三個問題。沒有標準答案；妳怎麼回答，薇菈就會留下怎樣的證詞。',
       lock: true
+    },
+    {
+      id: 'portrait',
+      label: '年輕醫師的畫像',
+      icon: 'gem',
+      x: 12,
+      y: 48,
+      text: '畫像裡的男人戴著一副圓框眼鏡，白袍的口袋裡插著聽診器。畫框背面寫著：「等我畢業，我們開一間診所。」\n畫像的玻璃被擦得很亮，是這間寢宮裡唯一沒有灰塵的東西。\n畫像右下角有一圈細小的霜痕，永遠擦不掉。',
+      clues: ['lover', 'frost'],
+      clue: true
+    },
+    {
+      id: 'agreement',
+      label: '床頭的婚約文書',
+      icon: 'scroll',
+      x: 52,
+      y: 58,
+      text: '婚約文書夾在祈禱書裡，邊角被反覆摺過。每一條條款都在談王室生命庫，沒有一條談到愛。\n簽名處有被淚水暈開的痕跡：薇菈簽下的，是一份她再也無法離開的契約。',
+      clues: ['contract'],
+      clue: true
+    },
+    {
+      id: 'vanity',
+      portrait: 'vera',
+      label: '梳妝台的王冠',
+      icon: 'mirror',
+      x: 62,
+      y: 32,
+      text: '王冠被隨意放在梳妝台上，鏡面朝下。薇菈說過：「它不是榮耀，是鎖。戴上它的人，要替整個王國記帳。」\n冠上少了一顆寶石，缺口的形狀剛好是一滴眼淚。',
+      clues: ['crown'],
+      clue: true
+    },
+    {
+      id: 'thimble',
+      label: '縫線盒的頂針',
+      icon: 'key',
+      x: 30,
+      y: 82,
+      text: '銀頂針的內側磨得發亮。縫了無數次兔耳的指尖，就是被它保護的。\n盒子裡的線已經用掉一大半，每一種顏色都縫過同一隻兔子。',
+      item: 'thimble',
+      itemName: '銀頂針'
     },
     {
       id: 'elaine',
@@ -86,6 +139,7 @@ export default {
     },
     {
       id: 'vera',
+      portrait: 'vera',
       label: '記憶：雪為什麼是白的',
       icon: 'gem',
       x: 62,
@@ -145,7 +199,7 @@ export default {
     }
   ],
   hints: [
-    '先收取銀針，再打開王后的信，翻開記憶卡讓字跡浮現。',
+    '先收取銀針，再打開王后的信，翻開記憶卡讓字跡浮現。三問之前，魔鏡會要妳說出對薇菈的認識（推理三格）。',
     '王后的三問沒有標準答案。信上記著白雪當年的回答；妳可以照著回答，也可以說出自己的想法。',
     '任何回答都能讓魔鏡交出證詞。不同的回答，會聽到薇菈不同的回應，也會留在結局的回顧裡。'
   ]

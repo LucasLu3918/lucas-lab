@@ -6,10 +6,15 @@ export const galleryAssets=[
  {id:'snow-white',category:'character',title:'白雪公主',src:'assets/snow-white.webp',alt:'白雪公主戴著王冠，在燭光與魔鏡之間握著紅蘋果',description:'旅程的主視覺。'},
  {id:'portrait',category:'character',title:'魔鏡前的公主肖像',src:'assets/concepts/design-board-1.webp',sprite:'portrait',alt:'白雪公主站在魔鏡前的肖像',description:'取自企劃概念展板的肖像。早期版本曾作為黑鐘書庫的拼圖畫面。'},
  {id:'library',category:'scene',title:'黑鐘書庫',src:'assets/chamber.webp',alt:'幽暗的哥德式書庫與古老陳設',description:'第一幕，午夜第十三聲鐘響後的探索場景。'},
- {id:'mine',category:'scene',title:'銀骨礦坑',src:'assets/mine.webp',alt:'銀骨礦坑的地下工程場景',description:'第二幕，蒸汽工程與被遺忘的名字。'},
- {id:'crypt',category:'scene',title:'玻璃棺室',src:'assets/crypt.webp',alt:'玻璃棺室的冰冷幽暗場景',description:'第三幕，沉睡與符印的交界。'},
- {id:'queen',category:'scene',title:'王后寢宮',src:'assets/queen.webp',alt:'王后寢宮的哥德式室內場景',description:'第四幕，縫線、記憶與她最後的謊言。'},
- {id:'mirror',category:'scene',title:'鏡中之國',src:'assets/mirror.webp',alt:'鏡中之國的奇幻倒影場景',description:'第五幕，名字與契約的終點。'},
+ {id:'ballroom',category:'scene',title:'血色舞會',src:'assets/ballroom.webp',alt:'凝結成舞姿的蒙面賓客與深紅絲絨舞廳',description:'第二幕，面具下的謊言。'},
+ {id:'mirror-hall',category:'scene',title:'鏡廳',src:'assets/mirror-hall.webp',alt:'兩側排滿金框古鏡的長廊，月光從盡頭微開的門照入',description:'舞廳大鏡後的長廊。'},
+ {id:'balcony',category:'scene',title:'王宮陽台',src:'assets/balcony.webp',alt:'月夜下的陽台，桌上有兩杯紅酒與一隻黑手套，遠方蒸汽塔冒著白煙',description:'舞會之外的另一個夜晚。'},
+ {id:'hunter',category:'scene',title:'獵人的心臟',src:'assets/hunter-cabin.webp',alt:'獵人小屋桌上，玻璃罐裡泛著紅光的玻璃心臟',description:'第三幕，玻璃裡的孩子。'},
+ {id:'black-pine-path',category:'scene',title:'黑松林小徑',src:'assets/black-pine-path.webp',alt:'積雪的黑松林小徑，掛著提燈，遠處有一點紅光',description:'獵人小屋之後的路。'},
+ {id:'mine',category:'scene',title:'銀骨礦坑',src:'assets/mine.webp',alt:'銀骨礦坑的地下工程場景',description:'第四幕，蒸汽工程與被遺忘的名字。'},
+ {id:'crypt',category:'scene',title:'玻璃棺室',src:'assets/crypt.webp',alt:'玻璃棺室的冰冷幽暗場景',description:'第五幕，沉睡與符印的交界。'},
+ {id:'queen',category:'scene',title:'王后寢宮',src:'assets/queen.webp',alt:'王后寢宮的哥德式室內場景',description:'第六幕，縫線、記憶與她最後的謊言。'},
+ {id:'mirror',category:'scene',title:'鏡中之國',src:'assets/mirror.webp',alt:'鏡中之國的奇幻倒影場景',description:'第七幕，名字與契約的終點。'},
  {id:'design-board-1',category:'concept',unlockEndings:['dawn','frost','crown'],title:'遊戲全面升級 · 概念展板',src:'assets/concepts/design-board-1.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
  {id:'design-board-3',category:'concept',unlockEndings:['dawn','frost','crown'],title:'多樣解謎 · 概念展板',src:'assets/concepts/design-board-3.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
  {id:'design-board-4',category:'concept',unlockEndings:['dawn','frost','crown'],title:'三種命運 · 概念展板',src:'assets/concepts/design-board-4.webp',alt:'血色魔鏡遊戲企劃展板，包含互動玩法、配樂與三種結局的視覺提案',description:'原始遊戲企劃概念展板；其中的玩法、曲長與結局文字為創作提案，實際內容以遊戲為準。'},
@@ -22,7 +27,7 @@ export const filterArtwork=category=>galleryAssets.filter(asset=>category==='all
 export function createGallery({getEndings,openModal,closeModal,onPreviewStart,onPreviewStop}){
  const filters=document.querySelector('#gallery-filters'),grid=document.querySelector('#gallery-grid'),status=document.querySelector('#gallery-status');
  const player=document.querySelector('#gallery-audio'),trackSelect=document.querySelector('#gallery-track');
- const trackTitles={home:'標題 · 主題曲前奏',library:'第一幕 · 黑鐘書庫',mine:'第二幕 · 銀骨礦坑',crypt:'第三幕 · 玻璃棺室',queen:'第四幕 · 王后寢宮',mirror:'第五幕 · 鏡中之國',dawn:'真結局 · 無名的黎明',frost:'結局二 · 霜潮',crown:'結局三 · 血色王冠'};
+ const trackTitles={home:'標題 · 主題曲前奏',library:'第一幕 · 黑鐘書庫',ballroom:'第二幕 · 血色舞會',hunter:'第三幕 · 獵人的心臟',mine:'第四幕 · 銀骨礦坑',crypt:'第五幕 · 玻璃棺室',queen:'第六幕 · 王后寢宮',mirror:'第七幕 · 鏡中之國',dawn:'真結局 · 無名的黎明',frost:'結局二 · 霜潮',crown:'結局三 · 血色王冠'};
  let suppressResume=false;
  const stopPreview=(resume=true)=>{if(!player.paused){suppressResume=!resume;player.pause();}};
  player.addEventListener('play',onPreviewStart);player.addEventListener('pause',()=>{if(!suppressResume)onPreviewStop();suppressResume=false;});player.addEventListener('ended',onPreviewStop);

@@ -17,7 +17,8 @@ const BUDGETS=[
  {route:'/stories/dark-snow-white/',maxBytes:85*KB,maxRequests:8},
  {route:'/stories/dark-snow-white/chapters/00/',maxBytes:60*KB,maxRequests:7},
  {route:'/search/',maxBytes:330*KB,maxRequests:14},
- {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:30}
+ // The game ships as native ES modules (no bundler, plan §9.1), so its request count is higher; bytes stay the tight guard.
+ {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:55}
 ];
 const WIDTHS=[390,1440];
 

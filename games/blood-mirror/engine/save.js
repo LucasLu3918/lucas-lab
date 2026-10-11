@@ -1,6 +1,6 @@
 // Save format v2: chapters are stored by id, so inserting a chapter never shifts saved progress.
 // Version 1 (chapter indices, separate puzzle key) is read once and then superseded by v2.
-// Fields added after v2 shipped (clues, shards, achievements, glowRooms, misses) are optional:
+// Fields added after v2 shipped (clues, deduced, choices, skipped, roster, shards, achievements, glowRooms, misses) are optional:
 // a save without them restores to empty collections, so no version bump is needed.
 import {chapters} from '../data/chapters/index.js';
 import {restoreState} from './state.js';
@@ -30,6 +30,11 @@ export function toSaveV2(state,puzzles=[]){
   seen:[...state.seen],
   hints:Object.fromEntries(ids.map((id,i)=>[id,state.hints[i]??0])),
   clues:[...(state.clues||[])],
+  deduced:(state.deduced||[]).map(i=>ids[i]).filter(Boolean),
+  choices:{...(state.choices||{})},
+  // Which acts this save knew about, and which late-added acts it may leave open (see restoreState).
+  roster:[...ids],
+  skipped:(state.skipped||[]).map(i=>ids[i]).filter(Boolean),
   glowRooms:(state.glowRooms||[]).map(i=>ids[i]).filter(Boolean),
   misses:Object.fromEntries(ids.map((id,i)=>[id,state.misses?.[i]??0])),
   memories:[...(state.memories||[])],
@@ -59,6 +64,12 @@ export function fromSaveV2(data){
   seen:data.seen,
   hints:Object.fromEntries(ids.map((id,i)=>[i,data.hints?.[id]??0])),
   clues:data.clues,
+  deduced:Array.isArray(data.deduced)?data.deduced.map(id=>ids.indexOf(id)):[],
+  choices:data.choices,
+  // A save without a roster predates the acts added later; it may leave those open until it is played again.
+  skipped:Array.isArray(data.roster)
+   ?(Array.isArray(data.skipped)?data.skipped.map(id=>ids.indexOf(id)):[])
+   :chapters.map((c,i)=>c.catchUp?i:-1).filter(i=>i>=0),
   glowRooms:Array.isArray(data.glowRooms)?data.glowRooms.map(id=>ids.indexOf(id)):[],
   misses:Object.fromEntries(ids.map((id,i)=>[i,data.misses?.[id]??0])),
   shards:data.shards,
@@ -73,6 +84,25 @@ export function fromSaveV2(data){
  return {state:restoreState(legacy),puzzles:knownIds(data.puzzles)};
 }
 
+// Version 1 saves count the five original acts by index. Chapters have since been inserted, so those
+// indices are translated through the original order before the state is restored.
+const V1_ORDER=['library','mine','crypt','queen','mirror'];
+export function remapV1(raw){
+ if(!raw||typeof raw!=='object'||raw.version!==1)return raw;
+ const ids=chapterIds(),to=i=>{const at=ids.indexOf(V1_ORDER[i]);return at<0?null:at;};
+ const index=value=>Number.isInteger(value)&&value>=0&&value<V1_ORDER.length?to(value):null;
+ const byIndex=map=>Object.fromEntries(Object.entries(map&&typeof map==='object'?map:{}).map(([k,v])=>[index(Number(k)),v]).filter(([k])=>k!==null));
+ return {
+  ...raw,
+  room:index(raw.room)??0,
+  solved:Array.isArray(raw.solved)?raw.solved.map(index).filter(i=>i!==null):[],
+  hints:byIndex(raw.hints),
+  misses:byIndex(raw.misses),
+  glowRooms:Array.isArray(raw.glowRooms)?raw.glowRooms.map(index).filter(i=>i!==null):[],
+  skipped:chapters.map((c,i)=>c.catchUp?i:-1).filter(i=>i>=0)
+ };
+}
+
 function parseJSON(text){try{return JSON.parse(text);}catch{return null;}}
 
 // Reads the browser store: v2 first, then the untouched v1 keys as a one-time migration source.
@@ -83,7 +113,7 @@ export function loadSave(storage=globalThis.localStorage){
  const legacyRaw=read(LEGACY_SAVE_KEY);
  const legacyPuzzles=parseJSON(read(LEGACY_PUZZLE_KEY));
  return {
-  state:legacyRaw===null?restoreState(null):restoreState(parseJSON(legacyRaw)),
+  state:legacyRaw===null?restoreState(null):restoreState(remapV1(parseJSON(legacyRaw))),
   puzzles:knownIds(legacyPuzzles),
   migrated:legacyRaw!==null
  };
@@ -111,6 +141,6 @@ export function parseSave(text){
   if(!loaded)throw new Error('這不是血色魔鏡的存檔，或版本不相容。');
   return loaded;
  }
- if(data.version===1&&data.story?.version===1)return {state:restoreState(data.story),puzzles:knownIds(data.challenges)};
+ if(data.version===1&&data.story?.version===1)return {state:restoreState(remapV1(data.story)),puzzles:knownIds(data.challenges)};
  throw new Error('這不是血色魔鏡的存檔，或版本不相容。');
 }

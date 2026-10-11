@@ -10,17 +10,17 @@ function finish(state,{miners=true,contract=true}={}){
   if(room.requires){const spot=room.spots.find(s=>s.item===room.requires);inspect(state,spot.id);collect(state,spot.id);}
   solve(state,room.answer);
   if(i===0&&contract){inspect(state,'contract');collect(state,'contract');}
-  if(i===1&&miners)inspect(state,'miners');
+  if(room.id==='mine'&&miners)inspect(state,'miners');
  }
  return state;
 }
 
 test('one memory per act appears only after an ending and never joins the guide or progress',()=>{
- assert.deepEqual(memorySpots.map(s=>s.room),[0,1,2,3,4]);
+ assert.deepEqual(memorySpots.map(s=>s.room),rooms.map((_,i)=>i));
  const state=finish(initialState());
  assert.equal(visibleSpots(state).some(s=>s.memory),false);
  const before=journeyGuide(state).total;
- chooseEnding(state,'frost');state.ending=null;travel(state,4);
+ chooseEnding(state,'frost');state.ending=null;travel(state,rooms.length-1);
  assert.equal(visibleSpots(state).filter(s=>s.memory).length,1);
  assert.equal(journeyGuide(state).total,before,'memories must not change progress counts');
  assert.notEqual(journeyGuide(state).next.spot,'lucy-mother','guide must not push optional memories');
@@ -29,7 +29,7 @@ test('one memory per act appears only after an ending and never joins the guide 
 
 test('memories are collected by viewing, survive a save and a new journey, and stay non-spoiling while hidden',()=>{
  const state=finish(initialState());chooseEnding(state,'dawn');state.ending=null;
- travel(state,0);inspect(state,'toby');travel(state,3);inspect(state,'vera');
+ travel(state,0);inspect(state,'toby');travel(state,rooms.findIndex(r=>r.id==='queen'));inspect(state,'vera');
  assert.deepEqual(state.memories,['toby','vera']);
  const restored=restoreState(JSON.stringify({...state,memories:['toby','vera','fake','toby']}));
  assert.deepEqual(restored.memories,['toby','vera']);
@@ -44,12 +44,12 @@ test('ending recap explains the outcome from what the player actually did',()=>{
  const listened=finish(initialState());chooseEnding(listened,'dawn');
  let recap=journeyRecap(listened);
  assert.match(recap.cause.join(''),/工程藍圖/);assert.match(recap.cause.join(''),/赫索的話/);
- assert.equal(recap.scenes,2);assert.equal(recap.sceneTotal,4);assert.match(recap.next,/另外 2 種代價/);
+ assert.equal(recap.scenes,2);assert.equal(recap.sceneTotal,6);assert.match(recap.next,/另外 2 種代價/);
  const hurried=finish(initialState(),{miners:false,contract:false});chooseEnding(hurried,'frost');
  assert.doesNotMatch(journeyRecap(hurried).cause.join(''),/赫索說過/);
  chooseEnding(listened,'frost');assert.match(journeyRecap(listened).cause.join(''),/赫索說過/);
  chooseEnding(listened,'crown');assert.match(journeyRecap(listened).cause.join(''),/父親簽下的契約/);
- recap=journeyRecap(listened);assert.match(recap.next,/5 段人物記憶/);
+ recap=journeyRecap(listened);assert.match(recap.next,/7 段人物記憶/);
  listened.memories=memorySpots.map(s=>s.id);assert.match(journeyRecap(listened).next,/全部真相/);
  assert.equal(journeyRecap(initialState()),null);
 });
@@ -58,13 +58,13 @@ test('portable saves (v2) round-trip, read v1 files, and reject foreign, corrupt
  const state=finish(initialState());chooseEnding(state,'dawn');state.memories=['toby'];
  const text=exportSave(state,['library','mine','bogus']);
  const {state:back,puzzles}=parseSave(text);
- assert.deepEqual(back.solved,[0,1,2,3,4]);assert.equal(back.ending,'dawn');assert.deepEqual(back.memories,['toby']);assert.deepEqual(puzzles,['library','mine']);
+ assert.deepEqual(back.solved,rooms.map((_,i)=>i));assert.equal(back.ending,'dawn');assert.deepEqual(back.memories,['toby']);assert.deepEqual(puzzles,['library','mine']);
  for(const bad of ['','{oops',JSON.stringify({format:'other',version:2,save:{}}),JSON.stringify({format:'blood-mirror-save',version:3,save:{}}),JSON.stringify({format:'blood-mirror-save',version:2,story:state}),'x'.repeat(MAX_SAVE_BYTES+1)])assert.throws(()=>parseSave(bad));
  const tampered=JSON.parse(text);tampered.save.solved=['library','queen'];tampered.save.chapter='mirror';tampered.save.ending='crown';
  const safe=parseSave(JSON.stringify(tampered)).state;
  assert.deepEqual(safe.solved,[0]);assert.equal(safe.room,1);assert.equal(safe.ending,null);
  // Files exported before the v2 format still import, with their puzzle list.
- const legacy=JSON.stringify({format:'blood-mirror-save',version:1,exported:'2026-01-01T00:00:00.000Z',story:{...state,version:1},challenges:['library','mine','bogus']});
+ const legacy=JSON.stringify({format:'blood-mirror-save',version:1,exported:'2026-01-01T00:00:00.000Z',story:{version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch','valve','apple','needle','blueprint'],seen:[],endings:['dawn'],ending:'dawn'},challenges:['library','mine','bogus']});
  const old=parseSave(legacy);
- assert.deepEqual(old.state.solved,[0,1,2,3,4]);assert.deepEqual(old.puzzles,['library','mine']);
+ assert.deepEqual(old.state.solved,[0,3,4,5,6],'v1 indices are translated; the new acts stay open to catch up on');assert.deepEqual(old.puzzles,['library','mine']);
 });

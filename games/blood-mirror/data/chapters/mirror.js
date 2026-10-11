@@ -3,7 +3,7 @@ export default {
   id: 'mirror',
   title: '鏡中之國',
   subtitle: '一個名字的代價',
-  chapter: '第五幕',
+  chapter: '第七幕',
   image: 'mirror.webp',
   atmosphere: 'mirror',
   intro: '七十三個孩子站在鏡子的另一端。露西握住妳的手。魔鏡提出最後一筆交易：「我可以讓妳活過來。代價，是妳的名字。」',
@@ -32,6 +32,7 @@ export default {
   spots: [
     {
       id: 'lucy',
+      portrait: 'lucy',
       label: '露西的倒影',
       icon: 'gem',
       x: 30,
@@ -65,6 +66,46 @@ export default {
       clue: true
     },
     {
+      id: 'children',
+      label: '牽著手的孩子',
+      icon: 'gem',
+      x: 44,
+      y: 64,
+      text: '七十三個孩子背對著妳，手牽著手排成一列，紅線從他們的腕間一直連到碎裂的巨鏡。\n沒有人回頭。他們只是在等，等某個人替他們數完最後一個。',
+      clues: ['children73', 'children'],
+      clue: true
+    },
+    {
+      id: 'emptythrone',
+      label: '鏡片王座',
+      icon: 'mirror',
+      x: 70,
+      y: 34,
+      text: '王座由無數鏡片拼成，每一片裡都映著不同的人，唯獨坐上去的位置是空的。\n座椅扶手上刻著一行小字：「在此就座者，替所有人記帳。」',
+      clues: ['throne', 'crown'],
+      clue: true
+    },
+    {
+      id: 'corridor',
+      label: '鏡像走廊',
+      icon: 'mirror',
+      x: 10,
+      y: 50,
+      text: '走廊兩側的鏡子都在反映妳，卻沒有一個和妳做相同的動作。\n往左走的那個妳，永遠在往右看。',
+      clues: ['mirrorcorridor'],
+      clue: true
+    },
+    {
+      id: 'ribbon',
+      label: '露西的髮帶',
+      icon: 'scroll',
+      x: 38,
+      y: 86,
+      text: '褪色的紅髮帶落在鏡面上，結打得很用力，像是怕自己被帶走。\n妳把它放進口袋。這是七十三個孩子裡，唯一留下來的東西。',
+      item: 'ribbon',
+      itemName: '露西的髮帶'
+    },
+    {
       id: 'lock5',
       label: '最後一面鏡子',
       icon: 'mirror',
@@ -84,6 +125,7 @@ export default {
     },
     {
       id: 'lucy-mother',
+      portrait: 'lucy',
       label: '記憶：露西的問題',
       icon: 'gem',
       x: 66,
@@ -94,7 +136,7 @@ export default {
     }
   ],
   hints: [
-    '見證者手稿是反寫的。打開它，讓鏡面把字映照回來，再把手稿裡的詞收進審問。',
+    '見證者手稿是反寫的。打開它，讓鏡面把字映照回來，再把手稿裡的詞收進審問。露西、鏡片王座與孩子們也留著線索。',
     '審問共五格。第一格是最終的繼承人；第二、三格是被排除的人，兩者可以互換；第四格是契約真正承認的東西；第五格描述世界怎樣對待那個名字。',
     '在審問頁按「魔鏡替妳填一格」，它會填入一個正確的詞。每次只解一格。'
   ]

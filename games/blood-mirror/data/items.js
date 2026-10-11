@@ -34,5 +34,45 @@ export const items = {
     name: '工程藍圖',
     icon: 'scroll',
     text: '地下熱泉 → 蒸汽管線 → 城市暖氣。先建設與遷移，再解除魔法結界。'
+  },
+  lantern: {
+    name: '礦工提燈',
+    icon: 'gear',
+    text: '玻璃罩上刻著七個歪斜的記號，像七個小孩各自畫上去的名字。'
+  },
+  candle: {
+    name: '守夜燭台',
+    icon: 'clock',
+    text: '燭芯被人剪過許多次。有人在玻璃棺旁守了很久。'
+  },
+  thimble: {
+    name: '銀頂針',
+    icon: 'key',
+    text: '內側磨得發亮。縫了無數次兔耳的指尖，就是被它保護的。'
+  },
+  ribbon: {
+    name: '露西的髮帶',
+    icon: 'scroll',
+    text: '褪色的紅髮帶，結打得很用力，像是怕自己被帶走。'
+  },
+  foxmask: {
+    name: '銀狐面具',
+    icon: 'mirror',
+    text: '內側繡著一個名字：「安娜貝爾」。面具比臉更能保守祕密。'
+  },
+  glove: {
+    name: '伊萊的黑手套',
+    icon: 'scroll',
+    text: '指尖被灼燒過的黑色皮手套。它遮住的，是一隻為了別人而燒傷的手。'
+  },
+  knife: {
+    name: '生鏽的獵刀',
+    icon: 'key',
+    text: '本來是用來取走一顆心的刀，刀刃上卻沒有一滴血。'
+  },
+  toy: {
+    name: '托比的木頭玩具',
+    icon: 'gem',
+    text: '被磨得發亮的木頭玩具。底部的刻字很用力，像怕自己忘記。'
   }
 };
