@@ -31,7 +31,7 @@ export function shortestWalk(){
  return -1;
 }
 
-const LABEL={L:'向左',R:'向右',U:'向前',D:'向後'},ARROW={L:'◀',R:'▶',U:'▲',D:'▼'},KEY={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D'};
+const LABEL={L:'向左',R:'向右',U:'向前',D:'向後'},ARROW=Object.fromEntries(Object.entries({L:-90,R:90,U:0,D:180}).map(([key,turn])=>[key,'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path transform="rotate('+turn+' 12 12)" d="M12 19V5 M6 11l6-6 6 6"/></svg>'])),KEY={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D'};
 export function mountMaze(ctx){
  let at=[...startCell],steps=0,message='';
  const move=input=>{
