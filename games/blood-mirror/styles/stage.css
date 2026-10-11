@@ -330,3 +330,4 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .ending-buttons .primary-button,.ending-buttons .text-button{min-height:52px}
 .ending-buttons .text-button{color:var(--gold)}
 .maze-key{display:grid;place-items:center;padding:0}
+.pipe-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
