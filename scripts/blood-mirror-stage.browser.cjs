@@ -22,7 +22,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
    page.on('pageerror',e=>errors.push(e.message));
    await page.goto(ORIGIN+'/games/blood-mirror/play/');
    await page.locator('#start').click();
-   await page.locator('#intro-explore').click();
+   await page.locator('#prologue-skip').click();await page.locator('#intro-explore').click();
 
    // The site frame is gone during play; the scene and the first hotspot are on screen.
    assert.equal(await page.locator('.site-header').isVisible(),false,'site header must be hidden in play @'+width);
