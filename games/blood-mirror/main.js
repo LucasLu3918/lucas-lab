@@ -5,6 +5,7 @@ import {conceptMarkup,itemArtwork,placeConcepts} from './concept-art.js';
 import {rooms,items,endings,initialState,inspect,collect,solve,travel,chooseEnding,visibleSpots,queenResponse,queenResponses,unlockText,markGlow,restoreClues,collectShard,unlockAchievements,achievements,shardIds,PROLOGUE_SHARD,clueWords,clueGroups,judgeInterrogation} from './engine/index.js';
 import {interrogationPage,interrogationNotice,hintFill,nextEmpty} from './puzzles/interrogation.js';
 import {secretEpilogue} from './data/secret-epilogue.js';
+import {credits,creditsNote} from './data/credits.js';
 import {isPuzzleComplete as isChallengeComplete,startPuzzle as startChallenge,resetPuzzles as resetChallenges,completedPuzzles as completedChallenges,setPuzzleCompletions as setChallenges,setPuzzlePersistence} from './puzzles/index.js';
 import {createSoundtrack} from './soundtrack.js';
 import {createGallery} from './gallery.js';
@@ -78,8 +79,10 @@ function openFate(){if(state.solved.length<5)return;modal('妳願意支付什麼
 function renderEpilogue(e){
  const box=$('#ending-epilogue'),epilogue=e.epilogue;
  if(!epilogue){box.innerHTML='';return;}
- box.innerHTML='<h2>尾聲</h2><p class="epilogue-prompt">'+epilogue.prompt+'</p><div class="epilogue-options">'+epilogue.options.map(option=>'<button class="choice-option" data-epilogue="'+option.id+'">'+option.label+' <span>⟶</span></button>').join('')+'</div><p id="epilogue-text" class="epilogue-text" role="status" aria-live="polite"></p>';
+ box.innerHTML='<h2>尾聲</h2><p class="epilogue-prompt">'+epilogue.prompt+'</p><div class="epilogue-options">'+epilogue.options.map(option=>'<button class="choice-option" data-epilogue="'+option.id+'">'+option.label+' <span>⟶</span></button>').join('')+'</div><p id="epilogue-text" class="epilogue-text" role="status" aria-live="polite"></p><div class="epilogue-extras"><button id="ending-credits" class="text-button">片尾名單 ⟶</button>'+(shardIds.every(id=>(state.shards||[]).includes(id))?'<button id="ending-secret" class="text-button">祕密尾聲 ⟶</button>':'')+'</div>';
  $$('[data-epilogue]').forEach(b=>b.onclick=()=>{$('#epilogue-text').textContent=epilogue.options.find(option=>option.id===b.dataset.epilogue).text;});
+ $('#ending-credits').onclick=openCredits;
+ $('#ending-secret')?.addEventListener('click',openSecretEpilogue);
 }
 function renderEnding(){const e=endings[state.ending];if(!e){showView('home');return}$('#ending-title').textContent=e.title;$('#ending-concept').innerHTML=['frost','crown'].includes(state.ending)?conceptMarkup(state.ending):'';placeConcepts($('#ending-concept'));$('#ending-concept').classList.toggle('hidden',state.ending==='dawn');const art=document.querySelector('.ending-art');art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+state.ending+'.svg)';const endingId=state.ending;const enhancedCG=new Image();enhancedCG.decoding='async';enhancedCG.onload=()=>{if(view==='ending'&&state.ending===endingId)art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+endingId+'.webp'+')';};enhancedCG.src='assets/endings/'+endingId+'.webp';art.setAttribute('role','img');art.setAttribute('aria-label','結局場景插畫：'+e.title);$('#ending-eyebrow').textContent=e.eyebrow;$('#ending-text').textContent=e.text;renderEpilogue(e);$('#ending-quote').textContent=e.quote;$('#ending-stats').innerHTML=`<span>旅程 ${formatTime(state.elapsed)}</span><span>真相 5 / 5</span><span>已發現結局 ${state.endings.length} / 3</span>`;const recap=journeyRecap(state);$('#ending-recap').innerHTML=recap?`<h2>這段旅程如何走到這裡</h2><ul>${recap.cause.map(line=>`<li>${line}</li>`).join('')}</ul>${recap.answers.length?`<h2>妳對王后說過的話</h2><ul>${recap.answers.map(line=>`<li>${line}</li>`).join('')}</ul>`:''}<p class="ending-recap-stats">解封後的場景 ${recap.scenes} / ${recap.sceneTotal} · 使用提示 ${recap.hints} 次 · 人物記憶 ${recap.memories} / ${recap.memoryTotal}</p><p class="ending-recap-next">${recap.next}</p>`:'';renderHome();}
 function followJourney(){
@@ -146,7 +149,33 @@ function collectionBook(){
  const ready=shardIds.every(id=>found.includes(id));
  return `<h3>鏡之碎片 ${shardIds.filter(id=>found.includes(id)).length} / ${shardIds.length}</h3><ul class="shard-list">${shardIds.map(id=>`<li class="${found.includes(id)?'found':''}">${found.includes(id)?'◇ '+titleOf(id)+' · 已收藏':'◆ 尚未發現'}</li>`).join('')}</ul><h3>成就 ${unlocked.length} / ${achievements.length}</h3><ul class="achievement-list">${achievements.map(item=>{const got=unlocked.includes(item.id);return `<li class="${got?'unlocked':'locked'}"><strong>${got?item.title:'？？？'}</strong><span>${got?item.text:'尚未達成。'}</span></li>`;}).join('')}</ul><button id="secret-epilogue" class="primary-button" ${ready?'':'disabled'}>${ready?secretEpilogue.title+' · 閱讀祕密尾聲 ⟶':'集滿碎片後解鎖祕密尾聲'}</button>`;
 }
-function openSecretEpilogue(){modal(secretEpilogue.title,secretEpilogue.eyebrow,secretEpilogue.paragraphs.map(text=>`<p class="modal-text">${text}</p>`).join('')+'<button id="secret-close" class="primary-button">闔上鏡子</button>');$('#secret-close').onclick=closeModal;}
+// The secret epilogue (祕密尾聲): two scenes, each a choice with its own reply, then a closing line.
+function openSecretEpilogue(){
+ const lines=[...secretEpilogue.opening];let step=0;
+ const page=(body)=>lines.map(text=>`<p class="modal-text">${text}</p>`).join('')+body;
+ const draw=()=>{
+  const scene=secretEpilogue.scenes[step];
+  if(!scene){
+   modal(secretEpilogue.title,secretEpilogue.eyebrow,page(secretEpilogue.closing.map(text=>`<p class="modal-text">${text}</p>`).join('')+'<button id="secret-close" class="primary-button">闔上鏡子</button>'));
+   $('#secret-close').onclick=closeModal;
+   return;
+  }
+  modal(secretEpilogue.title,secretEpilogue.eyebrow,page(`<p class="modal-text">${scene.prompt}</p>`+scene.options.map(option=>`<button class="choice-option" data-secret="${option.id}">${option.label} <span>⟶</span></button>`).join('')));
+  $$('#modal [data-secret]').forEach(b=>b.onclick=()=>{
+   const option=scene.options.find(item=>item.id===b.dataset.secret);
+   lines.push(scene.prompt,option.text);step++;draw();
+  });
+  $('#modal [data-secret]')?.focus({preventScroll:true});
+ };
+ draw();
+}
+// The end credits (片尾名單). The full theme plays under the roll and the previous track returns on close.
+function openCredits(){
+ soundtrack.select('credits');
+ modal('片尾名單','CREDITS · 製作名單',credits.map(group=>`<section class="credit-group"><h3>${group.role}</h3>${group.lines.map(line=>`<p>${line}</p>`).join('')}</section>`).join('')+`<p class="modal-note">${creditsNote}</p><button id="credits-close" class="primary-button">闔上名單</button>`);
+ $('#credits-close').onclick=closeModal;
+ $('#modal').addEventListener('close',()=>soundtrack.select(currentTrack()),{once:true});
+}
 function confirmImport(imported){const s=imported.state;modal('匯入這段旅程？','IMPORT · 攜帶存檔',`<p class="modal-text">檔案中的旅程：真相 ${s.solved.length} / 5 · 結局 ${s.endings.length} / 3 · 人物記憶 ${s.memories.length} / ${memoryCollection(s).length}。\n\n匯入後，會取代此裝置目前的進度。</p><button id="import-confirm" class="primary-button">匯入並繼續 ⟶</button><button id="import-cancel" class="secondary-button">保留目前進度</button>`);$('#import-confirm').onclick=()=>{state={...s,muted:state.muted,shards:mergeIds(s.shards,state.shards),achievements:mergeIds(s.achievements,state.achievements)};setChallenges(imported.puzzles);save();closeModal();showView('home');toast('存檔已匯入');};$('#import-cancel').onclick=closeModal;}
 function confirmReset(){modal('重新踏入魔鏡？','NEW JOURNEY · 新的旅程','<p class="modal-text">目前的章節進度、線索、物品與計時將重設。已發現的結局會保留。</p><button id="reset-confirm" class="primary-button">重新開始 ⟶</button><button id="reset-cancel" class="secondary-button">保留目前旅程</button>');$('#reset-confirm').onclick=()=>{closeModal();begin()};$('#reset-cancel').onclick=closeModal;}
 function playlogPanel(){const rows=summarizePlaylog(playlog.events,rooms.map(r=>r.title));return `<div class="playlog-panel" aria-label="試玩紀錄摘要">${rows.length?`<table class="playlog-table"><thead><tr><th>章節</th><th>分鐘</th><th>修復</th><th>答錯</th><th>提示</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.title}</td><td>${r.minutes??'進行中'}</td><td>${r.restoreMinutes??'—'}</td><td>${r.fails}</td><td>${r.hint} / 3</td></tr>`).join('')}</tbody></table>`:'<p class="modal-note">開始探索後，這裡會列出每一幕的耗時、答錯次數與提示層級。</p>'}<div class="playlog-actions"><button id="playlog-copy" class="secondary-button">複製紀錄</button><button id="playlog-download" class="secondary-button">下載 JSON</button><button id="playlog-clear" class="secondary-button">清除</button></div></div>`;}
