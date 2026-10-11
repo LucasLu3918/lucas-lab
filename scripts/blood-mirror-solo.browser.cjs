@@ -18,11 +18,11 @@ const ROOT=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
    await page.goto(origin+'/games/blood-mirror/play/');
    assert.equal(await page.evaluate(()=>localStorage.getItem('blood-mirror-playlog-v1')),null,'log must be off by default');
    await page.locator('#start').click();await page.locator('#intro-explore').click();
-   await page.locator('.settings-toggle').click();await page.locator('#setting-playlog').click();
+   await page.locator('#pause').click();await page.locator('#pause-settings').click();await page.locator('#setting-playlog').click();
    assert.equal(await page.locator('#setting-playlog').getAttribute('aria-pressed'),'true');await page.keyboard.press('Escape');
    for(const id of ['watch','bells'])await page.locator('[data-clue="'+id+'"]').evaluate(el=>el.click()).then(()=>page.keyboard.press('Escape'));
    await page.locator('.game-tools [data-action="hint"]').click();await page.locator('#more-hint').click();await page.keyboard.press('Escape');
-   await page.locator('.settings-toggle').click();
+   await page.locator('#pause').click();await page.locator('#pause-settings').click();
    assert.match(await page.locator('.playlog-table').innerText(),/黑鐘書庫\s+進行中\s+—\s+0\s+1 \/ 3/);
    await page.locator('#modal').screenshot({path:out+'/settings-'+width+'.png'});
    const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#playlog-download').click()]);
