@@ -229,8 +229,8 @@ button,a,input,select {outline-offset:4px}
 .readerpage.night {background:#111e29;color:#eee8dd;border-color:var(--line)}
 .readerpage h1 {text-align:center;font-size:clamp(1.6rem,4vw,2.1rem);margin-bottom:35px}
 .chaptermeta {text-align:center;letter-spacing:.12em;font-size:var(--fs-xs);opacity:.75}
-.readerpage p {font-size:var(--reader-size);text-indent:2em;margin:0 0 1.55em}
-.readerpage.manuscript {line-height:1.95}
+.readerpage p {font-family:var(--font-serif);font-size:var(--reader-size);text-indent:2em;margin:0 0 1.55em}
+.readerpage.manuscript {line-height:2.05}
 .readerpage.manuscript p {margin:0 0 .42em;text-indent:0}
 .chapternav {display:flex;gap:12px;justify-content:space-between;margin-top:24px}
 /* Gallery and native dialog */
@@ -290,14 +290,19 @@ button,a,input,select {outline-offset:4px}
  .book-card .cover-caption strong {font-size:14px}.book-card .cover-caption {left:9px;right:9px;bottom:15px}.book-card .cover-edition {font-size:10px;left:9px;right:9px}.book-card .book-art::before {inset:6px}.bookgrid {padding-bottom:40px}
  .bookgrid .book-card {display:grid}.bookgrid .cover-subtitle,.bookgrid .cover-series {display:none}.bookgrid .cover-caption {left:9px;right:9px;bottom:15px}.bookgrid .cover-caption strong {font-size:14px}.bookgrid .cover-edition {left:9px;right:9px;top:14px;font-size:10px}.card p {font-size:12px}.card .action {font-size:12px}
  .toolbar {padding:12px;gap:12px}.search {width:100%;flex-basis:100%}.filters {width:100%;flex-wrap:nowrap;overflow-x:auto;padding-block:4px 8px;scrollbar-width:thin;overscroll-behavior-inline:contain}.filter {flex:none}
- .readerwrap {width:calc(100% - 30px)}.readerpage {padding:26px 20px}.readerpage.manuscript {line-height:1.9}.readerbar .control-group {gap:5px}.readerbar button {padding-inline:10px}.chapternav {flex-direction:column}.chapternav .btn {width:100%}
+ .readerwrap {width:calc(100% - 30px)}.readerpage {padding:26px 20px}.readerpage.manuscript {line-height:2}.readerbar .control-group {gap:5px}.readerbar button {padding-inline:10px}.chapternav {flex-direction:column}.chapternav .btn {width:100%}
  .chapterlist a {padding:15px;flex-wrap:wrap}.gallery {gap:12px}.gallery .visual:not(.book-art) {height:165px}.gallery>button>strong {font-size:12px;padding:12px}.callout,.component-panel {padding:24px}.featurecopy h2 {font-size:1.9rem}
 }
 /* Reading progress, continue reading, chapter search, next-chapter card and concept boards */
 .hero-picture {display:contents}
 [hidden] {display:none!important}
 .read-flag {display:inline-flex;align-items:center;margin-left:10px;padding:2px 9px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-size:12px;line-height:1.6;white-space:nowrap}
-.continue-note {margin:20px 0}
+/* Story detail: reading actions under the title, chapter rows carry their reading time, and the cover stays in view beside a long contents list. */
+.story-actions {margin:24px 0 10px}
+.chapterlist a {justify-content:flex-start}
+.chapterlist a>span:first-of-type {margin-left:auto}
+@media(min-width:921px) {.detail>.cover {position:sticky;top:104px;align-self:start}}
+@media(max-width:720px) {.detail .cover {max-width:220px}.story-actions .btn {flex:1 1 auto}}
 .continue-shelf {padding-top:28px}
 .shelf-head {margin-bottom:12px}
 .shelf-list,.chapter-results {list-style:none;margin:0;padding:0;display:grid;gap:10px}
@@ -406,7 +411,7 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
 .about-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .about-card {padding:28px;border:1px solid var(--line);border-radius:var(--radius-panel);background:var(--panel)}
 .about-card h2 {font-size:1.35rem;margin:0 0 12px}
-.about-card p,.about-card li {color:var(--muted);margin:0 0 10px}
+.about-card p,.about-card li {max-width:42em;color:var(--muted);margin:0 0 10px}
 .about-card ul {margin:0;padding-left:1.2em}
 .chips {display:flex;flex-wrap:wrap;gap:8px;padding:0!important;margin:0;list-style:none}
 .chips li {margin:0!important;padding:4px 12px;border:1px solid #625843;border-radius:4px;background:#30291e;color:#dbcbb1!important;font-size:var(--fs-xs)}

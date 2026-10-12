@@ -168,9 +168,10 @@
   const entry=readProgress().stories[continueNote.dataset.storyContinue];
   const chapters=many('.chapterlist [data-chapter-id]');
   if(entry&&sameOrigin(entry.chapterUrl)&&entry.chapterTitle){
-   const link=one('[data-story-continue-link]',continueNote);
-   link.href=entry.chapterUrl;link.textContent='繼續閱讀：'+entry.chapterTitle;
+   continueNote.href=entry.chapterUrl;continueNote.textContent='繼續閱讀：'+entry.chapterTitle;
    continueNote.hidden=false;
+   const start=one('[data-story-start]');
+   if(start){start.classList.remove('primary');start.textContent='從頭開始閱讀';}
    const summary=one('[data-story-progress]');
    if(summary){
     const read=Array.isArray(entry.read)?entry.read:[];
