@@ -10,7 +10,6 @@ import {credits,creditsNote} from './data/credits.js';
 import {isPuzzleComplete as isChallengeComplete,isStageComplete,activeStage,stageLabel,puzzles as challengeRegistry,startPuzzle as startChallenge,resetPuzzles as resetChallenges,completedPuzzles as completedChallenges,setPuzzleCompletions as setChallenges,setPuzzlePersistence} from './puzzles/index.js';
 import {createSoundtrack} from './soundtrack.js';
 import {createGallery} from './gallery.js';
-import {createJuice} from './juice.js';
 import {icon,spotIcon,itemIcon,hydrateIcons,enableButtonArrows} from './icons.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.puzzles);setPuzzlePersistence(()=>save());
@@ -18,12 +17,17 @@ const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.
 let saveBlocked=loaded.newer;if(!saveBlocked){if(!loaded.recovered)backupSave(localStorage);if(loaded.migrated||loaded.recovered)writeSave(state,completedChallenges(),localStorage);}
 let view='home',lastFocus=null,lastFocusSelector=null,toastTimeout,activeNodes=[],saveFailed=false;
 const mixer=createMixer();const soundtrack=createSoundtrack({mixer});const sfx=createSfx(mixer);const ambience=createAmbience(mixer);
-const ui=createGameUI();const juice=createJuice({motion:()=>!ui.preferences.reduceMotion,haptics:()=>ui.preferences.vibrate});const playlog=createPlaylog();let loggedRoom=null;const log=(kind,data={})=>playlog.record(kind,{room:state.room,...data});const restoredRoom=(index=state.room)=>isChallengeComplete(rooms[index].id)||state.solved.includes(index);
+const ui=createGameUI();
+// The feedback layer (juice.js) loads on the first pointer or key press, outside the page's initial request budget.
+let juice=null,juiceRequested=false;
+const loadJuice=()=>{if(juiceRequested)return;juiceRequested=true;import('./juice.js').then(({createJuice})=>{juice=createJuice({motion:()=>!ui.preferences.reduceMotion,haptics:()=>ui.preferences.vibrate});}).catch(()=>{juiceRequested=false;});};
+addEventListener('pointerdown',loadJuice,{capture:true,passive:true});addEventListener('keydown',loadJuice,{capture:true});
+const playlog=createPlaylog();let loggedRoom=null;const log=(kind,data={})=>playlog.record(kind,{room:state.room,...data});const restoredRoom=(index=state.room)=>isChallengeComplete(rooms[index].id)||state.solved.includes(index);
 document.body.dataset.view='home';
 const currentTrack=()=>['home','gallery'].includes(view)?'home':view==='ending'?(state.ending||'dawn'):rooms[state.room].id;
 const save=()=>{if(saveBlocked){$('#save-indicator').textContent='存檔來自較新版本，請重新整理頁面';return;}const fresh=unlockAchievements(state,completedChallenges());if(fresh.length)toast('成就解鎖：'+fresh.map(item=>item.title).join('、'));saveFailed=!writeSave(state,completedChallenges(),localStorage);const message=saveFailed?'無法存檔，請保持本頁開啟':'進度已儲存在此裝置';if($('#save-indicator').textContent!==message)$('#save-indicator').textContent=message;};
 const formatTime=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;
-function toast(text){const box=$('#toast');if($('dialog[open]')){juice.raise(box);void box.offsetWidth;}box.textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>$('#toast').classList.remove('visible'),3200)}
+function toast(text){const box=$('#toast');if($('dialog[open]')){juice?.raise(box);void box.offsetWidth;}box.textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>$('#toast').classList.remove('visible'),3200)}
 function modal(title,eyebrow,html){const d=$('#modal'),opening=!d.open,titleChanged=$('#modal-title').textContent!==title;if(opening){lastFocus=document.activeElement;const key=['data-clue','data-spot','data-item','data-artwork','data-gallery-filter'].find(name=>lastFocus?.hasAttribute(name));lastFocusSelector=key?`[${key}="${lastFocus.getAttribute(key)}"]`:null;}$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;placeConcepts($('#modal-body'));if(opening)d.showModal();if(opening||titleChanged)$('#modal-body').scrollTop=0;if(!opening&&!d.contains(document.activeElement))$('#modal-title').focus({preventScroll:true});}
 function restoreFocus(){if($('#modal').open)return;if(view==='ending'){$('#ending-title').focus({preventScroll:true});return;}const target=lastFocus?.isConnected?lastFocus:lastFocusSelector?$(lastFocusSelector):null;if(target?.getClientRects().length)target.focus({preventScroll:true});}
 function closeModal(){$('#modal').close();restoreFocus();}
@@ -260,7 +264,7 @@ async function startAudio(){await soundtrack.start(currentTrack());ambience.sele
 async function toggleSound(){gallery.stopPreview(false);if(state.muted){try{await startAudio();state.muted=false;toast('環境音效已開啟')}catch{state.muted=true;toast('此瀏覽器目前無法播放音效。')}}else{state.muted=true;stopAudio()}updateSound();save();}
 function updateSound(){$('#sound-icon').innerHTML=icon(state.muted?'mute':'sound');$('#sound').setAttribute('aria-pressed',String(!state.muted));$('#sound').setAttribute('aria-label',state.muted?'開啟環境音效':'關閉環境音效');$('.sound-label').textContent=state.muted?'音效關閉':'音效開啟';$('.settings-toggle').innerHTML=icon('gear');}
 // The feedback layer (juice.js) answers every cue, so actions still land when the sound is off.
-function playCue(kind){juice.cue(kind);if(state.muted)return;sfx.play(kind);}
+function playCue(kind){juice?.cue(kind);if(state.muted)return;sfx.play(kind);}
 let galleryReturn='home';
 const gallery=createGallery({getEndings:()=>state.endings,openModal:modal,closeModal,onPreviewStart:stopAudio,onPreviewStop:()=>{if(!state.muted&&!document.hidden)startAudio().catch(()=>{});}});
 function openGallery(){if(view!=='gallery')galleryReturn=view;showView('gallery');}
