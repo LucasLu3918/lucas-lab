@@ -67,7 +67,7 @@
 .song-detail {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;padding:30px}
 .song-detail h2 {margin:8px 0 0;font-size:clamp(1.6rem,3vw,2.2rem)}
 .song-detail h3 {margin:26px 0 10px;font-size:1.05rem;color:var(--gold-bright)}
-.song-english {margin:2px 0 14px;font-family:var(--font-display);font-style:italic;color:var(--muted)}
+.song-english {margin:2px 0 14px;font-family:var(--font-serif);font-style:italic;color:var(--muted)}
 .song-spec {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:20px 0 0}
 .song-spec div {border-left:2px solid #d9bf8a55;padding-left:12px}
 .song-spec dt {font-size:12px;color:var(--gold);letter-spacing:.09em;font-weight:750}
@@ -89,7 +89,7 @@
 .song-compare {width:100%;min-width:760px;border-collapse:collapse;font-size:14px}
 .song-compare th,.song-compare td {padding:12px 14px;text-align:left;border-bottom:1px solid #4d493f80;vertical-align:top}
 .song-compare thead th {font-size:12px;color:var(--gold);letter-spacing:.06em;background:#121c26}
-.song-compare tbody th {font-family:var(--font-display);font-weight:600;white-space:nowrap}
+.song-compare tbody th {font-family:var(--font-serif);font-weight:600;white-space:nowrap}
 .song-compare tr:last-child > * {border-bottom:0}
 @media(max-width:920px) {.music-room {grid-template-columns:1fr}.now-playing {position:static;grid-template-columns:150px minmax(0,1fr);align-items:center}.now-playing .album-art {grid-row:span 1}.now-playing > :not(.album-art):not(.np-copy) {grid-column:1/-1}.song-detail {grid-template-columns:1fr}.song-lyrics {position:static;max-height:520px}}
 @media(max-width:720px) {.track-row {grid-template-columns:28px minmax(0,1fr) 46px;gap:10px}.track-meta {display:none}.song-detail {padding:22px 18px}}
