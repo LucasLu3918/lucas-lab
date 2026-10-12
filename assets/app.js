@@ -59,27 +59,20 @@
   window.addEventListener('scroll',scheduleProgress,{passive:true});window.addEventListener('resize',scheduleProgress);
   update();
  }
- // Gallery dialog: shows the tile's full image (or a copy of its concept sketch) and steps through the tiles of the same section.
+ // Gallery dialog: shows the tile's full image and steps through the tiles of the same section.
  const dialog=one('#gallery-dialog');
  if(dialog&&typeof dialog.showModal==='function'){
   const art=one('[data-dialog-visual]',dialog),count=one('[data-dialog-count]',dialog),link=one('[data-dialog-link]',dialog);
   let group=[],position=0;
   const show=button=>{
    art.replaceChildren();
-   if(button.dataset.fullSrc){
-    const wide=Number(button.dataset.fullW)>Number(button.dataset.fullH);
-    art.className='visual has-art';dialog.classList.toggle('is-wide',wide);
-    // The tile's thumbnail fills in while the full-size file downloads.
-    const thumb=one('img',button);art.style.backgroundImage=thumb?'url("'+(thumb.currentSrc||thumb.src)+'")':'';
-    const image=document.createElement('img');image.src=button.dataset.fullSrc;image.alt=button.dataset.fullAlt||button.dataset.title;image.width=Number(button.dataset.fullW)||900;image.height=Number(button.dataset.fullH)||1350;image.decoding='async';art.append(image);
-   }else{
-    art.style.backgroundImage='';
-    const source=one('.visual',button);
-    art.className=(source?source.className:'visual')+' is-concept';dialog.classList.add('is-wide');
-    const graphic=one('svg.concept-scene',button)||one('.visual>span',button);if(graphic)art.append(graphic.cloneNode(true));
-   }
+   const wide=Number(button.dataset.fullW)>Number(button.dataset.fullH);
+   art.className='visual has-art';dialog.classList.toggle('is-wide',wide);
+   // The tile's thumbnail fills in while the full-size file downloads.
+   const thumb=one('img',button);art.style.backgroundImage=thumb?'url("'+(thumb.currentSrc||thumb.src)+'")':'';
+   const image=document.createElement('img');image.src=button.dataset.fullSrc;image.alt=button.dataset.fullAlt||button.dataset.title;image.width=Number(button.dataset.fullW)||900;image.height=Number(button.dataset.fullH)||1350;image.decoding='async';art.append(image);
    one('[data-dialog-title]',dialog).textContent=button.dataset.title;
-   one('[data-dialog-desc]',dialog).textContent=button.dataset.description||'世界概念草圖，正式場景插畫尚在構思。';
+   one('[data-dialog-desc]',dialog).textContent=button.dataset.description||'';
    if(link){link.hidden=!button.dataset.href;if(button.dataset.href){link.href=button.dataset.href;link.textContent=button.dataset.hrefLabel+' →'}}
    count.textContent=group.length>1?(position+1)+' / '+group.length:'';
    dialog.classList.toggle('is-single',group.length<2);

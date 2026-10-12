@@ -138,7 +138,7 @@ async function audit(){
     await page.screenshot({path:path.join(captures,'gallery-dialog-390.png'),animations:'disabled'});
     await page.locator('[data-dialog-close]').click();
     assert.ok(!(await page.locator('#gallery-dialog').evaluate(el=>el.open)),'gallery dialog did not close');
-    await page.locator('.concept-tile').first().click();assert.equal(await page.locator('#gallery-dialog .visual svg.concept-scene').count(),1,'concept art was not cloned into dialog');
+    await page.locator('.concept-tile').first().click();assert.ok(await page.locator('#gallery-dialog .visual img').evaluate(img=>img.decode().then(()=>img.naturalWidth>0,()=>false)),'concept painting did not load in dialog');
     await page.keyboard.press('Escape');assert.ok(!(await page.locator('#gallery-dialog').evaluate(el=>el.open)),'dialog Escape failed');
     await page.goto(origin+'/stories/mist-letters/chapters/01/',{waitUntil:'load'});
     await page.locator('[data-theme="paper"]').click();

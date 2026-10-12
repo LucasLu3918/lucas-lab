@@ -362,42 +362,42 @@
       "symbol": "tree",
       "palette": "teal",
       "scene": "forest",
-      "description": "森林角色的視覺設計方向（示意圖，尚未上傳正式原畫）。"
+      "description": "迷霧古森林中提燈獨行的旅人，與爬滿藤蔓的石拱門。"
     },
     {
       "title": "赤紅斗篷",
       "symbol": "hood",
       "palette": "red",
       "scene": "redhood",
-      "description": "黑暗童話角色視覺方向（示意圖，非正式小說封面）。"
+      "description": "血月下的黑松林，紅斗篷少女與巨狼對望。"
     },
     {
       "title": "魔法古書",
       "symbol": "book",
       "palette": "gold",
       "scene": "grimoire",
-      "description": "幻想書籍與魔法視覺方向（示意）。"
+      "description": "燭光塔樓書庫，古書上方浮起金色魔法陣。"
     },
     {
       "title": "深海之歌",
       "symbol": "wave",
       "palette": "blue",
       "scene": "deepsea",
-      "description": "深海幻想場景概念方向（示意）。"
+      "description": "沉沒海底的哥德式大教堂，人魚游向破碎的玫瑰窗。"
     },
     {
       "title": "銀色魔鏡",
       "symbol": "mirror",
       "palette": "rose",
       "scene": "mirror",
-      "description": "黑暗童話場景概念方向（示意）。"
+      "description": "月光照進荒廢的寢殿，銀色魔鏡映出戴冠女子的幻影。"
     },
     {
       "title": "夜色星軌",
       "symbol": "stars",
       "palette": "blue",
       "scene": "startrail",
-      "description": "科技奇幻品牌視覺（示意）。"
+      "description": "雲海上的古老天文塔，渾天儀在環形星軌下發光。"
     }
   ],
   "journal": [
