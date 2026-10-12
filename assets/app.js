@@ -243,7 +243,7 @@
    shelf.hidden=false;
    for(const [slug,entry] of entries){
     const item=document.createElement('li'),link=document.createElement('a'),title=document.createElement('strong'),meta=document.createElement('span');
-    link.href=entry.chapterUrl;title.textContent=entry.title||slug;meta.textContent=entry.chapterTitle+' · 已讀 '+Math.round(Number(entry.percent)||0)+'%';
+    link.href=entry.chapterUrl;title.textContent=entry.title||slug;const pct=Math.round(Number(entry.percent)||0);meta.textContent=entry.chapterTitle+(pct>=5?' · 已讀 '+pct+'%':' · 剛開始閱讀');
     link.append(title,meta);item.append(link);list.append(item);
    }
   }
@@ -293,6 +293,16 @@
  // Legal page: the reader can clear what this site stores on the device.
  const clearStatus=one('[data-clear-status]');
  const report=text=>{if(clearStatus)clearStatus.textContent=text};
+ // Contact address: shipped only as reversed base64, decoded on click, so it never appears in the HTML for scrapers.
+ many('[data-reveal-email]').forEach(button=>button.addEventListener('click',()=>{
+  try{
+   const address=Array.from(atob(button.dataset.contact)).reverse().join('');
+   const link=document.createElement('a');
+   link.className='btn';link.href='mailto:'+address;link.textContent=address;
+   const note=one('[data-email-note]');if(note)note.hidden=true;
+   button.replaceWith(link);link.focus();
+  }catch{button.disabled=true}
+ }));
  one('[data-clear-progress]')?.addEventListener('click',()=>{try{localStorage.removeItem(progressKey);localStorage.removeItem(warningKey)}catch{}report('已清除閱讀紀錄與內容提示確認。')});
  one('[data-clear-offline]')?.addEventListener('click',async()=>{
   if(!window.confirm('要移除所有離線保存的作品嗎？'))return;

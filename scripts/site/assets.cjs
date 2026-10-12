@@ -43,6 +43,8 @@ function securityAndCacheHeaders(base){
   p+'/journal/feed.xml',
   '  Cache-Control: public, max-age=0, must-revalidate',
   '',
+  p+'/assets/*.woff2',
+  '  Cache-Control: public, max-age=31536000, immutable',
   p+'/assets/images/*',
   '  Cache-Control: public, max-age=604800',
   p+'/assets/icons/*',
@@ -80,6 +82,12 @@ module.exports=function copyAssets(ctx){
   fs.mkdirSync(dir,{recursive:true});
   fs.writeFileSync(path.join(dir,path.basename(file)),bytes);
   fingerprint[file]='static/'+hash+'/'+path.basename(file);
+ }
+ // The stylesheet references its fonts relatively, so they sit beside the fingerprinted copy (and beside assets/style.css as the fallback).
+ for(const f of fs.readdirSync(path.join(root,'assets')).filter(f=>f.endsWith('.woff2'))){
+  const dir=path.dirname(path.join(out,fingerprint['assets/style.css']));
+  fs.copyFileSync(path.join(root,'assets',f),path.join(dir,f));
+  fingerprint['assets/'+f]=path.posix.dirname(fingerprint['assets/style.css'])+'/'+f;
  }
  const base=('/'+(process.env.BASE_PATH||'/').replace(/^\/+|\/+$/g,'')+'/').replace('//','/');
  fs.writeFileSync(path.join(out,'_headers'),securityAndCacheHeaders(base));
