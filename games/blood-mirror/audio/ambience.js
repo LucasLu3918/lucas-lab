@@ -9,28 +9,46 @@ const BEDS={
  hunter:{filter:'lowpass',freq:300,level:0.2,swell:0.1,event:{kind:'crackle',every:[0.9,2.2],freq:2800,peak:0.03}},
  chamber:{filter:'lowpass',freq:260,level:0.14,swell:0.08}
 };
-const CROSSFADE=1.5,LOOP_SECONDS=4;
+// The bed loops every 8 s; the last SEAM seconds are cross-faded into the head so the loop point
+// is inaudible. The mirror's reversed swell repeats every 4 s, so two swells fit one loop exactly.
+const CROSSFADE=1.5,LOOP_SECONDS=8,SEAM=0.5,SWELL_SECONDS=4,SWELL_FADE=0.04;
 
 export function createAmbience(mixer){
  let scene=null,bed=null,eventTimer=null;
 
+ // Brown-ish noise: smoother than white noise, closer to wind and distant machinery.
+ const brown=frames=>{const data=new Float32Array(frames);let last=0;for(let i=0;i<frames;i++){last=(last+0.02*(Math.random()*2-1))/1.02;data[i]=last*3.5;}return data;};
+ const buffers={};
  const noiseBuffer=(context,reverse)=>{
-  const frames=Math.floor(context.sampleRate*LOOP_SECONDS),buffer=context.createBuffer(1,frames,context.sampleRate),data=buffer.getChannelData(0);
-  let last=0;
+  const key=(reverse?'reverse':'plain')+context.sampleRate;
+  if(buffers[key])return buffers[key];
+  const rate=context.sampleRate,frames=Math.floor(rate*LOOP_SECONDS),seam=Math.floor(rate*SEAM);
+  const stream=brown(frames+seam),buffer=context.createBuffer(1,frames,rate),data=buffer.getChannelData(0);
   for(let i=0;i<frames;i++){
-   // Brown-ish noise: smoother than white noise, closer to wind and distant machinery.
-   last=(last+0.02*(Math.random()*2-1))/1.02;
-   const shape=reverse?Math.pow(i/frames,3):1-Math.pow(i/frames,6)*0.5;
-   data[i]=last*3.5*shape;
+   // Equal-power blend of the head with the samples that would have followed the tail.
+   let value=stream[i];
+   if(i<seam){const t=i/seam;value=stream[i]*Math.sin(t*Math.PI/2)+stream[frames+i]*Math.cos(t*Math.PI/2);}
+   if(reverse){
+    // A reversed swell that rises and stops short, with a tiny fade so the stop never clicks.
+    const period=Math.floor(rate*SWELL_SECONDS),phase=i%period,fade=Math.floor(rate*SWELL_FADE);
+    value*=Math.pow(phase/period,3)*Math.min(1,(period-phase)/fade);
+   }
+   data[i]=value;
   }
-  return buffer;
+  return buffers[key]=buffer;
  };
  const ramp=(gain,to,seconds)=>{const now=mixer.context.currentTime;gain.gain.cancelScheduledValues(now);gain.gain.setValueAtTime(gain.gain.value,now);gain.gain.linearRampToValueAtTime(to,now+seconds);};
- const event=(context,destination,config)=>{
+ // Room events (clock ticks, water drips, embers) vary in pitch and level so no two sound alike.
+ // They play through the bed's gain so they fade with it; `peak` is divided by the bed level to stay absolute.
+ const event=(context,destination,config,bedLevel)=>{
   const now=context.currentTime+0.01,osc=context.createOscillator(),gain=context.createGain();
-  osc.type=config.kind==='tick'?'square':'sine';osc.frequency.value=config.freq;
-  gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(config.peak,now+0.005);gain.gain.exponentialRampToValueAtTime(0.0001,now+(config.kind==='tick'?0.05:0.18));
-  osc.connect(gain);gain.connect(destination);osc.start(now);osc.stop(now+0.22);
+  const freq=config.freq*(0.85+Math.random()*0.3),peak=config.peak/bedLevel*(0.6+Math.random()*0.4);
+  const length=config.kind==='tick'?0.05:config.kind==='crackle'?0.03:0.18;
+  osc.type=config.kind==='tick'?'square':config.kind==='crackle'?'triangle':'sine';osc.frequency.setValueAtTime(freq,now);
+  // A drip falls in pitch as it lands.
+  if(config.kind==='drip')osc.frequency.exponentialRampToValueAtTime(freq*0.45,now+0.12);
+  gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(peak,now+0.005);gain.gain.exponentialRampToValueAtTime(0.0001,now+length);
+  osc.connect(gain);gain.connect(destination);osc.start(now);osc.stop(now+length+0.04);
   osc.onended=()=>{osc.disconnect();gain.disconnect();};
  };
  const scheduleEvents=(config)=>{
@@ -38,7 +56,7 @@ export function createAmbience(mixer){
   const next=()=>{
    if(!bed||!bed.config.event)return;
    const context=mixer.context;
-   if(context&&context.state==='running')event(context,bed.gain,bed.config.event);
+   if(context&&context.state==='running')event(context,bed.gain,bed.config.event,bed.config.level);
    const [low,high]=config.every;
    eventTimer=setTimeout(next,(low+Math.random()*(high-low))*1000);
   };
