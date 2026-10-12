@@ -7,7 +7,7 @@ module.exports=function renderPages(ctx){
  const cats=[['tools/','tools','小工具館','實用工具與生活靈感'],['stories/','stories','故事藏書館','黑暗童話與原創奇幻'],['games/','games','互動遊戲館','選擇與探索的新體驗'],['music/','music','音樂館','血色魔鏡原創歌曲'],['projects/','projects','軟體作品集','產品設計與工程實踐'],['gallery/','gallery','AI 視覺藝廊','角色與藝術探索'],['journal/','journal','創作與開發日誌','記錄背後的故事'],['about/','about','關於創作者','工程 × 創作 × 想像']];
  const categoryMarkup=cats.map(([route,s,title,desc],index)=>`<a class="cat" href="${url(route)}"><span class="symbol emblem-symbol cat-emblem-${index}" aria-hidden="true"><img src="${url('assets/images/emblems.webp')}" alt="" width="48" height="384" loading="lazy" decoding="async"></span><strong>${title} ↗</strong><span>${desc}</span></a>`).join('');
  const featuredGame=catalog.games.find(g=>g.status==='playable'&&g.storySlug==='dark-snow-white');
- const selected=['dark-red-hood','dark-mermaid','dark-cinderella'].map(slug=>card(catalog.stories.find(x=>x.slug===slug),'story')).join('');
+ const selected=['dark-red-hood','dark-mermaid'].map(slug=>card(catalog.stories.find(x=>x.slug===slug),'story')).join('')+card(catalog.projects[0],'project');
  // Hero: AVIF first, WebP fallback, smallest candidate on phones. The 1536px WebP stays as the <img> fallback.
  const heroSet=(ext1,type)=>`<source type="image/${type}" srcset="${url('assets/images/moonlit-castle-640.'+ext1)} 640w, ${url('assets/images/moonlit-castle-1024.'+ext1)} 1024w, ${url('assets/images/moonlit-castle.'+ext1)} 1536w" sizes="100vw">`;
  // The hero's AVIF candidates are preloaded so the phone-sized file starts downloading with the HTML.
