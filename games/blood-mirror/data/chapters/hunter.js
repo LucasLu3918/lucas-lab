@@ -176,7 +176,9 @@ export default {
       x: 8,
       y: 58,
       shard: true,
-      text: '玻璃罐的底座邊，一片碎鏡映出妳的臉，眼睛的位置換成了另一個孩子的眼睛。妳把它收進口袋，聽見自己的心跳慢了一拍。'
+      needs: 'knife',
+      veiled: '玻璃罐的底座邊卡著一片碎鏡，被凍在結冰的松脂裡，指甲怎麼摳都摳不動。\n要有比手指更硬的東西，才撬得開。',
+      text: '妳用生鏽的獵刀撬開凍硬的松脂。碎鏡映出妳的臉，眼睛的位置換成了另一個孩子的眼睛。妳把它收進口袋，聽見自己的心跳慢了一拍。'
     }
   ],
   // Step-aware hints (提示): three tiers for each stage of the evidence, the deduction and the seal.

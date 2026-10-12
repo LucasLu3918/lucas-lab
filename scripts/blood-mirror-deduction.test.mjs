@@ -94,6 +94,7 @@ test('judgement feedback names only a count, never a blank',()=>{
 
 test('shards are collected once, persist into a new journey, and never enter the notebook',()=>{
  const s=initialState();s.room=at('mirror');
+ collect(s,'ribbon');
  inspect(s,'shard-mirror');inspect(s,'shard-mirror');
  assert.deepEqual(s.shards,['shard-mirror']);
  assert.deepEqual(s.clues,[]);

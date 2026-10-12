@@ -27,8 +27,14 @@ export function inspect(state,id){
  if(spot.memory){state.memories=state.memories||[];if(!state.memories.includes(id))state.memories.push(id);}
  state.clues=state.clues||[];
  for(const word of spot.clues||[])if(clueWords[word]&&!state.clues.includes(word))state.clues.push(word);
- if(spot.shard)collectShard(state,id);
+ if(spot.shard&&shardReachable(state,spot))collectShard(state,id);
  return spot;
+}
+
+// A shard may sit behind a tool found in the same act (spot.needs). Until the player carries it, the
+// spot shows its `veiled` text, which points at the tool. A shard kept from an earlier journey stays found.
+export function shardReachable(state,spot){
+ return !spot.needs||(state.shards||[]).includes(spot.id)||state.inventory.includes(spot.needs);
 }
 
 // Clue words that only become readable once an act's evidence is restored (spot.restoredClues).

@@ -1,4 +1,5 @@
-// Inventory items: name, icon key and the description shown in the inventory.
+// Inventory items: name, icon key and the description shown in the inventory. A `keepsake` is never
+// used on anything; the inventory says so, so players do not hunt for a use that does not exist.
 export const items = {
   watch: {
     name: '黃金懷錶',
@@ -23,6 +24,7 @@ export const items = {
   witness: {
     name: '見證者手稿',
     icon: 'scroll',
+    keepsake: true,
     text: '白雪才是最後的血脈繼承人。名字一旦消失，生命抵押便失去主人。'
   },
   contract: {
@@ -63,6 +65,7 @@ export const items = {
   glove: {
     name: '伊萊的黑手套',
     icon: 'scroll',
+    keepsake: true,
     text: '指尖被灼燒過的黑色皮手套。它遮住的，是一隻為了別人而燒傷的手。'
   },
   knife: {
@@ -73,6 +76,7 @@ export const items = {
   toy: {
     name: '托比的木頭玩具',
     icon: 'gem',
+    keepsake: true,
     text: '被磨得發亮的木頭玩具。底部的刻字很用力，像怕自己忘記。'
   }
 };
