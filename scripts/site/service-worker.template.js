@@ -48,7 +48,7 @@ async function cacheFirst(request){
 
 async function staleWhileRevalidate(request){
  const cache=await caches.open(SHELL_CACHE),cached=await cache.match(request);
- const fresh=fetch(request).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>cached);
+ const fresh=fetch(request).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>cached||Response.error());
  return cached||fresh;
 }
 

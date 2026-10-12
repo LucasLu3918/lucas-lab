@@ -322,7 +322,10 @@
         "Vue 3 + TypeScript + Vite",
         "多用途工具分類",
         "前端本機運算與資料查詢"
-      ]
+      ],
+      "shot": "assets/images/project-lucas-tools.webp",
+      "shotSmall": "assets/images/project-lucas-tools-small.webp",
+      "shotAlt": "Lucas Tools 首頁畫面：深色標題區、59 項工具、7 個功能分類與搜尋篩選"
     },
     {
       "slug": "aips",
@@ -339,7 +342,10 @@
         "品質檢查與治理",
         "可擴展的技能與工作流程"
       ],
-      "hrefLabel": "閱讀 AIPS 說明文件"
+      "hrefLabel": "閱讀 AIPS 說明文件",
+      "shot": "assets/images/project-aips.webp",
+      "shotSmall": "assets/images/project-aips-small.webp",
+      "shotAlt": "AI Product System 說明文件首頁：標題、安裝按鈕與四項核心原則"
     },
     {
       "slug": "ecommerce-concept",
