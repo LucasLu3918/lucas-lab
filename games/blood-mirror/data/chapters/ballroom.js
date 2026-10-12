@@ -187,7 +187,9 @@ export default {
       x: 6,
       y: 60,
       shard: true,
-      text: '牆邊一面落地鏡缺了一角，掉出的碎片裡，所有賓客都在轉身看妳。妳把它收進口袋，鏡中的人群同時鬆了一口氣。'
+      needs: 'foxmask',
+      veiled: '牆邊一面落地鏡缺了一角。妳一靠近，鏡裡所有賓客同時轉頭盯著妳的臉，缺角的碎片立刻沉進鏡面深處。\n他們認得這張臉。也許換一張臉，他們就不會看了。',
+      text: '妳戴上銀狐面具再靠近。鏡中的賓客認不出妳，一個個轉回舞池；缺角的碎片浮了上來。妳把它收進口袋，鏡中的人群同時鬆了一口氣。'
     }
   ],
   // Step-aware hints (提示): three tiers for each stage of the evidence, the deduction and the seal.
