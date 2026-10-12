@@ -1,5 +1,5 @@
 /* LUCAS LAB shared visual system: surfaces, controls, content and cover variants. */
-/* Heading font: Noto Serif TC 600 (SIL OFL 1.1), self-hosted slices from scripts/subset-fonts.py. Used by h1/h2 only; each page fetches just the slices it needs. Story and chapter pages use the system serif (data-font="system") to stay inside their page-weight budget. */
+/* Heading font: Noto Serif TC 600 (SIL OFL 1.1), self-hosted slices from scripts/subset-fonts.py. Used by h1/h2 only; each page fetches just the slices it needs. Story and chapter pages use the system serif (data-heading-font="system") to stay inside their page-weight budget. */
 @font-face {font-family:"LL Serif TC";font-style:normal;font-weight:600;font-display:swap;src:url(noto-serif-tc-a.woff2) format("woff2");unicode-range:U+B7,U+D7,U+2014,U+3001-3002,U+300C-300D,U+4E00,U+4E2D,U+4E3B,U+4E4B,U+4F5C,U+5168,U+516C,U+5177,U+5275,U+53EF,U+54C1,U+555F,U+5728,U+591A,U+591C,U+5BE6,U+5DE5,U+5E55,U+6253,U+63A2,U+65B0,U+66F4,U+6700,U+7121,U+7528,U+767D,U+7A0B,U+7AD9,U+7D22,U+7E7C,U+7E8C,U+80FD,U+8272,U+8840,U+8B80,U+9375,U+93E1,U+958B,U+95B1,U+9650,U+96EA,U+9B54,U+FF01,U+FF08-FF09,U+FF0C,U+FF1A,U+FF1F}
 @font-face {font-family:"LL Serif TC";font-style:normal;font-weight:600;font-display:swap;src:url(noto-serif-tc-b.woff2) format("woff2");unicode-range:U+30FB,U+4E0A,U+4E16,U+4E8B,U+4E92,U+4E9B,U+4EBA,U+4EC0,U+4EE5,U+4EF6,U+4F01,U+4F4F,U+4F60,U+4FDD,U+500B,U+505A,U+50CF,U+5143,U+5148,U+5165,U+5167,U+516B,U+516D,U+5206,U+5230,U+5283,U+52D5,U+5361,U+539F,U+53E3,U+5404,U+540D,U+5546,U+55AE,U+56DE,U+5716,U+57FA,U+5834,U+5929,U+5979,U+597D,U+59B3,U+5B58,U+5B87,U+5B8C,U+5B99,U+5BA4,U+5BB9,U+5BC6,U+5C01,U+5C0B,U+5C55,U+5DF2,U+5ECA,U+5F0F,U+5F69,U+5F8C,U+5F97,U+5F9E,U+5FF5,U+600E,U+6027,U+60F3,U+614B,U+6163,U+6211,U+6232,U+6280,U+628A,U+6301,U+6309,U+6388,U+63D2,U+63DB,U+641C,U+64AD,U+64CD,U+64DA,U+6536,U+6539,U+653E,U+6545,U+6574,U+6587,U+65BC,U+65C5,U+65E5,U+660E,U+6625,U+6642,U+666F,U+66AB,U+66F2,U+66F8,U+66FF,U+6709,U+672C,U+677F,U+6797,U+67B6,U+6982,U+6A02,U+6A23,U+6A94,U+6B0A,U+6B21,U+6B4C,U+6BD4,U+6C92,U+6CD5,U+6E05,U+7247-7248,U+72C0,U+73A9,U+73FE,U+754C,U+756B,U+767C,U+7684,U+76E1,U+76F4,U+770B,U+790E,U+793A,U+79C1,U+79FB,U+7A3F,U+7ACB,U+7AE0,U+7B26,U+7BC0,U+7BC7,U+7BE9,U+7C4D,U+7CFB,U+7D71,U+7DB2,U+7DDA,U+7DE8,U+7E6A,U+80CC,U+81EA,U+81F4,U+8207,U+843D,U+85CF,U+85DD,U+8853,U+8868,U+898B,U+8996,U+89BA,U+89D2,U+8A08,U+8A18,U+8A2A,U+8A2D,U+8A8C,U+8AAA,U+8ACB,U+8B49,U+8EDF,U+8F03,U+8FF7,U+9014,U+9019,U+9020,U+904A,U+9054,U+9077-9078,U+90E8,U+91CD,U+9215,U+9577,U+95DC,U+96B1,U+96C6,U+96E2,U+96FB,U+971C,U+9727,U+9762,U+97F3,U+9810,U+982D,U+9928,U+9A57,U+9AD4,U+9EBC,U+9ECE,U+9EDE}
 :root {
@@ -398,7 +398,7 @@ button,a,input,select {outline-offset:4px}
  .footnav {gap:32px}
 }
 
-html[data-font=system] {--font-display:var(--font-serif)}
+html[data-heading-font=system] {--font-display:var(--font-serif)}
 /* Project screenshots and the about page. */
 .visual.shot-visual {aspect-ratio:16/10;height:auto;padding:0;overflow:hidden;background:#0d1721}
 .shot-visual img {width:100%;height:100%;object-fit:cover;object-position:top left}
