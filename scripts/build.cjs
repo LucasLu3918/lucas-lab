@@ -14,6 +14,7 @@ Object.assign(ctx,require('./site/layout.cjs')(ctx));
 require('./site/pages.cjs')(ctx);
 require('./site/stories.cjs')(ctx);
 require('./site/games.cjs')(ctx);
+require('./site/music.cjs')(ctx);
 require('./site/projects.cjs')(ctx);
 require('./site/showcase-search.cjs')(ctx);
 require('./site/pwa.cjs')(ctx);

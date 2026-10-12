@@ -10,7 +10,8 @@ const REQUIRED={
  projects:['slug','title','description','category','status','palette','symbol','highlights'],
  tools:['title','description','category','trait','href','symbol'],
  gallery:['title','description','palette','symbol'],
- journal:['slug','date','title','description']
+ journal:['slug','date','title','description'],
+ music:['slug','title','english','edition','style','bpm','key','meter','vocal','instruments','mood','palette','description','highlights','bestFor','timeline','duration','audio','lyrics']
 };
 
 function validateCatalog(catalog,root){
@@ -44,6 +45,14 @@ function validateCatalog(catalog,root){
  }
  for(const t of catalog.tools){
   if(!/^https:\/\//.test(t.href))fail('tool href must be https: '+t.title);
+ }
+ for(const m of catalog.music){
+  for(const file of [m.audio,m.lyrics])if(!fs.existsSync(path.join(root,file)))fail('missing music file '+file);
+  if(!/^music\/audio\/[a-z0-9-]+\.m4a$/.test(m.audio))fail('music audio must be music/audio/<slug>.m4a: '+m.slug);
+  for(const field of ['instruments','mood','highlights','timeline'])if(!Array.isArray(m[field])||!m[field].length)fail('music '+m.slug+' needs '+field);
+  if(m.timeline.some((s,i)=>!s.title||!s.desc||!Number.isInteger(s.start)||!(s.end>s.start)||(i&&s.start!==m.timeline[i-1].end)))fail('music timeline steps need title, desc and contiguous start/end seconds: '+m.slug);
+  if(m.timeline[0].start!==0||m.timeline.at(-1).end!==m.duration)fail('music timeline must cover the whole song: '+m.slug);
+  if(!Array.isArray(m.energy)||m.energy.length<20||!Number.isInteger(m.peak)||m.peak>=m.duration)fail('music '+m.slug+' needs measured energy and peak');
  }
  for(const j of catalog.journal){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(j.date))fail('journal date must be YYYY-MM-DD: '+j.slug);

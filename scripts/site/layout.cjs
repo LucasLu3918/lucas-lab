@@ -16,7 +16,7 @@ module.exports=function createLayout(ctx){
  const analyticsToken=(process.env.CF_ANALYTICS_TOKEN||'').trim();
  if(analyticsToken&&!/^[A-Za-z0-9]{8,64}$/.test(analyticsToken))throw new Error('CF_ANALYTICS_TOKEN must be 8-64 letters or digits');
  const analyticsTag=analyticsToken?`<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='${JSON.stringify({token:analyticsToken})}'></script>`:'';
- const navItems=[['tools/','工具'],['stories/','故事'],['games/','遊戲'],['projects/','作品'],['gallery/','藝廊'],['journal/','日誌']];
+ const navItems=[['tools/','工具'],['stories/','故事'],['games/','遊戲'],['music/','音樂'],['projects/','作品'],['gallery/','藝廊'],['journal/','日誌']];
  const stateLabel=s=>({demo:'原創示範',pending:'劇本待匯入',concept:'概念規劃',complete:'完整作品',live:'已公開',repo:'公開專案',playable:'可遊玩'})[s]||s;
  const tag=(text,tone)=>badge(text,tone);
  const card=(obj,kind)=>{

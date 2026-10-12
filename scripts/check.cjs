@@ -2,7 +2,7 @@
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -23,6 +23,19 @@
    assert.ok(fs.existsSync(path.join(dist,target)),`broken internal href ${href} in ${f}`);
   }
  }
+ // Music room: every song ships as a compressed AAC file under the size budget, with its title and lyrics on the page.
+ const musicPage=fs.readFileSync(path.join(dist,'music/index.html'),'utf8');
+ assert.ok(Array.isArray(catalog.music)&&catalog.music.length>0,'music catalog is empty');
+ for(const m of catalog.music){
+  const source=fs.readFileSync(path.join(root,m.audio)),built=fs.readFileSync(path.join(dist,m.audio));
+  assert.ok(source.equals(built),'music copy differs: '+m.audio);
+  assert.equal(source.toString('ascii',4,8),'ftyp','music file must be MP4/AAC: '+m.audio);
+  assert.ok(source.length>500000&&source.length<6000000,'music file exceeds budget or is empty: '+m.audio);
+  assert.ok(musicPage.includes(m.title)&&musicPage.includes('id="song-'+m.slug+'"'),'music page missing song: '+m.slug);
+  const firstLine=fs.readFileSync(path.join(root,m.lyrics),'utf8').split(/\r?\n/).map(l=>l.trim()).find(l=>l&&!/^\[.*\]$/.test(l));
+  assert.ok(musicPage.includes(firstLine),'music page missing lyrics: '+m.slug);
+ }
+ assert.ok(!musicPage.includes('.wav'),'music page must not reference uncompressed audio');
  const css=fs.readFileSync(path.join(dist,'assets/style.css'),'utf8');
  for(const breakpoint of ['max-width:1100px','max-width:920px','max-width:720px','max-width:480px','prefers-reduced-motion'])assert.ok(css.includes(breakpoint),'missing responsive '+breakpoint);
  for(const story of catalog.stories){
@@ -187,8 +200,8 @@
   }
  }
  const fingerprints=[...fs.readdirSync(path.join(dist,'static'))];
- assert.equal(fingerprints.length,2,'expected one fingerprint directory per site entry asset');
- for(const [file,name] of [['assets/style.css','style.css'],['assets/app.js','app.js']]){
+ assert.equal(fingerprints.length,4,'expected one fingerprint directory per site entry asset');
+ for(const [file,name] of [['assets/style.css','style.css'],['assets/app.js','app.js'],['assets/music.css','music.css'],['assets/music.js','music.js']]){
   const hashed=fingerprints.find(hash=>fs.existsSync(path.join(dist,'static',hash,name)));
   assert.ok(hashed,'fingerprinted copy missing for '+file);
   assert.ok(fs.readFileSync(path.join(dist,'static',hashed,name)).equals(fs.readFileSync(path.join(root,file))),'fingerprinted copy differs from source '+file);
