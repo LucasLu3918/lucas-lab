@@ -15,6 +15,15 @@ export default {
     { id: 'balcony', label: '陽台', image: 'balcony.webp' }
   ],
   intro: '黑鐘學院的舞會在暴雪夜舉行。賓客全戴著面具，凝結成舞姿，像一排排蠟像；只有鏡子裡的倒影還在旋轉。伊萊在人群邊緣向妳點頭，指了指舞廳深處那面最大的鏡子。',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '黑鐘學院的舞會在暴雪夜舉行。賓客全戴著面具，凝結成舞姿，像一排排蠟像。' },
+    { text: '只有鏡子裡的倒影還在旋轉。樂聲從鏡面的另一側傳來，慢了半拍。' },
+    { speaker: 'eli', text: '「別看他們的眼睛，看面具。今晚，每個人都站錯了位置。」' },
+    { speaker: 'eli', text: '「舞廳深處那面最大的鏡子——只要月光走得到它，門就會開。」' },
+    { text: '他退回人群邊緣，一隻手藏在背後，像在遮住什麼。' }
+  ],
   objective: '認出每張面具下的人，為鏡廳的暗門引來月光，再向魔鏡說出這場舞會的真相。',
   puzzle: 'interrogation',
   // Positional answers: one word per blank of the interrogation below.

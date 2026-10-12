@@ -7,6 +7,22 @@ export default {
   image: 'mine.webp',
   atmosphere: 'mine',
   intro: '奈菈帶妳穿過銀骨礦坑。玻璃容器裡，有人不停呼喚母親。赫索指著停擺的管線：「不靠魔法，也能讓城市暖起來。」',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '奈菈帶妳穿過銀骨礦坑。坑道越走越窄，玻璃容器裡有人不停呼喚母親。' },
+    { speaker: 'nyla', text: '「別停下來。妳一停，他們就以為有人來接他們了。」' },
+    { speaker: 'heso', text: '「不靠魔法，也能讓城市暖起來。前提是，管子得先接回去。」' },
+    {
+      text: '坑道深處很冷。這裡的名字，還沒有人替他們刻回去。',
+      byChoice: {
+        tobyHeart: {
+          take: '妳的行囊微微發熱。玻璃罐裡的光跳快了一拍，像是認得這條坑道。',
+          bury: '妳想起黑松林裡那塊刻著名字的小石頭。這裡的名字，還沒有人替他們刻回去。'
+        }
+      }
+    }
+  ],
   objective: '接回管網、把名字刻回床頭，再依工程手札轉動對應礦工的閥門。',
   puzzle: 'sequence',
   answer: [

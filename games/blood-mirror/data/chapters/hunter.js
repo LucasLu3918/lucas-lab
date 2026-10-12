@@ -14,6 +14,14 @@ export default {
     { id: 'path', label: '黑松林小徑', image: 'black-pine-path.webp' }
   ],
   intro: '黑松林深處有一間獵人的小屋。桌上放著一只玻璃罐，裡面的東西還在微弱地跳動，像是不肯睡去。獵人背對著妳，沒有回頭：「我替她取過心。取不下來的那一顆，我留在這裡。」',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '黑松林深處有一間獵人的小屋。雪下得很密，腳印一踩下去就被蓋住。' },
+    { text: '桌上放著一只玻璃罐，裡面的東西還在微弱地跳動，像是不肯睡去。' },
+    { speaker: 'hunter', text: '「我替她取過心。取不下來的那一顆，我留在這裡。」' },
+    { speaker: 'hunter', text: '「妳想知道自己為什麼還活著，就自己看。我不會再說第二次。」' }
+  ],
   objective: '點亮玻璃心臟的法陣，弄清楚獵人為什麼沒有交出妳的心。',
   puzzle: 'interrogation',
   // Positional answers: one word per blank of the interrogation below.

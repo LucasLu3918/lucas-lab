@@ -135,7 +135,21 @@ body.mode-story .journey-guide{display:grid}
 .dialogue-actions .primary-button,.dialogue-actions .secondary-button{min-height:44px;padding:8px 14px;font-size:13px;white-space:nowrap}
 .scene-progress{display:none;font-size:12px;color:var(--stage-muted)}
 .narrative{margin:0;font:15px/1.8 var(--serif);color:var(--stage-text);white-space:pre-line;max-height:min(30dvh,260px);overflow:auto;overscroll-behavior:contain;padding-right:2px}
-.dialogue.collapsed .narrative{display:none}
+.dialogue.collapsed .narrative,.dialogue.collapsed .dialogue-foot{display:none}
+/* Scene lines: a click on the text (or 繼續) finishes the line being typed, then moves on. */
+.narrative{cursor:pointer}
+.narrative.typing .letter{opacity:0;animation:type-in .01s linear forwards;animation-delay:calc(var(--i) * 32ms)}
+@keyframes type-in{to{opacity:1}}
+.sr-speaker{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dialogue-toggle.unread{color:var(--stage-gold-hi)}
+.dialogue-toggle.unread::before{content:'';display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:var(--stage-gold-hi);vertical-align:middle}
+.dialogue-foot{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.dialogue-foot>[hidden]{display:none}
+.dialogue-count{margin-right:auto;font-size:12px;letter-spacing:1px;color:var(--stage-muted);font-variant-numeric:tabular-nums}
+.dialogue-foot .text-button{min-height:44px;padding:0 6px;font-size:12px;letter-spacing:1px;color:var(--stage-gold)}
+.dialogue-foot .secondary-button{min-height:44px;padding:8px 14px;font-size:13px;white-space:nowrap}
+.dialogue-portrait.has-portrait{overflow:hidden}
+.dialogue-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 16%}
 
 /* Inventory tray: label on the left, items scroll sideways. */
 .tray{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0;padding:8px 12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:var(--stage-radius)}
@@ -331,3 +345,10 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .ending-buttons .text-button{color:var(--gold)}
 .maze-key{display:grid;place-items:center;padding:0}
 .pipe-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+
+/* Read log (回顧紀錄): speaker or spot name above each passage, newest at the end. */
+.read-log{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
+.read-log-entry{padding:0 0 12px;border-bottom:1px solid var(--line)}
+.read-log-speaker{margin:0 0 4px;font-size:12px;letter-spacing:2px;color:var(--gold)}
+.read-log-entry.spot .read-log-speaker{color:var(--muted)}
+.read-log-text{margin:0;white-space:pre-line;font:15px/1.9 var(--serif);color:#d2c6b6}
