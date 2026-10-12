@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState,rooms,inspect,collect,solve,travel,toSaveV2,fromSaveV2,loadSave,writeSave,SAVE_KEY,LEGACY_SAVE_KEY,LEGACY_PUZZLE_KEY} from '../games/blood-mirror/engine/index.js';
+import {initialState,rooms,inspect,collect,solve,travel,toSaveV2,fromSaveV2,loadSave,backupSave,writeSave,exportSave,parseSave,SAVE_KEY,BACKUP_SAVE_KEY,SAVE_FORMAT,LEGACY_SAVE_KEY,LEGACY_PUZZLE_KEY} from '../games/blood-mirror/engine/index.js';
 
 // A minimal in-memory localStorage, so the tests need no browser.
 const storage=(entries={})=>{const data=new Map(Object.entries(entries));return {getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,String(v)),removeItem:k=>data.delete(k),has:k=>data.has(k),raw:k=>data.get(k)};};
@@ -92,4 +92,43 @@ test('finished stages and per-step hints survive a save; unknown ones are droppe
  assert.deepEqual(loaded.puzzles,['library','mine.names','prologue']);
  assert.deepEqual(loaded.state.stepHints,{'mine.names':2,'library.seal':1});
  assert.deepEqual(fromSaveV2({version:2}).state.stepHints,{},'older saves without stepHints restore empty');
+});
+
+test('an unreadable save restores from the backup of the last visit, not from v1',()=>{
+ const good=JSON.stringify(toSaveV2(progressThrough(2),['library']));
+ const store=storage({[SAVE_KEY]:good,[LEGACY_SAVE_KEY]:JSON.stringify({...progressThrough(1),version:1})});
+ assert.equal(backupSave(store),true);
+ assert.equal(store.raw(BACKUP_SAVE_KEY),good);
+ store.setItem(SAVE_KEY,'{"version":2,"solved":["libr');
+ const loaded=loadSave(store);
+ assert.equal(loaded.recovered,true);
+ assert.equal(loaded.migrated,false);
+ assert.deepEqual(loaded.state.solved,[0,1]);
+ assert.deepEqual(loaded.puzzles,['library']);
+});
+
+test('an unreadable save never replaces a good backup',()=>{
+ const good=JSON.stringify(toSaveV2(progressThrough(1),[]));
+ const store=storage({[SAVE_KEY]:'{broken',[BACKUP_SAVE_KEY]:good});
+ assert.equal(backupSave(store),false);
+ assert.equal(store.raw(BACKUP_SAVE_KEY),good);
+ assert.equal(backupSave(storage()),false,'nothing to back up yet');
+});
+
+test('a save from a newer build is reported and left untouched',()=>{
+ const future=JSON.stringify({version:3,chapter:'library',solved:['library']});
+ const store=storage({[SAVE_KEY]:future,[BACKUP_SAVE_KEY]:JSON.stringify(toSaveV2(progressThrough(1),[]))});
+ const loaded=loadSave(store);
+ assert.equal(loaded.newer,true);
+ assert.equal(loaded.state.started,false,'nothing from an older backup or v1 is mixed in');
+ assert.equal(backupSave(store),false,'the newer save is not copied over the backup');
+ assert.equal(store.raw(SAVE_KEY),future);
+});
+
+test('save files from a newer build ask for a reload instead of a generic error',()=>{
+ const file=JSON.parse(exportSave(progressThrough(1),[]));
+ assert.equal(file.format,SAVE_FORMAT);
+ assert.deepEqual(parseSave(JSON.stringify(file)).state.solved,[0]);
+ assert.throws(()=>parseSave(JSON.stringify({...file,version:3})),/較新的版本/);
+ assert.throws(()=>parseSave(JSON.stringify({...file,save:{...file.save,version:3}})),/較新的版本/);
 });
