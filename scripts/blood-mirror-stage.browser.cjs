@@ -39,10 +39,27 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
    await page.waitForFunction(()=>!document.querySelector('#stage').classList.contains('glow-on'),null,{timeout:6000});
    assert.equal(await page.locator('#glow').isDisabled(),true,'cooldown outlasts the glow');
 
-   // Dialogue collapses to one line and expands again; its actions stay reachable either way.
+   // Phones keep the dialogue collapsed so the scene stays in view, and say the opening scene is unread.
    assert.equal(await page.locator('#dialogue-toggle').getAttribute('aria-expanded'),width<600?'false':'true','dialogue default @'+width);
+   if(width<600){
+    assert.equal(await page.locator('#dialogue-toggle').textContent(),'展開新對話','unread scene cue @'+width);
+    await page.locator('#dialogue-toggle').click();
+   }
+   // The scene plays one line per click and names each speaker.
+   assert.equal(await page.locator('#dialogue-speaker').textContent(),'旁白');
+   assert.equal(await page.locator('#dialogue-count').textContent(),'1 / 4');
+   await page.locator('#dialogue-next').click();await page.locator('#dialogue-next').click();
+   assert.equal(await page.locator('#dialogue-speaker').textContent(),'魔鏡','speaker follows the line @'+width);
+   assert.ok((await page.locator('#narrative').textContent()).includes('魔鏡：'),'the line names its speaker for screen readers');
+   await page.locator('#dialogue-log').click();
+   assert.equal(await page.locator('#modal .read-log-entry').count(),3,'read log stops at the line being read @'+width);
+   await page.locator('#log-back').click();
+   await page.locator('#dialogue-next').click();
+   assert.equal(await page.locator('#dialogue-next').isVisible(),false,'no 繼續 after the last line');
+
+   // Dialogue collapses to one line and expands again; its actions stay reachable either way.
    await page.locator('#dialogue-toggle').click();
-   assert.equal(await page.locator('#dialogue-toggle').getAttribute('aria-expanded'),width<600?'true':'false','dialogue toggle @'+width);
+   assert.equal(await page.locator('#dialogue-toggle').getAttribute('aria-expanded'),'false','dialogue toggle @'+width);
    assert.equal(await page.locator('#room-puzzle').isVisible(),true,'seal action must stay visible @'+width);
    await page.locator('#dialogue-toggle').click();
 

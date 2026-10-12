@@ -7,6 +7,14 @@ export default {
   image: 'queen.webp',
   atmosphere: 'queen',
   intro: '鏡子讓妳看見年輕的薇菈。她為了救愛人嫁給國王，卻成為契約的囚徒。床頭那隻灰兔，右耳被一針一線縫好了。',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '鏡子讓妳看見年輕的薇菈。她為了救愛人嫁給國王，卻成為契約的囚徒。' },
+    { text: '床頭那隻灰兔，右耳被一針一線縫好了。' },
+    { speaker: 'vera', text: '「又把兔子的耳朵扯掉了？過來，我縫給妳。」' },
+    { speaker: 'vera', text: '「我會問妳三個問題。沒有對錯——我只想知道，妳會成為什麼樣的人。」' }
+  ],
   objective: '取得銀針，用妳自己的意志回答王后留下的三個問題。',
   puzzle: 'questions',
   free: true,

@@ -7,6 +7,14 @@ export default {
   image: 'chamber.webp',
   atmosphere: 'library',
   intro: '午夜，黑鐘學院敲響了第十三聲。妳在禁書庫醒來。門外有人拖動鎖鏈，而桌上的懷錶……正在倒著走。',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '午夜，黑鐘學院敲響了第十三聲。妳在禁書庫醒來，臉頰還貼著冰冷的書頁。' },
+    { text: '門外有人拖動鎖鏈，停在妳的門前，沒有再動。桌上的懷錶……正在倒著走。' },
+    { speaker: 'mirror', text: '「醒了嗎，公主？今夜多敲的那一聲，是為妳敲的。」' },
+    { speaker: 'mirror', text: '「禁書櫃裡鎖著妳出生的價錢。找到那四個數字，妳就會知道自己欠了誰。」' }
+  ],
   objective: '找到禁書櫃的四位密碼，取回王室生命契約。',
   puzzle: 'code',
   answer: '1373',
