@@ -36,6 +36,8 @@ body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{anim
 .playlog-table{width:100%;border-collapse:collapse;font-size:13px}
 .playlog-table th,.playlog-table td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}
 .playlog-table th{color:var(--gold);font-weight:400;letter-spacing:1px}
+.playlog-panel{overflow-x:auto}
+.playlog-stall td{color:#e3a0a8}
 .playlog-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .playlog-actions button{flex:1 1 auto;min-height:44px}
 /* Post-game: memories, ending recap, portable save */

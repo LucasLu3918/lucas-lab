@@ -22,6 +22,10 @@ const holds=(clue,arrangement)=>{
  return at(clue.a)>at(clue.b);
 };
 export const bedsSatisfy=arrangement=>bedClues.every(clue=>holds(clue,arrangement));
+// The first testimony a full arrangement breaks (index into bedClues), or -1 (plan r3).
+export const brokenBedClue=arrangement=>bedClues.findIndex(clue=>!holds(clue,arrangement));
+// The miners are offered in this fixed order, which is deliberately not the solution order.
+export const minerOrder=[2,6,0,3,5,1,4];
 
 // Every ordering that satisfies all testimonies (exactly one is expected; tests assert it).
 export function bedSolutions(){
@@ -42,7 +46,7 @@ export function mountNames(ctx){
    +bedClues.map(clue=>'<li>'+clue.text+'</li>').join('')
    +'</ol><div class="mask-board">'
    +bedAnswer.map((_,i)=>'<label class="mask-row"><span class="mask-slot">'+(i+1)+'</span><span class="mask-name">第'+(i+1)+'床</span><select data-bed="'+i+'" aria-label="從爐火數起第'+(i+1)+'張床是誰"><option value="-1">未選擇</option>'
-    +miners.map((name,m)=>'<option value="'+m+'"'+(picks[i]===m?' selected':'')+'>'+name+'</option>').join('')+'</select></label>').join('')
+    +minerOrder.map(m=>'<option value="'+m+'"'+(picks[i]===m?' selected':'')+'>'+miners[m]+'</option>').join('')+'</select></label>').join('')
    +'</div><p class="challenge-feedback" role="status">'+message+'</p><button id="names-confirm" class="primary-button">把名字刻回床頭 ⟶</button><button id="names-reset" class="secondary-button">全部重選</button>');
   document.querySelectorAll('[data-bed]').forEach(select=>select.onchange=()=>{picks[Number(select.dataset.bed)]=Number(select.value);message='';});
   document.querySelector('#names-reset').onclick=()=>{picks=bedAnswer.map(()=>-1);message='';draw();};
@@ -50,8 +54,8 @@ export function mountNames(ctx){
    if(picks.some(miner=>miner<0)){message='還有床位沒有刻上名字。';draw();return;}
    if(new Set(picks).size<picks.length){message='同一個人不可能睡在兩張床上。';ctx.playCue('wrong');draw();return;}
    if(namesSolved(picks)){ctx.done();return;}
-   const correct=picks.filter((miner,i)=>miner===bedAnswer[i]).length;
-   message='木牌微微發燙又冷卻——目前有 '+correct+' / '+bedAnswer.length+' 張床對上了名字。再核對一次證詞。';
+   const broken=brokenBedClue(picks);
+   message='木牌微微發燙又冷卻——第 '+(broken+1)+' 則證詞說不通：'+bedClues[broken].text;
    ctx.playCue('wrong');draw();
   };
  };
