@@ -30,23 +30,36 @@ export function minTurns(start=startGears){
  return -1;
 }
 
+// A warm-up movement comes first (plan r9): one turn of the hour gear also pulls the minute gear home,
+// which shows the coupling before the real three-gear movement.
+export const warmGears=[5,1,0];
+
 export function mountWatch(ctx){
- let gears=[...startGears],turns=0;
- const draw=()=>{
+ let warm=true,gears=[...warmGears],turns=0;
+ const start=()=>warm?warmGears:startGears;
+ const draw=(note='')=>{
   const aligned=gears.filter(position=>position===0).length;
-  ctx.render('<p class="challenge-help">錶蓋裡藏著三枚咬合的齒輪，指針正在倒著走。每轉動一枚齒輪，它的下一枚就會被拉回一格——讓三道刻痕同時對準，指針才會重新往前走。</p>'
+  ctx.render('<p class="challenge-help">'+(warm
+    ?'錶蓋裡藏著咬合的齒輪，指針正在倒著走。先試一次：轉動「時輪」，看看它的下一枚齒輪怎麼被拉回來。'
+    :'三枚齒輪咬合在一起。每轉動一枚，它的下一枚就會被拉回一格（秒輪會拉回時輪）——讓三道刻痕同時對準，指針才會重新往前走。')+'</p>'
    +'<div class="watch-board" role="group" aria-label="懷錶的三枚齒輪">'
    +gears.map((position,i)=>'<button class="watch-gear rot'+position+(position===0?' aligned':'')+'" data-gear="'+i+'" aria-label="'+GEARS[i]+'，刻痕在第 '+(position+1)+' 格（共 '+TEETH+' 格），'+(position===0?'已對準':'尚未對準')+'，按下轉動一格">'
     +'<span class="watch-mark" aria-hidden="true">▲</span><span class="watch-name">'+GEARS[i]+'</span></button>').join('')
-   +'</div><p id="watch-status" class="challenge-feedback" role="status">'+aligned+' / '+GEARS.length+' 道刻痕已對準 · 已轉動 '+turns+' 次</p>'
+   +'</div><p id="watch-status" class="challenge-feedback" role="status">'+(note||(warm?'暖身 · ':'')+aligned+' / '+GEARS.length+' 道刻痕已對準 · 已轉動 '+turns+' 次')+'</p>'
    +'<button id="watch-reset" class="secondary-button">齒輪歸位</button>');
   document.querySelectorAll('[data-gear]').forEach(button=>button.onclick=()=>{
    const i=Number(button.dataset.gear);
    gears=turnGear(gears,i);turns++;ctx.playCue('click');
-   if(watchSolved(gears)){ctx.done();return;}
+   if(watchSolved(gears)){
+    if(!warm){ctx.done();return;}
+    warm=false;gears=[...startGears];turns=0;
+    draw('轉一枚，下一枚就倒退一格。錶芯真正的位置現在才露出來。');
+    document.querySelector('[data-gear="'+i+'"]')?.focus({preventScroll:true});
+    return;
+   }
    draw();
   });
-  document.querySelector('#watch-reset').onclick=()=>{gears=[...startGears];turns=0;draw();};
+  document.querySelector('#watch-reset').onclick=()=>{gears=[...start()];turns=0;draw();};
  };
  draw();
 }

@@ -11,7 +11,7 @@ export function mountRubbing(ctx){
  const revealed=new Set();let message='';
  const draw=()=>{
   const all=revealed.size===lid.length;
-  ctx.render('<p class="challenge-help">棺蓋上積著一層灰黑的污垢，下面有刻文。用手指（或滑鼠）在每一格上來回抹開；也可以用旁邊的按鈕逐格揭露。</p>'
+  ctx.render('<p class="challenge-help">妳把王室契約翻到空白的背面，覆在棺蓋上。污垢下面有刻文：用手指（或滑鼠）在每一格上來回抹開，讓刻痕拓到紙上；也可以用旁邊的按鈕逐格揭露。</p>'
    +'<div class="rub-board" role="group" aria-label="棺蓋的八格刻文">'
    +lid.map((seal,i)=>'<button class="rub-cell'+(revealed.has(i)?' clear':'')+'" data-rub="'+i+'" aria-label="第'+(i+1)+'格，'+(revealed.has(i)?(seal?'刻著「'+seal+'」':'磨得一片平滑，什麼也沒有'):'被污垢蓋住，按下揭露')+'">'
     +(revealed.has(i)?(seal||'磨損'):'')+'</button>').join('')

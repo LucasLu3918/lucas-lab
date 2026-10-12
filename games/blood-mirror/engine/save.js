@@ -1,6 +1,6 @@
 // Save format v2: chapters are stored by id, so inserting a chapter never shifts saved progress.
 // Version 1 (chapter indices, separate puzzle key) is read once and then superseded by v2.
-// Fields added after v2 shipped (clues, deduced, choices, skipped, roster, shards, achievements, glowRooms, misses) are optional:
+// Fields added after v2 shipped (clues, deduced, choices, skipped, roster, shards, achievements, glowRooms, misses, stepHints) are optional:
 // a save without them restores to empty collections, so no version bump is needed.
 import {chapters} from '../data/chapters/index.js';
 import {restoreState} from './state.js';
@@ -13,7 +13,9 @@ export const SAVE_FORMAT='blood-mirror-save',MAX_SAVE_BYTES=100000;
 export const PROLOGUE_PUZZLE='prologue';
 
 const chapterIds=()=>chapters.map(c=>c.id);
-const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE];
+// A two-stage evidence also records each finished stage ("mine.names"), so the player can do them in either order.
+const stageIds=()=>chapters.filter(c=>c.stages?.length>1).flatMap(c=>c.stages.map(stage=>c.id+'.'+stage));
+const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE,...stageIds()];
 const knownIds=list=>Array.isArray(list)?[...new Set(list.filter(id=>puzzleIds().includes(id)))]:[];
 
 // Engine state -> v2 object. `puzzles` lists the hands-on puzzles completed so far.
@@ -29,6 +31,7 @@ export function toSaveV2(state,puzzles=[]){
   inventory:[...state.inventory],
   seen:[...state.seen],
   hints:Object.fromEntries(ids.map((id,i)=>[id,state.hints[i]??0])),
+  stepHints:{...(state.stepHints||{})},
   clues:[...(state.clues||[])],
   deduced:(state.deduced||[]).map(i=>ids[i]).filter(Boolean),
   choices:{...(state.choices||{})},
@@ -63,6 +66,7 @@ export function fromSaveV2(data){
   inventory:data.inventory,
   seen:data.seen,
   hints:Object.fromEntries(ids.map((id,i)=>[i,data.hints?.[id]??0])),
+  stepHints:data.stepHints,
   clues:data.clues,
   deduced:Array.isArray(data.deduced)?data.deduced.map(id=>ids.indexOf(id)):[],
   choices:data.choices,

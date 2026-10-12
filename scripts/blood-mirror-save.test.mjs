@@ -82,3 +82,14 @@ test('no storage at all still starts a fresh journey',()=>{
  assert.equal(loadSave(null).state.started,false);
  assert.equal(writeSave(initialState(),[],null),false);
 });
+
+test('finished stages and per-step hints survive a save; unknown ones are dropped (r1, r8)',()=>{
+ const state={...initialState(),started:true,stepHints:{'mine.names':2,'library.seal':1}};
+ const saved=toSaveV2(state,['library','mine.names','hunter.runeheart','mine.ghost','prologue']);
+ assert.deepEqual(saved.puzzles,['library','mine.names','prologue'],'single-stage acts and unknown stages are not stored as stages');
+ assert.deepEqual(saved.stepHints,{'mine.names':2,'library.seal':1});
+ const loaded=fromSaveV2({...saved,stepHints:{...saved.stepHints,'mine.ghost':1,'crypt.rune':7,'crypt.rubbing':'2'}});
+ assert.deepEqual(loaded.puzzles,['library','mine.names','prologue']);
+ assert.deepEqual(loaded.state.stepHints,{'mine.names':2,'library.seal':1});
+ assert.deepEqual(fromSaveV2({version:2}).state.stepHints,{},'older saves without stepHints restore empty');
+});
