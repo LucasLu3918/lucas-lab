@@ -19,6 +19,8 @@ const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
     await wait(()=>soundtrack.getStatus().source==='mp3'&&soundtrack.getStatus().currentTime>0);
     const player=players.at(-1);await new Promise(r=>setTimeout(r,650));
     const status=soundtrack.getStatus();if(status.synthGain>.001)throw Error('synth did not fade out');
+    // Playback alone is not sound: the master bus must actually be open once the player turned audio on.
+    if(soundtrack.mixer.muted||soundtrack.mixer.bus('master').gain.value<.1)throw Error('master bus silent while music plays');
     if(!player.loop||player.duration<30||player.duration>160)throw Error('invalid preview duration '+player.duration);
     player.currentTime=player.duration-.15;await wait(()=>player.currentTime<2);
     await new Promise(r=>setTimeout(r,1700));// the previous track cross-fades out over 1.5 s
