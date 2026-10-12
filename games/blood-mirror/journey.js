@@ -1,7 +1,10 @@
-import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant} from './engine/index.js';
+import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant,shardReachable} from './engine/index.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
-export function spotText(spot,restored=false,state=null){return restored&&spot.restoredText?spot.restoredText:(state&&choiceVariant(spot,state))||spot.text;}
+export function spotText(spot,restored=false,state=null){
+ if(state&&spot.shard&&!shardReachable(state,spot))return spot.veiled;
+ return restored&&spot.restoredText?spot.restoredText:(state&&choiceVariant(spot,state))||spot.text;
+}
 
 export function journeyGuide(state,challengeComplete=false){
  // Optional post-game memories and mirror shards are collectibles: they never count toward
