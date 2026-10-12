@@ -352,3 +352,17 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .read-log-speaker{margin:0 0 4px;font-size:12px;letter-spacing:2px;color:var(--gold)}
 .read-log-entry.spot .read-log-speaker{color:var(--muted)}
 .read-log-text{margin:0;white-space:pre-line;font:15px/1.9 var(--serif);color:#d2c6b6}
+/* Game feel layer (juice.js): particles, soft flashes and the item that flies to the tray. It sits in the
+   top layer above an open dialog and is never hit-tested, so it can't swallow a click. */
+.fx-layer{position:fixed;inset:0;width:auto;height:auto;margin:0;padding:0;border:0;background:none;color:inherit;overflow:hidden;pointer-events:none;z-index:40}
+.fx-particle{position:absolute;left:0;top:0;width:var(--s,6px);height:var(--s,6px);margin:calc(var(--s,6px) / -2) 0 0 calc(var(--s,6px) / -2);will-change:translate,opacity}
+.fx-mote{border-radius:50%;background:radial-gradient(circle,#fff6dc 0,var(--stage-gold-hi) 45%,rgba(195,172,128,.35) 70%,rgba(195,172,128,0) 100%);box-shadow:0 0 8px 1px rgba(226,204,155,.55)}
+.fx-shard{background:linear-gradient(135deg,#f4fbff,var(--stage-frost) 60%,rgba(159,182,200,.25));clip-path:polygon(50% 0,100% 100%,0 70%)}
+.fx-flash{position:absolute;inset:0;opacity:0}
+.fx-flash-gold{background:radial-gradient(ellipse at 50% 45%,rgba(226,204,155,.3),rgba(226,204,155,.07) 45%,transparent 70%)}
+.fx-flash-pale{background:radial-gradient(ellipse at 50% 45%,rgba(220,236,248,.26),transparent 65%)}
+.fx-flash-blood{background:radial-gradient(ellipse at 50% 50%,transparent 42%,rgba(141,45,59,.42) 100%)}
+.fx-fly{position:absolute;left:0;top:0;display:grid;place-items:center;width:40px;height:40px;margin:-20px 0 0 -20px;border:1px solid var(--stage-gold);border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(226,204,155,.22),transparent 70%),#15121a;color:var(--stage-gold-hi);box-shadow:0 0 18px 2px rgba(226,204,155,.5),0 6px 16px rgba(0,0,0,.6)}
+.fx-fly svg{width:22px;height:22px}
+/* The toast becomes a manual popover so it can show above an open dialog; undo the popover UA box. */
+.toast[popover]{top:auto;right:auto;margin:0;color:var(--text)}
