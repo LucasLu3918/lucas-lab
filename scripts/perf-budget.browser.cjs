@@ -14,9 +14,10 @@ const KB=1024;
 // Measured after the 2026-10-10 optimisation pass (worst of 390px and 1440px) plus about 20% headroom.
 const BUDGETS=[
  {route:'/',maxBytes:280*KB,maxRequests:12},
- // Raised from 85 KB on 2026-10-12: the shared icon, gallery and music styles (PR #30) brought this page to 89 KB at 390px.
+ // Raised on 2026-10-12 (story 85→95 KB, chapter 60→72 KB): the shared icon, gallery and music styles and scripts from
+ // PR #30 grew style.css + app.js by about 9 KB, bringing these pages to 89 KB and 67 KB.
  {route:'/stories/dark-snow-white/',maxBytes:95*KB,maxRequests:8},
- {route:'/stories/dark-snow-white/chapters/00/',maxBytes:60*KB,maxRequests:7},
+ {route:'/stories/dark-snow-white/chapters/00/',maxBytes:72*KB,maxRequests:7},
  {route:'/search/',maxBytes:330*KB,maxRequests:14},
  // The game ships as native ES modules (no bundler, plan §9.1), so its request count is higher; bytes stay the tight guard.
  {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:55}
