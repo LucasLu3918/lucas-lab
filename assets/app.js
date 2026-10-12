@@ -293,6 +293,16 @@
  // Legal page: the reader can clear what this site stores on the device.
  const clearStatus=one('[data-clear-status]');
  const report=text=>{if(clearStatus)clearStatus.textContent=text};
+ // Contact address: shipped only as reversed base64, decoded on click, so it never appears in the HTML for scrapers.
+ many('[data-reveal-email]').forEach(button=>button.addEventListener('click',()=>{
+  try{
+   const address=Array.from(atob(button.dataset.contact)).reverse().join('');
+   const link=document.createElement('a');
+   link.className='btn';link.href='mailto:'+address;link.textContent=address;
+   const note=one('[data-email-note]');if(note)note.hidden=true;
+   button.replaceWith(link);link.focus();
+  }catch{button.disabled=true}
+ }));
  one('[data-clear-progress]')?.addEventListener('click',()=>{try{localStorage.removeItem(progressKey);localStorage.removeItem(warningKey)}catch{}report('已清除閱讀紀錄與內容提示確認。')});
  one('[data-clear-offline]')?.addEventListener('click',async()=>{
   if(!window.confirm('要移除所有離線保存的作品嗎？'))return;
