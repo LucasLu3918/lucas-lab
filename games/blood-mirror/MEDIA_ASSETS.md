@@ -112,6 +112,7 @@ node scripts/blood-mirror.browser.cjs
 - `00_title_The_Mirror_Lied_First.mp3` 為舊版標題曲，程式已不引用，已移至 `source-audio/`，不再隨遊戲發布。
 - 母帶 `source-audio/main_theme_Who_Deserves_to_Live.mp3`（約 9.3 MB）超過 8 MB 的提交守衛上限，未納入版本控制；`highlights.mp3` 已移出發布。
 - 場景環境音與音效全部由 WebAudio 即時合成（`audio/ambience.js`、`audio/sfx.js`），沒有額外音檔。
+- 混音（2026-10-13）：音樂、音效、環境音三條匯流排經主匯流排與安全限幅器輸出；音量滑桿採 40·log10 dB 曲線（一半約 -12 dB）。各曲以 EBU R128 實測響度正規化到 -18 LUFS（提升上限 +4 dB），數值在 `soundtrack.js` 的 `LOUDNESS`，換檔時需以 `ffmpeg -i <檔案> -af ebur128 -f null -` 重新量測。重要音效會壓低音樂；謎題開啟時音樂低通變暗，解開後恢復。
 - 鏡之碎片與收藏、成就、祕密尾聲皆為文字與 CSS 呈現，未新增圖片素材。
 - 尚缺：角色立繪（M4 對話場景與 M6 的人物）、M6 兩個新章節（血色舞會、獵人的心臟）的場景圖與三首 MiniMax 配樂。需於本機影像與音訊工具產出後，依 plan 第 8.2 節的人工審查流程加入。
 
