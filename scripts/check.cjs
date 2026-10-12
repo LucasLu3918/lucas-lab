@@ -156,7 +156,7 @@
  assert.ok(!sitemap.includes(origin+'/search/'),'noindex search must not be in sitemap');
  assert.ok(!sitemap.includes(origin+'/style-guide/'),'internal component showcase must not be in sitemap');
  // Masters, original PNG sources and planning files stay in the repository and never ship.
- for(const excluded of ['games/blood-mirror/play/source-art','games/blood-mirror/play/source-audio','games/blood-mirror/play/plan-improve'])assert.ok(!fs.existsSync(path.join(dist,excluded)),'master or planning files must not ship: '+excluded);
+ for(const excluded of ['source-art','games/blood-mirror/play/source-art','games/blood-mirror/play/source-audio','games/blood-mirror/play/plan-improve'])assert.ok(!fs.existsSync(path.join(dist,excluded)),'master or planning files must not ship: '+excluded);
  for(const s of catalog.stories.filter(x=>!(x.manuscript||(x.chapters||[]).length)))assert.ok(!sitemap.includes(origin+'/stories/'+s.slug+'/'),'pending story in sitemap: '+s.slug);
  for(const g of catalog.games.filter(g=>g.status==='concept'))assert.ok(!sitemap.includes(origin+'/games/'+g.slug+'/'),'concept game in sitemap: '+g.slug);
  for(const p of catalog.projects.filter(x=>x.status==='concept'))assert.ok(!sitemap.includes(origin+'/projects/'+p.slug+'/'),'concept project in sitemap: '+p.slug);

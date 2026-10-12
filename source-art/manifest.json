@@ -1,0 +1,161 @@
+{
+ "workflow": {
+  "tool": "ComfyUI (local, 127.0.0.1:8188)",
+  "unet": "z_image_turbo_bf16.safetensors",
+  "clip": "qwen_3_4b.safetensors (type lumina2)",
+  "vae": "ae.safetensors",
+  "model_sampling": "ModelSamplingAuraFlow shift 3.0",
+  "sampler": "KSampler steps 9, cfg 1.0, res_multistep, simple, denoise 1.0",
+  "negative": "ConditioningZeroOut of the positive prompt"
+ },
+ "concepts": [
+  {
+   "master": "source-art/concepts/concept-forest.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 1101,
+   "prompt": "Dark fantasy digital oil painting, cinematic wide shot. A lone cloaked traveler with a glowing lantern walks along a mossy path through an ancient misty forest of colossal twisted trees, shafts of pale teal moonlight through the canopy, floating spores and fireflies, ruined stone archway overgrown with vines. Deep teal and emerald palette with warm amber lantern glow, painterly brushwork, highly detailed, atmospheric depth, moody fairy tale illustration, book cover quality. No text, no letters, no watermark.",
+   "outputs": {
+    "assets/images/concept-forest.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-forest-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  },
+  {
+   "master": "source-art/concepts/concept-redhood.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 1202,
+   "prompt": "Dark fantasy digital oil painting, cinematic wide shot. A girl in a flowing crimson hooded cloak seen from behind standing at the edge of a black pine forest at night, a huge shadowy wolf with faint glowing eyes watching from between the trees, blood red eclipse moon in a stormy sky, fog rolling over the ground, red petals in the wind. Palette of crimson, charcoal and cold silver, painterly brushwork, highly detailed, gothic fairy tale illustration, book cover quality. No text, no letters, no watermark.",
+   "outputs": {
+    "assets/images/concept-redhood.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-redhood-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  },
+  {
+   "master": "source-art/concepts/concept-grimoire.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 2322,
+   "prompt": "Dark fantasy digital oil painting, cinematic interior. An ancient leather-bound grimoire with brass corner clasps lies open on a carved wooden lectern in a candlelit tower library. Above the open pages floats a single glowing golden magic circle made of concentric rings and fine geometric lines, golden sparks and light motes rising, the pages themselves are blank aged parchment with faded painted illustrations of stars and plants. Towering bookshelves vanishing into darkness, brass astrolabe, melted candles, dust motes. Deep brown and black palette with rich gold glow, painterly brushwork, highly detailed, moody arcane atmosphere, book cover quality. Absolutely no writing, no letters, no alphabet characters, no watermark.",
+   "outputs": {
+    "assets/images/concept-grimoire.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-grimoire-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  },
+  {
+   "master": "source-art/concepts/concept-deepsea.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 1404,
+   "prompt": "Dark fantasy digital oil painting, cinematic underwater wide shot. A sunken gothic cathedral on the deep sea floor, a mermaid silhouette with long flowing hair swimming toward its broken rose window, bioluminescent jellyfish and glowing coral, pale light rays falling from far above, drifting particles, schools of silver fish. Deep navy and cyan palette with soft pearl highlights, painterly brushwork, highly detailed, haunting melancholic fairy tale illustration, book cover quality. No text, no letters, no watermark.",
+   "outputs": {
+    "assets/images/concept-deepsea.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-deepsea-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  },
+  {
+   "master": "source-art/concepts/concept-mirror.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 1505,
+   "prompt": "Dark fantasy digital oil painting, cinematic interior. A tall ornate antique silver mirror with a baroque frame stands alone in an abandoned moonlit gothic chamber, its glass glowing with a ghostly pale rose light and showing a faint misty silhouette of a crowned woman, dried roses scattered on cracked marble floor, tattered velvet curtains, tall arched window with moonlight. Palette of dusky rose, silver and deep shadow, painterly brushwork, highly detailed, eerie gothic fairy tale illustration, book cover quality. No text, no letters, no watermark.",
+   "outputs": {
+    "assets/images/concept-mirror.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-mirror-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  },
+  {
+   "master": "source-art/concepts/concept-startrail.png",
+   "width": 1600,
+   "height": 1008,
+   "seed": 2622,
+   "prompt": "Dark fantasy digital oil painting, cinematic wide shot. An ancient stone observatory tower on a rocky cliff top under a vast night sky filled with sweeping concentric circular star trails, a glowing brass armillary sphere crowns the tower and emits soft blue light, one robed astronomer silhouette stands on the balcony, a calm sea of soft clouds stretches below, distant mountain peaks. Clean composition, midnight blue and indigo palette with silver and soft gold highlights, painterly brushwork, highly detailed, majestic mystical atmosphere, book cover quality. No text, no letters, no watermark.",
+   "outputs": {
+    "assets/images/concept-startrail.webp": "cwebp -q 78 -m 6 -resize 1600 1008",
+    "assets/images/concept-startrail-small.webp": "cwebp -q 76 -m 6 -resize 640 403"
+   }
+  }
+ ],
+ "emblems": [
+  {
+   "master": "source-art/emblems/emblem-tools.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4000,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a crossed hammer and wrench, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-tools.webp": "cwebp -q 84 -m 6 -crop 47 49 920 920 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-stories.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4007,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an open book with pages fanned, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-stories.webp": "cwebp -q 84 -m 6 -crop 47 56 913 913 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-games.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4014,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a chess knight horse head piece, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-games.webp": "cwebp -q 84 -m 6 -crop 45 50 918 918 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-music.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4021,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an ancient lyre harp, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-music.webp": "cwebp -q 84 -m 6 -crop 97 98 829 829 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-projects.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4028,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a large cogwheel gear, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-projects.webp": "cwebp -q 84 -m 6 -crop 53 56 906 906 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-gallery.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4035,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an artist palette with a paintbrush, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-gallery.webp": "cwebp -q 84 -m 6 -crop 31 31 963 963 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-journal.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4042,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a feather quill pen dipped in an inkwell, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-journal.webp": "cwebp -q 84 -m 6 -crop 19 19 984 984 -resize 160 160"
+   }
+  },
+  {
+   "master": "source-art/emblems/emblem-about.png",
+   "width": 1024,
+   "height": 1024,
+   "seed": 4049,
+   "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an eight pointed compass rose star, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
+   "outputs": {
+    "assets/images/emblem-about.webp": "cwebp -q 84 -m 6 -crop 50 54 908 908 -resize 160 160"
+   }
+  }
+ ]
+}

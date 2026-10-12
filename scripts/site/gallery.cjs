@@ -1,7 +1,6 @@
 'use strict';
-// AI visual gallery: story covers, Blood Mirror scenes and portraits, world-concept sketches and the game's concept boards.
+// AI visual gallery: story covers, Blood Mirror scenes and portraits, world-concept paintings and the game's concept boards.
 // Every tile opens the shared dialog (assets/app.js), which steps through the tiles of the same section.
-const {conceptScene}=require('./concept-art.cjs');
 
 const GAME_ART='games/blood-mirror/play/assets/';
 // Scenes in the game's chapter order; thumbnails are 640px derivatives in assets/images/, the full image is the game's own file.
@@ -31,26 +30,27 @@ const BOARDS=[1,3,4];
 
 module.exports=function renderGallery(ctx){
  const {catalog,url,e,icon,media,intro,page,write}=ctx;
- // One tile = one dialog entry. data-full-* is the image the dialog shows; concept tiles carry their SVG instead.
+ // One tile = one dialog entry. data-full-* is the image the dialog shows.
  const tile=({group,full,width,height,alt,title,description,href,hrefLabel,label,body,extraClass=''})=>`<button type="button" class="gallery-tile${extraClass}" data-preview data-group="${group}"${full?` data-full-src="${e(full)}" data-full-w="${width}" data-full-h="${height}" data-full-alt="${e(alt)}"`:''} data-title="${e(title)}" data-description="${e(description)}"${href?` data-href="${e(href)}" data-href-label="${e(hrefLabel)}"`:''} aria-label="${e('放大檢視：'+title)}">${body}<strong>${label||e(title)}</strong></button>`;
  const thumb=(src,alt,w,h,cls)=>`<div class="visual ${cls}"><img src="${url(src)}" alt="${e(alt)}" width="${w}" height="${h}" loading="lazy" decoding="async"><span class="tile-zoom" aria-hidden="true">${icon('search')}</span></div>`;
 
  const covers=catalog.stories.map(story=>tile({group:'covers',full:url(story.cover),width:900,height:1350,alt:story.coverAlt,title:story.title,description:story.description,href:url('stories/'+story.slug+'/'),hrefLabel:'閱讀這本故事',body:media(story)})).join('');
  const scenes=SCENES.map(([key,title,description])=>tile({group:'scenes',full:url(GAME_ART+key+'.webp'),width:1664,height:944,alt:'血色魔鏡遊戲場景插畫：'+title,title,description,href:url('games/blood-mirror/'),hrefLabel:'前往血色魔鏡',body:thumb('assets/images/gallery-scene-'+key+'.webp','血色魔鏡場景：'+title,640,363,'scene-art')})).join('');
  const portraits=PORTRAITS.map(([key,title,description])=>tile({group:'portraits',full:url(GAME_ART+'portraits/'+key+'.webp'),width:640,height:936,alt:'血色魔鏡角色立繪：'+title,title,description,body:thumb('assets/images/gallery-portrait-'+key+'.webp',title+'的角色立繪',320,468,'portrait-art')})).join('');
- const concepts=catalog.gallery.map(g=>tile({group:'concepts',title:g.title,description:g.description,label:`${e(g.title)} · 構思中`,extraClass:' concept-tile',body:`<div class="visual concept-visual ${e(g.palette)}">${conceptScene(g.scene,e(g.title+'：向量場景草圖'))}<span class="concept-badge">${icon(g.symbol)}草圖</span></div>`})).join('');
+ // World concepts: 1600×1008 paintings with 640px thumbnails, both in assets/images/.
+ const concepts=catalog.gallery.map(g=>tile({group:'concepts',full:url('assets/images/concept-'+g.scene+'.webp'),width:1600,height:1008,alt:'世界概念插畫：'+g.title,title:g.title,description:g.description,label:`${e(g.title)} · 構思中`,extraClass:' concept-tile',body:thumb('assets/images/concept-'+g.scene+'-small.webp',g.title+'的世界概念插畫',640,403,'scene-art concept-art').replace('<span class="tile-zoom"',`<span class="concept-badge">${icon(g.symbol)}概念</span><span class="tile-zoom"`)})).join('');
  const boards=BOARDS.map(n=>tile({group:'boards',full:url(GAME_ART+'concepts/design-board-'+n+'.webp'),width:1536,height:1024,alt:'血色魔鏡遊戲企劃展板 '+n,title:'企劃展板 '+n,description:'遊戲開發初期的企劃展板，記錄最初的構想；實際內容以遊戲為準。',extraClass:' concept-board',body:`<img src="${url(GAME_ART+'concepts/design-board-'+n+'.webp')}" alt="血色魔鏡遊戲企劃展板 ${n}" width="1536" height="1024" loading="lazy" decoding="async">`,label:'企劃展板 '+n})).join('');
 
  const sections=[
   {id:'covers',icon:'book',eyebrow:'ORIGINAL COVER COLLECTION',title:'故事封面收藏',desc:`${catalog.stories.length} 幅原創 AI 封面插畫，對應故事藏書館的每一本書。`,grid:'gallery art-gallery',body:covers,count:catalog.stories.length},
   {id:'scenes',icon:'image',eyebrow:'BLOOD MIRROR · SCENES',title:'血色魔鏡・場景插畫',desc:'遊戲中實際使用的場景插畫，依章節順序排列。點選可看完整尺寸。',grid:'gallery scene-gallery',body:scenes,count:SCENES.length,link:['games/blood-mirror/','前往遊戲']},
   {id:'portraits',icon:'mirror',eyebrow:'BLOOD MIRROR · CHARACTERS',title:'血色魔鏡・角色立繪',desc:'在遊戲對話中出現的角色立繪；介紹只標示登場章節，不透露劇情。',grid:'gallery portrait-gallery',body:portraits,count:PORTRAITS.length},
-  {id:'concepts',icon:'compass',eyebrow:'WORLD CONCEPTS · IN PROGRESS',title:'世界概念',desc:'尚未成書的世界，先以程式繪製的向量草圖定下構圖、光源與配色；正式插畫完成後會在這裡替換。',grid:'gallery concept-gallery',body:concepts,count:catalog.gallery.length},
+  {id:'concepts',icon:'compass',eyebrow:'WORLD CONCEPTS · IN PROGRESS',title:'世界概念',desc:'尚未成書的世界，先以概念插畫定下場景、光源與配色。',grid:'gallery concept-gallery',body:concepts,count:catalog.gallery.length},
   {id:'boards',icon:'file',eyebrow:'GAME CONCEPT BOARDS',title:'血色魔鏡・企劃展板',desc:'遊戲開發初期的企劃展板，記錄最初的構想；實際已完成的內容請見遊戲頁。',grid:'concept-boards',body:boards,count:BOARDS.length,link:['games/blood-mirror/','前往遊戲']}
  ];
  const jump=`<nav class="wrap gallery-jump" aria-label="藝廊分區">${sections.map(s=>`<a href="#${s.id}">${icon(s.icon)}<span>${e(s.title.replace('血色魔鏡・',''))}</span><small>${s.count}</small></a>`).join('')}</nav>`;
  const sectionMarkup=s=>`<section class="wrap section gallery-section" id="${s.id}" aria-labelledby="${s.id}-title"><div class="sectionhead"><div><div class="eyebrow">${e(s.eyebrow)}</div><h2 id="${s.id}-title">${e(s.title)}</h2><p>${e(s.desc)}</p></div>${s.link?`<a class="more" href="${url(s.link[0])}">${e(s.link[1])} ↗</a>`:''}</div><div class="${s.grid}">${s.body}</div></section>`;
  const dialog=`<dialog class="dialog gallery-dialog" id="gallery-dialog" aria-labelledby="gallery-dialog-title"><div class="dialog-bar"><span class="dialog-count" data-dialog-count aria-live="polite"></span><button type="button" class="close" data-dialog-close aria-label="關閉預覽">${icon('close')}</button></div><div class="dialog-stage"><button type="button" class="dialog-nav prev" data-dialog-prev aria-label="上一張">${icon('arrow')}</button><div class="visual" data-dialog-visual><span>${icon('image')}</span></div><button type="button" class="dialog-nav next" data-dialog-next aria-label="下一張">${icon('arrow')}</button></div><h2 data-dialog-title id="gallery-dialog-title"></h2><p data-dialog-desc class="muted"></p><a class="btn" data-dialog-link hidden></a><p class="dialog-hint">← → 切換 · Esc 關閉</p></dialog>`;
- const html=intro('VISUAL ARCHIVE','AI 視覺藝廊','故事封面、遊戲場景與角色立繪都是實際使用中的原創 AI 插畫；尚在構思的世界則先以向量草圖呈現。')+jump+sections.map(sectionMarkup).join('')+dialog;
- write('gallery',page('AI 視覺藝廊','原創 AI 故事封面、血色魔鏡場景與角色立繪，以及構思中的世界概念草圖。','gallery',html,'gallery'));
+ const html=intro('VISUAL ARCHIVE','AI 視覺藝廊','故事封面、遊戲場景與角色立繪都是實際使用中的原創 AI 插畫；尚在構思的世界則以概念插畫呈現。')+jump+sections.map(sectionMarkup).join('')+dialog;
+ write('gallery',page('AI 視覺藝廊','原創 AI 故事封面、血色魔鏡場景與角色立繪，以及構思中的世界概念插畫。','gallery',html,'gallery'));
 };

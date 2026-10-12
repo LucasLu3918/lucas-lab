@@ -61,7 +61,7 @@ docs/                內容與技術規範
 - 「霧林來信」是用於閱讀器的本站原創示範短篇（兩章）。
 - 《白雪公主：血色魔鏡》與另外五部使用者提供的完整 DOCX 劇本皆已上架，保留完整分章與內容警示；沒有使用 AI 自行補寫不存在的劇情。
 - 《白雪公主：血色魔鏡》五幕密室逃脫已可遊玩；其他遊戲與電商概念仍在規劃階段。
-- 藝廊展示七本故事的原創 AI 封面，可放大預覽；世界概念區仍為程式繪製的示意圖。
+- 藝廊展示七本故事的原創 AI 封面，可放大預覽；世界概念區為以本機 ComfyUI 產生的概念插畫；首頁八個分類徽章也是同一流程產出。
 - 未明確授權的第三方作品、素材不得直接公開。
 
 詳細設計與後續計畫參見 [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)。
@@ -79,7 +79,7 @@ docs/                內容與技術規範
 - 兩者與 `npm run test:visual` 一樣使用 Playwright；若要指定本機 Chromium，可設定 `BROWSER_EXECUTABLE`。
 - `dist/_headers` 由建置產生，包含安全標頭與快取規則；`npm start` 會依同一份規則回應，方便本機檢查。
 - 安全標頭採嚴格 CSP：`style-src 'self'`，站內頁面與遊戲都沒有 inline `style` 屬性（遊戲的熱點與概念圖以 CSSOM 設定）。`check` 會擋住會重新引入 `unsafe-inline` 的寫法。
-- 素材規則：遊戲的 PNG 原檔放在 `games/blood-mirror/source-art/`，不在 `assets/` 內，不會發布；`dist/` 中只允許 PWA 圖示（`assets/icons/`）使用 PNG，其他點陣圖上限 500 KB，單一音檔上限 2.5 MB。
+- 素材規則：遊戲的 PNG 原檔放在 `games/blood-mirror/source-art/`，網站的世界概念插畫與首頁分類徽章原檔放在根目錄 `source-art/`（產圖參數見 `source-art/manifest.json`）；兩者都不在 `assets/` 內，不會發布；`dist/` 中只允許 PWA 圖示（`assets/icons/`）使用 PNG，其他點陣圖上限 500 KB，單一音檔上限 2.5 MB。
 - 流量統計：建置時若設定環境變數 `CF_ANALYTICS_TOKEN`（Cloudflare Web Analytics 的 token，不寫入程式碼），才會輸出無 cookie 的統計 beacon；未設定時不輸出，`/legal/` 的隱私說明會依此切換。
 - 離線與 PWA：`sw.js` 由 `scripts/site/service-worker.template.js` 產生。新版本需使用者按「重新整理」才會啟用；開發時在本機網址加上 `?nosw` 可停用並移除 Service Worker。
 - 離線測試須實際停止伺服器（`context.setOffline` 不會阻擋 Service Worker 的請求）；`npm run test:site` 已依此方式驗證。
