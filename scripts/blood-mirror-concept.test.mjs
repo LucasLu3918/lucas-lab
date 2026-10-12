@@ -27,3 +27,8 @@ test('portrait tile edges represent only the selected portrait, and unknown asse
  assert.match(conceptMarkup('frost'),/role="img" aria-label="雪夜中的公主"/);
  assert.match(conceptMarkup('clock',{decorative:true}),/aria-hidden="true"/);
 });
+test('small clue objects come from the light item sheet and every region positions to a finite offset',()=>{
+ for(const id of ['clock','vial','feather','apple','key'])assert.equal(conceptArt[id].src,'assets/concepts/item-sheet.webp');
+ for(const id of Object.keys(conceptArt))assert.doesNotMatch(conceptStyle(id),/NaN|Infinity/,id);
+ assert.match(conceptStyle('clock'),/background-position:0% 0%/);
+});
