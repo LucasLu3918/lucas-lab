@@ -2,6 +2,7 @@
 // Loads data/catalog.json, parses full manuscripts into chapters, and validates the catalog before any page is rendered.
 const fs=require('node:fs'),path=require('node:path');
 const {loadMarkdownChapters}=require('../story-source.cjs');
+const {hasIcon}=require('../components.cjs');
 
 const ENUMS={story:['demo','pending','complete'],game:['playable','concept'],project:['live','repo','concept']};
 const REQUIRED={
@@ -26,6 +27,8 @@ function validateCatalog(catalog,root){
    seen.add(key);
   }
  }
+ // An unknown symbol would silently fall back to the generic sparkle, so every symbol must name an icon in scripts/components.cjs.
+ for(const group of ['stories','games','projects','tools','gallery','journal'])for(const item of catalog[group])if(item.symbol!==undefined&&!hasIcon(item.symbol))fail(group+' item '+(item.slug||item.title)+' uses unknown icon '+item.symbol);
  for(const s of catalog.stories){
   if(!ENUMS.story.includes(s.status))fail('invalid story status '+s.status+' for '+s.slug);
   for(const asset of [s.cover,s.coverSmall])if(!fs.existsSync(path.join(root,asset)))fail('missing cover file '+asset);

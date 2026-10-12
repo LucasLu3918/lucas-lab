@@ -1,6 +1,6 @@
 (() => {
  'use strict';
- // Music room player: playlist, shuffle, repeat (all/one/off), seek, volume, lyrics panel and lock-screen controls.
+ // Music room player: playlist, shuffle, repeat (all/one/off), seek and ±10 s skips, keyboard shortcuts, volume, lyrics panel and lock-screen controls.
  // Preferences (shuffle, repeat, volume) stay in this browser's localStorage only.
  const root=document.querySelector('[data-music-player]');
  if(!root)return;
@@ -8,6 +8,7 @@
  const audio=one('[data-audio]'),playButtons=Array.from(root.querySelectorAll('[data-play]')),seek=one('[data-seek]'),volume=one('[data-volume]');
  const shuffleButton=one('[data-shuffle]'),repeatButton=one('[data-repeat]'),muteButton=one('[data-mute]');
  const nowPlaying=one('.now-playing'),status=one('[data-player-status]'),mini=one('[data-mini]');
+ const buffer=one('[data-buffer]'),tip=one('[data-seek-tip]'),miniProgress=one('[data-mini-progress]');
  const rows=Array.from(root.querySelectorAll('[data-track]'));
  // Each playlist row carries its song's data, so the page needs no inline script (the CSP forbids one).
  const tracks=rows.map(r=>({slug:r.dataset.slug,title:r.dataset.title,edition:r.dataset.edition,palette:r.dataset.palette,src:r.dataset.src}));
@@ -19,7 +20,7 @@
  const prefs={shuffle:false,repeat:'all',volume:0.9,muted:false};
  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved){prefs.shuffle=saved.shuffle===true;prefs.repeat=['all','one','off'].includes(saved.repeat)?saved.repeat:'all';prefs.volume=Number.isFinite(saved.volume)?Math.min(1,Math.max(0,saved.volume)):0.9;prefs.muted=saved.muted===true}}catch{}
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(prefs))}catch{}};
- let index=0,order=[],seeking=false;
+ let index=0,order=[],seeking=false,blobUrl='',pendingSeek=null,loadingBlob=null;
 
  // Shuffle plays every track once per round, starting from the current one, before any repeats.
  const buildOrder=()=>{
@@ -45,18 +46,21 @@
  const showDetail=i=>details.forEach(d=>{d.hidden=Number(d.dataset.songDetail)!==i});
  const load=(i,{play=false,updateHash=true}={})=>{
   index=i;const t=tracks[i];
+  if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=''}
+  pendingSeek=null;loadingBlob=null;
   audio.src=t.src;
   one('[data-np-title]').textContent=t.title;one('[data-mini-title]').textContent=t.title;
   one('[data-np-edition]').textContent=t.edition;
   nowPlaying.dataset.palette=t.palette;
-  seek.value='0';one('[data-time-current]').textContent='0:00';
+  seek.value='0';one('[data-time-current]').textContent='0:00';paint(0);
   rows.forEach(r=>{const active=Number(r.dataset.track)===i;r.classList.toggle('is-current',active);if(active)r.setAttribute('aria-current','true');else r.removeAttribute('aria-current')});
   showDetail(i);
   if(updateHash)history.replaceState(null,'','#'+t.slug);
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:'LUCAS LAB',album,artwork:[{src:artwork,sizes:'360x540',type:'image/webp'}]});
   if(play)start();
  };
- const start=()=>{const p=audio.play();if(p&&p.catch)p.catch(()=>{status.textContent='瀏覽器阻擋了自動播放，請按下播放鍵。'})};
+ // Only a real autoplay block is reported; an AbortError just means a newer load or seek replaced this play request.
+ const start=()=>{const p=audio.play();if(p&&p.catch)p.catch(error=>{if(error&&error.name==='NotAllowedError')status.textContent='瀏覽器阻擋了自動播放，請按下播放鍵。'})};
  const go=dir=>{const n=step(dir);if(n<0){audio.pause();audio.currentTime=0;return}load(n,{play:true})};
 
  const renderShuffle=()=>{shuffleButton.setAttribute('aria-pressed',String(prefs.shuffle));shuffleButton.setAttribute('aria-label',prefs.shuffle?'隨機播放：開啟':'隨機播放：關閉')};
@@ -64,7 +68,7 @@
  const renderVolume=()=>{audio.volume=prefs.volume;audio.muted=prefs.muted;volume.value=String(prefs.volume);muteButton.setAttribute('aria-pressed',String(prefs.muted));muteButton.setAttribute('aria-label',prefs.muted?'取消靜音':'靜音');volume.style.setProperty('--fill',(prefs.muted?0:prefs.volume*100)+'%')};
 
  playButtons.forEach(b=>b.addEventListener('click',()=>{if(audio.paused)start();else audio.pause()}));
- one('[data-prev]').addEventListener('click',()=>{if(audio.currentTime>3){audio.currentTime=0;return}go(-1)});
+ one('[data-prev]').addEventListener('click',()=>{if(audio.currentTime>3){seekTo(0);return}go(-1)});
  root.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{const n=step(1);load(n<0?order[0]:n,{play:!audio.paused})}));
  shuffleButton.addEventListener('click',()=>{prefs.shuffle=!prefs.shuffle;buildOrder();renderShuffle();save()});
  repeatButton.addEventListener('click',()=>{prefs.repeat={all:'one',one:'off',off:'all'}[prefs.repeat];renderRepeat();save()});
@@ -72,10 +76,67 @@
  volume.addEventListener('input',()=>{prefs.volume=Number(volume.value);prefs.muted=prefs.volume===0;renderVolume();save()});
  rows.forEach(r=>r.addEventListener('click',()=>{const i=Number(r.dataset.track);if(i===index){if(audio.paused)start();else audio.pause();return}load(i,{play:true});if(prefs.shuffle)buildOrder()}));
 
- seek.addEventListener('input',()=>{seeking=true;one('[data-time-current]').textContent=clock(Number(seek.value));seek.style.setProperty('--fill',(Number(seek.value)/(Number(seek.max)||1)*100)+'%')});
- seek.addEventListener('change',()=>{audio.currentTime=Number(seek.value);seeking=false});
- audio.addEventListener('loadedmetadata',()=>{seek.max=String(Math.floor(audio.duration));one('[data-time-total]').textContent=clock(audio.duration)});
- audio.addEventListener('timeupdate',()=>{if(seeking)return;seek.value=String(Math.floor(audio.currentTime));one('[data-time-current]').textContent=one('[data-mini-time]').textContent=clock(audio.currentTime);seek.style.setProperty('--fill',(audio.currentTime/(audio.duration||1)*100)+'%')});
+ // Seeking. A host that ignores byte ranges serves songs as non-seekable, and the browser would snap back to 0:00.
+ // The site's Worker answers ranges, but as a fallback the song is fetched once into memory, where every position is seekable.
+ const duration=()=>Number.isFinite(audio.duration)?audio.duration:tracks[index].duration||0;
+ const canSeek=t=>{for(let i=0;i<audio.seekable.length;i++)if(audio.seekable.start(i)<=t&&t<=audio.seekable.end(i)+0.5)return true;return false};
+ const paint=t=>{
+  const d=duration()||1,pct=Math.min(100,Math.max(0,t/d*100))+'%';
+  seek.style.setProperty('--fill',pct);if(miniProgress)miniProgress.style.width=pct;
+  seek.setAttribute('aria-valuetext',clock(t)+' / '+clock(d));
+ };
+ const loadWhole=()=>{
+  if(loadingBlob)return loadingBlob;
+  const src=tracks[index].src,mine=index;
+  status.textContent='正在載入整首歌曲，以便跳轉…';
+  loadingBlob=fetch(src).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(blob=>new Promise(resolve=>{
+   if(mine!==index)return resolve(false);
+   const wasPlaying=!audio.paused;blobUrl=URL.createObjectURL(blob);audio.src=blobUrl;
+   // Playback resumes once the pending seek has landed in the in-memory copy.
+   audio.addEventListener('loadedmetadata',()=>{status.textContent='';if(wasPlaying)audio.addEventListener('canplay',start,{once:true});resolve(true)},{once:true});
+  })).catch(()=>{status.textContent='無法跳轉：音檔載入失敗，請稍後再試。';loadingBlob=null;return false});
+  return loadingBlob;
+ };
+ const seekTo=t=>{
+  t=Math.max(0,Math.min(t,Math.max(0,duration()-0.25)));
+  paint(t);one('[data-time-current]').textContent=clock(t);seek.value=String(t);
+  if(audio.readyState<1){pendingSeek=t;return}
+  if(canSeek(t)||blobUrl){audio.currentTime=t;return}
+  pendingSeek=t;loadWhole();
+ };
+ audio.addEventListener('loadedmetadata',()=>{if(pendingSeek!==null){const t=pendingSeek;pendingSeek=null;seekTo(t)}});
+ const skip=delta=>seekTo((seeking?Number(seek.value):audio.currentTime)+delta);
+ root.querySelectorAll('[data-skip]').forEach(b=>b.addEventListener('click',()=>skip(Number(b.dataset.skip))));
+
+ seek.addEventListener('input',()=>{seeking=true;const t=Number(seek.value);one('[data-time-current]').textContent=clock(t);paint(t)});
+ // Pointer drags commit on release; keyboard arrows and taps commit at once through "change".
+ seek.addEventListener('change',()=>{seeking=false;seekTo(Number(seek.value))});
+ seek.addEventListener('pointerup',()=>{if(seeking){seeking=false;seekTo(Number(seek.value))}});
+ // Hover preview of the time under the pointer.
+ // On the focused progress bar, arrows move 5 s and Page Up/Down 30 s, matching the global shortcuts.
+ seek.addEventListener('keydown',event=>{
+  const delta={ArrowLeft:-5,ArrowDown:-5,ArrowRight:5,ArrowUp:5,PageDown:-30,PageUp:30}[event.key];
+  if(delta===undefined)return;event.preventDefault();skip(delta);
+ });
+ seek.addEventListener('pointermove',event=>{
+  if(!tip||event.pointerType==='touch')return;
+  const r=seek.getBoundingClientRect(),x=Math.min(1,Math.max(0,(event.clientX-r.left)/r.width));
+  tip.hidden=false;tip.textContent=clock(x*duration());tip.style.left=(x*100)+'%';
+ });
+ seek.addEventListener('pointerleave',()=>{if(tip)tip.hidden=true});
+ const paintBuffer=()=>{
+  if(!buffer)return;const d=duration();let end=0;
+  for(let i=0;i<audio.buffered.length;i++)if(audio.buffered.start(i)<=audio.currentTime+0.5)end=Math.max(end,audio.buffered.end(i));
+  buffer.style.width=(d?Math.min(100,end/d*100):0)+'%';
+ };
+ audio.addEventListener('progress',paintBuffer);
+ audio.addEventListener('loadedmetadata',()=>{seek.max=String(duration());one('[data-time-total]').textContent=clock(duration());paintBuffer()});
+ audio.addEventListener('timeupdate',()=>{
+  paintBuffer();
+  if(seeking)return;
+  seek.value=String(audio.currentTime);one('[data-time-current]').textContent=one('[data-mini-time]').textContent=clock(audio.currentTime);paint(audio.currentTime);
+  if('mediaSession' in navigator&&navigator.mediaSession.setPositionState&&Number.isFinite(audio.duration)){try{navigator.mediaSession.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,audio.duration)})}catch{}}
+ });
  audio.addEventListener('play',()=>{root.classList.add('is-playing');playButtons.forEach(b=>b.setAttribute('aria-label','暫停'));status.textContent=''});
  audio.addEventListener('pause',()=>{root.classList.remove('is-playing');playButtons.forEach(b=>b.setAttribute('aria-label','播放'))});
  audio.addEventListener('ended',()=>{if(prefs.repeat==='one'){audio.currentTime=0;start();return}go(1)});
@@ -84,7 +145,8 @@
  if('mediaSession' in navigator){
   const set=(action,fn)=>{try{navigator.mediaSession.setActionHandler(action,fn)}catch{}};
   set('play',start);set('pause',()=>audio.pause());set('previoustrack',()=>go(-1));set('nexttrack',()=>go(1));
-  set('seekto',e=>{if(Number.isFinite(e.seekTime))audio.currentTime=e.seekTime});
+  set('seekto',e=>{if(Number.isFinite(e.seekTime))seekTo(e.seekTime)});
+  set('seekbackward',e=>skip(-(e.seekOffset||10)));set('seekforward',e=>skip(e.seekOffset||10));
  }
 
  // While the main panel is scrolled away (for example when reading lyrics), a slim bar keeps play/pause and next in reach once a song has started.
@@ -96,12 +158,29 @@
  // Section list and intensity chart: jump to a moment; the chart shades what has been played.
  // Positions are set through CSSOM because the CSP blocks inline style attributes.
  document.querySelectorAll('[data-peak]').forEach(label=>{label.style.left=label.dataset.peak+'%'});
- const jump=seconds=>{audio.currentTime=seconds;if(audio.paused)start()};
+ const jump=seconds=>{seekTo(seconds);if(audio.paused)start()};
  document.querySelectorAll('[data-seek-to]').forEach(b=>b.addEventListener('click',()=>jump(Number(b.dataset.seekTo))));
  document.querySelectorAll('[data-energy]').forEach(chart=>chart.addEventListener('click',event=>{const r=chart.getBoundingClientRect();jump((event.clientX-r.left)/r.width*(audio.duration||0))}));
  const paintProgress=()=>{const bar=details[index]?.querySelector('.energy-progress');if(bar)bar.style.width=(audio.currentTime/(audio.duration||1)*100)+'%'};
  audio.addEventListener('timeupdate',paintProgress);
  audio.addEventListener('emptied',paintProgress);
+
+ // Keyboard shortcuts, ignored while typing or while a control that uses the same keys has focus.
+ document.addEventListener('keydown',event=>{
+  if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey)return;
+  const el=event.target,tagName=el&&el.tagName;
+  if(tagName==='INPUT'||tagName==='TEXTAREA'||tagName==='SELECT'||(el&&el.isContentEditable))return;
+  if(event.key===' '||event.key==='k'||event.key==='K'){
+   if(event.key===' '&&(tagName==='BUTTON'||tagName==='A'))return;
+   event.preventDefault();if(audio.paused)start();else audio.pause();return;
+  }
+  if(event.key==='ArrowLeft'||event.key==='ArrowRight'){
+   const dir=event.key==='ArrowLeft'?-1:1;event.preventDefault();
+   if(event.shiftKey){if(dir<0&&audio.currentTime>3)seekTo(0);else go(dir)}else skip(dir*5);return;
+  }
+  if(event.key==='j'||event.key==='J'){event.preventDefault();skip(-10)}
+  else if(event.key==='l'||event.key==='L'){event.preventDefault();skip(10)}
+ });
 
  // A #slug link opens that song (without autoplay, which browsers block anyway).
  const fromHash=tracks.findIndex(t=>'#'+t.slug===location.hash);

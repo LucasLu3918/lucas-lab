@@ -5,3 +5,4 @@ dist/
 visual-audit-artifacts/
 .claude/settings.local.json
 .claude/worktrees/
+.wrangler/

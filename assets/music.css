@@ -15,9 +15,21 @@
 .music-room input[type=range] {--fill:0%;appearance:none;-webkit-appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
 .music-room input[type=range]::-webkit-slider-runnable-track {height:4px;border-radius:4px;background:linear-gradient(90deg,var(--gold) var(--fill),#ffffff2e var(--fill))}
 .music-room input[type=range]::-moz-range-track {height:4px;border-radius:4px;background:linear-gradient(90deg,var(--gold) var(--fill),#ffffff2e var(--fill))}
+/* Progress bar: the buffered part shows under a transparent unplayed track, with a time preview on hover. */
+.seek-track {position:relative;display:grid;align-items:center}
+.seek-buffer {position:absolute;left:0;top:50%;height:4px;width:0;margin-top:-2px;border-radius:4px;background:#ffffff26;pointer-events:none;transition:width .3s}
+.seek-track input[type=range]::-webkit-slider-runnable-track {height:4px;background:linear-gradient(90deg,var(--gold) var(--fill),#ffffff1a var(--fill))}
+.seek-track input[type=range]::-moz-range-track {height:4px;background:linear-gradient(90deg,var(--gold) var(--fill),#ffffff1a var(--fill))}
+.seek-track input[type=range] {position:relative;height:28px}
+.seek-track input[type=range]::-webkit-slider-thumb {transition:transform .15s}
+.seek-track:hover input[type=range]::-webkit-slider-thumb,.seek-track input[type=range]:focus-visible::-webkit-slider-thumb {transform:scale(1.25)}
+.seek-tip {position:absolute;bottom:calc(100% + 2px);transform:translateX(-50%);padding:2px 7px;border-radius:6px;background:#080e16f2;border:1px solid #d9bf8a55;color:var(--gold-bright);font-size:11px;pointer-events:none;white-space:nowrap}
+.player-hint {margin:-6px 0 0;font-size:11.5px;color:var(--muted);text-align:center}
+@media(hover:none) {.player-hint {display:none}}
+.player-btn[data-skip] svg {width:24px;height:24px}
 .music-room input[type=range]::-webkit-slider-thumb {-webkit-appearance:none;width:14px;height:14px;margin-top:-5px;border-radius:50%;background:var(--gold-bright);border:0}
 .music-room input[type=range]::-moz-range-thumb {width:14px;height:14px;border-radius:50%;background:var(--gold-bright);border:0}
-.player-controls {display:flex;align-items:center;justify-content:space-between;gap:6px}
+.player-controls {display:flex;align-items:center;justify-content:space-between;gap:2px}
 .player-btn,.player-play {display:grid;place-items:center;border:0;color:var(--txt);background:transparent;border-radius:50%;min-width:44px;min-height:44px;padding:0;transition:color .2s,background .2s}
 .player-btn svg {width:22px;height:22px}
 .player-btn:hover {background:#ffffff12;color:var(--gold-bright)}
@@ -83,7 +95,7 @@
 @media(max-width:720px) {.track-row {grid-template-columns:28px minmax(0,1fr) 46px;gap:10px}.track-meta {display:none}.song-detail {padding:22px 18px}}
 @media(max-width:480px) {.now-playing {grid-template-columns:96px minmax(0,1fr);padding:16px;gap:14px}.player-play {width:56px;height:56px}.song-spec {grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce) {.is-playing .album-art img {animation:none}}
-.mini-player {position:fixed;z-index:25;left:50%;bottom:16px;transform:translateX(-50%);display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:10px;align-items:center;width:min(560px,calc(100% - 32px));padding:8px 10px 8px 18px;border:1px solid #d9bf8a55;border-radius:999px;background:#0b1219f2;box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.mini-player {overflow:hidden;position:fixed;z-index:25;left:50%;bottom:16px;transform:translateX(-50%);display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:10px;align-items:center;width:min(560px,calc(100% - 32px));padding:8px 10px 8px 18px;border:1px solid #d9bf8a55;border-radius:999px;background:#0b1219f2;box-shadow:var(--shadow);backdrop-filter:blur(12px)}
 .mini-title {font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini-time {font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .mini-player .player-play {width:44px;height:44px}
@@ -100,3 +112,5 @@
 .song-jump {display:grid;gap:2px;width:100%;padding:4px 8px;margin:-4px -8px;border:0;border-radius:var(--radius);background:transparent;color:var(--txt);text-align:left}
 .song-jump:hover {background:#ffffff0d}
 .song-jump span:last-child {color:var(--muted);font-size:14px}
+.mini-progress {position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--gold);pointer-events:none}
+@media(max-width:380px) {.player-btn {min-width:40px}.player-btn svg {width:20px;height:20px}}
