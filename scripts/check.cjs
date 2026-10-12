@@ -2,7 +2,7 @@
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -200,8 +200,8 @@
   }
  }
  const fingerprints=[...fs.readdirSync(path.join(dist,'static'))];
- assert.equal(fingerprints.length,3,'expected one fingerprint directory per site entry asset');
- for(const [file,name] of [['assets/style.css','style.css'],['assets/app.js','app.js'],['assets/music.js','music.js']]){
+ assert.equal(fingerprints.length,4,'expected one fingerprint directory per site entry asset');
+ for(const [file,name] of [['assets/style.css','style.css'],['assets/app.js','app.js'],['assets/music.css','music.css'],['assets/music.js','music.js']]){
   const hashed=fingerprints.find(hash=>fs.existsSync(path.join(dist,'static',hash,name)));
   assert.ok(hashed,'fingerprinted copy missing for '+file);
   assert.ok(fs.readFileSync(path.join(dist,'static',hashed,name)).equals(fs.readFileSync(path.join(root,file))),'fingerprinted copy differs from source '+file);

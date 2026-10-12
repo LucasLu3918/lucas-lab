@@ -1,5 +1,6 @@
 'use strict';
 // Music room: original AI songs with a playlist player (assets/music.js), full lyrics and per-song notes.
+// Player styles live in assets/music.css so the site-wide stylesheet stays within other pages' weight budgets.
 // Audio ships from music/audio/ to dist/music/audio/, outside /assets/, so the offline service worker never caches it.
 const ALBUM='白雪公主：血色魔鏡・原聲概念集';
 const ART='assets/images/snow-white-portrait-small.webp';
@@ -64,6 +65,6 @@ module.exports=function renderMusic(ctx){
   +`<section class="wrap section"><div class="sectionhead"><div><div class="eyebrow">VERSION COMPARISON</div><h2>八個版本比較</h2><p>同一個結局，不同的節奏、人聲與情緒重心。</p></div></div>${compare}</section>`
   +`<section class="wrap section"><div class="callout"><h2>關於這些歌曲</h2><p class="muted">歌詞、曲風設定與編曲方向由 Lucas 撰寫，音訊以 AI 音樂模型依提示生成；旋律為原創，並未取樣既有作品。網頁播放版本為 AAC 128 kbps 壓縮檔。歌詞未逐句對時，僅完整呈現。</p><div class="btnrow"><a class="btn primary" href="${url('stories/dark-snow-white/')}">閱讀原著故事 →</a><a class="btn" href="${url('games/blood-mirror/')}">前往血色魔鏡遊戲 →</a></div></div></section>`;
  const schema={'@context':'https://schema.org','@type':'MusicPlaylist',name:ALBUM,url:ext+url('music/'),numTracks:tracks.length,track:tracks.map(t=>({'@type':'MusicRecording',name:t.title,duration:'PT'+Math.floor(t.duration/60)+'M'+(t.duration%60)+'S',genre:t.style,inLanguage:'zh-Hant'}))};
- write('music',page('音樂館','《白雪公主：血色魔鏡》AI 原創歌曲：八種曲風、完整歌詞，支援循環與隨機播放。','music',html,'music',{image:ART,imageAlt:'白雪公主原創肖像插畫',jsonld:[schema],head:`<script src="${asset('assets/music.js')}" defer></script>`}));
+ write('music',page('音樂館','《白雪公主：血色魔鏡》AI 原創歌曲：八種曲風、完整歌詞，支援循環與隨機播放。','music',html,'music',{image:ART,imageAlt:'白雪公主原創肖像插畫',jsonld:[schema],head:`<link rel="stylesheet" href="${asset('assets/music.css')}"><script src="${asset('assets/music.js')}" defer></script>`}));
 };
 module.exports.parseLyrics=parseLyrics;

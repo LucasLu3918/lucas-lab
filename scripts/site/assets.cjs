@@ -1,7 +1,7 @@
 'use strict';
 // Copies source assets, writes content-fingerprinted copies of the site CSS/JS, and emits the Cloudflare _headers file.
 const crypto=require('node:crypto');
-const FINGERPRINTED=['assets/style.css','assets/app.js','assets/music.js'];
+const FINGERPRINTED=['assets/style.css','assets/app.js','assets/music.css','assets/music.js'];
 
 function fingerprintOf(bytes){return crypto.createHash('sha256').update(bytes).digest('hex').slice(0,10)}
 
