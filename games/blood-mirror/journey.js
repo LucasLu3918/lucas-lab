@@ -38,7 +38,7 @@ export function journeyGuide(state,challengeComplete=false){
 }
 
 export function journalChapters(state,isRestored=()=>false){
- return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&!spot.memory&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,room.evidence===spot.id&&isRestored(room.id),state)}))})).filter(section=>section.index<=state.unlocked);
+ return rooms.map((room,index)=>({index,title:room.title,chapter:room.chapter,entries:visibleSpots(state,index).filter(spot=>!spot.lock&&!spot.memory&&state.seen.includes(spot.id)).map(spot=>({...spot,text:spotText(spot,!!spot.restoredText&&isRestored(room.id),state)}))})).filter(section=>section.index<=state.unlocked);
 }
 
 // Memories persist across journeys; unfound ones only reveal which act holds them.

@@ -4,10 +4,12 @@ import {rooms,items,endings,memorySpots,validAnswers,shardIds,choiceDefs} from '
 import {achievementIds} from './achievements.js';
 import {clueWords} from '../data/clues.js';
 
-// Per journey: started, room, solved, inventory, seen, hints, clues, deduced, glowRooms, misses, elapsed.
+// Per journey: started, room, solved, inventory, seen, hints, stepHints, clues, deduced, glowRooms, misses, elapsed.
+// `hints` keeps the highest hint tier per act (recap and achievements); `stepHints` keeps it per step,
+// keyed "<chapter id>.<step>" where step is a key of the chapter's stepHints.
 // Kept across journeys: endings, memories, shards, achievements.
 export function initialState(){
- return {version:1,started:false,room:0,unlocked:0,solved:[],inventory:[],seen:[],hints:{},clues:[],deduced:[],skipped:[],choices:{},glowRooms:[],misses:{},shards:[],achievements:[],elapsed:0,ending:null,endings:[],memories:[],answers:null,muted:true};
+ return {version:1,started:false,room:0,unlocked:0,solved:[],inventory:[],seen:[],hints:{},stepHints:{},clues:[],deduced:[],skipped:[],choices:{},glowRooms:[],misses:{},shards:[],achievements:[],elapsed:0,ending:null,endings:[],memories:[],answers:null,muted:true};
 }
 
 export function restoreState(raw){
@@ -30,6 +32,7 @@ export function restoreState(raw){
    inventory:list(s.inventory,id=>validItems.includes(id)),
    seen:list(s.seen,id=>validSeen.includes(id)),
    hints:Object.fromEntries(rooms.map((_,i)=>[i,Math.min(3,Math.max(0,Number.isInteger(s.hints?.[i])?s.hints[i]:0))])),
+   stepHints:Object.fromEntries(Object.entries(s.stepHints&&typeof s.stepHints==='object'?s.stepHints:{}).filter(([key,level])=>{const [id,step]=key.split('.');const room=rooms.find(r=>r.id===id);return !!room?.stepHints?.[step]&&Number.isInteger(level)&&level>0&&level<=room.stepHints[step].length;})),
    // Saves written before clue words existed (no `clues` field) regain the words of every spot they already viewed.
    clues:Array.isArray(s.clues)?list(s.clues,id=>Object.hasOwn(clueWords,id)):[...new Set(rooms.flatMap(r=>r.spots.filter(spot=>Array.isArray(s.seen)&&s.seen.includes(spot.id)).flatMap(spot=>spot.clues||[])))].filter(id=>Object.hasOwn(clueWords,id)),
    // Acts whose pre-seal deduction (room.deduction) was solved. Only acts that have one can be listed.

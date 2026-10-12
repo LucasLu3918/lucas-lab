@@ -31,12 +31,14 @@ test('following only the next-step guide finishes every act and unlocks every en
  for(const id of ['dawn','frost','crown'])assert.equal(chooseEnding(state,id),true,id);
 });
 
-test('every act ships the solo safety net: evidence, gate copy, three hints, reachable items',()=>{
+test('every act ships the solo safety net: evidence, gate copy, three hints per step, reachable items',()=>{
  for(const [index,room] of rooms.entries()){
   const evidence=room.spots.find(spot=>spot.id===room.evidence);
   assert.ok(evidence&&evidence.restoredText&&!evidence.after,'evidence '+room.id);
   assert.ok(room.evidenceButton&&room.evidenceGate,'evidence copy '+room.id);
-  assert.equal(room.hints.length,3,'hints '+room.id);
+  const steps=[...room.stages,...(room.deduction?['deduction']:[]),'seal'];
+  assert.deepEqual(Object.keys(room.stepHints).sort(),[...steps].sort(),'hint steps '+room.id);
+  for(const step of steps)assert.equal(room.stepHints[step].length,3,'hints '+room.id+'.'+step);
   if(room.requires)assert.ok(room.spots.some(spot=>spot.item===room.requires&&!spot.after),'required item hidden in '+room.id);
   assert.equal(room.spots.filter(spot=>spot.lock).length,1,'seal '+room.id);
   for(const spot of room.spots.filter(spot=>spot.after))assert.ok(index<rooms.length-1||!spot.item,'final act aftermath would block the choice');
@@ -67,9 +69,9 @@ test('solo playtest log is opt-in, local, bounded and summarised per act',()=>{
  log.setEnabled(true);log.record('room',{room:0});log.record('unknown',{room:0});
  for(let i=0;i<2100;i++)log.record('spot',{room:0});assert.equal(log.events.length,2000);
  assert.equal(createPlaylog(storage).enabled,true);log.setEnabled(false);assert.equal(store.size,0);
- const t=0,events=[{t,kind:'room',room:0},{t:30000,kind:'restore-start',room:0},{t:90000,kind:'restore-done',room:0},{t:100000,kind:'seal-fail',room:0},{t:110000,kind:'hint',room:0,level:2},{t:120000,kind:'seal-ok',room:0},{t:130000,kind:'room',room:1},{t:'bad',kind:'spot',room:1},{kind:'spot',room:9,t:1}];
+ const t=0,events=[{t,kind:'room',room:0},{t:30000,kind:'restore-start',room:0},{t:30000,kind:'stage-start',room:0,step:'ledger'},{t:60000,kind:'stage-done',room:0,step:'ledger'},{t:60000,kind:'stage-start',room:0,step:'watch'},{t:400000,kind:'stage-start',room:0,step:'watch'},{t:420000,kind:'stage-done',room:0,step:'watch'},{t:90000,kind:'restore-done',room:0},{t:100000,kind:'seal-fail',room:0},{t:110000,kind:'hint',room:0,level:2},{t:120000,kind:'seal-ok',room:0},{t:130000,kind:'room',room:1},{t:'bad',kind:'spot',room:1},{kind:'spot',room:9,t:1}];
  const [first,second]=summarizePlaylog(events,rooms.map(r=>r.title));
- assert.deepEqual(first,{index:0,title:'黑鐘書庫',minutes:2,spots:0,restoreMinutes:1,fails:1,hint:2,solved:true});
+ assert.deepEqual(first,{index:0,title:'黑鐘書庫',minutes:2,spots:0,restoreMinutes:1,fails:1,hint:2,solved:true,stages:[{step:'watch',minutes:6},{step:'ledger',minutes:0.5}],longest:{step:'watch',minutes:6},stalled:['watch']});
  assert.equal(second.solved,false);assert.equal(second.minutes,null);
  assert.deepEqual(summarizePlaylog(null,['a']),[]);
 });

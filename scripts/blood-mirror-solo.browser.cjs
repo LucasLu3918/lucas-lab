@@ -23,12 +23,12 @@ const ROOT=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1
    for(const id of ['watch','bells'])await page.locator('[data-clue="'+id+'"]').evaluate(el=>el.click()).then(()=>page.keyboard.press('Escape'));
    await page.locator('.game-tools [data-action="hint"]').click();await page.locator('#more-hint').click();await page.keyboard.press('Escape');
    await page.locator('#pause').click();await page.locator('#pause-settings').click();
-   assert.match(await page.locator('.playlog-table').innerText(),/黑鐘書庫\s+進行中\s+—\s+0\s+1 \/ 3/);
+   assert.match(await page.locator('.playlog-table').innerText(),/黑鐘書庫\s+進行中\s+—\s+—\s+0\s+1 \/ 3/);
    await page.locator('#modal').screenshot({path:out+'/settings-'+width+'.png'});
    const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#playlog-download').click()]);
    const data=JSON.parse(readFileSync(await download.path(),'utf8'));
    assert.deepEqual([...new Set(data.events.map(e=>e.kind))].sort(),['hint','room','spot']);
-   assert.ok(data.events.every(e=>Object.keys(e).every(k=>['t','kind','room','spot','level'].includes(k))),'log stores only gameplay fields');
+   assert.ok(data.events.every(e=>Object.keys(e).every(k=>['t','kind','room','spot','level','step'].includes(k))),'log stores only gameplay fields');
    await page.locator('#setting-playlog').click();
    assert.equal(await page.evaluate(()=>localStorage.getItem('blood-mirror-playlog-v1')),null,'turning off erases the log');
    assert.deepEqual(foreign,[]);assert.deepEqual(errors,[]);

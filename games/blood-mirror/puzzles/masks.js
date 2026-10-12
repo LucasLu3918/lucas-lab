@@ -23,6 +23,11 @@ const holds=(clue,arrangement)=>{
  return at(clue.a)>at(clue.b);
 };
 export const satisfiesClues=arrangement=>maskClues.every(clue=>holds(clue,arrangement));
+// The first testimony a full arrangement breaks (index into maskClues), or -1. Wrong answers name one broken
+// testimony instead of counting correct masks, so the puzzle cannot be brute-forced by the count (plan r3).
+export const brokenClue=arrangement=>maskClues.findIndex(clue=>!holds(clue,arrangement));
+// The guests are offered in this fixed order, which is deliberately not the solution order.
+export const guestOrder=[3,0,5,2,4,1];
 
 // Every permutation that satisfies all testimonies (exactly one is expected; tests assert it).
 export function maskSolutions(){
@@ -43,7 +48,7 @@ export function mountMasks(ctx){
    +maskClues.map(clue=>'<li>'+clue.text+'</li>').join('')
    +'</ol><div class="mask-board">'
    +maskNames.map((name,i)=>'<label class="mask-row"><span class="mask-slot">'+(i+1)+'</span><span class="mask-name">'+name+'</span><select data-mask="'+i+'" aria-label="從左數第'+(i+1)+'張面具「'+name+'」是誰"><option value="-1">未選擇</option>'
-    +guests.map((guest,g)=>'<option value="'+g+'"'+(picks[i]===g?' selected':'')+'>'+guest+'</option>').join('')+'</select></label>').join('')
+    +guestOrder.map(g=>'<option value="'+g+'"'+(picks[i]===g?' selected':'')+'>'+guests[g]+'</option>').join('')+'</select></label>').join('')
    +'</div><p class="challenge-feedback" role="status">'+message+'</p><button id="masks-confirm" class="primary-button">向賓客們確認 ⟶</button><button id="masks-reset" class="secondary-button">全部重選</button>');
   document.querySelectorAll('[data-mask]').forEach(select=>select.onchange=()=>{picks[Number(select.dataset.mask)]=Number(select.value);message='';});
   document.querySelector('#masks-reset').onclick=()=>{picks=maskAnswer.map(()=>-1);message='';draw();};
@@ -51,8 +56,8 @@ export function mountMasks(ctx){
    if(picks.some(guest=>guest<0)){message='還有面具沒有選人。';draw();return;}
    if(new Set(picks).size<picks.length){message='同一個人不可能同時戴著兩張面具。';ctx.playCue('wrong');draw();return;}
    if(masksSolved(picks)){ctx.done();return;}
-   const correct=picks.filter((guest,i)=>guest===maskAnswer[i]).length;
-   message='賓客們搖了搖頭——目前有 '+correct+' / 6 張面具對上了人。再核對一次證詞。';
+   const broken=brokenClue(picks);
+   message='賓客們搖了搖頭——第 '+(broken+1)+' 則證詞說不通：'+maskClues[broken].text;
    ctx.playCue('wrong');draw();
   };
  };
