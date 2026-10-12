@@ -1,4 +1,5 @@
-import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant,shardReachable} from './engine/index.js';
+import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant,shardReachable,unlockText} from './engine/index.js';
+import {NARRATOR} from './data/chapters/index.js';
 
 // Presentation derived from existing progress; never writes or migrates a save.
 export function spotText(spot,restored=false,state=null){
@@ -38,6 +39,25 @@ export function journeyGuide(state,challengeComplete=false){
      :{kind:'puzzle',label:challengeComplete?'檢視封印':'開始互動謎題',text:challengeComplete?'互動謎題已完成。比對已找到的線索，解開最後的封印。':'本幕線索已查看。可以開始互動謎題；需要幫助時，隨時打開筆記或提示。'};
  }
  return {chapter:room.chapter,title:room.title,objective:done?'本幕封印已解開。':room.objective,discovered,total,solved:state.solved.length,endingTitle:state.ending?endings[state.ending].title:null,next};
+}
+
+// An act's opening scene with the text that matches earlier choices. An act without a scene falls back
+// to its intro, so the dialogue box is never empty.
+const sceneLines=(state,index)=>{const room=rooms[index];return (room.scene?.length?room.scene:[{text:room.intro}]).map(line=>({speaker:line.speaker||NARRATOR,text:choiceVariant(line,state)||line.text}));};
+// Dialogue box lines: the opening scene until the act's seal opens, then the narrator's unlock line.
+export function dialogueLines(state,index=state.room){
+ return state.solved.includes(index)?[{speaker:NARRATOR,text:unlockText(state,index)}]:sceneLines(state,index);
+}
+// The player has already met this act (opened a spot or opened the seal), so the scene need not replay.
+export const sceneMet=(state,index=state.room)=>state.solved.includes(index)||rooms[index].spots.some(spot=>state.seen.includes(spot.id));
+
+// Read log (回顧紀錄) of one act: the opening scene, then every spot in the order it was opened, then the
+// unlock line once the seal is open. Derived from progress, so it needs no saved history of its own.
+// `sceneRead` limits the scene to the lines the dialogue box has shown, so the log never reads ahead.
+export function readLog(state,index=state.room,isRestored=()=>false,sceneRead=Infinity){
+ const room=rooms[index],spots=visibleSpots(state,index);
+ const opened=state.seen.map(id=>spots.find(spot=>spot.id===id&&!spot.lock)).filter(Boolean).map(spot=>({title:spot.label,speaker:spot.portrait||null,text:spotText(spot,!!spot.restoredText&&isRestored(room.id),state)}));
+ return [...sceneLines(state,index).slice(0,sceneRead),...opened,...(state.solved.includes(index)?[{speaker:NARRATOR,text:unlockText(state,index)}]:[])];
 }
 
 export function journalChapters(state,isRestored=()=>false){

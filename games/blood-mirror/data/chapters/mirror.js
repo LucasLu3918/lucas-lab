@@ -7,6 +7,15 @@ export default {
   image: 'mirror.webp',
   atmosphere: 'mirror',
   intro: '七十三個孩子站在鏡子的另一端。露西握住妳的手。魔鏡提出最後一筆交易：「我可以讓妳活過來。代價，是妳的名字。」',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '七十三個孩子站在鏡子的另一端，手牽著手，沒有人回頭。' },
+    { speaker: 'lucy', text: '「妳來了。我就知道妳會來。」' },
+    { text: '露西握住妳的手。她的手很冷，卻握得很用力。' },
+    { speaker: 'mirror', text: '「我可以讓妳活過來。代價，是妳的名字。」' },
+    { speaker: 'mirror', text: '「但在那之前，告訴我——誰才是這份契約最後的繼承人？」' }
+  ],
   objective: '揭露王冠契約的繼承者，然後決定妳的代價。',
   puzzle: 'interrogation',
   // Positional answers: one word per blank of the interrogation below.

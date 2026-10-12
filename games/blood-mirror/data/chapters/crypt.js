@@ -7,6 +7,23 @@ export default {
   image: 'crypt.webp',
   atmosphere: 'crypt',
   intro: '妳的呼吸停了，意識卻仍在。伊萊的聲音隔著玻璃傳來。薇菈說過，蘋果不是結束，而是通往魔鏡內部的鑰匙。',
+  // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
+  // speakers table in index.js (omitted for the narrator); `byChoice` swaps the text after an earlier act's choice.
+  scene: [
+    { text: '妳的呼吸停了，意識卻仍在。玻璃棺的冷，從背脊一路爬上來。' },
+    { speaker: 'eli', text: '「聽得見嗎？先別急著醒。聽清楚妳自己的心跳。」' },
+    {
+      speaker: 'orion',
+      text: '「我來晚了嗎？」',
+      byChoice: {
+        lastDance: {
+          prince: '「我來晚了。最後一支舞，妳的手明明還是暖的。」',
+          eli: '「舞會上，妳沒有回答我。現在……妳還聽得見我嗎？」'
+        }
+      }
+    },
+    { text: '薇菈說過，蘋果不是結束，而是通往魔鏡內部的鑰匙。' }
+  ],
   objective: '收取毒蘋果，聽出心跳的順序、拓出被鑿掉的符印，再把四枚符印排回棺蓋，打開鏡界。',
   puzzle: 'sequence',
   answer: [
