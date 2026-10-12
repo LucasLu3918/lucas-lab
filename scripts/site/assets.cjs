@@ -4,6 +4,8 @@ const crypto=require('node:crypto');
 const FINGERPRINTED=['assets/style.css','assets/app.js','assets/music.css','assets/music.js'];
 
 function fingerprintOf(bytes){return crypto.createHash('sha256').update(bytes).digest('hex').slice(0,10)}
+// Comments stay in the source stylesheets for maintainers; visitors download the fingerprinted copy without them.
+function publishedBytes(file,bytes){return file.endsWith('.css')?Buffer.from(bytes.toString('utf8').replace(/\/\*[\s\S]*?\*\//g,'')):bytes}
 
 function securityAndCacheHeaders(base){
  const p=base==='/'?'':base.replace(/\/$/,'');
@@ -77,7 +79,7 @@ module.exports=function copyAssets(ctx){
  }
  const fingerprint={};
  for(const file of FINGERPRINTED){
-  const bytes=fs.readFileSync(path.join(root,file)),hash=fingerprintOf(bytes);
+  const bytes=publishedBytes(file,fs.readFileSync(path.join(root,file))),hash=fingerprintOf(bytes);
   const dir=path.join(out,'static',hash);
   fs.mkdirSync(dir,{recursive:true});
   fs.writeFileSync(path.join(dir,path.basename(file)),bytes);
@@ -94,3 +96,4 @@ module.exports=function copyAssets(ctx){
  return {fingerprint};
 };
 module.exports.fingerprintOf=fingerprintOf;
+module.exports.publishedBytes=publishedBytes;

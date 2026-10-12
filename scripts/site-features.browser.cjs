@@ -62,7 +62,7 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   await page.goto(ORIGIN+STORY,{waitUntil:'load'});
   await pause(200);
   assert.equal(await page.locator('[data-story-continue]').isVisible(),true,'continue reading not shown');
-  assert.match(await page.locator('[data-story-continue-link]').textContent(),/繼續閱讀：/);
+  assert.match(await page.locator('[data-story-continue]').textContent(),/繼續閱讀：/);
   assert.equal(await page.locator('.chapterlist .read-flag').count(),1,'read flag missing on chapter list');
   console.log('✓ story page resumes at the last chapter and shows read marks');
 
