@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Regenerates the self-hosted heading font (Noto Serif TC 600, SIL OFL 1.1) as three unicode-range slices.
+"""Regenerates the self-hosted heading font (Noto Serif TC 600, SIL OFL 1.1) as two unicode-range slices.
 
 Run after `npm run build`, whenever headings gain characters the slices do not cover:
     python3 scripts/subset-fonts.py
 Glyphs outside the slices fall back to the system serif, so a missed character is cosmetic, never broken.
-Slices: a = home page + shared punctuation, b = other pages, c = chapter and story pages. Each page downloads only the slices it uses.
+Slices: a = home page + shared punctuation, b = other pages. Story and chapter pages (stories/<slug>/...) use the system serif and are skipped,
+so reading pages stay inside their page-weight budget. Each page downloads only the slices it uses.
 The subsets come from the Google Fonts CSS API (text= parameter); the font files are committed so the site never calls Google at runtime.
 """
 import glob, html, re, sys, urllib.parse, urllib.request
@@ -27,16 +28,17 @@ def main():
     if not (dist / 'index.html').exists():
         sys.exit('Run npm run build first.')
     home = heading_chars(dist / 'index.html') | set(PUNCT)
-    others, chapters = set(), set()
+    others = set()
     for f in glob.glob(str(dist / '**/*.html'), recursive=True):
         rel = Path(f).relative_to(dist).as_posix()
         if rel == 'index.html' or rel.startswith('games/blood-mirror/play'):
             continue
-        (chapters if '/chapters/' in rel or rel.startswith('stories/') else others).update(heading_chars(f))
+        if rel.startswith('stories/') and rel != 'stories/index.html':
+            continue
+        others.update(heading_chars(f))
     a = home
     b = others - a
-    c = chapters - a - b
-    for name, chars in (('a', a), ('b', b), ('c', c)):
+    for name, chars in (('a', a), ('b', b)):
         text = ''.join(sorted(chars))
         url = 'https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600&display=swap&text=' + urllib.parse.quote(text)
         css = urllib.request.urlopen(urllib.request.Request(url, headers=UA)).read().decode()
