@@ -8,8 +8,9 @@ function fingerprintOf(bytes){return crypto.createHash('sha256').update(bytes).d
 function securityAndCacheHeaders(base){
  const p=base==='/'?'':base.replace(/\/$/,'');
  // Styles carry no inline attributes (the game places its sprites through CSSOM), so style-src needs no 'unsafe-inline'.
+ // media-src allows blob: for the music player's fallback when a host ignores byte ranges (assets/music.js).
  // The analytics origins are the only third-party hosts allowed; they are unused unless CF_ANALYTICS_TOKEN is set at build time.
- const csp=["default-src 'self'","script-src 'self' https://static.cloudflareinsights.com","style-src 'self'","img-src 'self' data:","media-src 'self'","font-src 'self'","connect-src 'self' https://cloudflareinsights.com","manifest-src 'self'","worker-src 'self'","object-src 'none'","base-uri 'self'","form-action 'self'","frame-ancestors 'none'"].join('; ');
+ const csp=["default-src 'self'","script-src 'self' https://static.cloudflareinsights.com","style-src 'self'","img-src 'self' data:","media-src 'self' blob:","font-src 'self'","connect-src 'self' https://cloudflareinsights.com","manifest-src 'self'","worker-src 'self'","object-src 'none'","base-uri 'self'","form-action 'self'","frame-ancestors 'none'"].join('; ');
  // Each header is set by one rule per path so Cloudflare never has to merge duplicate values.
  return [
   '/*',
@@ -52,11 +53,10 @@ function securityAndCacheHeaders(base){
   p+'/games/blood-mirror/play/assets/*',
   '  Cache-Control: public, max-age=604800',
   // Game scripts and styles are not fingerprinted, so they stay revalidated (ETag) and a deploy is never masked.
+  // Cloudflare allows one splat per rule and it spans slashes, so these also cover engine/, puzzles/, data/chapters/ and styles/.
   p+'/games/blood-mirror/play/*.js',
   '  Cache-Control: no-cache',
   p+'/games/blood-mirror/play/*.css',
-  '  Cache-Control: no-cache',
-  p+'/games/blood-mirror/play/*/*.js',
   '  Cache-Control: no-cache',
   ''
  ].join('\n');

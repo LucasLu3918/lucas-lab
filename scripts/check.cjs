@@ -141,6 +141,11 @@
  assert.equal(cfg.assets.directory,'./dist','Cloudflare assets directory must be dist');
  assert.equal(cfg.assets.not_found_handling,'404-page');
  assert.equal(cfg.assets.html_handling,'auto-trailing-slash');
+ // Cloudflare skips a _headers rule with more than one splat, so such a rule would silently do nothing.
+ for(const rule of fs.readFileSync(path.join(dist,'_headers'),'utf8').split('\n').filter(line=>line.startsWith('/')))assert.ok((rule.match(/\*/g)||[]).length<=1,'_headers rule has more than one splat: '+rule);
+ // The Worker answers byte ranges for songs only (worker/index.js); everything else must stay on the static asset path.
+ assert.deepEqual(cfg.assets.run_worker_first,['/music/audio/*'],'Worker must run only for song files');
+ assert.ok(cfg.main&&fs.existsSync(path.join(root,cfg.main))&&cfg.assets.binding==='ASSETS','range Worker or its ASSETS binding missing');
  const origin=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\/+$/,'');
  const homeHtml=fs.readFileSync(path.join(dist,'index.html'),'utf8');
  assert.ok(homeHtml.includes('<link rel="canonical" href="'+origin+'/">'),'incorrect production canonical URL');
