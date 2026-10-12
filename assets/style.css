@@ -27,6 +27,7 @@ button,a,input,select {outline-offset:4px}
 .eyebrow {font-size:11px;text-transform:uppercase;color:var(--gold);letter-spacing:.18em;font-weight:750}
 .gradient {color:var(--gold-bright)}
 .icon {width:20px;height:20px;flex:none;vertical-align:middle}
+.icon .ac {fill:currentColor;stroke:none}
 .skip {position:absolute;top:-80px;left:12px;z-index:1000;background:var(--gold-bright);color:var(--bg);padding:12px 20px;border-radius:var(--radius)}
 .skip:focus {top:12px}
 /* Navigation */
@@ -97,12 +98,15 @@ button,a,input,select {outline-offset:4px}
 .pageintro h1 {font-size:clamp(2.5rem,5.5vw,4.1rem);margin:14px 0}
 .pageintro p {max-width:780px;color:var(--muted)}
 .cats,.cards,.tools {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.cats {grid-template-columns:repeat(4,minmax(0,1fr))}
 .cat,.card,.tool,.callout,.feature,.gallery button {border:1px solid var(--line);border-radius:var(--radius-panel);background:linear-gradient(145deg,#17222c,#0e1720);box-shadow:var(--shadow)}
 .cat,.card,.gallery button {transition:border-color .2s,transform .2s}
 .cat:hover,.card:hover,.gallery button:hover {border-color:#b89e69;transform:translateY(-2px)}
 .cat {position:relative;overflow:hidden;padding:24px;min-height:174px;display:flex;flex-direction:column}
 .cat:after {content:"";position:absolute;right:-25px;bottom:-46px;width:115px;height:115px;border:1px solid #cfb47a2b;border-radius:50%;box-shadow:0 0 0 15px #cfb47a08}
-.cat .symbol,.tool .symbol {display:grid;place-items:center;width:46px;height:46px;border:1px solid #a68d596b;border-radius:50%;background:#161f25;color:var(--gold);margin-bottom:14px}
+.cat .symbol,.tool .symbol {display:grid;place-items:center;width:48px;height:48px;border:1px solid #a68d5980;border-radius:50%;background:radial-gradient(circle at 35% 30%,#24323b,#121a20 70%);box-shadow:inset 0 0 0 3px #121a20,inset 0 0 0 4px #d9bf8a26,0 0 0 4px #d9bf8a0a;color:var(--gold-bright);margin-bottom:14px;transition:box-shadow .25s,color .25s}
+.cat .symbol .icon,.tool .symbol .icon {width:23px;height:23px}
+.cat:hover .symbol,.tool:hover .symbol {box-shadow:inset 0 0 0 3px #121a20,inset 0 0 0 4px #d9bf8a55,0 0 18px #d9bf8a33;color:#fff4d8}
 .cat strong {font-size:17px}
 .cat span:last-child {font-size:13px;color:var(--muted)}
 .card {overflow:hidden;display:flex;flex-direction:column;min-width:0}
@@ -119,6 +123,19 @@ button,a,input,select {outline-offset:4px}
 .visual::after {content:"";position:absolute;width:180px;height:180px;border:1px solid #d7bc8025;border-radius:50%;right:-55px;top:-40px}
 .visual>span {position:relative;z-index:1;color:#e3d3b1}
 .visual>span .icon {width:65px;height:65px;stroke-width:1}
+/* Medallion behind placeholder icons: rings, compass ticks and four gems, matching the brand mark. */
+.emblem {display:grid;place-items:center;width:132px;height:132px;filter:drop-shadow(0 6px 18px #0009)}
+.emblem>* {grid-area:1/1}
+.emblem-ring {width:100%;height:100%;fill:none;stroke:#d9bf8a59;stroke-width:1}
+.emblem-ring .er-outer {stroke:#d9bf8a33}
+.emblem-ring .er-ticks {stroke:#d9bf8a66;stroke-dasharray:1 7.33;stroke-width:3}
+.emblem-ring .er-cross {stroke:#d9bf8a40}
+.emblem-ring .er-gem {fill:var(--gold);stroke:none}
+.emblem::before {content:"";grid-area:1/1;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,#ffffff14,#0000 70%)}
+.visual>.emblem .icon {width:58px;height:58px;stroke-width:1.1;color:var(--gold-bright)}
+.card:hover .emblem-ring .er-ticks {animation:emblem-turn 14s linear infinite;transform-origin:60px 60px}
+@keyframes emblem-turn {to {transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce) {.card:hover .emblem-ring .er-ticks {animation:none}}
 .visual.red {background:radial-gradient(circle at 75% 20%,#62363c,#211820 75%)}
 .visual.teal {background:radial-gradient(circle at 75% 20%,#315459,#14242c 75%)}
 .visual.gold {background:radial-gradient(circle at 75% 20%,#766344,#24221e 75%)}
@@ -137,7 +154,9 @@ button,a,input,select {outline-offset:4px}
 .detail p {color:var(--muted)}
 .cover {width:100%;height:max-content;border:1px solid #b69b6690;border-radius:var(--radius-panel);overflow:hidden;background:var(--panel);box-shadow:0 22px 45px #0007}
 .cover>.visual:not(.book-art) {height:auto;aspect-ratio:2/3}
-.cover>.visual:not(.book-art) .icon {width:100px;height:100px}
+.cover>.visual:not(.book-art) .emblem {width:210px;height:210px}
+.cover>.visual:not(.book-art) .emblem::before {width:150px;height:150px}
+.cover>.visual:not(.book-art) .icon {width:84px;height:84px}
 .warning {display:flex;gap:11px;align-items:start;padding:16px 18px;border:1px solid #9a7451;background:#34271d;border-radius:var(--radius);color:#efd3af;font-size:13px;line-height:1.8}
 .warning .icon {margin-top:2px}
 .detail .warning {margin:22px 0 0}
@@ -249,7 +268,7 @@ button,a,input,select {outline-offset:4px}
  .wrap {width:calc(100% - 30px)}.headerin {gap:12px}.brand {gap:9px}.brand-mark {width:35px;height:35px}.brand-name {font-size:20px}.brand-tagline {font-size:8px;letter-spacing:.13em}
  .hero {min-height:590px}.hero-art {object-position:62% center}.hero h1 {font-size:clamp(2.4rem,10.4vw,3.25rem)}.hero .btn {min-width:0;flex:1}.btnrow {gap:10px}
  .cats {gap:10px}.cat {min-height:156px;padding:16px}.cat strong {font-size:14px}.cat span:last-child {font-size:11px}.cat .symbol {width:40px;height:40px}
- .cards,.tools {grid-template-columns:1fr;gap:14px}.card:not(.book-card) {display:grid;grid-template-columns:34% minmax(0,1fr)}.card:not(.book-card) .visual {height:100%;min-height:160px}.card:not(.book-card) .visual .icon {width:44px;height:44px}
+ .cards,.tools {grid-template-columns:1fr;gap:14px}.card:not(.book-card) {display:grid;grid-template-columns:34% minmax(0,1fr)}.card:not(.book-card) .visual {height:100%;min-height:160px}.card:not(.book-card) .visual .emblem {width:96px;height:96px}.card:not(.book-card) .visual .icon {width:38px;height:38px}
  .body,.tool {padding:18px}.card h3 {font-size:16px}.book-card {grid-template-columns:34% minmax(0,1fr)}.book-card .body {padding:16px}.book-card .book-art {margin:12px 0 12px 12px;width:calc(100% - 12px);border-radius:var(--radius)}
  .book-card .cover-caption strong {font-size:14px}.book-card .cover-caption {left:9px;right:9px;bottom:15px}.book-card .cover-edition {font-size:6px;left:9px;right:9px}.book-card .book-art::before {inset:6px}.bookgrid {padding-bottom:40px}
  .bookgrid .book-card {display:grid}.bookgrid .cover-subtitle,.bookgrid .cover-series {display:none}.bookgrid .cover-caption {left:9px;right:9px;bottom:15px}.bookgrid .cover-caption strong {font-size:14px}.bookgrid .cover-edition {left:9px;right:9px;top:14px;font-size:6px}.card p {font-size:12px}.card .action {font-size:12px}
@@ -301,3 +320,58 @@ button,a,input,select {outline-offset:4px}
 .group-title {font-size:1.35rem;margin:0 0 14px;color:var(--gold-bright)}
 .update-banner {position:fixed;left:16px;right:16px;bottom:16px;z-index:60;max-width:560px;margin-inline:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;border:1px solid var(--gold);border-radius:var(--radius-panel);background:var(--panel-raised);box-shadow:var(--shadow)}
 .update-banner p {margin:0;font-size:14px}
+/* Gallery sections: in-page jump links, art tiles per section and the stepping dialog. */
+.gallery-jump {display:flex;flex-wrap:wrap;gap:10px;margin-top:-8px}
+.gallery-jump a {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:14px;transition:border-color .2s,color .2s}
+.gallery-jump a:hover {border-color:var(--gold);color:var(--gold-bright)}
+.gallery-jump .icon {width:18px;height:18px;color:var(--gold)}
+.gallery-jump small {min-width:22px;padding:0 6px;border-radius:999px;background:#d9bf8a1f;color:var(--gold);font-size:11px;text-align:center}
+.gallery-section {scroll-margin-top:90px;padding-bottom:12px}
+.gallery-section .art-gallery {margin-bottom:0}
+.gallery-tile {position:relative}
+.gallery-tile:focus-visible {outline:2px solid var(--focus);outline-offset:3px}
+.scene-gallery {grid-template-columns:repeat(3,minmax(0,1fr))}
+.portrait-gallery {grid-template-columns:repeat(4,minmax(0,1fr))}
+.concept-gallery {grid-template-columns:repeat(3,minmax(0,1fr))}
+.gallery .visual.scene-art,.gallery .visual.portrait-art,.gallery .visual.concept-visual {height:auto;background:#080e16}
+.gallery .visual.scene-art {aspect-ratio:16/9}
+.gallery .visual.portrait-art {aspect-ratio:2/3;background:radial-gradient(circle at 50% 30%,#2a2c38,#0b1017 75%)}
+.gallery .visual.concept-visual {aspect-ratio:8/5}
+.scene-art::before,.scene-art::after,.portrait-art::before,.portrait-art::after,.concept-visual::before,.concept-visual::after {display:none}
+.scene-art img,.portrait-art img {width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.portrait-art img {object-position:50% 12%}
+.gallery-tile:hover .scene-art img,.gallery-tile:hover .portrait-art img {transform:scale(1.04)}
+.tile-zoom {position:absolute;right:10px;bottom:10px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#080e16cc;border:1px solid #d9bf8a55;color:var(--gold-bright);opacity:0;transition:opacity .2s}
+.gallery-tile:hover .tile-zoom,.gallery-tile:focus-visible .tile-zoom {opacity:1}
+.tile-zoom .icon {width:16px;height:16px}
+.concept-scene {display:block;width:100%;height:100%}
+.concept-scene .cs-frame {fill:none;stroke:#d7bc8040}
+.concept-scene .cs-star {fill:#f3eee5}
+.concept-scene .cs-dust {fill:#f6d78b}
+.concept-scene .cs-glint {fill:#fff}
+.visual>.concept-badge {position:absolute;z-index:2;left:12px;top:12px;display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 6px;border-radius:999px;background:#080e16cc;border:1px solid #d9bf8a55;color:var(--gold-bright);font-size:11px;letter-spacing:.06em}
+.visual>.concept-badge .icon {width:15px;height:15px;stroke-width:1.5}
+.concept-boards .concept-board {display:block;width:100%;padding:0;border:0;background:none;border-radius:var(--radius);overflow:hidden;color:var(--txt);text-align:left}
+.concept-boards .concept-board strong {display:block;padding:10px 2px 0;font-size:13px;color:var(--muted);font-weight:600}
+.concept-board:hover img {border-color:#b89e69}
+.gallery-dialog.is-wide {width:min(1080px,calc(100% - 32px))}
+.dialog-bar {display:flex;align-items:center;gap:12px}
+.dialog-count {font-size:13px;color:var(--gold);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.dialog-stage {position:relative}
+.gallery-dialog .visual.is-concept {height:auto;aspect-ratio:8/5;background:#080e16}
+.gallery-dialog .visual.is-concept::before,.gallery-dialog .visual.is-concept::after,.gallery-dialog .concept-badge {display:none}
+.gallery-dialog .visual.has-art {background-size:contain;background-position:center;background-repeat:no-repeat}
+.gallery-dialog.is-wide .visual.has-art {height:auto;max-height:min(60vh,600px);aspect-ratio:16/9}
+.gallery-dialog:not(.is-wide) .visual.has-art {height:min(60vh,540px)}
+.dialog-nav {position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:44px;height:44px;margin-top:-22px;border:1px solid #d9bf8a66;border-radius:50%;background:#080e16d9;color:var(--gold-bright);transition:background .2s}
+.dialog-nav:hover {background:var(--panel-raised)}
+.dialog-nav.prev {left:10px}.dialog-nav.prev .icon {transform:scaleX(-1)}
+.dialog-nav.next {right:10px}
+.is-single .dialog-nav,.is-single .dialog-hint {display:none}
+.gallery-dialog [data-dialog-link] {margin-top:4px}
+.dialog-hint {margin:14px 0 0;font-size:12px;color:var(--muted)}
+@media(hover:none) {.dialog-hint {display:none}.tile-zoom {opacity:1}}
+@media(max-width:1100px) {.portrait-gallery {grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:720px) {.scene-gallery,.concept-gallery {grid-template-columns:repeat(2,minmax(0,1fr))}.portrait-gallery {grid-template-columns:repeat(3,minmax(0,1fr))}.gallery-jump {flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.gallery-jump a {flex:none}.gallery .visual.scene-art,.gallery .visual.portrait-art,.gallery .visual.concept-visual {height:auto}}
+@media(max-width:480px) {.scene-gallery,.concept-gallery {grid-template-columns:1fr}.portrait-gallery {grid-template-columns:repeat(2,minmax(0,1fr))}.dialog-nav {width:40px;height:40px;margin-top:-20px}.gallery-dialog {padding:16px}}
+@media(prefers-reduced-motion:reduce) {.scene-art img,.portrait-art img {transition:none}.gallery-tile:hover .scene-art img,.gallery-tile:hover .portrait-art img {transform:none}}

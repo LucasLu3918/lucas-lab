@@ -59,22 +59,45 @@
   window.addEventListener('scroll',scheduleProgress,{passive:true});window.addEventListener('resize',scheduleProgress);
   update();
  }
+ // Gallery dialog: shows the tile's full image (or a copy of its concept sketch) and steps through the tiles of the same section.
  const dialog=one('#gallery-dialog');
  if(dialog&&typeof dialog.showModal==='function'){
-  many('[data-preview]').forEach(button=>button.addEventListener('click',()=>{
-   const art=one('[data-dialog-visual]',dialog);
+  const art=one('[data-dialog-visual]',dialog),count=one('[data-dialog-count]',dialog),link=one('[data-dialog-link]',dialog);
+  let group=[],position=0;
+  const show=button=>{
    art.replaceChildren();
-   if(button.dataset.coverSrc){
-    art.className='visual has-art';
-    const image=document.createElement('img');image.src=button.dataset.coverSrc;image.alt=button.dataset.coverAlt||button.dataset.title;image.width=900;image.height=1350;art.append(image);
+   if(button.dataset.fullSrc){
+    const wide=Number(button.dataset.fullW)>Number(button.dataset.fullH);
+    art.className='visual has-art';dialog.classList.toggle('is-wide',wide);
+    // The tile's thumbnail fills in while the full-size file downloads.
+    const thumb=one('img',button);art.style.backgroundImage=thumb?'url("'+(thumb.currentSrc||thumb.src)+'")':'';
+    const image=document.createElement('img');image.src=button.dataset.fullSrc;image.alt=button.dataset.fullAlt||button.dataset.title;image.width=Number(button.dataset.fullW)||900;image.height=Number(button.dataset.fullH)||1350;image.decoding='async';art.append(image);
    }else{
-    art.className='visual '+(button.dataset.palette||'blue');
-    const graphic=one('.visual>span',button);if(graphic)art.append(graphic.cloneNode(true));
+    art.style.backgroundImage='';
+    const source=one('.visual',button);
+    art.className=(source?source.className:'visual')+' is-concept';dialog.classList.add('is-wide');
+    const graphic=one('svg.concept-scene',button)||one('.visual>span',button);if(graphic)art.append(graphic.cloneNode(true));
    }
    one('[data-dialog-title]',dialog).textContent=button.dataset.title;
-   one('[data-dialog-desc]',dialog).textContent=button.dataset.description||'世界概念示意圖，正式場景插畫尚在構思。';
-   dialog.showModal();
+   one('[data-dialog-desc]',dialog).textContent=button.dataset.description||'世界概念草圖，正式場景插畫尚在構思。';
+   if(link){link.hidden=!button.dataset.href;if(button.dataset.href){link.href=button.dataset.href;link.textContent=button.dataset.hrefLabel+' →'}}
+   count.textContent=group.length>1?(position+1)+' / '+group.length:'';
+   dialog.classList.toggle('is-single',group.length<2);
+  };
+  const step=dir=>{if(group.length<2)return;position=(position+dir+group.length)%group.length;show(group[position])};
+  many('[data-preview]').forEach(button=>button.addEventListener('click',()=>{
+   group=many('[data-preview][data-group="'+(button.dataset.group||'')+'"]');position=Math.max(0,group.indexOf(button));
+   show(button);if(!dialog.open)dialog.showModal();
   }));
+  one('[data-dialog-prev]',dialog)?.addEventListener('click',()=>step(-1));
+  one('[data-dialog-next]',dialog)?.addEventListener('click',()=>step(1));
+  dialog.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'){event.preventDefault();step(-1)}else if(event.key==='ArrowRight'){event.preventDefault();step(1)}});
+  // Swipe left or right on the picture to change it on touch screens.
+  let touchX=null;
+  art.addEventListener('touchstart',event=>{touchX=event.touches[0].clientX},{passive:true});
+  art.addEventListener('touchend',event=>{if(touchX===null)return;const dx=event.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(dx)>45)step(dx<0?1:-1)},{passive:true});
+  // Focus returns to the tile that is showing when the dialog closes, so keyboard users keep their place.
+  dialog.addEventListener('close',()=>{group[position]?.focus()});
   one('[data-dialog-close]',dialog)?.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  }

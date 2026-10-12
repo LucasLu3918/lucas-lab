@@ -197,7 +197,7 @@
       "title": "多語翻譯工具",
       "description": "選擇多個目標語言，比較與複製翻譯結果。",
       "category": "文字與資料",
-      "symbol": "🌐",
+      "symbol": "globe",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/translation-tool",
       "trait": "需要網路"
     },
@@ -205,7 +205,7 @@
       "title": "圖片轉 WebP",
       "description": "在瀏覽器批次轉換與壓縮圖片。",
       "category": "圖片設計",
-      "symbol": "▧",
+      "symbol": "imageSwap",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/convert-to-webp",
       "trait": "本機處理"
     },
@@ -213,7 +213,7 @@
       "title": "資料格式轉換器",
       "description": "JSON、YAML、CSV 等常見格式轉換。",
       "category": "開發工具",
-      "symbol": "{}",
+      "symbol": "braces",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/format-converter",
       "trait": "本機處理"
     },
@@ -221,7 +221,7 @@
       "title": "時間轉換",
       "description": "Unix 時戳與不同時區日期時間換算。",
       "category": "開發工具",
-      "symbol": "◷",
+      "symbol": "clock",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/time-converter",
       "trait": "本機處理"
     },
@@ -229,7 +229,7 @@
       "title": "PDF 工具箱",
       "description": "合併、擷取、旋轉與重新排列 PDF 頁面。",
       "category": "文字與資料",
-      "symbol": "▤",
+      "symbol": "file",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/pdf-toolbox",
       "trait": "本機處理"
     },
@@ -237,7 +237,7 @@
       "title": "色彩工具箱",
       "description": "取得色彩值並轉換 HEX、RGB、HSL 等格式。",
       "category": "圖片設計",
-      "symbol": "◈",
+      "symbol": "palette",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/color-picker",
       "trait": "本機處理"
     },
@@ -245,7 +245,7 @@
       "title": "台灣即時電力看板",
       "description": "查看台灣用電、發電結構及供電餘裕。",
       "category": "生活資訊",
-      "symbol": "⚡",
+      "symbol": "bolt",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/power-grid",
       "trait": "需要網路"
     },
@@ -253,7 +253,7 @@
       "title": "QR Code 產生器",
       "description": "在瀏覽器本機產生可下載的 QR Code。",
       "category": "生活資訊",
-      "symbol": "▦",
+      "symbol": "qr",
       "href": "https://lucas-tools.owl3918.workers.dev/tools/qr-code",
       "trait": "本機處理"
     }
@@ -265,7 +265,7 @@
       "description": "化身白雪，探索五座被詛咒的密室，蒐集道具、解開生命契約，決定三種結局。支援手機與桌面，提供提示、線索筆記與本機自動存檔。",
       "category": "恐怖密室逃脫",
       "status": "playable",
-      "symbol": "◇",
+      "symbol": "mirror",
       "palette": "rose",
       "storySlug": "dark-snow-white",
       "duration": "約 25–40 分鐘",
@@ -294,7 +294,7 @@
       "description": "以選擇影響劇情分支的網頁冒險概念；目前尚未開發可遊玩版本。",
       "category": "互動敘事",
       "status": "concept",
-      "symbol": "✧",
+      "symbol": "lantern",
       "palette": "teal"
     },
     {
@@ -303,7 +303,7 @@
       "description": "觀察符文與場景中的線索，逐步破解關卡的遊戲概念。",
       "category": "解謎遊戲",
       "status": "concept",
-      "symbol": "◈",
+      "symbol": "rune",
       "palette": "rose"
     }
   ],
@@ -314,7 +314,7 @@
       "description": "使用 Vue 3、TypeScript、Vite 開發的工具集合。本站僅展示並連回原網站，不搬移程式碼。",
       "category": "Web Application",
       "status": "live",
-      "symbol": "⚙",
+      "symbol": "toolbox",
       "palette": "blue",
       "href": "https://lucas-tools.owl3918.workers.dev/",
       "repo": "https://github.com/LucasLu3918/lucas-tools",
@@ -330,7 +330,7 @@
       "description": "以人類決策為中心的 AI 輔助產品開發系統，涵蓋治理、流程與工程品質。",
       "category": "AI Engineering",
       "status": "repo",
-      "symbol": "✳",
+      "symbol": "aips",
       "palette": "rose",
       "href": "https://lucaslu3918.github.io/ai-product-system/",
       "repo": "https://github.com/LucasLu3918/ai-product-system",
@@ -347,7 +347,7 @@
       "description": "規劃展示商品探索、購物流程與產品設計，尚未完成公開網站。",
       "category": "Product Concept",
       "status": "concept",
-      "symbol": "▤",
+      "symbol": "storefront",
       "palette": "gold",
       "highlights": [
         "商品與分類",
@@ -359,38 +359,44 @@
   "gallery": [
     {
       "title": "森之旅人",
-      "symbol": "✧",
+      "symbol": "tree",
       "palette": "teal",
+      "scene": "forest",
       "description": "森林角色的視覺設計方向（示意圖，尚未上傳正式原畫）。"
     },
     {
       "title": "赤紅斗篷",
-      "symbol": "☾",
+      "symbol": "hood",
       "palette": "red",
+      "scene": "redhood",
       "description": "黑暗童話角色視覺方向（示意圖，非正式小說封面）。"
     },
     {
       "title": "魔法古書",
-      "symbol": "✦",
+      "symbol": "book",
       "palette": "gold",
+      "scene": "grimoire",
       "description": "幻想書籍與魔法視覺方向（示意）。"
     },
     {
       "title": "深海之歌",
-      "symbol": "≈",
+      "symbol": "wave",
       "palette": "blue",
+      "scene": "deepsea",
       "description": "深海幻想場景概念方向（示意）。"
     },
     {
       "title": "銀色魔鏡",
-      "symbol": "◇",
+      "symbol": "mirror",
       "palette": "rose",
+      "scene": "mirror",
       "description": "黑暗童話場景概念方向（示意）。"
     },
     {
       "title": "夜色星軌",
-      "symbol": "✳",
+      "symbol": "stars",
       "palette": "blue",
+      "scene": "startrail",
       "description": "科技奇幻品牌視覺（示意）。"
     }
   ],
@@ -399,7 +405,9 @@
       "title": "LUCAS LAB：從工具到創作宇宙",
       "date": "2026-10-09",
       "description": "記錄網站的起點、設計原則與功能規劃。這是一篇首發介紹，而非已完成的技術研究報告。",
-      "slug": "origin"
+      "slug": "origin",
+      "symbol": "compass",
+      "palette": "gold"
     },
     {
       "slug": "cloudflare-workers",
@@ -410,7 +418,9 @@
         "LUCAS LAB 的正式網站現在只使用 Cloudflare Workers Static Assets。GitHub Pages 的部署流程已移除，避免兩套部署同時存在。",
         "GitHub Actions 每次推送到 main 都會執行原始碼驗證，通過後再以 smoke test 確認正式網址的主要路由、樣式、sitemap 與版本資訊，並可用 EXPECTED_COMMIT 比對部署的 Git commit。",
         "這些檢查只能證明網站的公開結構與版本正確，不能取代 Cloudflare 上的建置紀錄檢查，兩者需要一起看。"
-      ]
+      ],
+      "symbol": "bolt",
+      "palette": "blue"
     },
     {
       "slug": "five-novels",
@@ -421,7 +431,9 @@
         "目前七部故事中，有六部提供完整正文，共 116 個閱讀單元。原稿保留原文，只做分章與 Markdown 轉換，沒有使用 AI 補寫不存在的情節。",
         "建置程式會以 SHA-256 檢查每部原稿是否被意外改動，並驗證章節數、結尾標題與每一章的首尾段落是否完整輸出。",
         "成人情慾、暴力、兒童受害與死亡等題材都在故事頁與閱讀頁標示內容提示，讀者可依自身狀態決定是否閱讀。"
-      ]
+      ],
+      "symbol": "book",
+      "palette": "teal"
     },
     {
       "slug": "shared-ui-and-covers",
@@ -432,7 +444,9 @@
         "網站的按鈕、狀態標籤、搜尋列、卡片、閱讀控制與書籍封面由 scripts/components.cjs 統一產生，色彩與尺寸使用共同的設計 token。",
         "每本故事封面都提供大小兩種 WebP 版本，依螢幕寬度選擇較合適的圖像。元件展示頁 /style-guide/ 不索引，供設計與維護時檢視。",
         "封面與城堡主視覺都是本站原創插畫，與既有作品的官方視覺無關。"
-      ]
+      ],
+      "symbol": "palette",
+      "palette": "rose"
     },
     {
       "slug": "blood-mirror-playable",
@@ -443,7 +457,9 @@
         "《白雪公主：血色魔鏡》改編為七幕密室逃脫，玩家在書庫、舞廳、獵人小屋、礦坑、棺室、寢宮與鏡國之間探索線索、解開謎題，並依選擇抵達三種結局。",
         "遊戲以原生 JavaScript 實作，存檔只使用此瀏覽器的 localStorage，不收集個人資料。提示分為多層，玩家可以自行決定何時查看。",
         "CI 會在 Chromium 中完整走過七幕，確保主要流程可以通關，且手機與桌面的版面沒有橫向溢出。"
-      ]
+      ],
+      "symbol": "mirror",
+      "palette": "red"
     },
     {
       "slug": "blood-mirror-return",
@@ -454,7 +470,9 @@
         "回訪時，旅程指引會依現有進度提示下一步，已收集的道具與已閱讀的場景會被記錄，但不會改寫既有存檔。",
         "證據與筆記依劇情分幕顯示，玩家能看出哪些線索已經連結、哪些仍待探索。結局回顧與可選記憶則不計入主線進度。",
         "存檔格式沿用既有的版本，換裝置時可以匯出與匯入，但不做雲端同步，保留玩家對自己資料的控制權。"
-      ]
+      ],
+      "symbol": "quill",
+      "palette": "blue"
     }
   ],
   "music": [

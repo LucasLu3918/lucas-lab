@@ -3,7 +3,7 @@
  const root=path.resolve(__dirname,'../dist');
  if(!fs.existsSync(path.join(root,'index.html'))){console.error('Run npm run build first.');process.exit(1)}
  const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.mp3':'audio/mpeg','.m4a':'audio/mp4','.m4a':'audio/mp4','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml','.webp':'image/webp','.avif':'image/avif','.png':'image/png','.jpg':'image/jpeg'};
- // Mirrors dist/_headers the way Cloudflare applies it locally: "/*" and exact paths, plus trailing-"*" prefixes. Later rules override earlier ones.
+ // Mirrors dist/_headers the way Cloudflare applies it: exact paths, or one "*" splat that matches any characters (slashes included). Later rules override earlier ones.
  const rules=(()=>{
   const file=path.join(root,'_headers');
   if(!fs.existsSync(file))return [];
@@ -18,7 +18,7 @@
  const headersFor=pathname=>{
   const headers={};
   for(const {pattern,headers:set} of rules){
-   const matches=pattern.endsWith('*')?pathname.startsWith(pattern.slice(0,-1)):pathname===pattern;
+   const matches=pattern.includes('*')?pathname.startsWith(pattern.slice(0,pattern.indexOf('*')))&&pathname.endsWith(pattern.slice(pattern.indexOf('*')+1)):pathname===pattern;
    if(matches)Object.assign(headers,set);
   }
   return headers;

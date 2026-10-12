@@ -12,6 +12,7 @@ const ctx={fs,path,root,out,catalog,commit};
 Object.assign(ctx,require('./site/assets.cjs')(ctx));
 Object.assign(ctx,require('./site/layout.cjs')(ctx));
 require('./site/pages.cjs')(ctx);
+require('./site/gallery.cjs')(ctx);
 require('./site/stories.cjs')(ctx);
 require('./site/games.cjs')(ctx);
 require('./site/music.cjs')(ctx);
