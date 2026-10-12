@@ -1,5 +1,5 @@
 import {createMixer} from './audio/mixer.js';import {createSfx} from './audio/sfx.js';import {createAmbience} from './audio/ambience.js';
-import {journeyGuide,journalChapters,spotText,memoryCollection,journeyRecap,dialogueLines,sceneMet,readLog} from './journey.js';import {exportSave,parseSave,loadSave,writeSave} from './engine/index.js';import {ledgerMarkup} from './puzzles/ledger.js';import {createPlaylog,summarizePlaylog} from './playlog.js';
+import {journeyGuide,journalChapters,spotText,memoryCollection,journeyRecap,dialogueLines,sceneMet,readLog} from './journey.js';import {exportSave,parseSave,loadSave,backupSave,writeSave,SAVE_KEY} from './engine/index.js';import {ledgerMarkup} from './puzzles/ledger.js';import {createPlaylog,summarizePlaylog} from './playlog.js';
 import {createGameUI,createDialogueBox} from './ui.js';
 import {speakers} from './data/chapters/index.js';
 import {conceptMarkup,itemArtwork,placeConcepts,preloadImages,preloadConcepts} from './concept-art.js';
@@ -12,13 +12,15 @@ import {createSoundtrack} from './soundtrack.js';
 import {createGallery} from './gallery.js';
 import {icon,spotIcon,itemIcon,hydrateIcons,enableButtonArrows} from './icons.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.puzzles);setPuzzlePersistence(()=>save());if(loaded.migrated)writeSave(state,completedChallenges(),localStorage);
+const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.puzzles);setPuzzlePersistence(()=>save());
+// A save written by a newer build stays untouched: this page never writes until it is reloaded.
+let saveBlocked=loaded.newer;if(!saveBlocked){if(!loaded.recovered)backupSave(localStorage);if(loaded.migrated||loaded.recovered)writeSave(state,completedChallenges(),localStorage);}
 let view='home',lastFocus=null,lastFocusSelector=null,toastTimeout,activeNodes=[],saveFailed=false;
 const mixer=createMixer();const soundtrack=createSoundtrack({mixer});const sfx=createSfx(mixer);const ambience=createAmbience(mixer);
 const ui=createGameUI();const playlog=createPlaylog();let loggedRoom=null;const log=(kind,data={})=>playlog.record(kind,{room:state.room,...data});const restoredRoom=(index=state.room)=>isChallengeComplete(rooms[index].id)||state.solved.includes(index);
 document.body.dataset.view='home';
 const currentTrack=()=>['home','gallery'].includes(view)?'home':view==='ending'?(state.ending||'dawn'):rooms[state.room].id;
-const save=()=>{const fresh=unlockAchievements(state,completedChallenges());if(fresh.length)toast('成就解鎖：'+fresh.map(item=>item.title).join('、'));saveFailed=!writeSave(state,completedChallenges(),localStorage);const message=saveFailed?'無法存檔，請保持本頁開啟':'進度已儲存在此裝置';if($('#save-indicator').textContent!==message)$('#save-indicator').textContent=message;};
+const save=()=>{if(saveBlocked){$('#save-indicator').textContent='存檔來自較新版本，請重新整理頁面';return;}const fresh=unlockAchievements(state,completedChallenges());if(fresh.length)toast('成就解鎖：'+fresh.map(item=>item.title).join('、'));saveFailed=!writeSave(state,completedChallenges(),localStorage);const message=saveFailed?'無法存檔，請保持本頁開啟':'進度已儲存在此裝置';if($('#save-indicator').textContent!==message)$('#save-indicator').textContent=message;};
 const formatTime=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>$('#toast').classList.remove('visible'),3200)}
 function modal(title,eyebrow,html){const d=$('#modal'),opening=!d.open,titleChanged=$('#modal-title').textContent!==title;if(opening){lastFocus=document.activeElement;const key=['data-clue','data-spot','data-item','data-artwork','data-gallery-filter'].find(name=>lastFocus?.hasAttribute(name));lastFocusSelector=key?`[${key}="${lastFocus.getAttribute(key)}"]`:null;}$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;placeConcepts($('#modal-body'));if(opening)d.showModal();if(opening||titleChanged)$('#modal-body').scrollTop=0;if(!opening&&!d.contains(document.activeElement))$('#modal-title').focus({preventScroll:true});}
@@ -264,6 +266,12 @@ $('#gallery-return').onclick=()=>showView(galleryReturn);
 $('#sound').onclick=toggleSound;$('#start').onclick=()=>state.started?confirmReset():begin();$('#continue').onclick=()=>showView(state.ending?'ending':'game');$('.brand').onclick=e=>{e.preventDefault();showView('home')};$$('[data-action]').forEach(b=>b.onclick=()=>{if(b.closest('#game-nav')&&matchMedia('(max-width:850px)').matches)ui.closeMenu(true);const a=b.dataset.action;if(a==='home')showView('home');if(a==='gallery')openGallery();if(a==='guide')openGuide();if(a==='story')openStory();if(a==='journal')openJournal();if(a==='hint')openHint();if(a==='settings')openSettings();if(a==='chapters'){showView('home');$('#chapters').scrollIntoView({behavior:document.body.classList.contains('reduce-motion')?'instant':'smooth'});}if(a==='reconsider'){state.ending=null;state.room=rooms.length-1;save();showView('game');openFate();}});
 setInterval(()=>{if(view==='game'&&!document.hidden&&state.started&&!state.ending){state.elapsed++;$('#timer').textContent=formatTime(state.elapsed);checkWhisper();if(state.elapsed%10===0)save()}},1000);
 document.addEventListener('visibilitychange',()=>{save();if(document.hidden){gallery.stopPreview(false);stopAudio();}else if(!state.muted)startAudio().catch(()=>{})});window.addEventListener('pagehide',save);
+// Another tab saved. A tab the player is not using takes over that progress, so returning to it or closing it
+// never writes an older journey back; the tab in use keeps playing and its next save wins. A save from a newer
+// build stops every tab from writing, focused or not.
+window.addEventListener('storage',e=>{if(e.key!==SAVE_KEY||e.newValue===null)return;const next=loadSave(localStorage);if(next.newer||document.hidden||!document.hasFocus())adoptSave(next);});
+function adoptSave(next){if(next.newer){saveBlocked=true;save();return;}state={...next.state,muted:state.muted};setChallenges(next.puzzles);loggedRoom=null;showView(view==='game'&&!state.started||view==='ending'&&!state.ending?'home':view);if(document.hidden)stopAudio();}
+if(loaded.newer){save();toast('這份存檔來自較新的版本，請重新整理頁面');}else if(loaded.recovered)toast('存檔無法讀取，已從上次的備份還原');
 // Audio must start in a user gesture. Restored progress always begins quietly.
 // Stage controls (plan §5.5, §6): candle light, idle whisper, phone panning, chapter cards and the pause menu.
 let glowCooldownUntil=0,glowTimer=null,cardTimer=null,lastProgress=Date.now(),panX=0,dragStart=null,panMoved=false,panSuppressClick=false;
