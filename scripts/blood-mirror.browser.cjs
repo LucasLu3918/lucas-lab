@@ -189,8 +189,15 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await page.locator('[data-memory="0"]').click();
    assert.equal(await page.locator('[data-memory="0"] [data-concept="vial"]').count(),1);
    await page.locator('#modal').screenshot({path:'/tmp/blood-mirror-concept-preview/memory-'+width+'.png'});
+   // A miss never locks the board: the next click turns the pair back and opens the new card at once.
+   await page.locator('[data-memory="1"]').click();
+   assert.match(await page.locator('.challenge-feedback').innerText(),/點任何一張卡繼續/);
+   await page.locator('[data-memory="2"]').click({timeout:500});
+   assert.equal(await page.locator('.memory-card.turned').count(),1);
+   assert.equal(await page.locator('[data-memory="2"]').getAttribute('class'),'memory-card turned memory-note');
+   await page.locator('[data-memory="5"]').click();
    // Each memory pairs with the object it describes (r7).
-   for(const pair of [[0,4],[1,6],[2,5],[3,7]]){
+   for(const pair of [[0,4],[1,6],[3,7]]){
     await page.locator('[data-memory="'+pair[0]+'"]').click();
     await page.locator('[data-memory="'+pair[1]+'"]').click();
    }
