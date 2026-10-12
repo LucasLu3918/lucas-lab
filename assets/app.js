@@ -243,7 +243,7 @@
    shelf.hidden=false;
    for(const [slug,entry] of entries){
     const item=document.createElement('li'),link=document.createElement('a'),title=document.createElement('strong'),meta=document.createElement('span');
-    link.href=entry.chapterUrl;title.textContent=entry.title||slug;meta.textContent=entry.chapterTitle+' · 已讀 '+Math.round(Number(entry.percent)||0)+'%';
+    link.href=entry.chapterUrl;title.textContent=entry.title||slug;const pct=Math.round(Number(entry.percent)||0);meta.textContent=entry.chapterTitle+(pct>=5?' · 已讀 '+pct+'%':' · 剛開始閱讀');
     link.append(title,meta);item.append(link);list.append(item);
    }
   }
