@@ -1,7 +1,7 @@
 'use strict';
 // Copies source assets, writes content-fingerprinted copies of the site CSS/JS, and emits the Cloudflare _headers file.
 const crypto=require('node:crypto');
-const FINGERPRINTED=['assets/style.css','assets/app.js'];
+const FINGERPRINTED=['assets/style.css','assets/app.js','assets/music.js'];
 
 function fingerprintOf(bytes){return crypto.createHash('sha256').update(bytes).digest('hex').slice(0,10)}
 
@@ -45,6 +45,9 @@ function securityAndCacheHeaders(base){
   p+'/assets/images/*',
   '  Cache-Control: public, max-age=604800',
   p+'/assets/icons/*',
+  '  Cache-Control: public, max-age=604800',
+  // Song files are re-encoded under a new name when changed, so a week-long cache is safe.
+  p+'/music/audio/*',
   '  Cache-Control: public, max-age=604800',
   p+'/games/blood-mirror/play/assets/*',
   '  Cache-Control: public, max-age=604800',
