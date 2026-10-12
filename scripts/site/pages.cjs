@@ -2,8 +2,8 @@
 // Home, archive, journal, about and legal pages.
 module.exports=function renderPages(ctx){
  const {fs,path,root,out,catalog,url,ext,e,icon,button,badge,view,cover,media,notice,readerControls,navItems,stateLabel,tag,card,toolCard,header,footer,page,write,intro,section,library,analyticsEnabled}=ctx;
- // Each category shows one cell of the generated gold-on-enamel emblem sprite (assets/images/emblems.webp, 160px cells stacked
- // in this order), so the eight emblems cost a single request.
+ // Each category shows one cell of the generated gold-on-enamel emblem sprite (assets/images/emblems.webp, 96px cells, enough for
+ // the 48px circle on 2x screens, stacked in this order), so the eight emblems cost a single request.
  const cats=[['tools/','tools','小工具館','實用工具與生活靈感'],['stories/','stories','故事藏書館','黑暗童話與原創奇幻'],['games/','games','互動遊戲館','選擇與探索的新體驗'],['music/','music','音樂館','血色魔鏡原創歌曲'],['projects/','projects','軟體作品集','產品設計與工程實踐'],['gallery/','gallery','AI 視覺藝廊','角色與藝術探索'],['journal/','journal','創作與開發日誌','記錄背後的故事'],['about/','about','關於創作者','工程 × 創作 × 想像']];
  const categoryMarkup=cats.map(([route,s,title,desc],index)=>`<a class="cat" href="${url(route)}"><span class="symbol emblem-symbol cat-emblem-${index}" aria-hidden="true"><img src="${url('assets/images/emblems.webp')}" alt="" width="48" height="384" loading="lazy" decoding="async"></span><strong>${title} ↗</strong><span>${desc}</span></a>`).join('');
  const featuredGame=catalog.games.find(g=>g.status==='playable'&&g.storySlug==='dark-snow-white');

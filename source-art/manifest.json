@@ -84,7 +84,7 @@
    "seed": 4000,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a crossed hammer and wrench, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 47 49 920 920 -resize 160 160 (cell 0 of the sprite, 160x160 at y=0)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 47 49 920 920 -resize 160 160 (cell 0 of the sprite, 96x96 at y=0 after the sprite resize)"
    }
   },
   {
@@ -94,7 +94,7 @@
    "seed": 4007,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an open book with pages fanned, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 47 56 913 913 -resize 160 160 (cell 1 of the sprite, 160x160 at y=160)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 47 56 913 913 -resize 160 160 (cell 1 of the sprite, 96x96 at y=96 after the sprite resize)"
    }
   },
   {
@@ -104,7 +104,7 @@
    "seed": 4014,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a chess knight horse head piece, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 45 50 918 918 -resize 160 160 (cell 2 of the sprite, 160x160 at y=320)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 45 50 918 918 -resize 160 160 (cell 2 of the sprite, 96x96 at y=192 after the sprite resize)"
    }
   },
   {
@@ -114,7 +114,7 @@
    "seed": 4021,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an ancient lyre harp, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 97 98 829 829 -resize 160 160 (cell 3 of the sprite, 160x160 at y=480)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 97 98 829 829 -resize 160 160 (cell 3 of the sprite, 96x96 at y=288 after the sprite resize)"
    }
   },
   {
@@ -124,7 +124,7 @@
    "seed": 4028,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a large cogwheel gear, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 53 56 906 906 -resize 160 160 (cell 4 of the sprite, 160x160 at y=640)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 53 56 906 906 -resize 160 160 (cell 4 of the sprite, 96x96 at y=384 after the sprite resize)"
    }
   },
   {
@@ -134,7 +134,7 @@
    "seed": 4035,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an artist palette with a paintbrush, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 31 31 963 963 -resize 160 160 (cell 5 of the sprite, 160x160 at y=800)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 31 31 963 963 -resize 160 160 (cell 5 of the sprite, 96x96 at y=480 after the sprite resize)"
    }
   },
   {
@@ -144,7 +144,7 @@
    "seed": 4042,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of a feather quill pen dipped in an inkwell, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 19 19 984 984 -resize 160 160 (cell 6 of the sprite, 160x160 at y=960)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 19 19 984 984 -resize 160 160 (cell 6 of the sprite, 96x96 at y=576 after the sprite resize)"
    }
   },
   {
@@ -154,13 +154,13 @@
    "seed": 4049,
    "prompt": "Game UI icon, perfectly flat front view, orthographic, no perspective. A round medallion that fills the whole frame edge to edge: deep midnight navy blue enamel face with a thin antique gold rim. In the center a bold raised antique gold relief of an eight pointed compass rose star, simple clear silhouette readable at small size, softly glowing warm gold highlights, slightly worn engraved metal texture. Dark fantasy style, premium quality, refined and elegant. No text, no letters, no numbers, no watermark.",
    "outputs": {
-    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 50 54 908 908 -resize 160 160 (cell 7 of the sprite, 160x160 at y=1120)"
+    "assets/images/emblems.webp": "cwebp -q 84 -m 6 -crop 50 54 908 908 -resize 160 160 (cell 7 of the sprite, 96x96 at y=672 after the sprite resize)"
    }
   }
  ],
  "emblem_sprite": {
   "output": "assets/images/emblems.webp",
-  "size": "160x1280",
+  "size": "96x768",
   "order": [
    "tools",
    "stories",
@@ -171,6 +171,6 @@
    "journal",
    "about"
   ],
-  "build": "encode each cell as above, stack the cells top to bottom in this order, then cwebp -q 84 -m 6"
+  "build": "encode each cell as above at 160x160, stack the cells top to bottom in this order, then cwebp -q 84 -m 6 -resize 96 768"
  }
 }
