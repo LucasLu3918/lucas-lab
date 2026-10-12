@@ -4,8 +4,8 @@
 Run after `npm run build`, whenever headings gain characters the slices do not cover:
     python3 scripts/subset-fonts.py
 Glyphs outside the slices fall back to the system serif, so a missed character is cosmetic, never broken.
-Slices: a = home page + shared punctuation, b = other pages. Story and chapter pages (stories/<slug>/...) use the system serif and are skipped,
-so reading pages stay inside their page-weight budget. Each page downloads only the slices it uses.
+Slices: a = home page + shared punctuation, b = other pages. Story and chapter pages (stories/<slug>/...) and the search page use the system serif and are skipped,
+so they stay inside their page-weight budgets. Each page downloads only the slices it uses.
 The subsets come from the Google Fonts CSS API (text= parameter); the font files are committed so the site never calls Google at runtime.
 """
 import glob, html, re, sys, urllib.parse, urllib.request
@@ -33,7 +33,7 @@ def main():
         rel = Path(f).relative_to(dist).as_posix()
         if rel == 'index.html' or rel.startswith('games/blood-mirror/play'):
             continue
-        if rel.startswith('stories/') and rel != 'stories/index.html':
+        if (rel.startswith('stories/') and rel != 'stories/index.html') or rel == 'search/index.html':
             continue
         others.update(heading_chars(f))
     a = home
