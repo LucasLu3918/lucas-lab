@@ -18,7 +18,8 @@
 body[data-view="game"] .lab-bar,
 body[data-view="game"] .site-header{display:none}
 body[data-view="game"] #main{padding:0;margin:0;max-width:none}
-body[data-view="game"],body[data-view="ending"]{overflow:hidden}
+/* Only the play route is a fixed stage; the clear screen is a long page that must scroll under touch and wheel. */
+body[data-view="game"]{overflow:hidden}
 
 .game{position:relative;height:100vh;height:100dvh;margin:0;padding:0;max-width:none;overflow:hidden;background:#050405;aspect-ratio:auto}
 .stage{position:absolute;inset:0;overflow:hidden}
@@ -368,6 +369,17 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .ending-buttons{gap:12px}
 .ending-buttons .primary-button,.ending-buttons .text-button{min-height:52px}
 .ending-buttons .text-button{color:var(--gold)}
+/* Replay (重玩小遊戲): one thumbnailed card per finished mini-game, shared by the clear screen and the picker. */
+.ending-replay{margin:0 auto 28px;max-width:640px;text-align:center}
+.ending-replay h2{margin:0 0 6px}
+.replay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;text-align:left}
+#modal .replay-grid{grid-template-columns:1fr}
+.replay-card{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:8px 12px;font:inherit;font-size:14px;line-height:1.4;color:var(--text);text-align:left;border:1px solid var(--line);border-radius:var(--stage-radius-sm);background:rgba(255,255,255,.03);cursor:pointer}
+.replay-card:hover,.replay-card:focus-visible{border-color:var(--gold);background:rgba(195,172,128,.08)}
+.replay-thumb{flex:0 0 96px;width:96px;height:55px;object-fit:cover;border:1px solid var(--stage-line);border-radius:4px}
+.replay-name{flex:1 1 auto;min-width:0}
+.replay-arrow{flex:none;color:var(--gold)}
+@media (max-width:560px){.replay-grid{grid-template-columns:1fr}}
 .maze-key{display:grid;place-items:center;padding:0}
 .pipe-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 
