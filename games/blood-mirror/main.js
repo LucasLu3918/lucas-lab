@@ -1,4 +1,4 @@
-import {journalShellMarkup,clueBookMarkup,collectionMarkup,chapterEntriesMarkup,memoriesMarkup,settingsMarkup,playlogPanelMarkup,epilogueMarkup,recapMarkup,fateMarkup,replayPickerMarkup,hintModalMarkup,stageHintMarkup as stageHintHtml,prerequisiteNote,evidenceGateMarkup,solvedMarkup,codeSealMarkup,sequenceSealMarkup,questionSealMarkup,nameSealMarkup,sealSuccessMarkup,storyBody,guideBody,prologueBody,chapterIntroBody} from './views/modals.js';
+import {journalShellMarkup,clueBookMarkup,collectionMarkup,chapterEntriesMarkup,memoriesMarkup,settingsMarkup,playlogPanelMarkup,epilogueMarkup,recapMarkup,fateMarkup,replayPickerMarkup,endingReplayMarkup,hintModalMarkup,stageHintMarkup as stageHintHtml,prerequisiteNote,evidenceGateMarkup,solvedMarkup,codeSealMarkup,sequenceSealMarkup,questionSealMarkup,nameSealMarkup,sealSuccessMarkup,storyBody,guideBody,prologueBody,chapterIntroBody} from './views/modals.js';
 import {createMixer} from './audio/mixer.js';import {createSfx} from './audio/sfx.js';import {createAmbience} from './audio/ambience.js';
 import {journeyGuide,journalChapters,spotText,memoryCollection,journeyRecap,dialogueLines,sceneMet,readLog} from './journey.js';import {exportSave,parseSave,loadSave,backupSave,writeSave,SAVE_KEY} from './engine/index.js';import {ledgerMarkup} from './puzzles/ledger-art.js';import {createPlaylog,summarizePlaylog} from './playlog.js';
 import {createGameUI,createDialogueBox} from './ui.js';
@@ -168,10 +168,13 @@ function openPuzzle(){
  modal('最後的血脈繼承人','THE SEAL · 王冠契約',nameSealMarkup(r.options));
  $$('[data-name]').forEach(b=>b.onclick=()=>attempt(b.dataset.name));
 }
-// Replay picker (重玩小遊戲): every chapter whose mini-game is complete can be played again, as often as the
+// Every mini-game that can be replayed, in journey order: the prologue first, then each act. Only finished ones are offered.
+const replayOrder=[{id:'prologue',chapter:'序章'},...rooms.map(r=>({id:r.id,chapter:r.chapter}))];
+function finishedMiniGames(){return replayOrder.filter(item=>isChallengeComplete(item.id)).map(item=>({id:item.id,chapter:item.chapter,title:challengeRegistry[item.id].title,thumb:challengeRegistry[item.id].stages[0].id}));}
+// Replay picker (重玩小遊戲): every mini-game that is complete can be played again, as often as the
 // player likes. A replay starts fresh and writes nothing back to the journey; `back` returns to the caller's screen.
 function openReplayPicker(back=closeModal){
- const finished=rooms.filter(r=>isChallengeComplete(r.id)).map(r=>({id:r.id,chapter:r.chapter,title:challengeRegistry[r.id].title}));
+ const finished=finishedMiniGames();
  modal('重玩小遊戲','REPLAY · 重玩',replayPickerMarkup(finished));
  $$('#modal [data-replay]').forEach(b=>b.onclick=()=>startReplay(b.dataset.replay,()=>openReplayPicker(back)));
  $('#replay-back').onclick=back;
@@ -227,7 +230,13 @@ function renderEpilogue(e){
  $('#ending-credits').onclick=openCredits;
  $('#ending-secret')?.addEventListener('click',openSecretEpilogue);
 }
-function renderEnding(){const e=endings[state.ending];if(!e){showView('home');return}$('#ending-title').textContent=e.title;$('#ending-concept').innerHTML=['frost','crown'].includes(state.ending)?conceptMarkup(state.ending):'';placeConcepts($('#ending-concept'));$('#ending-concept').classList.toggle('hidden',state.ending==='dawn');const art=document.querySelector('.ending-art');art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+state.ending+'.svg)';const endingId=state.ending;const enhancedCG=new Image();enhancedCG.decoding='async';enhancedCG.onload=()=>{if(view==='ending'&&state.ending===endingId)art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+endingId+'.webp'+')';};enhancedCG.src='assets/endings/'+endingId+'.webp';art.setAttribute('role','img');art.setAttribute('aria-label','結局場景插畫：'+e.title);$('#ending-eyebrow').textContent=e.eyebrow;$('#ending-text').textContent=e.text;renderEpilogue(e);$('#ending-quote').textContent=e.quote;$('#ending-stats').innerHTML=`<span>旅程 ${formatTime(state.elapsed)}</span><span>真相 ${rooms.length} / ${rooms.length}</span><span>已發現結局 ${state.endings.length} / 3</span>`;const recap=journeyRecap(state);$('#ending-recap').innerHTML=recapMarkup(recap);renderHome();}
+function renderEnding(){const e=endings[state.ending];if(!e){showView('home');return}$('#ending-title').textContent=e.title;$('#ending-concept').innerHTML=['frost','crown'].includes(state.ending)?conceptMarkup(state.ending):'';placeConcepts($('#ending-concept'));$('#ending-concept').classList.toggle('hidden',state.ending==='dawn');const art=document.querySelector('.ending-art');art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+state.ending+'.svg)';const endingId=state.ending;const enhancedCG=new Image();enhancedCG.decoding='async';enhancedCG.onload=()=>{if(view==='ending'&&state.ending===endingId)art.style.backgroundImage='linear-gradient(0deg,#110d13bf,transparent 65%),url(assets/endings/'+endingId+'.webp'+')';};enhancedCG.src='assets/endings/'+endingId+'.webp';art.setAttribute('role','img');art.setAttribute('aria-label','結局場景插畫：'+e.title);$('#ending-eyebrow').textContent=e.eyebrow;$('#ending-text').textContent=e.text;renderEpilogue(e);$('#ending-quote').textContent=e.quote;$('#ending-stats').innerHTML=`<span>旅程 ${formatTime(state.elapsed)}</span><span>真相 ${rooms.length} / ${rooms.length}</span><span>已發現結局 ${state.endings.length} / 3</span>`;const recap=journeyRecap(state);$('#ending-recap').innerHTML=recapMarkup(recap);renderEndingReplay();renderHome();}
+// The clear screen's replay section: every finished mini-game is one click away, and the button in the row below scrolls here.
+function renderEndingReplay(){
+ $('#ending-replay').innerHTML=endingReplayMarkup(finishedMiniGames());
+ $$('#ending-replay [data-replay]').forEach(b=>b.onclick=()=>startReplay(b.dataset.replay,closeModal));
+ $('#ending-replay-jump').onclick=()=>{$('#ending-replay').scrollIntoView({behavior:document.body.classList.contains('reduce-motion')?'instant':'smooth',block:'start'});$('#ending-replay [data-replay]')?.focus({preventScroll:true});};
+}
 function followJourney(){
  const next=journeyGuide(state,restoredRoom()).next;
  if(next.kind==='ending'){showView('ending');return;}
@@ -401,9 +410,10 @@ scene.addEventListener('pointerup',endPan);scene.addEventListener('pointercancel
 window.addEventListener('resize',clampPan);
 function openPause(){
  const labHome=document.querySelector('.lab-bar a')?.href||'#';
- modal('暫停','MENU · 選單',`<div class="pause-menu"><button id="pause-resume" class="primary-button">繼續探索 ⟶</button><button id="pause-journal" class="secondary-button">線索筆記</button><button id="pause-gallery" class="secondary-button">魔鏡藝廊</button><button id="pause-settings" class="secondary-button">設定與攜帶存檔</button><button id="pause-title" class="secondary-button">返回標題</button><p class="modal-note"><a href="${labHome}">← 返回 LUCAS LAB 遊戲館</a></p></div>`);
+ modal('暫停','MENU · 選單',`<div class="pause-menu"><button id="pause-resume" class="primary-button">繼續探索 ⟶</button><button id="pause-journal" class="secondary-button">線索筆記</button><button id="pause-replay" class="secondary-button"${finishedMiniGames().length?'':' disabled'}>重玩小遊戲${finishedMiniGames().length?'':'（尚未通關）'}</button><button id="pause-gallery" class="secondary-button">魔鏡藝廊</button><button id="pause-settings" class="secondary-button">設定與攜帶存檔</button><button id="pause-title" class="secondary-button">返回標題</button><p class="modal-note"><a href="${labHome}">← 返回 LUCAS LAB 遊戲館</a></p></div>`);
  $('#pause-resume').onclick=closeModal;
  $('#pause-journal').onclick=openJournal;
+ $('#pause-replay').onclick=()=>openReplayPicker(openPause);
  $('#pause-gallery').onclick=()=>{closeModal();openGallery();};
  $('#pause-settings').onclick=openSettings;
  $('#pause-title').onclick=()=>{closeModal();showView('home');};

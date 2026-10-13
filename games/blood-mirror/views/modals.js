@@ -158,9 +158,14 @@ export const fateMarkup=()=>`<p class="modal-text">妳已握住所有真相。�
  +`<p class="modal-note">這個選擇會決定結局。完成後可回來探索其他可能。</p>`;
 
 // ---- replay.js ----
+// Replay cards (重玩小遊戲): one thumbnailed button per finished mini-game. The picker and the ending share them.
+export const replayCardsMarkup=finished=>finished.map(r=>`<button class="replay-card" data-replay="${r.id}"><img class="replay-thumb" src="assets/puzzles/thumbs/${r.thumb}.webp" alt="" width="112" height="64" loading="lazy" decoding="async" draggable="false"><span class="replay-name">${r.chapter} · ${r.title}</span><span class="replay-arrow" aria-hidden="true">⟶</span></button>`).join('');
 export const replayPickerMarkup=finished=>'<p class="modal-text">選一道已通關的小遊戲再玩一次。重玩不會改動旅程進度、碎片、成就與結局。</p>'
- +finished.map(r=>`<button class="choice-option" data-replay="${r.id}">${r.chapter} · ${r.title} <span>⟶</span></button>`).join('')
+ +(finished.length?`<div class="replay-grid">${replayCardsMarkup(finished)}</div>`:'<p class="modal-note">還沒有通關的小遊戲。解開任一封印後，就能在這裡重玩。</p>')
  +'<button id="replay-back" class="secondary-button">返回</button>';
+// The ending's replay section: placed under the recap so a clear always shows the way back into the puzzles.
+export const endingReplayMarkup=finished=>'<h2 id="ending-replay-title">重玩小遊戲</h2><p class="epilogue-prompt">挑一道機關，再解一次。進度、結局與收藏都不會改變。</p>'
+ +(finished.length?`<div class="replay-grid">${replayCardsMarkup(finished)}</div>`:'<p class="modal-note">尚未通關任何小遊戲。</p>');
 
 // ---- hints.js ----
 export const hintStepsMarkup=(list,count)=>list.slice(0,count)
