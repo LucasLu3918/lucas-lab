@@ -125,3 +125,20 @@ node scripts/blood-mirror.browser.cjs
 - 配樂：第一至第七幕的場景配樂已全面換成 v3（本機 MiniMax Music 3 產生，每首約 77–86 秒、可循環、−18 LUFS），舊曲歸檔於 `source-audio/bgm-v1-archive/`；來源、種子與授權見 `assets/music/SOURCE_NOTES.md`。
 - 人物立繪（`assets/portraits/*.webp`，640×936，各 ≤ 42 KB；PNG 母檔在 `source-art/m6/portraits/`）：eli、orion、nyla、heso、lucy、hunter、vera、mirror。本機 ComfyUI Z-Image Turbo 文字生圖，逐張目視審查通過（魔鏡倒影有一張面孔，與「無臉」的原設定略有出入）；無圖像編輯模型，故沒有白雪。人工驗收待你確認。
 
+
+## 機關特寫圖與黃銅介面（2026-10-13）
+
+- 機關特寫（`assets/puzzles/<機關 id>.webp`，960×411，各 ≤ 44 KB，共 14 張約 500 KB；PNG 母檔在 `source-art/puzzles/`，不發布）：musicbox、ledger、watch、masks、light、runeheart、pipes、names、rune、rubbing、memory、stitch、reflection、maze。檔名即 `puzzles/index.js` 各階段的 `id`；只在機關視窗開啟時載入，不計入首屏。
+- 產生方式：本機 ComfyUI，沿用 `source-art/manifest.json` 的 Z-Image Turbo 流程（9 步、`res_multistep`、1344×576，再以 `cwebp -q 78 -m 6 -resize 960 411` 轉檔）。每個機關出 2 張候選，目視挑選；提示詞限制為無文字、無人物。這不是使用者驗收。
+- 黃銅質感：樣式在 `challenges.css` 結尾（`#modal` 下的設計語彙，漸層與 `box-shadow`，不使用圖檔）；視窗外框在 `styles/stage.css` 結尾。
+- 線索視窗的場景特寫（`concept-art.js` 的 `zoomStyle`）：直接放大熱點座標附近的場景圖，沒有新增素材。
+- 機關選擇縮圖（`assets/puzzles/thumbs/<機關 id>.webp`，224×128，14 張共約 66 KB）：由上述母檔置中裁切；只在兩選一的選擇畫面載入。
+
+## 新增場景視角與熱點稽核（2026-10-13）
+
+- 新場景視角（1600×896 WebP，各 ≤ 126 KB，共約 500 KB；PNG 母檔在 `source-art/views/`，不發布）：`library-desk`（書庫書桌）、`queen-vanity`（王后梳妝台）、`mine-dorm`（礦工宿舍）、`mirror-children`（牽著手的孩子）、`crypt-bedside`（玻璃棺旁）。各章 `views` 的第一個仍是抵達視角；封印與證據熱點留在抵達視角（`blood-mirror-m6.test.mjs` 規定）。已加入魔鏡藝廊的「場景」分類。
+- 產生方式同上（本機 ComfyUI、Z-Image Turbo、每個場景出 2 張候選目視挑選）。不是使用者驗收。
+- 熱點稽核：以標註圖逐幕比對 84 個熱點與畫面物件，移動 48 個到對應物件上（例如懷錶移到書桌的懷錶、玻璃心臟移到罐中心臟、閥柄移到紅色閥輪）。原圖裡沒有的物件（鐘塔手札、被撕走書頁的禁書、打翻的墨水、蠟印、醫師畫像、王冠、祈禱書、搖籃、藍圖牆、礦工提燈、牽手的孩子、露西的髮帶、白紗、守夜燭台、玻璃外的低語）改放在新視角。
+- 座標準則：同一視角的熱點在 812×457 橫向手機舞台上至少相距 48 px；手機版 y 不超過約 80%（底部面板），桌面左半部 y 不超過約 75%（對話框）。
+
+- 母檔狀態：`source-art/puzzles/`（14 張，約 15 MB）與 `source-art/views/`（5 張，約 10 MB）的 PNG 母檔保留在作者本機，**尚未納入版本控制**（提交時被內容安全檢查擋下，待作者決定如何保存，例如 Git LFS 或另存封存）。發布用的 WebP 不受影響。
