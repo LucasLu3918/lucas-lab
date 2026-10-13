@@ -393,7 +393,14 @@ function showChapterCard(index){
 }
 function hideChapterCard(){clearTimeout(cardTimer);$('#chapter-card').classList.add('hidden');}
 // The 16:9 frame pans horizontally when it is wider than the screen (phones); hotspots move with it.
-function clampPan(){const max=Math.max(0,(frame.offsetWidth-scene.clientWidth)/2);panX=Math.min(max,Math.max(-max,panX));frame.style.setProperty('--pan-x',panX+'px');}
+function clampPan(){const max=Math.max(0,(frame.offsetWidth-scene.clientWidth)/2);panX=Math.min(max,Math.max(-max,panX));frame.style.setProperty('--pan-x',panX+'px');updateOffscreenHints();}
+// Brings a hotspot into the visible part of a panned phone frame, with a margin so it does not sit on the edge.
+function revealHotspot(element){if(!element?.closest('#hotspots'))return;const s=scene.getBoundingClientRect(),r=element.getBoundingClientRect(),margin=48;const shift=r.left<s.left+margin?s.left+margin-r.left:r.right>s.right-margin?s.right-margin-r.right:0;if(shift){panX+=shift;clampPan();}}
+// A phone frame is wider than the screen, so a hotspot past an edge is invisible. Unseen hotspots past each edge are
+// counted, and the chip beside the view arrows pans to the nearest one; the chips are rebuilt on every pan and render.
+function offscreenHotspots(){const s=scene.getBoundingClientRect(),left=[],right=[];for(const el of $$('#hotspots [data-spot]:not(.seen)')){const r=el.getBoundingClientRect();if(!r.width)continue;if(r.right<s.left)left.push({el,edge:r.right});else if(r.left>s.right)right.push({el,edge:r.left});}return {left:left.sort((a,b)=>b.edge-a.edge).map(item=>item.el),right:right.sort((a,b)=>a.edge-b.edge).map(item=>item.el)};}
+function updateOffscreenHints(){const {left,right}=offscreenHotspots();for(const [id,items,side] of [['hint-left',left,'左側'],['hint-right',right,'右側']]){const chip=$('#'+id);chip.hidden=!items.length;chip.textContent=(id==='hint-left'?'‹ ':'')+side+' '+items.length+' 處'+(id==='hint-right'?' ›':'');chip.setAttribute('aria-label',side+'還有 '+items.length+' 個未查看的熱點，點擊平移過去');}}
+$('#hint-left').onclick=()=>revealHotspot(offscreenHotspots().left[0]);$('#hint-right').onclick=()=>revealHotspot(offscreenHotspots().right[0]);
 scene.addEventListener('pointerdown',event=>{dragStart={x:event.clientX,start:panX};panMoved=false;});
 scene.addEventListener('pointermove',event=>{
  if(!dragStart)return;
@@ -450,8 +457,7 @@ const gamepadHooks={
  back:()=>{if($('#modal').open)closeModal();else if(view==='game')openPause();},
  menu:()=>{if($('#modal').open){if($('#modal-title').textContent==='暫停')closeModal();return;}if(view==='game')openPause();},
  shoulder:dir=>{if(view==='game'&&!$('#modal').open)stepView(dir);},
- // Scene hotspots can sit past the edge of a panned phone frame; pan just enough to bring one into view.
- reveal:element=>{if(!element.closest('#hotspots'))return;const s=scene.getBoundingClientRect(),r=element.getBoundingClientRect(),margin=48;const shift=r.left<s.left+margin?s.left+margin-r.left:r.right>s.right-margin?s.right-margin-r.right:0;if(shift){panX+=shift;clampPan();}}
+ reveal:revealHotspot
 };
 addEventListener('gamepadconnected',()=>{import('./gamepad.js').then(({startGamepadNav})=>startGamepadNav(gamepadHooks)).catch(()=>{});});
 hydrateIcons();enableButtonArrows();state.muted=true;updateSound();renderHome();

@@ -506,3 +506,10 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
 /* Gamepad navigation moves focus by script, so the ring is drawn on every focused control, not only on :focus-visible. */
 body.gamepad-nav :is(button,select,input,summary,a):focus{outline:3px solid var(--stage-gold-hi,#e2cc9b);outline-offset:3px}
 body.gamepad-nav .hotspot:focus svg,body.gamepad-nav .hotspot:focus span{opacity:1}
+
+/* Phone frames are wider than the screen: unseen hotspots past an edge are counted in a chip row at the end of the
+   top progress line (main.js). The row sits above the scene, so no chip ever covers a hotspot. */
+.offscreen-chips{display:flex;gap:6px;margin-left:auto;flex:0 0 auto}
+.offscreen-hint{min-height:44px;padding:0 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);color:var(--stage-gold-hi);font-size:12px;letter-spacing:.5px;white-space:nowrap}
+.offscreen-hint[hidden]{display:none}
+.offscreen-hint:hover,.offscreen-hint:focus-visible{background:rgba(16,15,16,.92);border-color:var(--stage-gold-hi)}
