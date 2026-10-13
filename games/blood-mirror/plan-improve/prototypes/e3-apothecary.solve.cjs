@@ -31,4 +31,9 @@ let s=[...c.START];for(const t of p)s=c.pour(s,t);assert.ok(c.goalB(s));
  }
  assert.ok(near>c.TOL*1.5,'nearest wrong recipe too close: '+near);
  console.log('C: accepted recipes='+okCount+', nearest wrong recipe distance='+near.toFixed(1)+' (tolerance '+c.TOL+')');}
+// The apprentice cards and names match the dialogue draft (single source of truth is the draft)
+{const md=fs.readFileSync(path.join(__dirname,'..','expert-dialogue-draft.md'),'utf8');
+ const rows=[...md.matchAll(/^\| \d \| (\S+) \| .+? \| (「.+」) \|$/gm)].map(m=>[m[1],m[2]]);
+ assert.strictEqual(rows.length,7);
+ rows.forEach(([name,line],i)=>{assert.strictEqual(name,c.APPRENTICES[i]);assert.strictEqual(line,c.CARD_LINES[i]);});}
 console.log('OK: E3 stages verified');

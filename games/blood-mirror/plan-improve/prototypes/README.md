@@ -18,6 +18,8 @@ for f in e1-gears e2-optics e3-apothecary e5-box; do node $f.solve.cjs; done
 
 驗證腳本會從對應的 HTML 抽出 `<script data-core>`（規則與提示）區塊來執行，所以**規則只有一份**：HTML 裡的那一份。
 
+另有 `../expert-dialogue.check.cjs`（對白草稿的規則檢查）；`e3-apothecary.solve.cjs` 也會核對學徒卡片台詞與 `../expert-dialogue-draft.md` 一致。
+
 ## 注意
 
 - 原型只經過腳本與瀏覽器 DOM 點擊驗證，**沒有用真實手指測過**。
