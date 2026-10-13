@@ -14,6 +14,12 @@ for(const {speaker,text} of lines){
 }
 // the apprentices are the only holders; no canon miner name appears in any spoken line
 for(const {text} of lines)for(const m of MINERS)assert.ok(!text.includes(m),'canon miner '+m+' in: '+text);
+// decisions of 2026-10-14: terms keep their roles (no line mixes two of them), the apprentices' fate is never hinted,
+// and the debt background stays out of the spoken lines
+for(const {text} of lines){
+ assert.ok(['帳冊','底稿','帳本'].filter(w=>text.includes(w)).length<=1,'mixes ledger terms: '+text);
+ assert.ok(!/抵債|後來怎麼|死了|活著/.test(text.replace('甘松的證詞','')),'hints at an apprentice fate or debt: '+text);
+}
 // vera speaks exactly once (a recorded line)
 assert.strictEqual(lines.filter(l=>l.speaker==='vera').length,1);
 // apprentice card lines are at most 40 characters
