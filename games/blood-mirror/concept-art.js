@@ -40,3 +40,17 @@ export function preloadImages(sources){
 }
 export const preloadConcepts=ids=>preloadImages(ids.map(id=>conceptArt[id]?.src));
 export const itemArtwork={watch:'clock',apple:'apple'};
+
+// A magnified crop of a 16:9 scene around a hotspot (x, y in percent), so a clue dialog opens on the thing itself.
+// The frame is 16:6.5; background-position percentages map the image edge to the frame edge, hence the algebra.
+export function zoomStyle(src,x,y,scale=2.6,frame=16/6.5,image=16/9){
+ const clamp=v=>Math.min(1,Math.max(0,v)),rows=scale*frame/image;
+ const px=clamp((x/100*scale-.5)/(scale-1))*100,py=rows>1?clamp((y/100*rows-.5)/(rows-1))*100:50;
+ return `background-image:url(${src});background-size:${scale*100}% auto;background-position:${px.toFixed(2)}% ${py.toFixed(2)}%`;
+}
+export function placeZooms(root){
+ for(const el of root.querySelectorAll('.spot-zoom[data-zoom-src]')){
+  const x=Number(el.dataset.zoomX),y=Number(el.dataset.zoomY);
+  if(Number.isFinite(x)&&Number.isFinite(y))el.style.cssText=zoomStyle(el.dataset.zoomSrc,x,y);
+ }
+}
