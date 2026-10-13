@@ -105,13 +105,22 @@ footer>span:nth-child(2){color:#b9ada2}
 .modal-portrait{display:block;margin:0 auto 14px;width:min(100%,240px);height:auto;aspect-ratio:320/468;object-fit:cover;object-position:top;border:1px solid #ad8e6540;-webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent)}
 
 /* Second-stage mechanisms: watch gears, bed names, coffin rubbing, rabbit-ear stitches, mirror corridor */
-.watch-board{display:flex;justify-content:center;gap:14px;margin:14px 0 10px}
-.watch-gear{width:84px;height:84px;min-height:44px;border-radius:50%;border:2px solid #ad8e6590;background:#201a22;color:#d8be8f;display:grid;place-items:center;position:relative;font-family:Georgia,serif}
-.watch-gear.aligned{border-color:#e2cc9b;box-shadow:0 0 16px #c3ac8077}
-.watch-mark{position:absolute;top:6px;font-size:16px;line-height:1;transform-origin:50% 36px;transition:transform .15s}
-.watch-name{font-size:13px;margin-top:22px}
-.watch-gear.rot0 .watch-mark{transform:rotate(0)}.watch-gear.rot1 .watch-mark{transform:rotate(60deg)}.watch-gear.rot2 .watch-mark{transform:rotate(120deg)}
-.watch-gear.rot3 .watch-mark{transform:rotate(180deg)}.watch-gear.rot4 .watch-mark{transform:rotate(240deg)}.watch-gear.rot5 .watch-mark{transform:rotate(300deg)}
+.watch-board{display:flex;justify-content:center;margin:16px auto 12px;padding:16px 24px 10px;width:fit-content;max-width:100%;border-radius:56px;border:2px solid #b99a62;background:radial-gradient(ellipse at 50% 20%,#2e2418,#130e0b 72%);box-shadow:inset 0 0 28px #000c,0 0 0 4px #17110c,0 0 0 5px #b99a6266,0 14px 36px #0008}
+.watch-gear{width:92px;min-height:44px;margin:0 -9px;padding:0;border:0;background:none;color:#e8d3a2;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;font-family:Georgia,serif;cursor:pointer}
+.watch-gear:focus-visible{outline:2px solid #f0dca8;outline-offset:2px}
+.watch-gear:nth-child(2){z-index:1}
+.gear-spin{flex:none;display:block;width:92px;height:92px;transition:transform .42s cubic-bezier(.3,1.45,.5,1)}
+.gear-svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 3px #000a)}
+.gear-teeth{fill:#7d6236;stroke:#d9bd82;stroke-width:1.2;stroke-linejoin:round}
+.gear-rim{fill:#2a2015;stroke:#b99a62;stroke-width:2}
+.gear-spokes{stroke:#9a7d48;stroke-width:3.2;stroke-linecap:round}
+.gear-hub{fill:#5c4627;stroke:#d9bd82;stroke-width:1.5}
+.gear-pin{fill:#e8d3a2}
+.gear-ruby{fill:#6d2530;stroke:#c3ac80;stroke-width:1.4;transition:fill .2s,filter .2s}
+.watch-gear.aligned .gear-ruby{fill:#ff5c70;filter:drop-shadow(0 0 5px #ff5c70)}
+.watch-gear.aligned .gear-teeth{stroke:#f3e1ae}
+.watch-gear:active .gear-svg{filter:drop-shadow(0 2px 3px #000a) brightness(1.2)}
+.watch-name{font-size:12px;letter-spacing:2px;color:#f0dca8;pointer-events:none}
 .rub-board{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:min(100%,340px);margin:12px auto}
 .rub-cell{aspect-ratio:1;min-height:44px;background:#0d0b0e;border:1px solid #2b2430;color:#d8be8f;font:22px Georgia,'Noto Serif TC',serif;touch-action:none}
 .rub-cell.clear{background:#2a2430;border-color:#ad8e6580}
@@ -131,4 +140,166 @@ footer>span:nth-child(2){color:#b9ada2}
 .maze-pad{display:grid;grid-template-columns:repeat(3,52px);grid-template-areas:'. u .' 'l d r';gap:6px;justify-content:center;margin:6px 0 10px}
 .maze-key{min-width:52px;min-height:52px;background:#201a22;color:#d8be8f;border:1px solid #ad8e6570;font-size:18px}
 .maze-U{grid-area:u}.maze-L{grid-area:l}.maze-D{grid-area:d}.maze-R{grid-area:r}
-@media (prefers-reduced-motion:reduce){.watch-mark{transition:none}}
+@media (prefers-reduced-motion:reduce){.gear-spin,.gear-ruby{transition:none}}
+
+/* Brass finish for every mechanism and dialog control (concept boards: gilded, riveted, hand-made).
+   One token set, loaded after challenges.css so it restyles the puzzle parts without touching their markup.
+   Shapes use gradients and box-shadow only: no image files, nothing that needs 'unsafe-inline'. */
+#modal{
+ --brass-hi:#f0dca8;--brass:#c9ab6a;--brass-mid:#9a7d48;--brass-lo:#5c4627;--brass-ink:#17110c;
+ --ruby:#b8323f;--ruby-hi:#ff7385;
+ --bevel:inset 0 1px 0 #f0dca83d,inset 0 -2px 0 #0009,0 2px 0 #000a;
+}
+
+/* Boards sit in a riveted brass plate. */
+#modal :is(.tile-board,.reflection-board,.light-board,.stitch-board,.maze-board,.rub-board,.rune-board,.memory-board,.heart-ring){
+ background:
+  radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) 4px 4px/9px 9px no-repeat,
+  radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) calc(100% - 4px) 4px/9px 9px no-repeat,
+  radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) 4px calc(100% - 4px)/9px 9px no-repeat,
+  radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) calc(100% - 4px) calc(100% - 4px)/9px 9px no-repeat,
+  radial-gradient(ellipse at 50% 0,#2b2117,#0f0a08 78%);
+ border:2px solid var(--brass);border-radius:8px;
+ box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 0 3px #c9ab6a4d,inset 0 0 26px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a;
+}
+#modal :is(.rune-board,.memory-board,.heart-ring){padding:14px;box-sizing:border-box}
+#modal .pipes-board{border:2px solid var(--brass);border-radius:8px;box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+#modal .ledger-figure{border:2px solid var(--brass);border-radius:3px;box-shadow:0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+
+/* Raised keys: rune keys, seal choices and the maze pad. */
+#modal :is(.rune-key,.seal-choice,.maze-key){
+ background:linear-gradient(#41331f,#1c150d);border:1px solid var(--brass-mid);border-radius:6px;
+ color:var(--brass-hi);text-shadow:0 1px 0 #000a;box-shadow:var(--bevel);
+ transition:transform .06s,box-shadow .06s,background .12s;
+}
+#modal :is(.rune-key,.seal-choice,.maze-key):active{transform:translateY(1px);box-shadow:inset 0 2px 5px #000b}
+#modal :is(.rune-key,.seal-choice,.maze-key):focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+#modal .rune-key.illuminated,#modal .heart-node.lit{
+ background:radial-gradient(circle at 50% 32%,#ff9aa7,var(--ruby) 58%,#5a1220);color:#fff;border-color:var(--brass-hi);
+ box-shadow:0 0 26px #ff738599,inset 0 1px 0 #fff6,inset 0 -3px 6px #3a0a12;text-shadow:0 0 8px #fff8;
+}
+
+/* Rune ring: round medallions around a glass heart. */
+#modal .heart-ring{border-radius:18px}
+#modal .heart-node{
+ background:radial-gradient(circle at 35% 28%,#6e5632,#241a0f 72%);border:2px solid var(--brass);color:var(--brass-hi);
+ box-shadow:var(--bevel),0 0 0 3px #0c0806;text-shadow:0 1px 0 #000a;
+}
+#modal .heart-core{color:var(--brass);opacity:1;letter-spacing:2px;text-shadow:0 0 12px #c9ab6a66}
+
+/* Mirror light path: silver beam through brass mirrors, ruby door. */
+#modal .light-cell{background:#120d09;border:1px solid #3a2c1a;color:var(--brass-mid);border-radius:2px}
+#modal .light-cell.beam{background:linear-gradient(#27303c,#161c25);border-color:#c8d8ec;color:#e6f0ff;box-shadow:inset 0 0 14px #bcd0e866,0 0 8px #bcd0e833}
+#modal .light-mirror{background:linear-gradient(#4a3a22,#1d150d);border-color:var(--brass);color:var(--brass-hi);box-shadow:var(--bevel)}
+#modal .light-mirror.beam{background:linear-gradient(#5d6c80,#2b3644);border-color:#e6f0ff;color:#fff}
+#modal .light-door{border-color:var(--ruby);color:var(--ruby-hi);background:#1a0c10}
+#modal .light-door.open{background:radial-gradient(circle,#ff9aa7,var(--ruby));color:#fff;border-color:var(--brass-hi);box-shadow:0 0 20px #ff738599}
+
+/* Embroidery grid: red thread on dark cloth. */
+#modal .stitch-cell{background:#120d09;border:1px solid #3a2c1a;color:var(--brass);border-radius:2px}
+#modal .stitch-cell.on{background:linear-gradient(#8c2433,#5a1220);border-color:#f0b8c0;color:#fff;box-shadow:inset 0 0 8px #0006}
+#modal .stitch-caption{color:var(--brass);letter-spacing:1px}
+
+/* Mirror corridor: mirrored walls, gold traveller. */
+#modal .maze-cell{background:#120d09;border:1px solid #3a2c1a;color:var(--brass-mid);border-radius:2px;opacity:1}
+#modal .maze-cell.wall{background:linear-gradient(135deg,#6a7a90,#2a3442 55%,#59697e);border-color:#cfdcec;box-shadow:inset 0 0 8px #0008}
+#modal .maze-cell.gate{background:linear-gradient(#4a3a22,#1d150d);border-color:var(--brass);color:var(--brass-hi)}
+#modal .maze-cell.exit{background:#1a0c10;border-color:var(--ruby);color:var(--ruby-hi)}
+#modal .maze-cell.here{background:radial-gradient(circle,#f6e3ab,var(--brass));border-color:var(--brass-hi);color:var(--brass-ink);box-shadow:0 0 14px #c9ab6a99}
+
+/* Coffin rubbing: soot-black until the paper shows through. */
+#modal .rub-cell{background:#0b0908;border:1px solid #2a2118;color:#0b0908;border-radius:2px}
+#modal .rub-cell.clear{background:linear-gradient(#e2cfa4,#cdb787);border-color:var(--brass);color:#2e2016}
+
+/* Reflected manuscript. */
+#modal .reflection-cell{background:#120d09;border:1px solid #3a2c1a;color:var(--brass-mid);border-radius:2px}
+#modal .reflection-cell.glow{background:radial-gradient(ellipse,#8a5068,#2c1c2c 82%);color:#ffe0e4;text-shadow:0 0 14px #f0a8c8}
+#modal .reflection-cell.fixed{border-color:var(--brass);background-color:#241a14}
+
+/* Memory cards: engraved brass backs, wine-dark faces. */
+#modal .memory-card{
+ background:linear-gradient(155deg,#3d2f1c,#130e0a);border:2px solid var(--brass-mid);border-radius:6px;color:var(--brass);
+ box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c9ab6a40,var(--bevel);text-shadow:0 1px 0 #000a;
+}
+#modal .memory-card.turned{background:linear-gradient(155deg,#4e2a37,#251119);border-color:var(--brass-hi);color:#f7dab0}
+
+/* Seven names / masked guests: engraved plates with real select controls. */
+#modal .mask-row{padding:2px 0}
+#modal .mask-slot{width:28px;height:28px;line-height:26px;border:1px solid var(--brass-mid);border-radius:50%;background:radial-gradient(circle at 35% 28%,#4a3a22,#1a130b);color:var(--brass-hi);box-shadow:var(--bevel)}
+#modal .mask-row select{
+ appearance:none;-webkit-appearance:none;min-height:44px;padding:0 38px 0 12px;border:1px solid var(--brass-mid);border-radius:6px;
+ background:
+  linear-gradient(45deg,transparent 50%,var(--brass) 50%) calc(100% - 20px) 50%/7px 7px no-repeat,
+  linear-gradient(135deg,var(--brass) 50%,transparent 50%) calc(100% - 14px) 50%/7px 7px no-repeat,
+  linear-gradient(#2a2016,#140e0a);
+ color:var(--brass-hi);box-shadow:var(--bevel);cursor:pointer;
+}
+#modal .mask-row select:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+#modal .mask-row select option{background:#17110c;color:#f0dca8}
+#modal .mask-clues{counter-reset:clue;list-style:none;padding:12px 14px;border:1px solid #c9ab6a40;border-radius:8px;background:#0e0a0788}
+#modal .mask-clues li{counter-increment:clue;position:relative;padding-left:26px;margin:2px 0}
+#modal .mask-clues li::before{content:counter(clue);position:absolute;left:0;top:.45em;width:18px;height:18px;line-height:17px;text-align:center;font:11px Georgia,serif;color:var(--brass-ink);background:var(--brass);border-radius:50%}
+#modal .rune-carving{border:1px solid var(--brass-mid);border-radius:6px;background:linear-gradient(#1c150d,#110c08);box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c9ab6a33;color:var(--brass-hi);letter-spacing:3px}
+
+/* Code input: engraved dial. */
+#modal .code-input{background:linear-gradient(#0b0806,#17110c);border:2px solid var(--brass-mid);border-radius:6px;color:var(--brass-hi);box-shadow:inset 0 3px 10px #000c,0 1px 0 #f0dca826;text-shadow:0 0 10px #c9ab6a66}
+#modal .code-input:focus{border-color:var(--brass-hi);outline:none;box-shadow:inset 0 3px 10px #000c,0 0 0 3px #c9ab6a40}
+
+/* Buttons inside dialogs. */
+#modal .primary-button{background:linear-gradient(#a8323f,#74202c);border:1px solid var(--brass);box-shadow:inset 0 1px 0 #ffd9dd40,0 4px 14px #74202c66;text-shadow:0 1px 0 #0006}
+#modal .primary-button:hover:not(:disabled){background:linear-gradient(#b93a49,#82253277);filter:brightness(1.08)}
+#modal .primary-button:disabled{background:linear-gradient(#3a2c1a,#241b10);border-color:var(--brass-lo);box-shadow:none;text-shadow:none}
+#modal .secondary-button{background:linear-gradient(#2a2016,#16100b);border:1px solid var(--brass-mid);color:var(--brass-hi);box-shadow:inset 0 1px 0 #f0dca826}
+#modal .secondary-button:hover:not(:disabled){background:linear-gradient(#34281b,#1d150e);border-color:var(--brass)}
+#modal .choice-option{background:linear-gradient(#2a2016,#16100b);border:1px solid var(--brass-mid);color:var(--brass-hi);box-shadow:var(--bevel)}
+#modal .choice-option:hover:not(:disabled){border-color:var(--brass-hi);background:linear-gradient(#3a2d1d,#1d150e)}
+#modal .choice-option small{display:block;margin-top:2px;color:#cdbb97;letter-spacing:.5px}
+#modal .stage-pick{text-align:left;font-size:16px;letter-spacing:2px}
+#modal .challenge-feedback{color:var(--brass-hi);padding-left:12px;border-left:2px solid var(--brass-mid);margin-top:6px}
+
+/* Hint panel: a lantern drawer rather than a bare summary line. */
+#modal .stage-hints{margin-top:18px;padding:0 14px 12px;border:1px solid #c9ab6a40;border-radius:8px;background:linear-gradient(#17110c99,#0e0a0799)}
+#modal .stage-hints summary{color:var(--brass-hi);letter-spacing:2px;list-style:none}
+#modal .stage-hints summary::-webkit-details-marker{display:none}
+#modal .stage-hints summary::before{content:'✧';margin-right:8px;color:var(--brass)}
+#modal .stage-hints summary::after{content:'';margin-left:auto;width:7px;height:7px;border:solid var(--brass);border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+#modal .stage-hints[open] summary::after{transform:rotate(225deg) translateY(-2px)}
+#modal .stage-hints .hint-step{padding-left:12px;border-left:2px solid var(--brass-mid);color:#d6c8b0;line-height:1.85}
+#modal .stage-hints[open]{background:linear-gradient(#1d150e,#110c08)}
+#modal .stage-switch{color:var(--brass-hi);letter-spacing:1px}
+
+/* Close-up picture at the head of each mechanism (see puzzles/index.js) and the scene zoom on clue dialogs. */
+#modal .stage-art{display:block;width:calc(100% + 64px);max-width:none;height:176px;margin:-24px -32px 16px;object-fit:cover;object-position:50% 45%;
+ -webkit-mask-image:linear-gradient(#000 58%,transparent);mask-image:linear-gradient(#000 58%,transparent);border-bottom:0}
+#modal .spot-zoom{position:relative;width:100%;aspect-ratio:16/6.5;margin:0 0 18px;border:2px solid var(--brass);border-radius:8px;background-repeat:no-repeat;background-color:#0e0a07;
+ box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 36px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 12px 30px #000a;overflow:hidden}
+#modal .spot-zoom::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 45%,#0b0806cc);pointer-events:none}
+#modal .spot-zoom .ui-icon{position:absolute;left:10px;bottom:10px;z-index:1;width:36px;height:36px;padding:7px;box-sizing:border-box;border:1px solid var(--brass);border-radius:50%;background:#120d09e6;color:var(--brass-hi)}
+@media (max-width:560px){
+ #modal .stage-art{width:calc(100% + 44px);margin:-20px -22px 14px;height:128px}
+ #modal .heart-ring{width:min(100%,300px)}
+}
+@media (prefers-reduced-motion:reduce){
+ #modal :is(.rune-key,.seal-choice,.maze-key){transition:none}
+ #modal .stage-hints summary::after{transition:none}
+}
+
+/* Music box: pins stand on a brass cylinder; a raised pin lifts and glows. */
+#modal .musicbox-pins{align-items:flex-end;gap:16px;width:fit-content;max-width:100%;margin:18px auto 14px;padding:22px 26px 26px;border:2px solid var(--brass);border-radius:14px;
+ background:linear-gradient(#0f0a08 0,#2b2117 14%,#0f0a08 100%);
+ box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 0 3px #c9ab6a4d,inset 0 0 24px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+#modal .music-pin{position:relative;width:52px;height:80px;border:1px solid var(--brass);border-radius:26px 26px 8px 8px;color:var(--brass-hi);
+ background:linear-gradient(90deg,#4a3a22,#8a6d3a 38%,#e6cf93 52%,#8a6d3a 66%,#3a2c1a);box-shadow:var(--bevel);transition:transform .16s cubic-bezier(.3,1.5,.5,1),box-shadow .16s;text-shadow:0 1px 0 #000a}
+#modal .music-pin.raised{transform:translateY(-16px);background:linear-gradient(90deg,#6e2330,#d44a5c 40%,#ff9aa7 52%,#d44a5c 66%,#5a1220);color:#fff;box-shadow:0 0 22px #ff738588,inset 0 1px 0 #fff6}
+#modal .music-pin:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+#modal .lullaby-score{color:var(--brass-hi);text-shadow:0 0 10px #c9ab6a66}
+#modal .challenge-feedback:empty{border:0;padding:0}
+@media (prefers-reduced-motion:reduce){#modal .music-pin{transition:none}}
+
+/* Two-stage evidence: the picker shows each mechanism's picture. */
+#modal .stage-pick{display:flex;align-items:center;gap:14px;padding:8px 14px 8px 8px;text-align:left}
+#modal .stage-thumb{flex:none;width:112px;height:64px;object-fit:cover;border:1px solid var(--brass-mid);border-radius:4px;box-shadow:0 2px 8px #000a}
+#modal .stage-pick-text{display:block;min-width:0}
+#modal .stage-pick:disabled .stage-thumb{filter:grayscale(.85) brightness(.55)}
+#modal .stage-pick:disabled small::before{content:'✓ ';color:var(--brass)}
+@media (max-width:560px){#modal .stage-thumb{width:88px;height:56px}}
