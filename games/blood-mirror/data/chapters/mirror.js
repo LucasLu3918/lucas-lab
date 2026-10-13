@@ -5,6 +5,11 @@ export default {
   subtitle: '一個名字的代價',
   chapter: '第七幕',
   image: 'mirror.webp',
+  // Views (視角): the first one is the arrival view; the seal and the evidence stay there.
+  views: [
+    { id: 'hall', label: '鏡之國', image: 'mirror.webp' },
+    { id: 'children', label: '孩子們', image: 'mirror-children.webp' }
+  ],
   atmosphere: 'mirror',
   intro: '七十三個孩子站在鏡子的另一端。露西握住妳的手。魔鏡提出最後一筆交易：「我可以讓妳活過來。代價，是妳的名字。」',
   // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
@@ -44,8 +49,8 @@ export default {
       portrait: 'lucy',
       label: '露西的倒影',
       icon: 'gem',
-      x: 30,
-      y: 47,
+      x: 15,
+      y: 38,
       text: '「妳又沒有殺我們。妳不是來幫我們的嗎？」\n鏡中的露西身後，站著薇菈王后與奧瑞恩王子的影子，王座卻是空的。他們誰都沒有回頭。\n露西曾經有名字，有母親，也有一個等不到的春天。',
       clues: ['queen', 'prince', 'throne'],
       clue: true
@@ -54,8 +59,8 @@ export default {
       id: 'witness',
       label: '見證者手稿',
       icon: 'scroll',
-      x: 21,
-      y: 74,
+      x: 12,
+      y: 62,
       text: '手稿上的字全是反寫的，像是寫給鏡子讀的。妳只認得出幾個詞：「第一位國王」「抵押」「最終繼承人」「血脈」「遺忘」。\n要讀懂它，得讓鏡子替妳翻過來。',
       restoredText: '第一位國王將臣民的生命抵押給王冠。\n最終繼承人是失蹤的公主——不是王后，也不是奧瑞恩。唯有她的名字被世界遺忘，抵押才會失去繼承人。',
       clues: ['blood', 'forgotten'],
@@ -68,8 +73,8 @@ export default {
       id: 'heatplan',
       label: '遠方的蒸汽塔',
       icon: 'gear',
-      x: 79,
-      y: 47,
+      x: 90,
+      y: 35,
       text: '赫索的工程能取代魔法結界，但必須先準備熱能與遷移。立即毀掉結界，會讓北方七座城市暴露在霜潮之中。\n工程師赫索說：「人們只記得會發光的東西。」',
       clues: ['remembered'],
       clue: true
@@ -78,8 +83,9 @@ export default {
       id: 'children',
       label: '牽著手的孩子',
       icon: 'gem',
-      x: 44,
-      y: 64,
+      view: 'children',
+      x: 60,
+      y: 58,
       text: '七十三個孩子背對著妳，手牽著手排成一列，紅線從他們的腕間一直連到碎裂的巨鏡。\n沒有人回頭。他們只是在等，等某個人替他們數完最後一個。',
       clues: ['children73', 'children'],
       clue: true
@@ -98,8 +104,8 @@ export default {
       id: 'corridor',
       label: '鏡像走廊',
       icon: 'mirror',
-      x: 10,
-      y: 50,
+      x: 28,
+      y: 38,
       text: '走廊兩側的鏡子都在反映妳，卻沒有一個和妳做相同的動作。\n往左走的那個妳，永遠在往右看。',
       clues: ['mirrorcorridor'],
       clue: true
@@ -108,8 +114,9 @@ export default {
       id: 'ribbon',
       label: '露西的髮帶',
       icon: 'scroll',
-      x: 38,
-      y: 86,
+      view: 'children',
+      x: 20,
+      y: 75,
       text: '褪色的紅髮帶落在鏡面上，結打得很用力，像是怕自己被帶走。\n妳把它放進口袋。這是七十三個孩子裡，唯一留下來的東西。',
       item: 'ribbon',
       itemName: '露西的髮帶'
@@ -118,8 +125,8 @@ export default {
       id: 'lock5',
       label: '最後一面鏡子',
       icon: 'mirror',
-      x: 52,
-      y: 37,
+      x: 45,
+      y: 40,
       text: '「告訴我，誰是生命契約最後的血脈繼承人？」',
       lock: true
     },
