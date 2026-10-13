@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>E3 毒蘋果調配室 原型</title>
 <!-- Throwaway prototype (plan-expert-levels.md, E3). Three short puzzles: who holds the poisoned apple (logic),
-     how to measure the antidote (one-way vessels), how to tint it (colour matching through a hand mirror).
+     how to measure the revival draught (one-way vessels), how to tint it (colour matching through a hand mirror).
      Rules and hints live in the data-core block; prototypes/e3-apothecary.solve.cjs extracts it and checks
      them exhaustively. Not shipped. -->
 <style>
@@ -63,11 +63,12 @@ svg.vessels{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
 <p id="hinttext" role="status"></p>
 <script data-core>
 // E3 poison apothecary rules: A testimonies, B one-way vessels, C colour matching. Pure data and functions.
-const MINERS=['奈菈','魯恩','赫索','莫格','奇妲','斐恩','提米'];
-const ZHUYIN=['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ']; // symbol carried into the master box by the poisoned miner
+// Seven original apothecary apprentices (the canon miners are victims and companions, not suspects).
+const APPRENTICES=['白芷','遠志','決明','茯苓','紫蘇','杜仲','甘松'];
+const ZHUYIN=['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ']; // symbol carried into the master box by the apprentice holding the poisoned apple
 // ---- A. Everyone tells the truth except the miner holding the poisoned apple. p = that miner's index.
 const TESTIMONY=[{k:'odd',v:true},{k:'not',s:[2,4,5]},{k:'not',s:[0,3]},{k:'in',s:[2,3,4,6]},{k:'odd',v:true},{k:'not',s:[3]},{k:'in',s:[1,4]}];
-const names=s=>s.map(i=>MINERS[i]).join('、');
+const names=s=>s.map(i=>APPRENTICES[i]).join('、');
 function say(st){
  if(st.k==='not')return `毒蘋果不在${names(st.s)}手上。`;
  if(st.k==='in')return `毒蘋果在${names(st.s)}其中一人手上。`;
@@ -108,12 +109,12 @@ const HINTS={
   const others=[0,1,2,3,4,5,6].filter(q=>q!==p);
   const withOther=others.find(q=>conflicts(q).some(i=>i!==q))??others[0];
   const i=conflicts(withOther).find(x=>x!==withOther)??conflicts(withOther)[0];
-  const why=i===withOther?`${MINERS[withOther]}若拿著毒蘋果，他就是唯一說謊的人，但他說的「${say(TESTIMONY[i])}」其實是真的，所以不可能。`
-   :`假設${MINERS[withOther]}拿著毒蘋果：${MINERS[i]}說「${say(TESTIMONY[i])}」，這句就說不通（而${MINERS[i]}必須說實話）。`;
+  const why=i===withOther?`${APPRENTICES[withOther]}若拿著毒蘋果，他就是唯一說謊的人，但他說的「${say(TESTIMONY[i])}」其實是真的，所以不可能。`
+   :`假設${APPRENTICES[withOther]}拿著毒蘋果：${APPRENTICES[i]}說「${say(TESTIMONY[i])}」，這句就說不通（而${APPRENTICES[i]}必須說實話）。`;
   return [
    '規則：除了拿著毒蘋果的人，其他六個人說的都是實話；拿著的人說的是謊話。逐一假設某個人拿著毒蘋果，檢查證詞會不會自相矛盾。',
    why+'像這樣把不可能的人一個個排除。',
-   `拿著毒蘋果的是${MINERS[p]}（編號 ${p+1}）。`];
+   `拿著毒蘋果的是${APPRENTICES[p]}（編號 ${p+1}）。`];
  },
  B:s=>{
   const path=shortest(s);
@@ -134,16 +135,16 @@ const HINTS={
    `紅 ${TARGET[0]} 滴、黃 ${TARGET[1]} 滴、藍 ${TARGET[2]} 滴。`];
  }
 };
-if(typeof module!=='undefined')module.exports={MINERS,ZHUYIN,TESTIMONY,say,holds,conflicts,candidatesA,CAP,TUBES,START,VN,pour,goalB,shortest,BASE,TARGET,TOL,MAXDROP,mixColor,colorDist,colorOk,HINTS};
+if(typeof module!=='undefined')module.exports={APPRENTICES,ZHUYIN,TESTIMONY,say,holds,conflicts,candidatesA,CAP,TUBES,START,VN,pour,goalB,shortest,BASE,TARGET,TOL,MAXDROP,mixColor,colorDist,colorOk,HINTS};
 
 </script>
 <script>
 'use strict';
 const $=s=>document.querySelector(s),main=$('#main'),NS='http://www.w3.org/2000/svg';
 const STAGE=[
- {id:'A',title:'七個人的證詞',goal:'七個礦工各拿著一顆蘋果，其中一顆有毒。除了拿著毒蘋果的人，其他六個人說的都是實話。點一顆蘋果指認它有毒；如果說不通，會告訴你哪一句矛盾。證詞是鏡中的反寫字，按「舉起手持鏡」才能正著讀。'},
- {id:'B',title:'解藥要剛好 4',goal:'要調出解藥，B 杯需要剛好 4 單位的蘋果汁。三個杯子容量 8、5、3，一開始 A 杯是滿的。管子只能照箭頭單向倒：A→C→B→A。點一條管子，就把來源杯倒向目的杯，倒到來源空了或目的杯滿了才停。'},
- {id:'C',title:'調出配方的顏色',goal:'解藥要調成配方的顏色。每種色精可以加 0–4 滴，瓶子是它們的平均色。配方色是隔著綠色玻璃看的，會歪掉；按「舉起手持鏡」才看得到真正的顏色。顏色夠接近時瓶子會發亮。'}
+ {id:'A',title:'七個人的證詞',goal:'七名藥房學徒各拿著一顆蘋果，其中一顆是毒蘋果（會把人的意識送進鏡子）。除了拿著毒蘋果的人，其他六個人說的都是實話。點一顆蘋果指認它有毒；如果說不通，會告訴你哪一句矛盾。證詞是鏡中的反寫字，按「舉起手持鏡」才能正著讀。'},
+ {id:'B',title:'回魂藥要剛好 4',goal:'要調出回魂藥（讓意識從鏡中回到身體），B 杯需要剛好 4 單位的蘋果汁。三個杯子容量 8、5、3，一開始 A 杯是滿的。管子只能照箭頭單向倒：A→C→B→A。點一條管子，就把來源杯倒向目的杯，倒到來源空了或目的杯滿了才停。'},
+ {id:'C',title:'調出配方的顏色',goal:'回魂藥要調成配方的顏色。每種色精可以加 0–4 滴，瓶子是它們的平均色。配方色是隔著綠色玻璃看的，會歪掉；按「舉起手持鏡」才看得到真正的顏色。顏色夠接近時瓶子會發亮。'}
 ];
 let si=0,hintTier=0,hintsUsed=0,lastChange=Date.now(),cleared={},poisoned=null,mirrorOn=false,vessels,history,drops,hintSig='';
 const sig=()=>si+':'+JSON.stringify([vessels,drops,poisoned===null]);
@@ -164,7 +165,7 @@ function renderA(){
  main.innerHTML='<div class="row" style="margin-top:0"><button id="mirror" aria-pressed="false">舉起手持鏡</button><span style="font-size:12px;color:#cdbf9f">（證詞原本是反寫的鏡中字）</span></div><div class="panel apples mirrored" id="apples"></div>';
  $('#mirror').onclick=e=>{mirrorOn=!mirrorOn;e.target.setAttribute('aria-pressed',String(mirrorOn));$('#apples').classList.toggle('mirrored',!mirrorOn);};
  const box=$('#apples');
- MINERS.forEach((n,i)=>{
+ APPRENTICES.forEach((n,i)=>{
   const b=document.createElement('button');b.className='apple';b.dataset.i=i;
   b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 7c-4-3-9 0-8 6 .8 5 4 8 8 8s7.2-3 8-8c1-6-4-9-8-6z" fill="#b3122b" stroke="#ff8a8a" stroke-width=".6"/><path d="M12 7c0-2 1-3 3-4" stroke="#6b8f3a" stroke-width="1.4" fill="none"/></svg><b>${i+1}　${n}</b><span class="say">「${say(TESTIMONY[i])}」</span><span class="num">點一下指認這顆有毒</span>`;
   b.onclick=()=>accuseA(i,b);box.appendChild(b);
@@ -174,11 +175,11 @@ function renderA(){
 function accuseA(p,btn){
  if(solvedA)return;lastChange=Date.now();
  const c=conflicts(p);
- if(!c.length){solvedA=true;status(`全部說得通：只有${MINERS[p]}說了謊，毒蘋果在他手上。取得注音符號「${ZHUYIN[p]}」。`,'ok');done();return;}
+ if(!c.length){solvedA=true;status(`全部說得通：只有${APPRENTICES[p]}說了謊，毒蘋果在他手上。取得注音符號「${ZHUYIN[p]}」。`,'ok');done();return;}
  const i=c.find(x=>x!==p)??c[0];
  btn.classList.add('out');
- status(i===p?`不是${MINERS[p]}：如果是他拿著毒蘋果，他就該是說謊的人，但他說的「${say(TESTIMONY[i])}」是真的。`
-  :`不是${MINERS[p]}：如果是他，${MINERS[i]}說的「${say(TESTIMONY[i])}」就會是謊話，但${MINERS[i]}不該說謊。`,'bad');
+ status(i===p?`不是${APPRENTICES[p]}：如果是他拿著毒蘋果，他就該是說謊的人，但他說的「${say(TESTIMONY[i])}」是真的。`
+  :`不是${APPRENTICES[p]}：如果是他，${APPRENTICES[i]}說的「${say(TESTIMONY[i])}」就會是謊話，但${APPRENTICES[i]}不該說謊。`,'bad');
 }
 // ---------- B
 function renderB(){
@@ -206,7 +207,7 @@ function drawB(){
  $('#vs').innerHTML=s;
  document.querySelectorAll('.tube').forEach(g=>{const f=()=>doPour(+g.dataset.tube);g.onclick=f;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
  $('#moves').textContent='已倒 '+history.length+' 次';
- if(goalB(vessels)){status('B 杯剛好 4！取得蘋果汁解藥原液。','ok');done();}
+ if(goalB(vessels)){status('B 杯剛好 4！取得回魂藥的蘋果汁原液。','ok');done();}
  else status(`A ${vessels[0]}　B ${vessels[1]}　C ${vessels[2]}　目標：B 杯 = 4`,'');
 }
 function doPour(tube){
@@ -238,13 +239,13 @@ function drawC(){
  const closeness=drops.some(Boolean)?Math.max(0,1-d/110):0;
  $('#meter i').style.width=Math.round(closeness*100)+'%';
  $('#cmsg').textContent=!drops.some(Boolean)?'還沒有加色精。':ok?'顏色吻合！':(d<28?'很接近了，差一點點。':d<60?'有點接近，比例還不對。':'還差很多。');
- if(ok){status('顏色吻合：解藥調好了。','ok');done();}else status('調色中…','');
+ if(ok){status('顏色吻合：回魂藥調好了。','ok');done();}else status('調色中…','');
 }
 // ---------- hints
 function showHint(auto){
  const st=STAGE[si].id;if(cleared[st]&&((st==='A'&&solvedA)||(st==='B'&&goalB(vessels))||(st==='C'&&colorOk(drops)&&drops.some(Boolean)))){$('#hinttext').style.display='none';return;}
  const sigNow=sig();if(sigNow!==hintSig){if(hintSig&&hintTier>0)hintTier=Math.max(hintTier,0);}hintSig=sigNow;
- const list=st==='A'?HINTS.A(MINERS.findIndex((_,p)=>conflicts(p).length===0)):st==='B'?HINTS.B(vessels):HINTS.C(drops);
+ const list=st==='A'?HINTS.A(APPRENTICES.findIndex((_,p)=>conflicts(p).length===0)):st==='B'?HINTS.B(vessels):HINTS.C(drops);
  hintTier=Math.min(hintTier+1,3);if(!auto)hintsUsed++;
  $('#hinttext').style.display='block';$('#hinttext').textContent=(auto?'魔鏡低語：':'燭光提示 '+hintTier+' / 3：')+list[hintTier-1];
  $('#hintinfo').textContent='已用提示 '+hintsUsed+' 次'+(hintTier<3?'；再按一次看更明確的':'；這已經是最明確的提示');

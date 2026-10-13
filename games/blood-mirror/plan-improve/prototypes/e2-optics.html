@@ -161,7 +161,7 @@ function render(){
  svg.querySelectorAll('.dancer').forEach(g=>{const f=()=>{S.k[+g.dataset.k]^=1;changed();};g.onclick=f;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
  const lit=L.targets.filter((t,i)=>r.got[i]===t.need).length;
  const st=document.getElementById('status');
- if(lit===L.targets.length){st.textContent=si<STAGES.length-1?'全部亮起！通過。':'全部亮起！稜鏡從吊燈落下——取得「稜鏡」。';st.className='ok';cleared[STAGES[si].id]=true;}
+ if(lit===L.targets.length){st.textContent=si<STAGES.length-1?'全部亮起！通過。':'全部亮起！三束光是吊燈裡火精靈的火。妳第一次聽見它們一直在尖叫；一枚稜鏡從吊燈落下——取得「稜鏡」。';st.className='ok';cleared[STAGES[si].id]=true;}
  else{st.textContent=`已亮起 ${lit} / ${L.targets.length} 個面具`;st.className='';}
  if(lit!==lastSat){if(lastSat!==-1){hintTier=0;document.getElementById('hinttext').style.display='none';}lastSat=lit;}
  return lit===L.targets.length;
