@@ -20,12 +20,12 @@ const trackFiles={...soundtrackFiles,credits:fullThemeFile};
 // The tracks span about 10 dB, so each one is trimmed to TARGET_LUFS (boosts capped at MAX_BOOST_DB)
 // and a scene change never jumps in volume. Re-measure when a file is replaced.
 const LOUDNESS={
- '01_library_The_Thirteenth_Toll.mp3':-18.4,'02_mine_Seven_Beds_of_Silver.mp3':-18.7,
- '03_crypt_The_Breath_Between.mp3':-18.4,'04_queen_Veras_Lullaby.mp3':-18.4,
- '05_mirror_The_Price_of_a_Name.mp3':-18.5,'06_dawn_Nameless_Dawn.mp3':-20.6,
- '07_frost_Winter_Without_Names.mp3':-19.9,'08_crown_Crown_of_Blood.mp3':-19.7,
+ '01_library_The_Thirteenth_Toll.mp3':-18.9,'02_mine_Seven_Beds_of_Silver.mp3':-19.1,
+ '03_crypt_The_Breath_Between.mp3':-18.9,'04_queen_Veras_Lullaby.mp3':-18.9,
+ '05_mirror_The_Price_of_a_Name.mp3':-18.9,'06_dawn_Nameless_Dawn.mp3':-21,
+ '07_frost_Winter_Without_Names.mp3':-20.4,'08_crown_Crown_of_Blood.mp3':-20.2,
  '10_theme_intro_Who_Deserves_to_Live.mp3':-22.2,'11_theme_full_Who_Deserves_to_Live.mp3':-15.3,
- '12_ballroom_Waltz_of_Wax.mp3':-18.4,'13_hunter_A_Heart_in_Glass.mp3':-18.4
+ '12_ballroom_Waltz_of_Wax.mp3':-18.9,'13_hunter_A_Heart_in_Glass.mp3':-18.9
 };
 const TARGET_LUFS=-18,MAX_BOOST_DB=4;
 export const trackGain=file=>{const lufs=LOUDNESS[file];return lufs===undefined?1:Math.pow(10,Math.min(MAX_BOOST_DB,TARGET_LUFS-lufs)/20);};
