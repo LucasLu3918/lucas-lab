@@ -1,5 +1,7 @@
 # 《血色魔鏡》互動解謎與媒體資產
 
+> **母檔位置（2026-10-13 起）**：PNG 與音訊母檔不在版本控制內。下文中的 `source-art/`、`source-audio/` 指倉庫旁的 `../draft/lucas-lab/blood-mirror/source-art/`、`../draft/lucas-lab/blood-mirror/source-audio/`，以及 `../draft/lucas-lab/bgm-audition/`（配樂封存與試聽）；網站根目錄的 `source-art/` 對應 `../draft/lucas-lab/source-art/`。完整清單見 `../draft/lucas-lab/MASTERS-MANIFEST.md`。
+
 遊戲延續 `engine.js` 五幕及三個結局，另以 `challenges.js` 提供五種操作性謎題：
 
 | 章節 | 互動謎題 | 操作 |

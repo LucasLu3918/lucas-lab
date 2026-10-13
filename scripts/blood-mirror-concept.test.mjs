@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {conceptArt,conceptStyle,conceptMarkup} from '../games/blood-mirror/concept-art.js';
 function webpSize(bytes){
  const chunk=bytes.toString('ascii',12,16);
@@ -9,11 +10,15 @@ function webpSize(bytes){
  if(chunk==='VP8L'){const b=bytes.readUInt32LE(21);return [(b&0x3fff)+1,((b>>14)&0x3fff)+1];}
  return [0,0];
 }
-test('every concept region fits its WebP sprite, which matches the original PNG size',()=>{
+// The PNG masters are not in the repository (see draft/lucas-lab/MASTERS-MANIFEST.md). BLOOD_MIRROR_MASTERS overrides the
+// default sibling draft folder; when neither exists the size check is skipped with that reason, never silently passed.
+const masters=process.env.BLOOD_MIRROR_MASTERS||fileURLToPath(new URL('../../draft/lucas-lab/blood-mirror/source-art/',import.meta.url));
+const mastersFound=existsSync(masters);
+test('every concept region fits its WebP sprite, which matches the original PNG size',{skip:mastersFound?false:'PNG masters not found at '+masters},()=>{
  for(const art of Object.values(conceptArt)){
   assert.match(art.src,/\.webp$/);
   const webp=readFileSync(new URL('../games/blood-mirror/'+art.src,import.meta.url));
-  const png=readFileSync(new URL('../games/blood-mirror/source-art/'+art.src.replace(/^assets\//,'').replace(/\.webp$/,'.png'),import.meta.url));
+  const png=readFileSync(new URL(art.src.replace(/^assets\//,'').replace(/\.webp$/,'.png'),'file://'+masters.replace(/\/?$/,'/')));
   assert.equal(webp.toString('ascii',0,4),'RIFF');assert.deepEqual(webpSize(webp),[art.width,art.height]);
   assert.equal(png.readUInt32BE(16),art.width);assert.equal(png.readUInt32BE(20),art.height);
   assert.ok(webp.length<png.length/4,'sprite source should be much lighter than the PNG');

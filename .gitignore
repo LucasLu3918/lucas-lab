@@ -6,3 +6,8 @@ visual-audit-artifacts/
 .claude/settings.local.json
 .claude/worktrees/
 .wrangler/
+
+# Master art and audio live outside the repository, in ../draft/lucas-lab (see MASTERS-MANIFEST.md there).
+/source-art/
+/games/blood-mirror/source-art/
+/games/blood-mirror/source-audio/
