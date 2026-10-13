@@ -409,7 +409,7 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 nav button{font-size:13px}
 .brand{gap:14px}
 .brand-mark{width:44px;height:44px;filter:drop-shadow(0 0 12px rgba(195,172,128,.16))}
-.brand small{font-size:9px;letter-spacing:3px;color:#a8946f;margin-top:2px}
+.brand small{font-size:10px;letter-spacing:3px;color:#a8946f;margin-top:2px}
 .header-actions{gap:10px}
 .sound-button,.header-actions .icon-button{height:40px;min-height:40px;border:1px solid var(--line);border-radius:999px;color:var(--gold);transition:border-color .2s,background .2s,color .2s}
 .sound-button{display:inline-flex;align-items:center;gap:8px;padding:0 16px 0 13px;font-size:12px;line-height:1;letter-spacing:1.5px;color:var(--muted)}
@@ -426,7 +426,7 @@ nav button{font-size:13px}
 @media(max-width:560px){
  .sound-button{width:44px;padding:0;justify-content:center}
  .brand-mark{width:36px;height:36px}
- .brand small{font-size:8px;letter-spacing:2px}
+ .brand small{font-size:10px;letter-spacing:2px}
 }
 
 /* Title screen: the hero grows with its content and the bottom strip sits in the flow, so the meta row and the
