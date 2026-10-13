@@ -30,7 +30,10 @@ export const puzzles={
  mine:{id:'mine',title:'重接銀骨蒸汽管',subtitle:'EVIDENCE · 管網與七個名字',stages:[{id:'pipes',label:'蒸汽管網',mount:lazy('pipes','mountPipes'),whisper:true},{id:'names',label:'七個名字',mount:lazy('names','mountNames'),whisper:true}]},
  crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印與拓印',stages:[{id:'rune',label:'棺中的心跳',mount:lazy('rune','mountRune')},{id:'rubbing',label:'保護咒拓印',mount:lazy('rubbing','mountRubbing'),requires:'contract',missing:'拓印需要一張夠韌的紙。妳想起黑鐘書庫暗門後的那份王室契約——它的背面是空白的。回到第一幕，把王室契約收進隨身物品。'}]},
  queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',label:'記憶與物件',mount:lazy('memory','mountMemory')},{id:'stitch',label:'縫線紋樣',mount:lazy('stitch','mountStitch'),whisper:true}]},
- mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]}
+ mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]},
+ // "帳本的背面" levels (data/abyss.js). `optional` puzzles stay out of the background preload and survive a new journey,
+ // because they belong to no act: only the saved list says whether they are done.
+ belfry:{id:'belfry',title:'逆走鐘樓',subtitle:'ABYSS · 齒輪列',optional:true,stages:[{id:'belfry',label:'逆走鐘樓',mount:lazy('gears13','mountGears13')}]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
 const stageArtSrc=stage=>stage?'assets/puzzles/'+stage.id+'.webp':'';
@@ -51,9 +54,9 @@ export function isStageComplete(chapter,stage){return completed.has(chapter)||co
 // The stage the player last worked on, {chapter, stage}, kept after the modal closes. Used by the hints.
 export function activeStage(){return active;}
 // A stage module that was never opened holds no state to reset.
-export function resetPuzzles(){completed.clear();active=null;loaded.pipes?.resetPipes();}
+export function resetPuzzles(){for(const id of [...completed])if(!puzzles[id]?.optional)completed.delete(id);active=null;loaded.pipes?.resetPipes();}
 // Fetches every stage module in the background once the player is in a scene; a failed fetch is retried on open.
-export function preloadStages(){for(const entry of Object.values(puzzles))for(const stage of entry.stages)stage.mount.preload?.().catch(()=>{});}
+export function preloadStages(){for(const entry of Object.values(puzzles))if(!entry.optional)for(const stage of entry.stages)stage.mount.preload?.().catch(()=>{});}
 
 // Opens a puzzle inside the modal. `success` runs after the puzzle has been recorded as complete.
 // Options: `has(item)` checks the inventory, `onStage(stage)` / `onStageDone(stage)` run when a stage

@@ -10,6 +10,8 @@
 | `e3-apothecary.html` | E3 毒蘋果調配室 | `e3-apothecary.solve.cjs` | 證詞唯一解、量杯最短解唯一、調色配方唯一 |
 | `e5-box.html` | E5 七重魔鏡匣 | `e5-box.solve.cjs` | 注音密碼可還原、缺任一關都解不開、各面閘門 |
 
+> **E1 已有正式實作**：`../../puzzles/gears13.js`（規則與介面）、`../../data/abyss.js`（關卡資料）、`../../abyss.js`（入口），測試在 `scripts/blood-mirror-abyss.test.mjs`。`e1-gears.html` 只保留作為設計紀錄，之後規則以正式版為準；詳見 `../plan-expert-levels.md` 7.8。
+
 ## 執行驗證
 
 ```bash
