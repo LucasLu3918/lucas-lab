@@ -433,3 +433,30 @@ nav button{font-size:13px}
 .section-heading>p{font-size:13px}
 .story-strip button,footer,footer button{font-size:12px}
 @media(max-width:560px){.section-heading .eyebrow{font-size:10px}footer{font-size:11px}}
+
+/* Artifact frame (concept boards): every dialog reads as a gilded panel, not a plain card.
+   Double gold rule, corner brackets and a warm glow from the top edge; all gradients, no extra files. */
+dialog#modal{
+ background:radial-gradient(130% 60% at 50% 0,#2b1621 0,#1a1419 48%,#121015 100%);
+ border-color:#bc9f6755;
+ box-shadow:0 30px 100px #000c,0 0 60px #6d1c2a33,inset 0 0 0 6px #0e0b10,inset 0 0 0 7px #bc9f6738;
+}
+dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#050407e6 70%);backdrop-filter:blur(8px)}
+#modal .modal-heading{background:none;border-bottom:0}
+#modal .modal-heading::after{content:'';position:absolute;left:32px;right:32px;bottom:4px;height:1px;
+ background:linear-gradient(90deg,transparent,#bc9f6788 18%,#bc9f6788 82%,transparent)}
+#modal .modal-heading::before{content:'';position:absolute;left:50%;bottom:1px;width:7px;height:7px;margin-left:-3px;transform:rotate(45deg);background:#d9bf8a;z-index:1}
+#modal .modal-close{right:20px;top:20px}
+#modal .modal-shell::after{content:'';position:absolute;inset:11px;pointer-events:none;z-index:2;
+ --g:#d9bf8aaa;
+ background:
+  linear-gradient(var(--g),var(--g)) 0 0/20px 1px,linear-gradient(var(--g),var(--g)) 0 0/1px 20px,
+  linear-gradient(var(--g),var(--g)) 100% 0/20px 1px,linear-gradient(var(--g),var(--g)) 100% 0/1px 20px,
+  linear-gradient(var(--g),var(--g)) 0 100%/20px 1px,linear-gradient(var(--g),var(--g)) 0 100%/1px 20px,
+  linear-gradient(var(--g),var(--g)) 100% 100%/20px 1px,linear-gradient(var(--g),var(--g)) 100% 100%/1px 20px;
+ background-repeat:no-repeat}
+#modal .modal-image-icon{width:84px;height:84px;margin:0 auto 20px;border-radius:50%;
+ background:radial-gradient(circle,#c3ac8029,transparent 68%);border:1px solid #bc9f6744}
+#modal .modal-image-icon svg{width:40px;height:40px}
+#modal .modal-text{text-shadow:0 1px 0 #0006}
+@media (max-width:560px){#modal .modal-heading::after{left:22px;right:22px}#modal .modal-close{right:14px;top:14px}#modal .modal-shell::after{inset:8px}}
