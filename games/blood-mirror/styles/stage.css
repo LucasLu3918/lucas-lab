@@ -489,3 +489,14 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
 #modal .modal-image-icon svg{width:40px;height:40px}
 #modal .modal-text{text-shadow:0 1px 0 #0006}
 @media (max-width:560px){#modal .modal-heading::after{left:22px;right:22px}#modal .modal-close{right:14px;top:14px}#modal .modal-shell::after{inset:8px}}
+
+/* 較大閱讀文字 (settings): the scene narrative already grows; the labels around it used to stay at 11–13px. */
+.large-text .speaker{font-size:15px}
+.large-text .dialogue-toggle,.large-text .dialogue-count,.large-text .clue-group-title span,.large-text .clue-view{font-size:14px}
+.large-text .dialogue-foot .text-button,.large-text .dialogue-foot .secondary-button,.large-text .dialogue-actions .primary-button,.large-text .dialogue-actions .secondary-button{font-size:15px}
+.large-text .hud-objective{font-size:14px;line-height:1.5;white-space:normal;border-radius:14px}
+.large-text .hud-meta,.large-text .hud-kicker,.large-text .hud-label,.large-text .scene-clues summary{font-size:14px}
+.large-text .room-tabs button span,.large-text .tray .inventory button span{font-size:13px}
+.large-text .hotspot span{font-size:15px}
+.large-text .clue-row .clue-name{font-size:16px}
+.large-text .clue-row .clue-state{font-size:14px}
