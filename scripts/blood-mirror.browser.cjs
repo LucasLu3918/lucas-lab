@@ -9,7 +9,10 @@ const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const noOverflow=async(page,label)=>assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),label+' overflows');
 // On phones the 16:9 scene is wider than the screen, so a hotspot may sit off-screen: pan like a player would.
-const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'"]');await spot.scrollIntoViewIfNeeded();const {width:vw,height:vh}=page.viewportSize();for(let i=0;i<6;i++){const box=await spot.boundingBox();if(!box)throw new Error('Missing hotspot '+id);const cx=box.x+box.width/2;if(cx>24&&cx<vw-24)break;const y=vh*0.35;await page.mouse.move(vw/2,y);await page.mouse.down();await page.mouse.move(vw/2+(vw/2-cx),y,{steps:6});await page.mouse.up();}const box=await spot.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;if(touch)await page.touchscreen.tap(x,y);else await page.mouse.click(x,y);};
+const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'"]');
+ // A spot may live in another view of the room (書桌特寫, 梳妝台…): turn to it with the arrows, as a player would.
+ for(let i=0;i<4&&!await spot.count();i++){await page.locator('#view-next').click();await pause(150);}
+ await spot.scrollIntoViewIfNeeded();const {width:vw,height:vh}=page.viewportSize();for(let i=0;i<6;i++){const box=await spot.boundingBox();if(!box)throw new Error('Missing hotspot '+id);const cx=box.x+box.width/2;if(cx>24&&cx<vw-24)break;const y=vh*0.35;const delta=Math.max(-300,Math.min(300,vw/2-cx));await page.mouse.move(vw/2-delta/2,y);await page.mouse.down();await page.mouse.move(vw/2+delta/2,y,{steps:6});await page.mouse.up();}const box=await spot.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;if(touch)await page.touchscreen.tap(x,y);else await page.mouse.click(x,y);};
 (async()=>{
  const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
  let browser;

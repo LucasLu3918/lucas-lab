@@ -93,7 +93,7 @@ export default {
       label: '舞廳深處的大鏡',
       icon: 'mirror',
       x: 50,
-      y: 44,
+      y: 50,
       text: '鏡面比任何一面都更深。鏡裡的舞者還在旋轉，而鏡外的人全都靜止了。\n鏡框邊緣刻著一行細字：「通往鏡廳。」伊萊說，今夜真正的舞會，在鏡子的另一端。',
       clues: ['mirrorhall'],
       clue: true
@@ -102,8 +102,8 @@ export default {
       id: 'chandelier',
       label: '碎裂的水晶吊燈',
       icon: 'gem',
-      x: 40,
-      y: 30,
+      x: 50,
+      y: 34,
       text: '水晶吊燈缺了一整排，碎片掉在地上，每一片都映出不同的角度，卻沒有一片映出妳的臉。\n燭火從高處滴下蠟油，一滴一滴落在黑色大理石上。'
     },
     {
@@ -131,8 +131,8 @@ export default {
       id: 'foxmask',
       label: '銀狐面具',
       icon: 'key',
-      x: 70,
-      y: 76,
+      x: 62,
+      y: 79,
       text: '一張銀狐面具被留在地上，內側用細針繡著一個名字：「安娜貝爾」。\n不知是哪一位賓客落下的。妳把它收了起來——面具總會有再用到的時候。',
       item: 'foxmask',
       itemName: '銀狐面具'

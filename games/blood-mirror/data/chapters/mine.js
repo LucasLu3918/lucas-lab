@@ -5,6 +5,11 @@ export default {
   subtitle: '七個被遺忘的人',
   chapter: '第四幕',
   image: 'mine.webp',
+  // Views (視角): the first one is the arrival view; the seal and the evidence stay there.
+  views: [
+    { id: 'shaft', label: '銀骨礦坑', image: 'mine.webp' },
+    { id: 'dorm', label: '礦工宿舍', image: 'mine-dorm.webp' }
+  ],
   atmosphere: 'mine',
   intro: '奈菈帶妳穿過銀骨礦坑。玻璃容器裡，有人不停呼喚母親。赫索指著停擺的管線：「不靠魔法，也能讓城市暖起來。」',
   // Opening scene (對話場景): one line per click in the dialogue box. `speaker` is a key of the
@@ -55,8 +60,8 @@ export default {
       id: 'minebook',
       label: '生命帳簿',
       icon: 'book',
-      x: 23,
-      y: 68,
+      x: 22,
+      y: 74,
       text: '奈菈、魯恩、赫索、莫格、奇妲、斐恩、提米。\n他們曾經有普通人的身高。銀骨礦石奪走了健康，王國又奪走了他們的名字。',
       clues: ['names', 'silverbone'],
       clue: true
@@ -65,8 +70,8 @@ export default {
       id: 'valve',
       label: '銅製閥柄',
       icon: 'gear',
-      x: 78,
-      y: 65,
+      x: 82,
+      y: 72,
       text: '赫索留下的閥柄。沉甸甸的金屬依然溫暖，柄上烙著一行小字：「冷水歸爐火邊第一張床，熱泉歸正中間那張床，出口歸門邊最後一張床。誰睡那張床，那道閥就歸誰。」',
       item: 'valve',
       itemName: '銅製閥柄'
@@ -75,8 +80,8 @@ export default {
       id: 'pipeNote',
       label: '工程手札',
       icon: 'scroll',
-      x: 49,
-      y: 43,
+      x: 33,
+      y: 73,
       text: '「先讓冷水進入管線；再引入地下熱泉；最後向城市輸送。」\n沒有水就加熱，銅管會破裂。出口必須最後開啟。',
       clues: ['coldwater'],
       clue: true
@@ -85,8 +90,8 @@ export default {
       id: 'pipes',
       label: '斷裂的蒸汽管',
       icon: 'gear',
-      x: 56,
-      y: 74,
+      x: 91,
+      y: 32,
       text: '控制盤後方的銅管全都錯開了，蒸汽從接縫裡嘶嘶外洩。\n不先把管網接回去，開哪一道閥門都沒有用。',
       restoredText: '五段銅管重新咬合，蒸汽沿著管網一路送到城市出口。\n宿舍的床頭也刻回了名字，從爐火數起：奇妲、魯恩、莫格、赫索、奈菈、斐恩、提米。\n控制盤上的三個壓力錶同時跳動——現在，可以依工程手札的順序開閥了。',
       clue: true
@@ -96,7 +101,7 @@ export default {
       label: '蒸汽控制盤',
       icon: 'gear',
       x: 91,
-      y: 55,
+      y: 54,
       text: '一排閥門，每道只掛著一位礦工的名牌，等待正確的開啟順序。',
       lock: true
     },
@@ -104,8 +109,9 @@ export default {
       id: 'lantern',
       label: '礦工提燈',
       icon: 'gear',
-      x: 12,
-      y: 52,
+      view: 'dorm',
+      x: 76,
+      y: 38,
       text: '玻璃罩上刻著七個歪斜的記號，像七個小孩各自畫上去的名字。\n燈芯還是濕的。有人剛剛離開，並且很用力地想被記住。',
       item: 'lantern',
       itemName: '礦工提燈',
@@ -116,8 +122,8 @@ export default {
       id: 'furnace',
       label: '熄滅的熔爐',
       icon: 'gear',
-      x: 36,
-      y: 52,
+      x: 49,
+      y: 64,
       text: '爐膛裡全是冷灰。赫索在牆上用炭筆寫著：「熱能不夠，就先別拆結界。」\n管線需要的不是魔法，是穩定、持續的熱。',
       clues: ['heatenergy'],
       clue: true
@@ -126,8 +132,8 @@ export default {
       id: 'cart',
       label: '結霜的礦車',
       icon: 'gem',
-      x: 64,
-      y: 58,
+      x: 21,
+      y: 52,
       text: '礦車的鐵輪凍在軌道上，輪緣結著一層細霜。霜不是從外面來的——是從結界的缺口滲進來的。\n沒有結界的地方，霜潮會先吞掉最北邊的城市。',
       clues: ['frost'],
       clue: true
@@ -137,8 +143,9 @@ export default {
       portrait: 'heso',
       label: '藍圖牆',
       icon: 'scroll',
-      x: 90,
-      y: 34,
+      view: 'dorm',
+      x: 28,
+      y: 32,
       text: '牆上釘滿發黃的圖紙：蒸汽塔、管線、七座城市的暖氣出口。\n最上方一行字：「工程取代魔法結界，不是反過來。」',
       clues: ['barrier', 'cityseven'],
       clue: true
@@ -147,8 +154,9 @@ export default {
       id: 'cradle',
       label: '礦工宿舍的搖籃',
       icon: 'gem',
-      x: 5,
-      y: 38,
+      view: 'dorm',
+      x: 38,
+      y: 64,
       text: '宿舍角落擺著一只小搖籃，被子疊得很整齊，像在等某個孩子回來。',
       byChoice: {
         tobyHeart: {
@@ -162,7 +170,7 @@ export default {
       portrait: 'nyla',
       label: '甦醒的礦工',
       icon: 'gem',
-      x: 28,
+      x: 32,
       y: 34,
       after: 'solved',
       text: '暖氣沿著管線湧進礦坑，玻璃容器裡的呼喊第一次停了下來。\n' +
