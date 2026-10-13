@@ -1,8 +1,10 @@
-import {analyzePipes,pipePorts,initialPipeRotations} from '../games/blood-mirror/puzzles/pipes.js';
+import {analyzePipes,pipePorts,initialPipeRotations,pipeIsSolved} from '../games/blood-mirror/puzzles/pipes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ledgerTile,ledgerMarkup,ledgerPieces} from '../games/blood-mirror/puzzles/ledger.js';
-import {puzzleIsSolved,pipeIsSolved,glassIsSolved,resetPuzzles,isPuzzleComplete} from '../games/blood-mirror/puzzles/index.js';
+import {puzzleIsSolved} from '../games/blood-mirror/puzzles/ledger.js';
+import {glassIsSolved} from '../games/blood-mirror/puzzles/reflection.js';
+import {resetPuzzles,isPuzzleComplete} from '../games/blood-mirror/puzzles/index.js';
 test('ledger pieces are distinct crops of one typeset page',()=>{
  const boxes=ledgerPieces.map((_,i)=>ledgerTile(i).match(/viewBox="([^"]+)"/)[1]);
  assert.equal(new Set(boxes).size,9);assert.equal(boxes[0],'0 0 100 100');assert.equal(boxes[8],'200 200 100 100');

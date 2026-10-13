@@ -1,8 +1,8 @@
-const assert=require('node:assert/strict');const {spawn}=require('node:child_process');const {mkdirSync}=require('node:fs');const {chromium}=require('playwright');
-const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173',out='/tmp/blood-mirror-ui-audit';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
+const assert=require('node:assert/strict');const {mkdirSync}=require('node:fs');const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173',out='/tmp/blood-mirror-ui-audit';
 const noOverflow=async(page,label)=>assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),label+' overflows');
-(async()=>{let browser;const server=spawn(process.execPath,[root+'/scripts/serve.cjs'],{cwd:root,stdio:'ignore'});
-try{for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});mkdirSync(out,{recursive:true});
+(async()=>{let browser;const server=startPreviewServer(root);
+try{for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}browser=await launchChromium();mkdirSync(out,{recursive:true});
 for(const width of [360,390,768,1280,1440]){
  const context=await browser.newContext({viewport:{width,height:850},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
   // The next-step guide is part of story mode; puzzle mode (the default) hides it.

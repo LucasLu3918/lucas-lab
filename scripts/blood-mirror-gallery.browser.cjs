@@ -1,12 +1,11 @@
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 const assert=require('node:assert/strict');
-const {spawn}=require('node:child_process');
 const {mkdirSync}=require('node:fs');
-const {chromium}=require('playwright');
 const origin='http://127.0.0.1:4173',root=require('node:path').resolve(__dirname,'..');
-(async()=>{const server=spawn(process.execPath,[root+'/scripts/serve.cjs'],{cwd:root,stdio:'ignore'});let browser;
+(async()=>{const server=startPreviewServer(root);let browser;
  try{
   for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});mkdirSync('/tmp/blood-mirror-gallery-preview',{recursive:true});
+  browser=await launchChromium();mkdirSync('/tmp/blood-mirror-gallery-preview',{recursive:true});
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:850},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/games/blood-mirror/play/');

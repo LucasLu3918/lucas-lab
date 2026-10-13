@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
 const {mkdirSync}=require('node:fs');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -14,11 +13,11 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
  for(let i=0;i<4&&!await spot.count();i++){await page.locator('#view-next').click();await pause(150);}
  await spot.scrollIntoViewIfNeeded();const {width:vw,height:vh}=page.viewportSize();for(let i=0;i<6;i++){const box=await spot.boundingBox();if(!box)throw new Error('Missing hotspot '+id);const cx=box.x+box.width/2;if(cx>24&&cx<vw-24)break;const y=vh*0.35;const delta=Math.max(-300,Math.min(300,vw/2-cx));await page.mouse.move(vw/2-delta/2,y);await page.mouse.down();await page.mouse.move(vw/2+delta/2,y,{steps:6});await page.mouse.up();}const box=await spot.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;if(touch)await page.touchscreen.tap(x,y);else await page.mouse.click(x,y);};
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ const server=startPreviewServer(ROOT);
  let browser;
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   mkdirSync('/tmp/blood-mirror-concept-preview',{recursive:true});
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:850},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});
@@ -55,6 +54,8 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.match(await page.locator('#watch-status').innerText(),/錶芯真正的位置/);
    for(const i of [1,1,2,2])await page.locator('[data-gear="'+i+'"]').click();
    // With the watch done, the ledger is the only stage left and opens by itself.
+   // The stage module loads on first open, so wait for its board instead of reading it at once.
+   await page.locator('.ledger-tile').nth(8).waitFor();
    assert.equal(await page.locator('.ledger-tile').count(),9);
    await page.locator('#modal').screenshot({path:'/tmp/blood-mirror-concept-preview/puzzle-'+width+'.png'});
    for(let wanted=0;wanted<9;wanted++){

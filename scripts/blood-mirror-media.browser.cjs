@@ -1,11 +1,10 @@
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 const assert=require('node:assert/strict');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173';
-(async()=>{let browser;const server=spawn(process.execPath,[root+'/scripts/serve.cjs'],{cwd:root,stdio:'ignore'});
+(async()=>{let browser;const server=startPreviewServer(root);
  try{
   for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   const page=await browser.newPage();await page.goto(origin+'/games/blood-mirror/play/');
   const result=await page.evaluate(async()=>{
    const {createSoundtrack,soundtrackFiles}=await import('./soundtrack.js');

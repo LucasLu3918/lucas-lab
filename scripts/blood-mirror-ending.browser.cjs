@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Browser acceptance for the ending epilogue, the end credits and the operable secret epilogue (plan §5.6, §5.7),
 // plus an axe-core pass over these screens. Seeds a complete save so the test starts at the ending screen.
 // axe-core is installed in CI with --no-save (see .github/workflows/visual.yml). Locally: set AXE_PATH to its
 // package directory, or SKIP_AXE=1 to run the functional checks only.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -28,11 +27,11 @@ async function auditAxe(page,label){
 }
 
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ const server=startPreviewServer(ROOT);
  let browser;
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
-  browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE});
+  browser=await launchChromium();
   for(const width of [360,1280]){
    const context=await browser.newContext({viewport:{width,height:width<600?800:820},reducedMotion:'reduce'});
    await context.addInitScript(([key,value])=>{try{localStorage.setItem(key,value);}catch{}},['blood-mirror-v2',JSON.stringify(solvedSave)]);
@@ -49,6 +48,7 @@ async function auditAxe(page,label){
    await auditAxe(page,'ending '+width);
    // Credits: the roll opens and the modal closes back to the ending.
    await page.locator('#ending-credits').click();
+   await page.locator('#modal-title',{hasText:'片尾名單'}).waitFor(); // the roll module loads on open
    assert.match(await page.locator('#modal-title').innerText(),/片尾名單/);
    assert.match(await page.locator('#modal-body').innerText(),/LUCAS LAB/);
    await auditAxe(page,'credits '+width);

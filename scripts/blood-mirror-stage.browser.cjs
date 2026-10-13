@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Immersive stage acceptance (plan §5.5, §6): first-screen scene on phones, candle light, dialogue
 // collapse, story-mode guide, no site frame during play, and phone panning.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ const server=startPreviewServer(ROOT);
  let browser;
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
 
   for(const [width,height] of [[375,667],[1280,800]]){
    const context=await browser.newContext({viewport:{width,height},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});

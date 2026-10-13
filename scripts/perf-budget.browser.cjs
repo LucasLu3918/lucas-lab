@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Chromium performance budget: transfer size, request count, LCP and CLS per key route at phone and desktop widths.
 // Budgets are set from measured values with headroom (see docs/design/SITE_OPTIMIZATION_PLAN.md); raise one only with a recorded reason.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -20,18 +19,19 @@ const BUDGETS=[
  {route:'/stories/dark-snow-white/',maxBytes:95*KB,maxRequests:8},
  {route:'/stories/dark-snow-white/chapters/00/',maxBytes:72*KB,maxRequests:7},
  {route:'/search/',maxBytes:350*KB,maxRequests:15},
- // The game ships as native ES modules (no bundler, plan §9.1), so its request count is higher; bytes stay the tight guard.
- {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:55}
+ // The game ships as native ES modules (no bundler, plan §9.1). Puzzle stages and the credits load on demand, so the
+ // first screen makes 43 requests (2026-10-13), with all modal markup in one module. The budget of 45 leaves room for one new eager module; a larger jump fails.
+ {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:45}
 ];
 const WIDTHS=[390,1440];
 
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ const server=startPreviewServer(ROOT);
  let browser;
  const report=[];
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   for(const width of WIDTHS)for(const budget of BUDGETS){
    const context=await browser.newContext({viewport:{width,height:844},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});
    const page=await context.newPage();
