@@ -142,3 +142,9 @@ node scripts/blood-mirror.browser.cjs
 - 座標準則：同一視角的熱點在 812×457 橫向手機舞台上至少相距 48 px；手機版 y 不超過約 80%（底部面板），桌面左半部 y 不超過約 75%（對話框）。
 
 - 母檔狀態：`source-art/puzzles/`（14 張，約 15 MB）與 `source-art/views/`（5 張，約 10 MB）的 PNG 母檔保留在作者本機，**尚未納入版本控制**（提交時被內容安全檢查擋下，待作者決定如何保存，例如 Git LFS 或另存封存）。發布用的 WebP 不受影響。
+
+## 白雪立繪（2026-10-13）
+
+- `assets/portraits/snow.webp`（640×936，42 KB）：與其他人物立繪同規格的半身油畫立繪。以本機 ComfyUI 的 Flux 2 Klein 4B base 圖像編輯（20 步、CFG 5），用 `assets/snow-white.webp` 主視覺當參考圖維持臉部與服飾（黑長捲髮、灰綠眼、紅唇、金冠與紅寶石耳環、黑絲絨金紅刺繡禮服），挑自 4 張候選的種子 33。PNG 母檔保留在作者本機 `source-art/m6/portraits/snow.png`，未納入版本控制。不是使用者驗收。
+- 使用位置：首頁「旅程回顧」卡的頭像（有存檔時才載入，首次造訪不增加請求）、線索筆記視窗的抬頭、魔鏡藝廊的「角色」分類（`snow-portrait`）。白雪仍是第二人稱的「妳」、不會說話，所以對話框的說話者表沒有她。
+- 試過但放棄的做法：Qwen Image Edit 2511 bf16（約 39 GB）與 2509 fp8（約 19 GB）在 48 GB 的 Mac 上載入後會讓 ComfyUI 後端因記憶體不足當掉；Flux 2 Klein 9B fp8 在 MPS 上不支援 Float8。
