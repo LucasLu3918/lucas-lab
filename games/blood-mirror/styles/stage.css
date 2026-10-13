@@ -66,7 +66,8 @@ body.reduce-motion .hotspot::before{animation:none}
 .hud-chapter{grid-area:chapter;min-width:0}
 .hud-center{grid-area:center;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .hud-tools{grid-area:tools;display:flex;gap:6px;justify-content:flex-end}
-.hud-kicker{display:block;font:11px/1 Georgia,serif;letter-spacing:3px;color:var(--stage-gold)}
+/* The chapter kicker stays on one line; on phones it used to wrap into the title beneath it. */
+.hud-kicker{display:block;font:11px/1 Georgia,serif;letter-spacing:3px;color:var(--stage-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hud-chapter h1{margin:5px 0 0;font:600 18px/1.25 var(--serif);letter-spacing:2px;color:var(--stage-text);overflow-wrap:anywhere}
 .hud-subtitle{display:none;margin:2px 0 0;font-size:12px;color:var(--stage-muted);letter-spacing:1px}
 .hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;max-width:100%;padding:6px 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:13px;line-height:1.5;color:var(--stage-text)}
@@ -88,8 +89,23 @@ body.reduce-motion .hotspot::before{animation:none}
 .room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
 .room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
 .room-tabs button:disabled{opacity:.4;cursor:default}
+/* Act picker below 1024px: seven act tabs need about 830px, so a narrower strip would clip the last acts with no scrollbar.
+   The select lists all seven acts in one 44px control. 16px text stops iOS zooming in. */
+.room-select{display:none;flex:1 1 auto;min-width:0;min-height:44px;padding:0 34px 0 14px;border:1px solid var(--stage-gold-hi);border-radius:999px;background:rgba(16,15,16,.82) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23e2cc9b' stroke-width='1.6'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E") no-repeat right 12px center/12px 12px;color:var(--stage-gold-hi);font:inherit;font-size:16px;letter-spacing:0;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
+.room-select option{background:#15121a;color:var(--stage-text)}
+.room-select option:disabled{color:#7a7065}
+@media (max-width:1023px){
+ .room-tabs{display:none}
+ .room-select{display:block}
+}
+/* Act numbers were 9px (the site-wide button span rule); they sit above each title, so 11px keeps two short lines. */
+.room-tabs button span{font-size:11px;letter-spacing:1.5px;margin-bottom:2px}
+/* Touch screens get 44px act tabs, the same size as the other tool buttons. */
+@media (pointer:coarse){
+ .room-tabs button{min-height:44px}
+}
 .scene-clues{position:relative;flex:0 0 auto;margin:0;padding:0;border:0;background:none;font-size:13px}
-.scene-clues summary{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;list-style:none;cursor:pointer;color:var(--stage-gold-hi);white-space:nowrap;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.82);font-size:12px;letter-spacing:1px}
+.scene-clues summary{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;list-style:none;cursor:pointer;color:var(--stage-gold-hi);white-space:nowrap;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.82);font-size:12px;letter-spacing:1px}
 .scene-clues summary::-webkit-details-marker{display:none}
 .scene-clues summary .summary-chevron{display:grid;place-items:center;transition:transform .2s}
 .scene-clues summary .summary-chevron svg{width:14px;height:14px}
@@ -106,14 +122,14 @@ body.reduce-motion .hotspot::before{animation:none}
 .clue-row .clue-icon{display:grid;place-items:center;color:var(--stage-gold)}
 .clue-row .clue-icon svg{width:20px;height:20px}
 .clue-row .clue-name{font-size:14px;line-height:1.45;overflow-wrap:anywhere}
-.clue-row .clue-state{display:inline-flex;align-items:center;gap:6px;font-size:11px;line-height:1;letter-spacing:.5px;white-space:nowrap;color:var(--stage-muted)}
+.clue-row .clue-state{display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:1;letter-spacing:.5px;white-space:nowrap;color:var(--stage-muted)}
 .clue-row .clue-state::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55}
 .clue-row.new .clue-state{color:var(--stage-gold-hi)}
 .clue-row.new .clue-state::before{opacity:1;box-shadow:0 0 6px rgba(226,204,155,.7)}
 .clue-row.todo .clue-state{color:#e0a8ae}
 .clue-row.todo .clue-state::before{opacity:1}
 .clue-row.done .clue-icon{opacity:.6}
-.scene-clues .clue-count{font-weight:400;font-size:11px;letter-spacing:0;color:var(--stage-muted);font-variant-numeric:tabular-nums}
+.scene-clues .clue-count{font-weight:400;font-size:12px;letter-spacing:0;color:var(--stage-muted);font-variant-numeric:tabular-nums}
 .pause-hint{align-self:flex-end;margin:0;font-size:12px;color:var(--stage-muted)}
 .pause-hint.hidden{display:none}
 

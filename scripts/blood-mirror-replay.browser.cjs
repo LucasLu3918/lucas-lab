@@ -39,7 +39,9 @@ const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch',
    for(const [i,count] of [1,2,2,2,2].entries())for(let n=0;n<count;n++)await page.locator('[data-pipe="'+i+'"]').click();
    await page.locator('#pipes-confirm').click();for(const [bed,miner] of [4,1,3,2,0,5,6].entries())await page.locator('[data-bed="'+bed+'"]').selectOption(String(miner));await page.locator('#names-confirm').click();assert.equal(await page.locator('#modal-title').innerText(),'斷裂的蒸汽管');await page.locator('#modal-close').click();
    // Queen memory cards render from the light WebP board.
-   await page.locator('[data-room="5"]').click();await page.locator('[data-clue="letter"]').evaluate(el=>el.click());await page.locator('#replay-evidence').click();await page.locator('[data-memory="0"]').click();
+   // Narrow screens pick the act from the select; wide screens use the tab strip.
+   if(await page.locator('#room-select').isVisible())await page.locator('#room-select').selectOption('5');else await page.locator('[data-room="5"]').click();
+   await page.locator('[data-clue="letter"]').evaluate(el=>el.click());await page.locator('#replay-evidence').click();await page.locator('[data-memory="0"]').click();
    await page.locator('[data-memory="0"] [data-concept="vial"]').waitFor();await page.keyboard.press('Escape');
    // Export, wipe, import.
    await page.locator('#pause').click();await page.locator('#pause-settings').click();
