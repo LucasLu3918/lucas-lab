@@ -1,0 +1,161 @@
+# 變更影響證據：血色魔鏡靜態匯入圖（2026-10-13）
+#
+# 方法：grep 式掃描 games/blood-mirror 內的 import 語句，以及 scripts/ 內從 games/blood-mirror 匯入的測試與工具。
+# 影響圖（IMPACT_GRAPH）對此 repo 沒有覆蓋（architecture_seed_unmapped），因此以此檔作為人工分析證據。
+
+## games/blood-mirror 內的 import
+### games/blood-mirror/data/chapters/index.js
+  import library from './library.js';
+  import ballroom from './ballroom.js';
+  import hunter from './hunter.js';
+  import mine from './mine.js';
+  import crypt from './crypt.js';
+  import queen from './queen.js';
+  import mirror from './mirror.js';
+### games/blood-mirror/engine/achievements.js
+  import {rooms,memorySpots,shardIds} from './rules.js';
+### games/blood-mirror/engine/index.js
+  export {rooms,items,endings,memorySpots,visibleSpots,inspect,collect,collectShard,shardReachable,markGlow,restoreClues,solve,judgeInterrogation,travel,chooseEnding,journeyComplete,choose,choiceDefs,ch
+  export {initialState,restoreState} from './state.js';
+  export {achievements,unlockAchievements} from './achievements.js';
+  export {SAVE_VERSION,SAVE_KEY,BACKUP_SAVE_KEY,LEGACY_SAVE_KEY,LEGACY_PUZZLE_KEY,SAVE_FORMAT,MAX_SAVE_BYTES,PROLOGUE_PUZZLE,toSaveV2,fromSaveV2,loadSave,backupSave,remapV1,writeSave,exportSave,parseSav
+  export {clueWords,clueGroups} from '../data/clues.js';
+### games/blood-mirror/engine/rules.js
+  import {chapters} from '../data/chapters/index.js';
+  import {items} from '../data/items.js';
+  import {endings} from '../data/endings.js';
+  import {clueWords} from '../data/clues.js';
+### games/blood-mirror/engine/save.js
+  import {chapters} from '../data/chapters/index.js';
+  import {restoreState} from './state.js';
+### games/blood-mirror/engine/state.js
+  import {rooms,items,endings,memorySpots,validAnswers,shardIds,choiceDefs} from './rules.js';
+  import {achievementIds} from './achievements.js';
+  import {clueWords} from '../data/clues.js';
+### games/blood-mirror/gallery.js
+  import {conceptMarkup,placeConcepts} from './concept-art.js';
+  import {soundtrackFiles,fullThemeFile} from './soundtrack.js';
+### games/blood-mirror/journey.js
+  import {rooms,items,endings,visibleSpots,memorySpots,validAnswers,choiceDefs,choiceVariant,shardReachable,unlockText} from './engine/index.js';
+  import {NARRATOR} from './data/chapters/index.js';
+### games/blood-mirror/main.js
+  import {journalShellMarkup,clueBookMarkup,collectionMarkup,chapterEntriesMarkup,memoriesMarkup,settingsMarkup,playlogPanelMarkup,epilogueMarkup,recapMarkup,fateMarkup,replayPickerMarkup,hintModalMarku
+  import {createMixer} from './audio/mixer.js';import {createSfx} from './audio/sfx.js';import {createAmbience} from './audio/ambience.js';
+  import {journeyGuide,journalChapters,spotText,memoryCollection,journeyRecap,dialogueLines,sceneMet,readLog} from './journey.js';import {exportSave,parseSave,loadSave,backupSave,writeSave,SAVE_KEY} fro
+  import {createGameUI,createDialogueBox} from './ui.js';
+  import {speakers} from './data/chapters/index.js';
+  import {conceptMarkup,itemArtwork,placeConcepts,placeZooms,preloadImages,preloadConcepts} from './concept-art.js';
+  import {rooms,items,endings,initialState,inspect,collect,solve,travel,chooseEnding,journeyComplete,choose,choiceVariant,visibleSpots,queenResponse,queenResponses,unlockText,markGlow,restoreClues,colle
+  import {interrogationPage,interrogationNotice,hintFill,nextEmpty} from './puzzles/interrogation.js';
+  import {secretEpilogue} from './data/secret-epilogue.js';
+  import {isPuzzleComplete as isChallengeComplete,isStageComplete,activeStage,stageLabel,puzzles as challengeRegistry,startPuzzle as startChallenge,preloadStages,resetPuzzles as resetChallenges,complete
+  import {createSoundtrack} from './soundtrack.js';
+  import {createGallery} from './gallery.js';
+  import {icon,spotIcon,itemIcon,hydrateIcons,enableButtonArrows} from './icons.js';
+### games/blood-mirror/puzzles/index.js
+  import {preloadImages} from '../concept-art.js';
+### games/blood-mirror/puzzles/interrogation.js
+  import {clueWords,clueGroups} from '../data/clues.js';
+  import {judgeInterrogation} from '../engine/rules.js';
+### games/blood-mirror/puzzles/ledger.js
+  import {ledgerPieces,ledgerTile,ledgerMarkup} from './ledger-art.js';
+### games/blood-mirror/puzzles/memory.js
+  import {conceptMarkup,conceptArt,preloadConcepts} from '../concept-art.js';
+### games/blood-mirror/soundtrack.js
+  import {createMixer} from './audio/mixer.js';
+### games/blood-mirror/ui.js
+  import {speakers,NARRATOR} from './data/chapters/index.js';
+### games/blood-mirror/views/modals.js
+  import {conceptMarkup} from '../concept-art.js';
+  import {icon} from '../icons.js';
+  import {clueWords,clueGroups} from '../data/clues.js';
+
+## scripts 內從 games/blood-mirror 匯入或讀取的檔案
+### scripts/blood-mirror-challenges.test.mjs
+  import {analyzePipes,pipePorts,initialPipeRotations,pipeIsSolved} from '../games/blood-mirror/puzzles/pipes.js';
+  import {ledgerTile,ledgerMarkup,ledgerPieces} from '../games/blood-mirror/puzzles/ledger.js';
+  import {puzzleIsSolved} from '../games/blood-mirror/puzzles/ledger.js';
+  import {glassIsSolved} from '../games/blood-mirror/puzzles/reflection.js';
+  import {resetPuzzles,isPuzzleComplete} from '../games/blood-mirror/puzzles/index.js';
+### scripts/blood-mirror-choice.test.mjs
+  import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,validAnswers,queenResponses,unlockText} from '../games/blood-mirror/engine/index.js';
+  import {journeyRecap} from '../games/blood-mirror/journey.js';
+### scripts/blood-mirror-concept.test.mjs
+  import {conceptArt,conceptStyle,conceptMarkup} from '../games/blood-mirror/concept-art.js';
+  const webp=readFileSync(new URL('../games/blood-mirror/'+art.src,import.meta.url));
+### scripts/blood-mirror-deduction-gate.test.mjs
+  import {rooms,clueWords,judgeInterrogation,initialState,restoreState,toSaveV2,fromSaveV2} from '../games/blood-mirror/engine/index.js';
+### scripts/blood-mirror-deduction.test.mjs
+  import {initialState,rooms,inspect,collect,solve,travel,judgeInterrogation,restoreClues,collectShard,markGlow,shardIds,PROLOGUE_SHARD,unlockAchievements,achievements,toSaveV2,fromSaveV2,exportSave,par
+  import {hintFill,interrogationNotice,interrogationPage} from '../games/blood-mirror/puzzles/interrogation.js';
+  import {lullaby} from '../games/blood-mirror/puzzles/musicbox.js';
+  import {endings} from '../games/blood-mirror/data/endings.js';
+  import {secretEpilogue} from '../games/blood-mirror/data/secret-epilogue.js';
+### scripts/blood-mirror-density.mjs
+  import {rooms,items} from '../games/blood-mirror/engine/index.js';
+  import {puzzles} from '../games/blood-mirror/puzzles/index.js';
+### scripts/blood-mirror-dialogue.test.mjs
+  import {initialState,rooms,inspect,collect,solve,choiceDefs} from '../games/blood-mirror/engine/index.js';
+  import {dialogueLines,sceneMet,readLog} from '../games/blood-mirror/journey.js';
+  import {speakers,NARRATOR} from '../games/blood-mirror/data/chapters/index.js';
+  const portraitFile=name=>new URL('../games/blood-mirror/assets/portraits/'+name+'.webp',import.meta.url);
+### scripts/blood-mirror-epilogue.test.mjs
+  import {secretEpilogue} from '../games/blood-mirror/data/secret-epilogue.js';
+  import {credits,creditsNote} from '../games/blood-mirror/data/credits.js';
+  import {endings} from '../games/blood-mirror/data/endings.js';
+  import {shardIds} from '../games/blood-mirror/engine/index.js';
+### scripts/blood-mirror-gallery.test.mjs
+  import {galleryAssets,canViewArtwork,filterArtwork} from '../games/blood-mirror/gallery.js';
+  for(const asset of galleryAssets){assert.ok(existsSync(new URL('../games/blood-mirror/'+asset.src,import.meta.url)),asset.src);assert.ok(asset.alt&&asset.description);}
+  for(const file of readdirSync(new URL('../games/blood-mirror/assets/',import.meta.url)).filter(f=>f.endsWith('.webp')))assert.ok(galleryAssets.some(a=>a.src==='assets/'+file),file);
+### scripts/blood-mirror-journey.test.mjs
+  import {initialState,rooms,collect,inspect,solve,travel,restoreState,chooseEnding,visibleSpots} from '../games/blood-mirror/engine/index.js';
+  import {journeyGuide,journalChapters,spotText} from '../games/blood-mirror/journey.js';
+  const copy=readFileSync(new URL('../games/blood-mirror/views/modals.js',import.meta.url),'utf8');
+### scripts/blood-mirror-juice.test.mjs
+  import {FEEDBACK,shakeOffset,createJuice} from '../games/blood-mirror/juice.js';
+  const sfx=fs.readFileSync(new URL('../games/blood-mirror/audio/sfx.js',import.meta.url),'utf8');
+### scripts/blood-mirror-level.test.mjs
+  import {initialState,rooms,items,inspect,collect,shardIds} from '../games/blood-mirror/engine/index.js';
+  import {spotText} from '../games/blood-mirror/journey.js';
+  import {puzzles} from '../games/blood-mirror/puzzles/index.js';
+### scripts/blood-mirror-m6.test.mjs
+  import {initialState,restoreState,rooms,solve,travel,chooseEnding,choose,choiceVariant,choiceDefs,journeyComplete,inspect,clueWords,judgeInterrogation,toSaveV2,fromSaveV2,parseSave,exportSave,remapV1}
+  import {maskSolutions,maskAnswer,masksSolved,maskClues,guests,maskNames} from '../games/blood-mirror/puzzles/masks.js';
+  import {heartPath,heartPathValid,NODES} from '../games/blood-mirror/puzzles/runeheart.js';
+  import {traceBeam,lightSolved,solution,startState,mirrors,COLS,ROWS} from '../games/blood-mirror/puzzles/light.js';
+  import {journeyRecap,spotText} from '../games/blood-mirror/journey.js';
+  assert.ok(existsSync(new URL('../games/blood-mirror/assets/'+rooms[at(id)].image,import.meta.url)),rooms[at(id)].image);
+  for(const file of ['12_ballroom_Waltz_of_Wax.mp3','13_hunter_A_Heart_in_Glass.mp3'])assert.ok(existsSync(new URL('../games/blood-mirror/assets/music/'+file,import.meta.url)),file);
+  assert.ok(existsSync(new URL('../games/blood-mirror/assets/'+view.image,import.meta.url)),view.image);
+  for(const name of names)assert.ok(existsSync(new URL('../games/blood-mirror/assets/portraits/'+name+'.webp',import.meta.url)),name);
+### scripts/blood-mirror-mechanisms.test.mjs
+  import {startGears,warmGears,turnGear,watchSolved,minTurns} from '../games/blood-mirror/puzzles/watch.js';
+  import {miners,bedAnswer,bedSolutions,namesSolved,bedsSatisfy,brokenBedClue,minerOrder} from '../games/blood-mirror/puzzles/names.js';
+  import {guests,maskAnswer,maskClues,brokenClue,guestOrder} from '../games/blood-mirror/puzzles/masks.js';
+  import {SEALS,lid,missingSeal,rubbingSolved} from '../games/blood-mirror/puzzles/rubbing.js';
+  import {backSeam,frontSeam,SIZE,stitchSolved,stitchPrefix,demoStitches} from '../games/blood-mirror/puzzles/stitch.js';
+  import {memoryCards,cardsMatch} from '../games/blood-mirror/puzzles/memory.js';
+  import {layout,startCell,exitCell,gateCell,step,mazeSolved,shortestWalk} from '../games/blood-mirror/puzzles/maze.js';
+### scripts/blood-mirror-replay.test.mjs
+  import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots,memorySpots} from '../games/blood-mirror/engine/index.js';
+  import {journeyGuide,memoryCollection,journeyRecap,journalChapters} from '../games/blood-mirror/journey.js';
+  import {exportSave,parseSave,MAX_SAVE_BYTES} from '../games/blood-mirror/engine/index.js';
+### scripts/blood-mirror-roadmap.test.mjs
+  import {rooms,items} from '../games/blood-mirror/engine/index.js';
+  import {puzzles,stageLabel} from '../games/blood-mirror/puzzles/index.js';
+  import {bedAnswer,miners} from '../games/blood-mirror/puzzles/names.js';
+  import {heartPath} from '../games/blood-mirror/puzzles/runeheart.js';
+### scripts/blood-mirror-save.test.mjs
+  import {initialState,rooms,inspect,collect,solve,travel,toSaveV2,fromSaveV2,loadSave,backupSave,writeSave,exportSave,parseSave,SAVE_KEY,BACKUP_SAVE_KEY,SAVE_FORMAT,LEGACY_SAVE_KEY,LEGACY_PUZZLE_KEY} f
+### scripts/blood-mirror-solo.test.mjs
+  import {initialState,rooms,inspect,collect,solve,travel,chooseEnding,visibleSpots} from '../games/blood-mirror/engine/index.js';
+  import {journeyGuide,journalChapters} from '../games/blood-mirror/journey.js';
+  import {summarizePlaylog,createPlaylog} from '../games/blood-mirror/playlog.js';
+### scripts/blood-mirror.test.mjs
+  import {initialState,restoreState,rooms,inspect,collect,solve,travel,chooseEnding} from '../games/blood-mirror/engine/index.js';
+### scripts/check.cjs
+  assert.ok(ldOf(fs.readFileSync(path.join(dist,'games/blood-mirror/index.html'),'utf8')).some(x=>x['@type']==='VideoGame'),'VideoGame structured data missing');
+  assert.ok(ldOf(fs.readFileSync(path.join(dist,'games/blood-mirror/index.html'),'utf8')).length>=2,'game breadcrumb missing');
+### scripts/visual-audit.cjs
+  const routes=['/','/stories/','/stories/dark-snow-white/','/stories/dark-snow-white/chapters/00/','/tools/','/search/','/gallery/','/games/','/games/blood-mirror/play/','/games/'+JSON.parse(fs.readFil

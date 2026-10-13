@@ -1,7 +1,8 @@
-const assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{mkdirSync}=require('node:fs'),{chromium}=require('playwright');
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
+const assert=require('node:assert/strict'),{mkdirSync}=require('node:fs');
 const root=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173',out='/tmp/blood-mirror-pipes-preview';
-(async()=>{let browser;const server=spawn(process.execPath,[root+'/scripts/serve.cjs'],{cwd:root,stdio:'ignore'});
-try{for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});mkdirSync(out,{recursive:true});
+(async()=>{let browser;const server=startPreviewServer(root);
+try{for(let i=0;i<40;i++){try{if((await fetch(origin)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}browser=await launchChromium();mkdirSync(out,{recursive:true});
 for(const width of [360,390,768,1280]){
  const context=await browser.newContext({viewport:{width,height:850},isMobile:width<600,hasTouch:width<600,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>localStorage.setItem('blood-mirror-v1',JSON.stringify({version:1,started:true,room:1,solved:[0],inventory:['watch','valve'],seen:['valve','minebook','blueprintwall','furnace','cart'],endings:[]})));

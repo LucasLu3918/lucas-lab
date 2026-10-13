@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Post-game loop: ending recap, optional memories, chapter replay, portable save, light sprites.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
 const {mkdirSync,readFileSync,writeFileSync}=require('node:fs');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173',out='/tmp/blood-mirror-replay';
 const done={version:1,started:true,room:4,solved:[0,1,2,3,4],inventory:['watch','contract','valve','blueprint','apple','needle','witness'],seen:['watch','bells','birth','contract','valve','pipes','miners'],ending:'dawn',endings:['dawn'],elapsed:1500,hints:{0:1,1:0,2:2,3:0,4:0}};
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});let browser;
+ const server=startPreviewServer(ROOT);let browser;
  try{
   for(let i=0;i<40;i++){try{if((await fetch(origin+'/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
   mkdirSync(out,{recursive:true});
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:900},acceptDownloads:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[],png=[];
    page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/design-board-[13]\.png|dawn\.png/.test(r.url()))png.push(r.url());});

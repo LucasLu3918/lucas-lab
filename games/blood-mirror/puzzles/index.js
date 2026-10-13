@@ -1,22 +1,21 @@
 // Hands-on puzzles repair evidence. Every puzzle is { id, title, subtitle, stages:[{ id, label, mount(ctx) }] }
 // where ctx = { render(html), feedback(text), done(), playCue(kind), fresh, has(item) }.
 // Completions are stored in the save (engine/save.js); this module only keeps them in memory.
-import {mountLedger,puzzleIsSolved} from './ledger.js';
-import {mountPipes,pipeIsSolved,resetPipes} from './pipes.js';
-import {mountRune} from './rune.js';
-import {mountMemory} from './memory.js';
-import {mountReflection,glassIsSolved} from './reflection.js';
-import {mountMusicBox,lullaby} from './musicbox.js';
-import {mountMasks,masksSolved} from './masks.js';
-import {mountRuneHeart,heartPathValid} from './runeheart.js';
-import {mountLight,lightSolved} from './light.js';
-import {mountWatch,watchSolved} from './watch.js';
-import {mountNames,namesSolved} from './names.js';
-import {mountRubbing,rubbingSolved} from './rubbing.js';
-import {mountStitch,stitchSolved} from './stitch.js';
-import {mountMaze,mazeSolved} from './maze.js';
 import {preloadImages} from '../concept-art.js';
-export {puzzleIsSolved,pipeIsSolved,glassIsSolved,lullaby,masksSolved,heartPathValid,lightSolved,watchSolved,namesSolved,rubbingSolved,stitchSolved,mazeSolved};
+
+// A stage module is imported the first time its stage opens, so the first screen fetches no puzzle code.
+// Once loaded, mount runs synchronously, exactly as before. A failed import shows a notice in the modal.
+const loaded={};
+const lazy=(file,mountName)=>{
+ const load=()=>loaded[file]?Promise.resolve(loaded[file]):import('./'+file+'.js').then(module=>(loaded[file]=module));
+ const mount=ctx=>{
+  if(loaded[file])return loaded[file][mountName](ctx);
+  ctx.render('<p class="challenge-help">機關正在組裝，請稍候。</p>');
+  return load().then(module=>module[mountName](ctx)).catch(error=>{console.error(error);ctx.render('<p class="challenge-help">這道機關暫時無法載入。請重新整理頁面後再試一次。</p>');});
+ };
+ mount.preload=load;
+ return mount;
+};
 
 // Each evidence puzzle has one or more stages (機關). Stage ids match the chapter data's `stages`, which
 // also drives the step-aware hints. Acts with two stages let the player pick either one first (plan r8).
@@ -24,14 +23,14 @@ export {puzzleIsSolved,pipeIsSolved,glassIsSolved,lullaby,masksSolved,heartPathV
 // bottleneck where the mirror offers its first hint after three quiet minutes (plan r1).
 export const puzzles={
  // The prologue is not a chapter: its completion is stored beside the chapters (engine/save.js).
- prologue:{id:'prologue',title:'音樂盒的搖籃曲',subtitle:'PROLOGUE · 序章',stages:[{id:'musicbox',label:'音樂盒',mount:mountMusicBox}]},
- library:{id:'library',title:'撕碎的出生紀錄',subtitle:'EVIDENCE · 帳頁與懷錶',stages:[{id:'ledger',label:'拼回帳頁',mount:mountLedger},{id:'watch',label:'懷錶齒輪',mount:mountWatch}]},
- ballroom:{id:'ballroom',title:'面具下的賓客',subtitle:'EVIDENCE · 面具與光路',stages:[{id:'masks',label:'面具賓客',mount:mountMasks,whisper:true},{id:'light',label:'鏡面光路',mount:mountLight,whisper:true}]},
- hunter:{id:'hunter',title:'玻璃心臟法陣',subtitle:'EVIDENCE · 符文順序',stages:[{id:'runeheart',label:'玻璃心臟法陣',mount:mountRuneHeart}]},
- mine:{id:'mine',title:'重接銀骨蒸汽管',subtitle:'EVIDENCE · 管網與七個名字',stages:[{id:'pipes',label:'蒸汽管網',mount:mountPipes,whisper:true},{id:'names',label:'七個名字',mount:mountNames,whisper:true}]},
- crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印與拓印',stages:[{id:'rune',label:'棺中的心跳',mount:mountRune},{id:'rubbing',label:'保護咒拓印',mount:mountRubbing,requires:'contract',missing:'拓印需要一張夠韌的紙。妳想起黑鐘書庫暗門後的那份王室契約——它的背面是空白的。回到第一幕，把王室契約收進隨身物品。'}]},
- queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',label:'記憶與物件',mount:mountMemory},{id:'stitch',label:'縫線紋樣',mount:mountStitch,whisper:true}]},
- mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:mountReflection},{id:'maze',label:'鏡像迷廊',mount:mountMaze,requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]}
+ prologue:{id:'prologue',title:'音樂盒的搖籃曲',subtitle:'PROLOGUE · 序章',stages:[{id:'musicbox',label:'音樂盒',mount:lazy('musicbox','mountMusicBox')}]},
+ library:{id:'library',title:'撕碎的出生紀錄',subtitle:'EVIDENCE · 帳頁與懷錶',stages:[{id:'ledger',label:'拼回帳頁',mount:lazy('ledger','mountLedger')},{id:'watch',label:'懷錶齒輪',mount:lazy('watch','mountWatch')}]},
+ ballroom:{id:'ballroom',title:'面具下的賓客',subtitle:'EVIDENCE · 面具與光路',stages:[{id:'masks',label:'面具賓客',mount:lazy('masks','mountMasks'),whisper:true},{id:'light',label:'鏡面光路',mount:lazy('light','mountLight'),whisper:true}]},
+ hunter:{id:'hunter',title:'玻璃心臟法陣',subtitle:'EVIDENCE · 符文順序',stages:[{id:'runeheart',label:'玻璃心臟法陣',mount:lazy('runeheart','mountRuneHeart')}]},
+ mine:{id:'mine',title:'重接銀骨蒸汽管',subtitle:'EVIDENCE · 管網與七個名字',stages:[{id:'pipes',label:'蒸汽管網',mount:lazy('pipes','mountPipes'),whisper:true},{id:'names',label:'七個名字',mount:lazy('names','mountNames'),whisper:true}]},
+ crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印與拓印',stages:[{id:'rune',label:'棺中的心跳',mount:lazy('rune','mountRune')},{id:'rubbing',label:'保護咒拓印',mount:lazy('rubbing','mountRubbing'),requires:'contract',missing:'拓印需要一張夠韌的紙。妳想起黑鐘書庫暗門後的那份王室契約——它的背面是空白的。回到第一幕，把王室契約收進隨身物品。'}]},
+ queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',label:'記憶與物件',mount:lazy('memory','mountMemory')},{id:'stitch',label:'縫線紋樣',mount:lazy('stitch','mountStitch'),whisper:true}]},
+ mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
 const stageArtSrc=stage=>stage?'assets/puzzles/'+stage.id+'.webp':'';
@@ -51,7 +50,10 @@ export function isPuzzleComplete(id){return completed.has(id);}
 export function isStageComplete(chapter,stage){return completed.has(chapter)||completed.has(stageKey(chapter,stage));}
 // The stage the player last worked on, {chapter, stage}, kept after the modal closes. Used by the hints.
 export function activeStage(){return active;}
-export function resetPuzzles(){completed.clear();active=null;resetPipes();}
+// A stage module that was never opened holds no state to reset.
+export function resetPuzzles(){completed.clear();active=null;loaded.pipes?.resetPipes();}
+// Fetches every stage module in the background once the player is in a scene; a failed fetch is retried on open.
+export function preloadStages(){for(const entry of Object.values(puzzles))for(const stage of entry.stages)stage.mount.preload?.().catch(()=>{});}
 
 // Opens a puzzle inside the modal. `success` runs after the puzzle has been recorded as complete.
 // Options: `has(item)` checks the inventory, `onStage(stage)` / `onStageDone(stage)` run when a stage

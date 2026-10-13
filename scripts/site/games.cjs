@@ -1,9 +1,9 @@
 'use strict';
 // Playable game entries (copied as a static bundle) and concept-only game pages.
 const GAME_FILE_EXTENSIONS=['.js','.css','.svg'];
-const GAME_DIRECTORIES=['assets','data','engine','puzzles','ui','audio','styles'];
+const GAME_DIRECTORIES=['assets','data','engine','puzzles','ui','audio','styles','views'];
 
-// Original PNG sources live in games/<slug>/source-art/ (see games/blood-mirror/MEDIA_ASSETS.md), outside the copied assets/ tree.
+// Original PNG sources are masters kept outside version control (see games/blood-mirror/MEDIA_ASSETS.md); they are never in the copied assets/ tree.
 
 module.exports=function renderGames(ctx){
  const {fs,path,root,out,catalog,url,ext,e,icon,button,badge,view,cover,media,notice,readerControls,navItems,stateLabel,tag,card,toolCard,header,footer,page,write,intro,section,library}=ctx;

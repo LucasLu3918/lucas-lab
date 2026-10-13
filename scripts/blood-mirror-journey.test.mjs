@@ -64,7 +64,8 @@ test('the opened seal reveals the contract and the father signature only afterwa
 
 test('the prologue no longer gives away the code or the signature',async()=>{
  const {readFileSync}=await import('node:fs');
- const app=readFileSync(new URL('../games/blood-mirror/main.js',import.meta.url),'utf8');
- const prologue=app.slice(app.indexOf('function openStory'),app.indexOf('function openGuide'));
+ // The story and prologue copy live in views/modals.js; check the same text there.
+ const copy=readFileSync(new URL('../games/blood-mirror/views/modals.js',import.meta.url),'utf8');
+ const prologue=copy.slice(copy.indexOf('export const storyBody'),copy.indexOf('export const guideBody'))+copy.slice(copy.indexOf('export const prologueBody'),copy.indexOf('export const chapterIntroBody'));
  for(const spoiler of ['七十三','第十三下','父親'])assert.ok(!prologue.includes(spoiler),spoiler);
 });

@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Deterministic Chromium layout + keyboard/touch functional smoke, against locally built pages.
 // These emulated viewports are NOT a substitute for physical iOS/Android/Safari testing.
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const AxeBuilder=require('@axe-core/playwright').default;
 const root=path.resolve(__dirname,'..');
 const captures=path.join(root,'visual-audit-artifacts');
@@ -33,12 +32,12 @@ async function ready(){
  throw new Error('Local preview server did not start');
 }
 async function audit(){
- const server=spawn(process.execPath,[path.join(root,'scripts','serve.cjs')],{cwd:root,stdio:'ignore'});
+ const server=startPreviewServer(root);
  let browser;
  try{
   await ready();
   fs.mkdirSync(captures,{recursive:true});
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   let inspected=0;
   for(const width of widths){
    const context=await browser.newContext({viewport:{width,height:900},deviceScaleFactor:1,hasTouch:width<=920,isMobile:width<=480,reducedMotion:'reduce'});

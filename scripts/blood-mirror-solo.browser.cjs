@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 'use strict';
+const {startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Solo playtest log: opt-in, summarised in settings, exportable, never sent over the network.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
 const {mkdirSync,readFileSync}=require('node:fs');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..'),origin='http://127.0.0.1:4173',out='/tmp/blood-mirror-solo';
 (async()=>{
- const server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});let browser;
+ const server=startPreviewServer(ROOT);let browser;
  try{
   for(let i=0;i<40;i++){try{if((await fetch(origin+'/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
   mkdirSync(out,{recursive:true});
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   for(const width of [360,1280]){
    const context=await browser.newContext({viewport:{width,height:850},acceptDownloads:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[],foreign=[];
    page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith(origin)&&!r.url().startsWith('data:')&&!r.url().startsWith('blob:'))foreign.push(r.url());});

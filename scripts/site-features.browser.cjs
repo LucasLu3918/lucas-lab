@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 'use strict';
+const {portInUse,startPreviewServer,launchChromium}=require('./browser-harness.cjs');
 // Chromium acceptance for the reading and discovery features: progress, continue reading, chapter search, offline reading, structured data and CSP.
 const {strict:assert}=require('node:assert');
-const {spawn}=require('node:child_process');
-const {chromium}=require('playwright');
 const ROOT=require('node:path').resolve(__dirname,'..');
 const ORIGIN='http://127.0.0.1:4173';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -11,14 +10,14 @@ const STORY='/stories/dark-snow-white/';
 const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
 (async()=>{
- let server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});
+ let server=startPreviewServer(ROOT);
  // Offline means the origin is unreachable: stopping the server also cuts the service worker's own fetches (context.setOffline does not).
- const stopServer=async()=>{server.kill();await pause(500)};
- const startServer=async()=>{server=spawn(process.execPath,[ROOT+'/scripts/serve.cjs'],{cwd:ROOT,stdio:'ignore'});for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200)}};
+ const stopServer=async()=>{server.kill();await pause(500);if(portInUse())throw new Error('Port 4173 still answers after this suite stopped its server; another server is running. The offline check would test that server instead.')};
+ const startServer=async()=>{server=startPreviewServer(ROOT);for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200)}};
  let browser;
  try{
   for(let i=0;i<40;i++){try{const res=await fetch(ORIGIN+'/');if(res.ok)break;}catch{}await pause(200);}
-  browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+  browser=await launchChromium();
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'});
   const page=await context.newPage();
   const errors=[];
