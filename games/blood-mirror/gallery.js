@@ -4,6 +4,7 @@ import {soundtrackFiles,fullThemeFile} from './soundtrack.js';
 export const galleryCategories=[{id:'all',label:'全部作品'},{id:'character',label:'角色'},{id:'scene',label:'場景'},{id:'concept',label:'概念圖'},{id:'ending',label:'結局 CG'}];
 export const galleryAssets=[
  {id:'snow-white',category:'character',title:'白雪公主',src:'assets/snow-white.webp',alt:'白雪公主戴著王冠，在燭光與魔鏡之間握著紅蘋果',description:'旅程的主視覺。'},
+ {id:'snow-portrait',category:'character',title:'白雪公主・立繪',src:'assets/portraits/snow.webp',alt:'白雪公主的半身油畫立繪，戴著金冠與紅寶石耳環，身旁燭光搖曳',description:'旅程的主角，與其他人物同一幅畫風。'},
  {id:'portrait',category:'character',title:'魔鏡前的公主肖像',src:'assets/concepts/design-board-1.webp',sprite:'portrait',alt:'白雪公主站在魔鏡前的肖像',description:'取自企劃概念展板的肖像。早期版本曾作為黑鐘書庫的拼圖畫面。'},
  {id:'library',category:'scene',title:'黑鐘書庫',src:'assets/chamber.webp',alt:'幽暗的哥德式書庫與古老陳設',description:'第一幕，午夜第十三聲鐘響後的探索場景。'},
  {id:'ballroom',category:'scene',title:'血色舞會',src:'assets/ballroom.webp',alt:'凝結成舞姿的蒙面賓客與深紅絲絨舞廳',description:'第二幕，面具下的謊言。'},
