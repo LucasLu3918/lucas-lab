@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E3 毒蘋果調配室 原型</title>
+<!-- Throwaway prototype (plan-expert-levels.md, E3). Three short puzzles: who holds the poisoned apple (logic),
+     how to measure the antidote (one-way vessels), how to tint it (colour matching through a hand mirror).
+     Rules and hints live in the data-core block; prototypes/e3-apothecary.solve.cjs extracts it and checks
+     them exhaustively. Not shipped. -->
+<style>
+:root{--bg:#0b0710;--gold:#e0b84f;--ink:#e9dcc3;--ok:#6f6;--bad:#f66}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}
+header{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header b{color:var(--gold)}
+button{background:#241522;color:var(--ink);border:1px solid var(--gold);border-radius:6px;min-height:44px;padding:0 12px;font:inherit;cursor:pointer}
+button[aria-pressed=true]{background:#5a3a14}
+button:disabled{opacity:.4;cursor:default}
+#goal{margin:0 12px 6px;padding:8px 12px;border-left:3px solid var(--gold);background:#1a1022;font-size:15px}
+#status{margin:0 12px 6px;min-height:24px;font-weight:600}
+#status.ok{color:var(--ok)}#status.bad{color:var(--bad)}
+.panel{margin:0 12px 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 12px}
+#hinttext{margin:0 12px 8px;padding:6px 12px;border-left:3px solid #7fe;background:#10202a;display:none}
+/* A */
+.apples{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.apple{border:2px solid #3a2a14;border-radius:10px;background:#150d1a;color:var(--ink);padding:8px;text-align:left;min-height:140px;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.apple:hover{border-color:var(--gold)}
+.apple.out{opacity:.45;border-style:dashed}
+.apple .num{font-size:12px;color:#cdbf9f}
+.apple .say{display:inline-block;font-size:13px;line-height:1.5}
+.mirrored .say{transform:scaleX(-1);transform-origin:center}
+.apple svg{width:34px;height:34px}
+/* B */
+svg.vessels{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.tube{cursor:pointer}
+.tube.off{opacity:.3;cursor:default}
+.tube:focus-visible{outline:2px solid #fff}
+/* C */
+.mixer{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px}
+.sw{height:96px;border-radius:10px;border:2px solid #6b5a3a;display:flex;align-items:flex-end;justify-content:center;font-size:12px;position:relative;overflow:hidden}
+.sw span{background:#000a;padding:0 6px;border-radius:4px;margin-bottom:4px}
+.sw.glass::after{content:"";position:absolute;inset:0;background:rgba(40,160,90,.42)}
+.sw.glass span{position:relative;z-index:1}
+.drops{display:flex;gap:8px;align-items:center;margin:6px 0}
+.drops b{width:3.2em}
+.drops button{min-width:44px}
+#meter{height:12px;border-radius:6px;background:#241522;border:1px solid #6b5a3a;max-width:560px;overflow:hidden}
+#meter i{display:block;height:100%;background:linear-gradient(90deg,#a33,#ea3,#6f6)}
+</style>
+</head>
+<body>
+<header>
+  <b>E3 毒蘋果調配室 · 原型</b>
+  <span id="stages"></span>
+  <button id="reset">重來這關</button>
+</header>
+<p id="goal"></p>
+<div id="status" role="status"></div>
+<div id="main"></div>
+<div class="row"><button id="hint">燭光提示</button><span id="hintinfo" style="color:#cdbf9f;font-size:12px"></span></div>
+<p id="hinttext" role="status"></p>
+<script data-core>
+// E3 poison apothecary rules: A testimonies, B one-way vessels, C colour matching. Pure data and functions.
+const MINERS=['奈菈','魯恩','赫索','莫格','奇妲','斐恩','提米'];
+const ZHUYIN=['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ']; // symbol carried into the master box by the poisoned miner
+// ---- A. Everyone tells the truth except the miner holding the poisoned apple. p = that miner's index.
+const TESTIMONY=[{k:'odd',v:true},{k:'not',s:[2,4,5]},{k:'not',s:[0,3]},{k:'in',s:[2,3,4,6]},{k:'odd',v:true},{k:'not',s:[3]},{k:'in',s:[1,4]}];
+const names=s=>s.map(i=>MINERS[i]).join('、');
+function say(st){
+ if(st.k==='not')return `毒蘋果不在${names(st.s)}手上。`;
+ if(st.k==='in')return `毒蘋果在${names(st.s)}其中一人手上。`;
+ if(st.k==='odd')return st.v?'拿著毒蘋果的人，編號是單數。':'拿著毒蘋果的人，編號是雙數。';
+ return `毒蘋果在前 ${st.n} 位之中。`;
+}
+function holds(st,p){
+ if(st.k==='not')return !st.s.includes(p);
+ if(st.k==='in')return st.s.includes(p);
+ if(st.k==='odd')return (p%2===0)===st.v; // numbers are 1-based, so index 0 is number 1 (odd)
+ return p<st.n;
+}
+// miners whose testimony would be false if the poison were with p, other than p themself (who must lie)
+const conflicts=p=>TESTIMONY.map((st,i)=>i).filter(i=>holds(TESTIMONY[i],p)!==(i!==p));
+const candidatesA=()=>[0,1,2,3,4,5,6].filter(p=>conflicts(p).length===0);
+// ---- B. Three vessels (8, 5, 3), tubes pour one way round the ring A>C, C>B, B>A. Goal: vessel B holds 4.
+const CAP=[8,5,3],TUBES=[[0,2],[2,1],[1,0]],START=[8,0,0],VN='ABC';
+function pour(s,tube){
+ const [f,t]=TUBES[tube],amt=Math.min(s[f],CAP[t]-s[t]);if(!amt)return null;
+ const n=[...s];n[f]-=amt;n[t]+=amt;return n;
+}
+const goalB=s=>s[1]===4;
+function shortest(from){ // BFS to the goal; returns the tube sequence or null
+ const key=s=>s.join(','),prev=new Map([[key(from),null]]),q=[from];
+ for(let i=0;i<q.length;i++){const s=q[i];
+  if(goalB(s)){const path=[];let k=key(s);while(prev.get(k)){path.push(prev.get(k).tube);k=prev.get(k).from;}return path.reverse();}
+  for(let tube=0;tube<3;tube++){const n=pour(s,tube);if(!n)continue;const k=key(n);if(!prev.has(k)){prev.set(k,{from:key(s),tube});q.push(n);}}}
+ return null;
+}
+// ---- C. Mix drops (0..4 each) of red, yellow, blue; the average colour must match the recipe's colour.
+const BASE={R:[210,43,43],Y:[232,200,50],B:[43,75,210]},TARGET=[1,1,4],TOL=8,MAXDROP=4;
+const mixColor=(r,y,b)=>{const n=r+y+b;return n?[0,1,2].map(i=>(r*BASE.R[i]+y*BASE.Y[i]+b*BASE.B[i])/n):[16,16,24];};
+const colorDist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+const colorOk=d=>colorDist(mixColor(d[0],d[1],d[2]),mixColor(...TARGET))<=TOL;
+// ---- Step-aware hints (three tiers each)
+const HINTS={
+ A:p=>{
+  const others=[0,1,2,3,4,5,6].filter(q=>q!==p);
+  const withOther=others.find(q=>conflicts(q).some(i=>i!==q))??others[0];
+  const i=conflicts(withOther).find(x=>x!==withOther)??conflicts(withOther)[0];
+  const why=i===withOther?`${MINERS[withOther]}若拿著毒蘋果，他就是唯一說謊的人，但他說的「${say(TESTIMONY[i])}」其實是真的，所以不可能。`
+   :`假設${MINERS[withOther]}拿著毒蘋果：${MINERS[i]}說「${say(TESTIMONY[i])}」，這句就說不通（而${MINERS[i]}必須說實話）。`;
+  return [
+   '規則：除了拿著毒蘋果的人，其他六個人說的都是實話；拿著的人說的是謊話。逐一假設某個人拿著毒蘋果，檢查證詞會不會自相矛盾。',
+   why+'像這樣把不可能的人一個個排除。',
+   `拿著毒蘋果的是${MINERS[p]}（編號 ${p+1}）。`];
+ },
+ B:s=>{
+  const path=shortest(s);
+  if(!path)return ['這條倒法已經走進死路，按「復原」退一步，或「重來」。','這條倒法已經走進死路，按「復原」退一步，或「重來」。','這條倒法已經走進死路，按「復原」退一步，或「重來」。'];
+  if(!path.length)return Array(3).fill('B 杯已經剛好 4 了。');
+  const [f,t]=TUBES[path[0]];
+  return [
+   '目標是讓 B 杯剛好有 4。管子只能照箭頭單向倒：A→C→B→A。每次倒到來源空了或目的地滿了才停。',
+   `下一步要從 ${VN[f]} 杯倒出去。`,
+   `把 ${VN[f]} 杯倒向 ${VN[t]} 杯（再按一次提示會從新的盤面重算）。`];
+ },
+ C:d=>{
+  const cur=mixColor(d[0],d[1],d[2]),want=mixColor(...TARGET);
+  const diff=[0,1,2].map(i=>want[i]-cur[i]);
+  return [
+   '右邊那一塊是隔著綠色玻璃看的，顏色是歪的。按「舉起手持鏡」才能看到配方真正的顏色，再拿它和瓶子裡的比。',
+   '配方色是偏紫的灰藍：藍色最多，紅和黃各只加一點點。',
+   `紅 ${TARGET[0]} 滴、黃 ${TARGET[1]} 滴、藍 ${TARGET[2]} 滴。`];
+ }
+};
+if(typeof module!=='undefined')module.exports={MINERS,ZHUYIN,TESTIMONY,say,holds,conflicts,candidatesA,CAP,TUBES,START,VN,pour,goalB,shortest,BASE,TARGET,TOL,MAXDROP,mixColor,colorDist,colorOk,HINTS};
+
+</script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),main=$('#main'),NS='http://www.w3.org/2000/svg';
+const STAGE=[
+ {id:'A',title:'七個人的證詞',goal:'七個礦工各拿著一顆蘋果，其中一顆有毒。除了拿著毒蘋果的人，其他六個人說的都是實話。點一顆蘋果指認它有毒；如果說不通，會告訴你哪一句矛盾。證詞是鏡中的反寫字，按「舉起手持鏡」才能正著讀。'},
+ {id:'B',title:'解藥要剛好 4',goal:'要調出解藥，B 杯需要剛好 4 單位的蘋果汁。三個杯子容量 8、5、3，一開始 A 杯是滿的。管子只能照箭頭單向倒：A→C→B→A。點一條管子，就把來源杯倒向目的杯，倒到來源空了或目的杯滿了才停。'},
+ {id:'C',title:'調出配方的顏色',goal:'解藥要調成配方的顏色。每種色精可以加 0–4 滴，瓶子是它們的平均色。配方色是隔著綠色玻璃看的，會歪掉；按「舉起手持鏡」才看得到真正的顏色。顏色夠接近時瓶子會發亮。'}
+];
+let si=0,hintTier=0,hintsUsed=0,lastChange=Date.now(),cleared={},poisoned=null,mirrorOn=false,vessels,history,drops,hintSig='';
+const sig=()=>si+':'+JSON.stringify([vessels,drops,poisoned===null]);
+const status=(t,c)=>{$('#status').textContent=t;$('#status').className=c||'';};
+function load(i){
+ si=i;hintTier=0;mirrorOn=false;vessels=[...START];history=[];drops=[0,0,0];hintSig='';
+ $('#goal').textContent='第 '+(i+1)+' 關・'+STAGE[i].title+'：'+STAGE[i].goal;
+ $('#hinttext').style.display='none';$('#hintinfo').textContent='';
+ const sb=$('#stages');sb.innerHTML='';
+ STAGE.forEach((s,j)=>{const b=document.createElement('button');b.textContent=(cleared[s.id]?'✓ ':'')+(j+1);b.setAttribute('aria-pressed',String(j===i));b.setAttribute('aria-label','第 '+(j+1)+' 關');b.onclick=()=>load(j);sb.appendChild(b);});
+ [renderA,renderB,renderC][i]();
+}
+const done=()=>{cleared[STAGE[si].id]=true;[...$('#stages').children].forEach((b,j)=>b.textContent=(cleared[STAGE[j].id]?'✓ ':'')+(j+1));$('#hinttext').style.display='none';};
+// ---------- A
+let ruledOut=new Set(),solvedA=false;
+function renderA(){
+ ruledOut=new Set();solvedA=false;
+ main.innerHTML='<div class="row" style="margin-top:0"><button id="mirror" aria-pressed="false">舉起手持鏡</button><span style="font-size:12px;color:#cdbf9f">（證詞原本是反寫的鏡中字）</span></div><div class="panel apples mirrored" id="apples"></div>';
+ $('#mirror').onclick=e=>{mirrorOn=!mirrorOn;e.target.setAttribute('aria-pressed',String(mirrorOn));$('#apples').classList.toggle('mirrored',!mirrorOn);};
+ const box=$('#apples');
+ MINERS.forEach((n,i)=>{
+  const b=document.createElement('button');b.className='apple';b.dataset.i=i;
+  b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 7c-4-3-9 0-8 6 .8 5 4 8 8 8s7.2-3 8-8c1-6-4-9-8-6z" fill="#b3122b" stroke="#ff8a8a" stroke-width=".6"/><path d="M12 7c0-2 1-3 3-4" stroke="#6b8f3a" stroke-width="1.4" fill="none"/></svg><b>${i+1}　${n}</b><span class="say">「${say(TESTIMONY[i])}」</span><span class="num">點一下指認這顆有毒</span>`;
+  b.onclick=()=>accuseA(i,b);box.appendChild(b);
+ });
+ status('還沒有指認。');
+}
+function accuseA(p,btn){
+ if(solvedA)return;lastChange=Date.now();
+ const c=conflicts(p);
+ if(!c.length){solvedA=true;status(`全部說得通：只有${MINERS[p]}說了謊，毒蘋果在他手上。取得注音符號「${ZHUYIN[p]}」。`,'ok');done();return;}
+ const i=c.find(x=>x!==p)??c[0];
+ btn.classList.add('out');
+ status(i===p?`不是${MINERS[p]}：如果是他拿著毒蘋果，他就該是說謊的人，但他說的「${say(TESTIMONY[i])}」是真的。`
+  :`不是${MINERS[p]}：如果是他，${MINERS[i]}說的「${say(TESTIMONY[i])}」就會是謊話，但${MINERS[i]}不該說謊。`,'bad');
+}
+// ---------- B
+function renderB(){
+ main.innerHTML=`<div class="panel"><svg class="vessels" id="vs" viewBox="0 -34 275 150" aria-label="三個杯子"></svg></div><div class="row"><button id="undo">復原</button><span id="moves" style="color:#9fb"></span></div>`;
+ $('#undo').onclick=()=>{if(history.length){vessels=history.pop();drawB();lastChange=Date.now();}};
+ drawB();
+}
+function drawB(){
+ // row A, C, B (the pouring order); heights are proportional to capacity; the bottoms line up
+ const X=[15,215,125],W=44,BOT=96,unit=70/8,vy=i=>BOT-CAP[i]*unit;
+ let s='<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7z" fill="#e0b84f"/></marker></defs>';
+ for(let i=0;i<3;i++){
+  const h=CAP[i]*unit,lvl=vessels[i]*unit;
+  s+=`<rect x="${X[i]}" y="${vy(i)}" width="${W}" height="${h}" rx="3" fill="#101826" stroke="#9fb4d8" stroke-width="1.4"/>`+
+   `<rect x="${X[i]+1.5}" y="${BOT-lvl}" width="${W-3}" height="${lvl}" fill="#c9482f" fill-opacity=".85"/>`+
+   `<text x="${X[i]+W/2}" y="${BOT+13}" text-anchor="middle" font-size="9.5" fill="#e9dcc3">${VN[i]} 杯（容量 ${CAP[i]}）</text>`+
+   `<text x="${X[i]+W/2}" y="${Math.min(BOT-lvl-4,BOT-6)}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">${vessels[i]}</text>`;
+ }
+ // one-way tubes: A>C and C>B run straight; B>A arches over the top
+ const geo=[{d:`M${X[0]+W+4} 62L${X[2]-6} 62`,lx:(X[0]+W+X[2])/2-1,ly:54},{d:`M${X[2]+W+4} 72L${X[1]-6} 72`,lx:(X[2]+W+X[1])/2,ly:64},{d:`M${X[1]+W/2} ${vy(1)-4}C${X[1]+W/2} -26 ${X[0]+W/2} -26 ${X[0]+W/2} ${vy(0)-6}`,lx:(X[0]+X[1])/2+W/2,ly:-23}];
+ TUBES.forEach(([f,t],tube)=>{
+  const ok=!!pour(vessels,tube),g=geo[tube];
+  s+=`<g class="tube${ok?'':' off'}" data-tube="${tube}" tabindex="${ok?0:-1}" role="button" aria-label="把 ${VN[f]} 杯倒向 ${VN[t]} 杯"${ok?'':' aria-disabled="true"'}><path d="${g.d}" fill="none" stroke="#e0b84f" stroke-width="3" marker-end="url(#ar)"/><path d="${g.d}" fill="none" stroke="transparent" stroke-width="22"/><text x="${g.lx}" y="${g.ly}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e0b84f">${VN[f]}→${VN[t]}</text></g>`;
+ });
+ $('#vs').innerHTML=s;
+ document.querySelectorAll('.tube').forEach(g=>{const f=()=>doPour(+g.dataset.tube);g.onclick=f;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+ $('#moves').textContent='已倒 '+history.length+' 次';
+ if(goalB(vessels)){status('B 杯剛好 4！取得蘋果汁解藥原液。','ok');done();}
+ else status(`A ${vessels[0]}　B ${vessels[1]}　C ${vessels[2]}　目標：B 杯 = 4`,'');
+}
+function doPour(tube){
+ const n=pour(vessels,tube);if(!n)return;
+ history.push(vessels);vessels=n;lastChange=Date.now();drawB();
+}
+// ---------- C
+function renderC(){
+ main.innerHTML=`<div class="panel mixer"><div><div class="sw glass" id="swRef"><span>配方色（隔著綠玻璃）</span></div></div><div><div class="sw" id="swMix"><span>你的瓶子</span></div></div></div>
+ <div class="row"><button id="mirror" aria-pressed="false">舉起手持鏡</button><span style="font-size:12px;color:#cdbf9f">看配方真正的顏色</span></div>
+ <div class="panel" id="dr"></div><div class="panel"><div id="meter"><i></i></div><div id="cmsg" style="margin-top:4px"></div></div>`;
+ $('#mirror').onclick=e=>{mirrorOn=!mirrorOn;e.target.setAttribute('aria-pressed',String(mirrorOn));drawC();};
+ const dr=$('#dr');
+ [['紅','R'],['黃','Y'],['藍','B']].forEach(([n,k],i)=>{
+  const row=document.createElement('div');row.className='drops';
+  row.innerHTML=`<b style="color:rgb(${BASE[k]})">${n}色精</b><button data-d="${i}" data-s="-1" aria-label="${n}減一滴">−</button><span id="dv${i}" style="min-width:3em;text-align:center">0 滴</span><button data-d="${i}" data-s="1" aria-label="${n}加一滴">＋</button>`;
+  dr.appendChild(row);
+ });
+ dr.querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;drops[i]=Math.max(0,Math.min(MAXDROP,drops[i]+(+b.dataset.s)));lastChange=Date.now();drawC();});
+ drawC();
+}
+function drawC(){
+ const want=mixColor(...TARGET),cur=mixColor(...drops),d=colorDist(want,cur),ok=colorOk(drops)&&drops.some(Boolean);
+ // the reference seen through green glass is skewed; the mirror shows its true colour
+ const ref=$('#swRef');ref.style.background='rgb('+want.map(Math.round)+')';ref.classList.toggle('glass',!mirrorOn);
+ ref.querySelector('span').textContent=mirrorOn?'配方色（手持鏡裡的真色）':'配方色（隔著綠玻璃）';
+ const mx=$('#swMix');mx.style.background='rgb('+cur.map(Math.round)+')';mx.style.boxShadow=ok?'0 0 18px 4px #fff8':'none';
+ drops.forEach((v,i)=>$('#dv'+i).textContent=v+' 滴');
+ const closeness=drops.some(Boolean)?Math.max(0,1-d/110):0;
+ $('#meter i').style.width=Math.round(closeness*100)+'%';
+ $('#cmsg').textContent=!drops.some(Boolean)?'還沒有加色精。':ok?'顏色吻合！':(d<28?'很接近了，差一點點。':d<60?'有點接近，比例還不對。':'還差很多。');
+ if(ok){status('顏色吻合：解藥調好了。','ok');done();}else status('調色中…','');
+}
+// ---------- hints
+function showHint(auto){
+ const st=STAGE[si].id;if(cleared[st]&&((st==='A'&&solvedA)||(st==='B'&&goalB(vessels))||(st==='C'&&colorOk(drops)&&drops.some(Boolean)))){$('#hinttext').style.display='none';return;}
+ const sigNow=sig();if(sigNow!==hintSig){if(hintSig&&hintTier>0)hintTier=Math.max(hintTier,0);}hintSig=sigNow;
+ const list=st==='A'?HINTS.A(MINERS.findIndex((_,p)=>conflicts(p).length===0)):st==='B'?HINTS.B(vessels):HINTS.C(drops);
+ hintTier=Math.min(hintTier+1,3);if(!auto)hintsUsed++;
+ $('#hinttext').style.display='block';$('#hinttext').textContent=(auto?'魔鏡低語：':'燭光提示 '+hintTier+' / 3：')+list[hintTier-1];
+ $('#hintinfo').textContent='已用提示 '+hintsUsed+' 次'+(hintTier<3?'；再按一次看更明確的':'；這已經是最明確的提示');
+}
+$('#hint').onclick=()=>showHint(false);
+$('#reset').onclick=()=>load(si);
+setInterval(()=>{if(Date.now()-lastChange>60000&&hintTier===0){showHint(true);lastChange=Date.now();}},5000);
+load(0);
+window.__e3={load,accuse:i=>accuseA(i,document.querySelector('.apple[data-i="'+i+'"]')),pourTube:t=>doPour(t),get vessels(){return vessels},setDrops:d=>{drops=d;drawC();},showHint,get tier(){return hintTier},get cleared(){return cleared}};
+</script>
+</body>
+</html>

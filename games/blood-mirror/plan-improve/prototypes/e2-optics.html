@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E2 稜鏡舞廳 光路原型</title>
+<!-- Throwaway prototype (plan-expert-levels.md, E2). Question: is a three-colour mirror puzzle readable and fair
+     on a phone, with colour never the only cue? Rules and the three stages live in the data-core block;
+     prototypes/e2-optics.solve.cjs extracts it and proves each stage has one beam solution. Not shipped. -->
+<style>
+:root{--bg:#0b0710;--gold:#e0b84f;--ink:#e9dcc3;--ok:#6f6;--bad:#f66}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}
+header{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header b{color:var(--gold)}
+button{background:#241522;color:var(--ink);border:1px solid var(--gold);border-radius:6px;min-height:44px;padding:0 12px;font:inherit;cursor:pointer}
+button[aria-pressed=true]{background:#5a3a14}
+#goal{margin:0 12px 6px;padding:8px 12px;border-left:3px solid var(--gold);background:#1a1022;font-size:15px}
+#legend{margin:0 12px 6px;font-size:13px;color:#cdbf9f}
+#status{margin:0 12px 6px;min-height:24px;font-weight:600}
+#status.ok{color:var(--ok)}#status.bad{color:var(--bad)}
+#wrap{margin:0 12px;border:1px solid #3a2a14;border-radius:8px;background:#0e0814}
+svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 12px}
+.mirror,.dancer{cursor:pointer}
+.mirror:focus-visible,.dancer:focus-visible{outline:2px solid #fff}
+#hinttext{margin:0 12px 8px;padding:6px 12px;border-left:3px solid #7fe;background:#10202a;display:none}
+.sym{font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <b>E2 稜鏡舞廳 · 光路原型</b>
+  <span id="stages"></span>
+  <button id="reset">重來這關</button>
+</header>
+<p id="goal"></p>
+<p id="legend">三色光各有形狀，不靠顏色也看得出來：<b style="color:#ff6b6b">▲ 紅</b>　<b style="color:#6bff95">● 綠</b>　<b style="color:#6b9cff">■ 藍</b>　黃＝▲＋●。面具下方的符號就是它需要的光。</p>
+<div id="status" role="status"></div>
+<div id="wrap"><svg id="svg" aria-label="舞廳光路盤"></svg></div>
+<div class="row"><button id="hint">燭光提示</button><span id="hintinfo" style="color:#cdbf9f;font-size:12px"></span></div>
+<p id="hinttext" role="status"></p>
+<script data-core>
+// E2 prism-ballroom optics. Pure rules; beams are bitmasks R=1 G=2 B=4. Mirrors are double-sided with two states.
+const COLORS={R:1,G:2,B:4};
+const DIRS={'/':([dx,dy])=>[-dy,-dx],'\\':([dx,dy])=>[dy,dx]};
+// layout: {w,h,emitters:[{c:'R',x}],mirrors:[{x,y}],blockers:[{a:[x,y],b:[x,y]}],targets:[{x,y,need}]}
+// state:  {m:['/'|'\\',...], k:[0|1,...]}  (k = which of a blocker's two cells it stands on)
+function trace(L,S){
+ const blocked=new Map(),mir=new Map(),tgt=new Map();
+ L.blockers.forEach((b,i)=>{const p=S.k[i]?b.b:b.a;blocked.set(p[0]+','+p[1],i);});
+ L.mirrors.forEach((m,i)=>mir.set(m.x+','+m.y,S.m[i]));
+ L.targets.forEach((t,i)=>tgt.set(t.x+','+t.y,i));
+ const got=L.targets.map(()=>0),beams=[];
+ for(const e of L.emitters){
+  let x=e.x,y=0,dir=[0,1];const pts=[[x,-0.6]],seen=new Set();let end='edge';
+  for(;;){
+   if(x<0||y<0||x>=L.w||y>=L.h){end='edge';break;}
+   const key=x+','+y,sk=key+','+dir;if(seen.has(sk)){end='loop';break;}seen.add(sk);
+   if(blocked.has(key)){pts.push([x-dir[0]*0.35,y-dir[1]*0.35]);end='blocked';break;}
+   pts.push([x,y]);
+   if(tgt.has(key))got[tgt.get(key)]|=COLORS[e.c];
+   if(mir.has(key))dir=DIRS[mir.get(key)](dir);
+   x+=dir[0];y+=dir[1];
+  }
+  if(end==='edge')pts.push([x-dir[0]*0.5,y-dir[1]*0.5]);
+  beams.push({c:e.c,pts,end});
+ }
+ return {beams,got};
+}
+function solved(L,S){const r=trace(L,S);return L.targets.every((t,i)=>r.got[i]===t.need);}
+function allStates(L){
+ const out=[],M=L.mirrors.length,K=L.blockers.length,n=M+K;
+ for(let b=0;b<(1<<n);b++){
+  out.push({m:L.mirrors.map((_,i)=>(b>>i)&1?'\\':'/'),k:L.blockers.map((_,i)=>(b>>(M+i))&1)});
+ }
+ return out;
+}
+const solutions=L=>allStates(L).filter(S=>solved(L,S));
+const NAME={1:'紅',2:'綠',4:'藍',3:'黃（紅＋綠）',5:'洋紅（紅＋藍）',6:'青（綠＋藍）',7:'白'};
+// Hints come from the unique solution: the first unsatisfied target, then the kind of fix, then the exact fix.
+function hint(L,S,sol,tier){
+ const r=trace(L,S);
+ const ti=L.targets.findIndex((t,i)=>r.got[i]!==t.need);if(ti<0)return null;
+ const t=L.targets[ti],where=`第 ${t.x+1} 欄、第 ${t.y+1} 列的面具`;
+ const onPath=new Set();trace(L,sol).beams.forEach(b=>b.pts.forEach(p=>onPath.add(p.join(','))));
+ const mi=sol.m.findIndex((v,i)=>S.m[i]!==v&&onPath.has(L.mirrors[i].x+','+L.mirrors[i].y)),ki=sol.k.findIndex((v,i)=>S.k[i]!==v);
+ if(tier===1)return `${where}還沒亮對顏色：它需要${NAME[t.need]}光，現在是${r.got[ti]?NAME[r.got[ti]]+'光':'沒有光'}。先想想哪一道光該去那裡。`;
+ if(tier===2)return mi>=0?'有一面鏡子的角度不對。沿著光束走，看看哪一面鏡子把光送去了錯的方向，點它轉個向。':'有一位舞者擋住了光。點舞者可以把他推到另一格。';
+ return mi>=0?`把第 ${L.mirrors[mi].x+1} 欄、第 ${L.mirrors[mi].y+1} 列的鏡子轉成「${sol.m[mi]}」。`:`把第 ${ki+1} 位舞者推到另一格。`;
+}
+if(typeof module!=='undefined')module.exports={COLORS,trace,solved,allStates,solutions,hint};
+
+</script>
+<script data-layouts>
+// Stages. Layouts s2 and s3 came from gen.cjs (seed 7 and 11); the solver proves each has one beam solution.
+const STAGES=[
+ {id:'s1',title:'一束光',goal:'讓紅光照亮右邊的面具。點一下鏡子可以把它轉向。',
+  L:{w:5,h:4,emitters:[{c:'R',x:1}],mirrors:[{x:1,y:2}],blockers:[],targets:[{x:3,y:2,need:1}]},
+  init:{m:['/'],k:[]}},
+ {id:'s2',title:'兩束光合成黃光',goal:'這個面具要的是黃光。黃光＝紅光＋綠光，兩束光要在面具上重疊。',
+  L:{w:6,h:5,emitters:[{c:'R',x:1},{c:'G',x:4}],mirrors:[{x:1,y:3},{x:4,y:3}],blockers:[],targets:[{x:2,y:3,need:3}]},
+  init:{m:['/','\\'],k:[]}},
+ {id:'s3',title:'舞廳',goal:'讓三個面具各自亮起需要的顏色：紅、藍、黃。注意：光會穿過面具繼續前進，所以不要讓多餘的光照到它。點舞者可以把他推到另一格。',
+  L:{w:9,h:7,emitters:[{c:'R',x:1},{c:'G',x:4},{c:'B',x:7}],mirrors:[{x:5,y:2},{x:5,y:3},{x:6,y:6},{x:1,y:3},{x:0,y:0},{x:0,y:4},{x:7,y:0}],blockers:[{a:[1,1],b:[1,6]},{a:[5,0],b:[2,5]}],targets:[{x:5,y:4,need:1},{x:0,y:2,need:4},{x:4,y:3,need:3}]},
+  init:{m:['\\','/','\\','/','\\','\\','\\'],k:[0,0]}}
+];
+
+</script>
+<script>
+'use strict';
+const NS='http://www.w3.org/2000/svg',svg=document.getElementById('svg'),CELL=10;
+const RGB={1:'#ff4d4d',2:'#4dff7a',4:'#4d8dff'};
+const SOL={};STAGES.forEach(s=>SOL[s.id]=solutions(s.L)[0]);
+let si=0,L,S,hintTier=0,hintsUsed=0,lastSat=-1,lastChange=Date.now(),cleared={};
+const px=v=>(v+.5)*CELL;
+const sym=(c,x,y,r,col)=>{ // second channel: R triangle, G circle, B square
+ const f=col||RGB[c]; if(c===1)return `<path d="M${x} ${y-r}L${x+r*.95} ${y+r*.7}L${x-r*.95} ${y+r*.7}Z" fill="${f}"/>`;
+ if(c===2)return `<circle cx="${x}" cy="${y}" r="${r*.85}" fill="${f}"/>`;
+ return `<rect x="${x-r*.8}" y="${y-r*.8}" width="${r*1.6}" height="${r*1.6}" fill="${f}"/>`;
+};
+const needSyms=(need,cx,cy)=>{const cs=[1,2,4].filter(c=>need&c);return cs.map((c,i)=>sym(c,cx+(i-(cs.length-1)/2)*3.4,cy,1.5)).join('');};
+function load(i){
+ si=i;const st=STAGES[i];L=st.L;S={m:[...st.init.m],k:[...st.init.k]};hintTier=0;lastSat=-1;
+ document.getElementById('goal').textContent='第 '+(i+1)+' 關・'+st.title+'：'+st.goal;
+ document.getElementById('hinttext').style.display='none';document.getElementById('hintinfo').textContent='';
+ const sb=document.getElementById('stages');sb.innerHTML='';
+ STAGES.forEach((s,j)=>{const b=document.createElement('button');b.textContent=(cleared[s.id]?'✓ ':'')+(j+1);b.setAttribute('aria-pressed',String(j===i));b.setAttribute('aria-label','第 '+(j+1)+' 關');b.onclick=()=>load(j);sb.appendChild(b);});
+ render();
+}
+function render(){
+ const W=L.w*CELL,H=L.h*CELL,r=trace(L,S);
+ svg.setAttribute('viewBox',`-3 -13 ${W+6} ${H+17}`);
+ let s='<defs><filter id="glow"><feGaussianBlur stdDeviation="1.1"/></filter></defs>';
+ for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++)s+=`<rect x="${x*CELL}" y="${y*CELL}" width="${CELL}" height="${CELL}" fill="${(x+y)%2?'#1c1424':'#120c1a'}"/>`;
+ // emitters: a prism above its column, with its colour symbol
+ for(const e of L.emitters){const c=({R:1,G:2,B:4})[e.c],x=px(e.x);s+=`<path d="M${x-3.4} -3.4L${x+3.4} -3.4L${x} -8.6Z" fill="#e8f0ff" fill-opacity=".85" stroke="#9fb4d8" stroke-width=".4"/>${sym(c,x,-4.5,1.7,'#0b0710')}<text x="${x}" y="-9.4" font-size="2.6" text-anchor="middle" fill="${RGB[c]}">${e.c==='R'?'紅':e.c==='G'?'綠':'藍'}</text>`;}
+ // targets (drawn under the beams so a beam visibly passes through a mask)
+ L.targets.forEach((t,i)=>{const x=px(t.x),y=px(t.y),got=r.got[i],ok=got===t.need,over=got&~t.need,under=t.need&~got;
+  const ring=ok?'#6f6':over?'#f66':'#7a6a4a';
+  s+=`<g><ellipse cx="${x}" cy="${y}" rx="4.2" ry="3.4" fill="${ok?'#1d2f1d':'#161018'}" stroke="${ring}" stroke-width="${ok?.9:.6}"/>`+
+   `<ellipse cx="${x-1.5}" cy="${y-.4}" rx=".8" ry=".6" fill="${ok?'#cfc':'#000'}"/><ellipse cx="${x+1.5}" cy="${y-.4}" rx=".8" ry=".6" fill="${ok?'#cfc':'#000'}"/>`+
+   needSyms(t.need,x,y+5.3)+(over?`<text x="${x}" y="${y-4.6}" font-size="2.4" text-anchor="middle" fill="#f66">顏色太多</text>`:'')+`</g>`;});
+ // beams (screen blend so overlaps add up like light)
+ s+='<g style="mix-blend-mode:screen">';
+ for(const b of r.beams){const c=({R:1,G:2,B:4})[b.c],d=b.pts.map(p=>px(p[0])+','+px(p[1])).join(' ');
+  s+=`<polyline points="${d}" fill="none" stroke="${RGB[c]}" stroke-width="3.4" stroke-opacity=".28" filter="url(#glow)" stroke-linejoin="round"/><polyline points="${d}" fill="none" stroke="${RGB[c]}" stroke-width="1.3" stroke-linejoin="round"/>`;
+  // shape markers along the beam so colour is never the only cue
+  for(let i=1;i<b.pts.length-1;i+=3){s+=sym(c,px(b.pts[i][0]),px(b.pts[i][1]),1.2,'#fff');}
+ }
+ s+='</g>';
+ // blockers (dancers): the other cell is shown as a faint ghost
+ L.blockers.forEach((b,i)=>{const cur=S.k[i]?b.b:b.a,alt=S.k[i]?b.a:b.b;
+  const fig=(p,ghost)=>`<g opacity="${ghost?.28:1}" transform="translate(${px(p[0])} ${px(p[1])})"><circle cy="-2.4" r="1.5" fill="#d9c9a8"/><path d="M-2.3 3.4L0 -.8L2.3 3.4Z" fill="#7a1530" stroke="#c9a24a" stroke-width=".3"/></g>`;
+  s+=fig(alt,true)+`<g class="dancer" data-k="${i}" tabindex="0" role="button" aria-label="舞者 ${i+1}（點一下推到另一格）">${fig(cur,false)}<rect x="${px(cur[0])-5}" y="${px(cur[1])-5}" width="10" height="10" fill="transparent"/></g>`;});
+ // mirrors
+ L.mirrors.forEach((m,i)=>{const x=px(m.x),y=px(m.y),a=S.m[i]==='/'?[-3.6,3.6,3.6,-3.6]:[-3.6,-3.6,3.6,3.6];
+  s+=`<g class="mirror" data-m="${i}" tabindex="0" role="button" aria-label="鏡子 ${i+1}，目前 ${S.m[i]}（點一下轉向）"><circle cx="${x}" cy="${y}" r="4.6" fill="#1a1024" stroke="#6b5a3a" stroke-width=".4"/><line x1="${x+a[0]}" y1="${y+a[1]}" x2="${x+a[2]}" y2="${y+a[3]}" stroke="#e0b84f" stroke-width="1.6" stroke-linecap="round"/><line x1="${x+a[0]}" y1="${y+a[1]}" x2="${x+a[2]}" y2="${y+a[3]}" stroke="#fff6cf" stroke-width=".5" stroke-linecap="round"/><rect x="${x-5}" y="${y-5}" width="10" height="10" fill="transparent"/></g>`;});
+ svg.innerHTML=s;
+ svg.querySelectorAll('.mirror').forEach(g=>{const f=()=>{S.m[+g.dataset.m]=S.m[+g.dataset.m]==='/'?'\\':'/';changed();};g.onclick=f;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+ svg.querySelectorAll('.dancer').forEach(g=>{const f=()=>{S.k[+g.dataset.k]^=1;changed();};g.onclick=f;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+ const lit=L.targets.filter((t,i)=>r.got[i]===t.need).length;
+ const st=document.getElementById('status');
+ if(lit===L.targets.length){st.textContent=si<STAGES.length-1?'全部亮起！通過。':'全部亮起！稜鏡從吊燈落下——取得「稜鏡」。';st.className='ok';cleared[STAGES[si].id]=true;}
+ else{st.textContent=`已亮起 ${lit} / ${L.targets.length} 個面具`;st.className='';}
+ if(lit!==lastSat){if(lastSat!==-1){hintTier=0;document.getElementById('hinttext').style.display='none';}lastSat=lit;}
+ return lit===L.targets.length;
+}
+function changed(){lastChange=Date.now();const done=render();if(done){document.getElementById('hinttext').style.display='none';
+ const sb=document.getElementById('stages');[...sb.children].forEach((b,j)=>{b.textContent=(cleared[STAGES[j].id]?'✓ ':'')+(j+1);});
+ if(si<STAGES.length-1)setTimeout(()=>{if(solved(L,S))load(si+1);},1200);}}
+function showHint(auto){
+ const sol=SOL[STAGES[si].id];const box=document.getElementById('hinttext');
+ if(solved(L,S)){box.style.display='none';return;}
+ hintTier=Math.min(hintTier+1,3);if(!auto)hintsUsed++;
+ box.style.display='block';box.textContent=(auto?'魔鏡低語：':'燭光提示 '+hintTier+' / 3：')+hint(L,S,sol,hintTier);
+ document.getElementById('hintinfo').textContent='已用提示 '+hintsUsed+' 次'+(hintTier<3?'；再按一次看更明確的':'；這已經是最明確的提示');
+}
+document.getElementById('hint').onclick=()=>showHint(false);
+document.getElementById('reset').onclick=()=>load(si);
+setInterval(()=>{if(Date.now()-lastChange>60000&&!solved(L,S)&&hintTier===0){showHint(true);lastChange=Date.now();}},5000);
+load(0);
+window.__e2={load,get S(){return S},get L(){return L},get si(){return si},SOL,click:(sel)=>svg.querySelector(sel).dispatchEvent(new MouseEvent('click',{bubbles:true})),solved:()=>solved(L,S),showHint};
+</script>
+</body>
+</html>

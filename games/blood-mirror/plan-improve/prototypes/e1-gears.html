@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E1 逆走鐘樓 齒輪原型</title>
+<!-- Throwaway prototype (plan-expert-levels.md, E1 L2-A). Question: can a player work out the one gear train that
+     gives 13:1 by trying gears and watching them mesh, jam or miss? Rules live in the data-core block, which
+     prototypes/e1-gears.solve.cjs extracts and checks exhaustively (unique minimal solution). Not shipped. -->
+<style>
+:root{--bg:#0b0710;--gold:#e0b84f;--copper:#d9825b;--ink:#e9dcc3;--ok:#6f6;--bad:#f55}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}
+header{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header b{color:var(--gold)}
+button{background:#241522;color:var(--ink);border:1px solid var(--gold);border-radius:6px;min-height:44px;padding:0 12px;font:inherit;cursor:pointer}
+button[aria-pressed=true]{background:#5a3a14}
+#goal{margin:0 12px 6px;padding:8px 12px;border-left:3px solid var(--gold);background:#1a1022;font-size:15px}
+#rules{margin:0 12px 8px;padding-left:28px;font-size:13px;color:#cdbf9f}
+#status{margin:0 12px 6px;min-height:24px;font-weight:600}
+#status.ok{color:var(--ok)}#status.bad{color:var(--bad)}
+#wrap{margin:0 12px;border:1px solid #3a2a14;background:radial-gradient(circle at 40% 40%,#241520,#0b0710);border-radius:8px}
+#svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.gear{transition:none}
+.sock{fill:#000;stroke:#6b5a3a;stroke-width:.5;cursor:pointer}
+.sock:hover{stroke:#fff}
+.sock.out{stroke:#f55;stroke-width:.9}
+.lbl{font-size:2.6px;fill:#e9dcc3;text-anchor:middle;pointer-events:none}
+.dist{font-size:3.4px;font-weight:700;paint-order:stroke;stroke:#0b0710;stroke-width:.6px;fill:#9fd;text-anchor:middle;pointer-events:none}
+#tray{display:flex;gap:8px;flex-wrap:wrap;margin:8px 12px}
+.tg{width:76px;min-height:92px;border:2px solid #3a2a14;border-radius:8px;background:#150d1a;display:flex;flex-direction:column;align-items:center;padding:4px;cursor:pointer;color:var(--ink);font:inherit}
+.tg[aria-pressed=true]{border-color:var(--gold);background:#2d1d10}
+.tg.used{opacity:.35}
+.tg svg{width:60px;height:60px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 12px 8px}
+#counter{font-variant-numeric:tabular-nums;color:#9fb}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<header>
+  <b>E1 逆走鐘樓 · 齒輪列原型</b>
+  <button id="reset">重來</button>
+  <button id="ruler" aria-pressed="false">顯示軸座距離</button>
+</header>
+<p id="goal"><b>目標：</b>左上角金色的曲柄齒輪（12 齒）轉 <b>13 圈</b>，右下紅圈的輸出軸要剛好轉 <b>1 圈</b>，而且<b>轉向和曲柄相同</b>。</p>
+<ol id="rules">
+  <li>從下方取齒輪：點一下選取，選好「放置層」，再點畫面上的黑色軸座放上去。再點一次軸座可以取下。</li>
+  <li><span class="legend"><i style="background:var(--gold)"></i>金色＝下層</span>　<span class="legend"><i style="background:var(--copper)"></i>銅色＝上層</span>。只有<b>同一層</b>的齒輪會咬合；同一個軸座上的上下兩層齒輪會<b>一起轉</b>。</li>
+  <li>齒輪要剛好咬合：太遠會空轉（沒有咬合），太近會卡住（變紅）。按「轉動曲柄」看看會發生什麼。</li>
+</ol>
+<div id="status" role="status"></div>
+<div class="row"><button id="hint">燭光提示</button><span id="hintinfo" style="color:#cdbf9f;font-size:12px"></span></div>
+<p id="hinttext" role="status" style="margin:0 12px 8px;min-height:22px;padding:6px 12px;border-left:3px solid #7fe;background:#10202a;display:none"></p>
+<div id="wrap"><svg id="svg" viewBox="-26 -26 108 74" aria-label="齒輪盤"></svg></div>
+<div class="row">
+  <span>放置層：</span>
+  <button id="l0" aria-pressed="true">下層（金）</button>
+  <button id="l1" aria-pressed="false">上層（銅）</button>
+  <button id="spin" aria-pressed="false">轉動曲柄</button>
+  <span id="counter"></span>
+</div>
+<div id="tray" role="group" aria-label="齒輪托盤"></div>
+<script data-core>
+// E1 gear-train rules. Pure data + pure functions; module = 1 unit, pitch radius = teeth / 2.
+const GEAR_TRAY=[6,8,12,13,16,18,24,39];
+const SOCKETS={S0:[0,0],S1:[25.5,0],S2:[25.5,15],S3:[0,18],S4:[51,15]};
+const CRANK_TEETH=12,OUT_SOCKET='S2',TARGET=[1,13]; // output turns 1 per 13 crank turns, same direction
+const EPS=0.01;
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+// state: {S1:[t0,t1],...} teeth or null per layer; S0 has only layer 1 free (layer 0 is the crank gear).
+function evaluate(state){
+ const nodes=[{id:'S0.0',s:'S0',l:0,t:CRANK_TEETH}];
+ for(const s of Object.keys(SOCKETS))for(const l of [0,1]){
+  if(s==='S0')continue; // the crank axle carries only the crank gear
+  const t=(state[s]||[])[l];if(t)nodes.push({id:s+'.'+l,s,l,t});
+ }
+ const edges=[];let jam=null;
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+  const a=nodes[i],b=nodes[j];
+  if(a.s===b.s){edges.push([i,j,'axle']);continue;}
+  if(a.l!==b.l)continue; // different layers pass over each other
+  const d=Math.hypot(SOCKETS[a.s][0]-SOCKETS[b.s][0],SOCKETS[a.s][1]-SOCKETS[b.s][1]),mesh=(a.t+b.t)/2;
+  if(Math.abs(d-mesh)<EPS)edges.push([i,j,'mesh']);
+  else if(d<mesh-EPS)jam=jam||{a:a.id,b:b.id,why:'overlap'};
+ }
+ // propagate speed as signed fraction [num,den] from the crank
+ const w=new Array(nodes.length).fill(null);w[0]=[1,1];const stack=[0];
+ while(stack.length&&!jam){
+  const i=stack.pop();
+  for(const [x,y,kind] of edges){
+   const j=x===i?y:y===i?x:-1;if(j<0)continue;
+   let nw;
+   if(kind==='axle')nw=w[i];
+   else{let n=-w[i][0]*nodes[i].t,dn=w[i][1]*nodes[j].t;const g=gcd(n,dn);nw=[n/g,dn/g];}
+   if(!w[j]){w[j]=nw;stack.push(j);}
+   else if(w[j][0]!==nw[0]||w[j][1]!==nw[1])jam={a:nodes[i].id,b:nodes[j].id,why:'locked'};
+  }
+ }
+ const dangling=nodes.filter((n,i)=>!w[i]).map(n=>n.id);
+ let out=null;
+ nodes.forEach((n,i)=>{if(n.s===OUT_SOCKET&&w[i]&&!out)out=w[i];});
+ const solved=!jam&&!!out&&out[0]*TARGET[1]===out[1]*TARGET[0]&&out[0]>0;
+ return {nodes,w,jam,out,dangling,solved};
+}
+// A solution is minimal when removing any single gear breaks it (no decorative extra gears).
+function isMinimal(state){
+ for(const s in state)for(const l of [0,1]){
+  if(!state[s][l])continue;const t=state[s][l];state[s][l]=null;const ok=evaluate(state).solved;state[s][l]=t;if(ok)return false;
+ }
+ return true;
+}
+// Exhaustive search: every injective placement of tray gears into slots with no dangling gear and no jam.
+function solveAll(){
+ const slots=[];for(const s of Object.keys(SOCKETS))for(const l of [0,1])if(s!=='S0')slots.push([s,l]);
+ const sols=[];const state={};for(const s in SOCKETS)state[s]=[null,null];
+ const used=new Array(GEAR_TRAY.length).fill(false);
+ (function rec(si){
+  if(si===slots.length){const r=evaluate(state);if(r.solved&&isMinimal(state))sols.push(JSON.stringify(state));return;}
+  const [s,l]=slots[si];
+  rec(si+1);
+  for(let g=0;g<GEAR_TRAY.length;g++){
+   if(used[g])continue;
+   // skip duplicate tooth counts to avoid counting identical gears twice
+   used[g]=true;state[s][l]=GEAR_TRAY[g];rec(si+1);state[s][l]=null;used[g]=false;
+  }
+ })(0);
+ return sols;
+}
+
+// Step-aware hints (three tiers: where to look -> the rule -> the answer), like the game's stepHints.
+// stage() reads the player's board, so a hint always matches what they are stuck on.
+const HINTS={
+ first:[
+  '先看曲柄（左上、12 齒）。按上方「顯示軸座距離」，找出曲柄右邊那個軸座離曲柄多遠。',
+  '兩個齒輪要咬合，中心距＝兩個齒數相加的一半。曲柄是 12 齒、距離是 25.5，所以另一顆的齒數是 25.5×2−12。',
+  '把 39 齒放在曲柄右邊軸座的「下層」（金色）。'
+ ],
+ second:[
+  '第一段只減速到 12 : 39（約 3.25 倍），還差約 4 倍。同一個軸座的上層和下層會一起轉，上層可以接力到輸出軸。',
+  '接力這一段：小齒輪放在 39 齒所在軸座的上層，大齒輪放在輸出軸（紅圈）的上層。兩顆齒數相加要等於兩軸座距離 15 的兩倍（30），而且大÷小要剛好是 4。',
+  '39 齒軸座的上層放 6 齒，輸出軸（紅圈）的上層放 24 齒。'
+ ]
+};
+function stage(state){
+ const r=evaluate(state);if(r.solved)return null;
+ return (state.S1&&state.S1[0]===39)?'second':'first';
+}
+if(typeof module!=='undefined')module.exports={GEAR_TRAY,SOCKETS,CRANK_TEETH,OUT_SOCKET,TARGET,evaluate,solveAll,HINTS,stage};
+
+</script>
+<script>
+'use strict';
+const NS='http://www.w3.org/2000/svg',svg=document.getElementById('svg');
+let state,sel=null,layer=0,spinning=false,turns=0,last=0,ev=null,usedMap={};
+const reset=()=>{hintStage=null;hintTier=0;state={};for(const s in SOCKETS)state[s]=[null,null];sel=null;turns=0;spinning=false;update();};
+const toothPath=(t,r)=>{ // trapezoid teeth around a pitch radius
+ const p=2*Math.PI/t,ri=r-1,ro=r+1;let d='';
+ for(let k=0;k<t;k++){const a=k*p;
+  for(const [da,rr] of [[-.27,ri],[-.16,ro],[.16,ro],[.27,ri]]){const x=Math.cos(a+da*p)*rr,y=Math.sin(a+da*p)*rr;d+=(d?'L':'M')+x.toFixed(2)+' '+y.toFixed(2);}
+ }
+ return d+'Z';
+};
+const gearEl=(t,l,cls)=>{
+ const g=document.createElementNS(NS,'g');g.setAttribute('class','gear '+(cls||''));
+ const col=l===0?'#e0b84f':'#d9825b',stroke=l===0?'#7a5a14':'#7a3418';
+ const r=t/2;
+ g.innerHTML=`<path d="${toothPath(t,r)}" fill="${col}" fill-opacity="${l===0?1:.93}" stroke="${stroke}" stroke-width=".35"/>`+
+  `<circle r="${Math.max(r-2.6,1)}" fill="none" stroke="${stroke}" stroke-width=".3" opacity=".7"/>`+
+  `<circle r="${Math.min(1.6,r/3)}" fill="${stroke}"/>`;
+ return g;
+};
+// initial rotation offsets so meshing teeth interleave (see derivation in the prototype notes)
+function phases(r){
+ const ph=new Array(r.nodes.length).fill(0),seen=new Array(r.nodes.length).fill(false);seen[0]=true;const q=[0];
+ const edges=[];const N=r.nodes;
+ for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){
+  const a=N[i],b=N[j];if(a.s===b.s){edges.push([i,j,'axle']);continue;}
+  if(a.l!==b.l)continue;const d=Math.hypot(SOCKETS[a.s][0]-SOCKETS[b.s][0],SOCKETS[a.s][1]-SOCKETS[b.s][1]);
+  if(Math.abs(d-(a.t+b.t)/2)<EPS)edges.push([i,j,'mesh']);
+ }
+ while(q.length){const i=q.shift();
+  for(const [x,y,k] of edges){const j=x===i?y:y===i?x:-1;if(j<0||seen[j])continue;seen[j]=true;
+   if(k==='axle')ph[j]=ph[i];
+   else{const A=N[i],B=N[j],th=Math.atan2(SOCKETS[B.s][1]-SOCKETS[A.s][1],SOCKETS[B.s][0]-SOCKETS[A.s][0]);
+    const ua=(th-ph[i])*A.t/(2*Math.PI);ph[j]=th+Math.PI-2*Math.PI*(0.5-ua)/B.t;}
+   q.push(j);}
+ }
+ return ph;
+}
+function draw(){
+ svg.innerHTML='';
+ const rulerOn=document.getElementById('ruler').getAttribute('aria-pressed')==='true';
+ if(rulerOn){const ids=Object.keys(SOCKETS);for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+  const a=SOCKETS[ids[i]],b=SOCKETS[ids[j]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d>32)continue;
+  svg.insertAdjacentHTML('beforeend',`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#9fd" stroke-width=".25" stroke-dasharray="1 1"/><text class="dist" x="${(a[0]+b[0])/2}" y="${(a[1]+b[1])/2-.6}">${d.toFixed(1).replace('.0','')}</text>`);}}
+ ev=evaluate(state);const ph=phases(ev);
+ const idx={};ev.nodes.forEach((n,i)=>idx[n.id]=i);
+ for(const l of [0,1])for(const n of ev.nodes.filter(n=>n.l===l)){
+  const i=idx[n.id],w=ev.w[i]?ev.w[i][0]/ev.w[i][1]:0,[x,y]=SOCKETS[n.s];
+  const bad=ev.jam&&(ev.jam.a===n.id||ev.jam.b===n.id);
+  const g=gearEl(n.t,n.l,bad?'bad':'');
+  const rot=(ph[i]+turns*w*2*Math.PI)*180/Math.PI;
+  g.setAttribute('transform',`translate(${x} ${y}) rotate(${rot.toFixed(2)})`);
+  g.dataset.node=n.id;if(bad)g.firstChild.setAttribute('stroke','#f33'),g.firstChild.setAttribute('stroke-width','.9');
+  svg.appendChild(g);
+ }
+ // sockets (on top, receive taps); the output socket carries the red marker
+ for(const s in SOCKETS){
+  const [x,y]=SOCKETS[s];
+  const c=document.createElementNS(NS,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',s==='S0'?1.6:2.2);
+  c.setAttribute('class','sock'+(s===OUT_SOCKET?' out':''));c.dataset.sock=s;
+  c.setAttribute('role','button');c.setAttribute('aria-label','軸座 '+s);c.setAttribute('tabindex','0');
+  if(s!=='S0'){c.addEventListener('click',()=>tap(s));c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(s);}});}
+  svg.appendChild(c);
+  if(s===OUT_SOCKET){
+   const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',x);ring.setAttribute('cy',y);ring.setAttribute('r',4);ring.setAttribute('fill','none');ring.setAttribute('stroke','#f55');ring.setAttribute('stroke-width','.5');ring.setAttribute('stroke-dasharray','1.2 1');ring.setAttribute('pointer-events','none');svg.appendChild(ring);
+   svg.insertAdjacentHTML('beforeend',`<text class="lbl" x="${x}" y="${y+7.4}" fill="#f88" style="fill:#f88">輸出軸</text>`);
+   // red marker follows the output gear's rotation
+   const oi=ev.nodes.findIndex(n=>n.s===OUT_SOCKET),ow=oi>=0&&ev.w[oi]?ev.w[oi][0]/ev.w[oi][1]:0,ang=turns*ow*2*Math.PI-Math.PI/2;
+   if(oi>=0&&ev.w[oi])svg.insertAdjacentHTML('beforeend',`<circle cx="${x+Math.cos(ang)*3.2}" cy="${y+Math.sin(ang)*3.2}" r=".9" fill="#f33" pointer-events="none"/>`);
+  }
+ }
+ // crank handle on S0 so the driver is obvious
+ const ca=turns*2*Math.PI-Math.PI/2;
+ svg.insertAdjacentHTML('beforeend',`<text class="lbl" x="0" y="-8.6">曲柄 12 齒</text><line x1="0" y1="0" x2="${Math.cos(ca)*5}" y2="${Math.sin(ca)*5}" stroke="#fff" stroke-width=".6" pointer-events="none"/><circle cx="${Math.cos(ca)*5}" cy="${Math.sin(ca)*5}" r="1" fill="#fff" pointer-events="none"/>`);
+ for(const s in SOCKETS)if(s!=='S0'&&s!==OUT_SOCKET){const [x,y]=SOCKETS[s];svg.insertAdjacentHTML('beforeend',`<text class="lbl" x="${x}" y="${y-3.2}" style="opacity:.55">軸座</text>`);}
+}
+function trayDraw(){
+ const tray=document.getElementById('tray');tray.innerHTML='';
+ const placed={};for(const s in state)state[s].forEach(t=>{if(t)placed[t]=(placed[t]||0)+1;});
+ const taken={};
+ GEAR_TRAY.forEach((t,i)=>{
+  const used=(placed[t]||0)>(taken[t]||0);if(used)taken[t]=(taken[t]||0)+1;
+  const b=document.createElement('button');b.className='tg'+(used?' used':'');b.setAttribute('aria-pressed',String(sel===i));
+  b.setAttribute('aria-label',t+' 齒齒輪'+(used?'（已放置）':''));
+  const r=t/2+2,gs=document.createElementNS(NS,'svg');gs.setAttribute('viewBox',`${-r} ${-r} ${2*r} ${2*r}`);
+  gs.appendChild(gearEl(t,layer,''));b.appendChild(gs);
+  b.insertAdjacentHTML('beforeend',`<b>${t} 齒</b>`);
+  b.disabled=used;b.onclick=()=>{sel=sel===i?null:i;trayDraw();msg(sel!==null?`已選 ${GEAR_TRAY[sel]} 齒，點一個軸座放上去（${layer?'上層':'下層'}）`:'');};
+  tray.appendChild(b);
+ });
+}
+function tap(s){
+ if(sel!==null){
+  const t=GEAR_TRAY[sel];
+  if(state[s][layer]){msg('這個軸座的這一層已經有齒輪了，先點一下取下它。','bad');return;}
+  state[s][layer]=t;sel=null;update();return;
+ }
+ const l=state[s][layer]?layer:state[s][1-layer]?1-layer:null;
+ if(l===null){msg('先從下方選一個齒輪。','');return;}
+ state[s][l]=null;update();
+}
+function msg(t,cls){const e=document.getElementById('status');e.textContent=t;e.className=cls||'';}
+function update(){
+ draw();trayDraw();
+ const r=ev;
+ if(r.solved)msg('齒輪咬合：曲柄 13 圈 → 輸出 1 圈，同方向。通過！','ok');
+ else if(r.jam)msg(r.jam.why==='overlap'?`卡住：${r.jam.a} 與 ${r.jam.b} 重疊，但齒沒有咬合。換個尺寸，或換個軸座。`:`卡住：這組齒輪互相鎖死，轉不動。`,'bad');
+ else if(r.out)msg(`輸出軸已被帶動：曲柄 ${r.out[1]} 圈 → 輸出 ${Math.abs(r.out[0])} 圈${r.out[0]<0?'（反方向）':''}。還不是 13 比 1。`,'');
+ else msg(r.dangling.length?`有 ${r.dangling.length} 個齒輪沒有咬合到任何東西（距離太遠，空轉）。輸出軸還沒有被帶動。`:(sel===null?'輸出軸還沒有被帶動。':''),'');
+ document.getElementById('counter').textContent='曲柄 '+turns.toFixed(2)+' 圈'+(r.out?' · 輸出 '+(turns*r.out[0]/r.out[1]).toFixed(2)+' 圈':'');
+}
+function frame(ts){
+ if(spinning){const dt=Math.min(.05,(ts-last)/1000);turns+=dt*.6;draw();
+  document.getElementById('counter').textContent='曲柄 '+turns.toFixed(2)+' 圈'+(ev.out?' · 輸出 '+(turns*ev.out[0]/ev.out[1]).toFixed(2)+' 圈':'');}
+ last=ts;requestAnimationFrame(frame);
+}
+document.getElementById('reset').onclick=reset;
+document.getElementById('ruler').onclick=e=>{e.target.setAttribute('aria-pressed',String(e.target.getAttribute('aria-pressed')!=='true'));draw();};
+for(const l of [0,1])document.getElementById('l'+l).onclick=()=>{layer=l;document.getElementById('l0').setAttribute('aria-pressed',String(l===0));document.getElementById('l1').setAttribute('aria-pressed',String(l===1));trayDraw();};
+document.getElementById('spin').onclick=e=>{spinning=!spinning;e.target.setAttribute('aria-pressed',String(spinning));if(ev&&ev.jam&&spinning)msg('卡住了，曲柄轉不動。','bad');};
+// hints: tier resets when the stage changes; an idle player gets tier 1 offered by the mirror (60 s here, 3 min in the game)
+let hintStage=null,hintTier=0,hintsUsed=0,lastChange=Date.now();
+function showHint(auto){
+ const st=stage(state);const box=document.getElementById('hinttext');
+ if(!st){box.style.display='none';return;}
+ if(st!==hintStage){hintStage=st;hintTier=0;}
+ if(!auto||hintTier===0){hintTier=Math.min(hintTier+(auto?1:1),3);}
+ if(!auto)hintsUsed++;
+ box.style.display='block';box.textContent=(auto?'魔鏡低語：':'燭光提示 '+hintTier+' / 3：')+HINTS[st][hintTier-1];
+ document.getElementById('hintinfo').textContent='已用提示 '+hintsUsed+' 次'+(hintTier<3?'；再按一次看更明確的':'；這已經是最明確的提示');
+}
+document.getElementById('hint').onclick=()=>showHint(false);
+setInterval(()=>{if(Date.now()-lastChange>60000&&stage(state)&&hintTier===0){showHint(true);lastChange=Date.now();}},5000);
+const _update=update;update=function(){lastChange=Date.now();const prev=hintStage;_update();const st=stage(state);if(st!==prev&&prev!==null){hintStage=st;hintTier=0;document.getElementById('hinttext').style.display='none';}if(!st)document.getElementById('hinttext').style.display='none';};
+reset();requestAnimationFrame(frame);
+window.__e1={showHint:(a)=>showHint(a),get hintTier(){return hintTier},get state(){return state},place:(s,l,t)=>{state[s][l]=t;update();},evaluate:()=>ev};
+</script>
+</body>
+</html>
