@@ -15,6 +15,7 @@ import {mountNames,namesSolved} from './names.js';
 import {mountRubbing,rubbingSolved} from './rubbing.js';
 import {mountStitch,stitchSolved} from './stitch.js';
 import {mountMaze,mazeSolved} from './maze.js';
+import {preloadImages} from '../concept-art.js';
 export {puzzleIsSolved,pipeIsSolved,glassIsSolved,lullaby,masksSolved,heartPathValid,lightSolved,watchSolved,namesSolved,rubbingSolved,stitchSolved,mazeSolved};
 
 // Each evidence puzzle has one or more stages (機關). Stage ids match the chapter data's `stages`, which
@@ -32,6 +33,9 @@ export const puzzles={
  queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',label:'記憶與物件',mount:mountMemory},{id:'stitch',label:'縫線紋樣',mount:mountStitch,whisper:true}]},
  mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:mountReflection},{id:'maze',label:'鏡像迷廊',mount:mountMaze,requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]}
 };
+// Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
+const stageArtSrc=stage=>stage?'assets/puzzles/'+stage.id+'.webp':'';
+const stageArt=stage=>stage?'<img class="stage-art" src="'+stageArtSrc(stage)+'" alt="" width="960" height="411" decoding="async" draggable="false">':'';
 export const stageLabel=(chapter,stage)=>puzzles[chapter]?.stages.find(s=>s.id===stage)?.label||'';
 export const stageKey=(chapter,stage)=>chapter+'.'+stage;
 
@@ -67,7 +71,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
   const selector=attr?'['+attr+'="'+focused.getAttribute(attr)+'"]':null;
   const others=current&&multi&&!fresh&&remaining().some(s=>s.id!==current.id);
   const subtitle=current&&multi?entry.subtitle.split(' · ')[0]+' · '+current.label:entry.subtitle;
-  modal(entry.title,subtitle,'<div class="challenge" data-challenge="'+id+'"'+(current?' data-step="'+current.id+'"':'')+'>'+html+(others?'<button class="text-button stage-switch" data-stage-switch>先做另一道機關 ⟶</button>':'')+'</div>'+(current&&extra?extra.html(current.id):''));
+  modal(entry.title,subtitle,'<div class="challenge" data-challenge="'+id+'"'+(current?' data-step="'+current.id+'"':'')+'>'+stageArt(current)+html+(others?'<button class="text-button stage-switch" data-stage-switch>先做另一道機關 ⟶</button>':'')+'</div>'+(current&&extra?extra.html(current.id):''));
   document.querySelector('[data-stage-switch]')?.addEventListener('click',choose);
   if(current&&extra)extra.bind(current.id);
   if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});
@@ -83,7 +87,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
   if(left.length===1||fresh)run(left[0]);else choose();
  };
  const run=stage=>{
-  current=stage;active={chapter:id,stage:stage.id};
+  current=stage;active={chapter:id,stage:stage.id};preloadImages([stageArtSrc(stage)]);
   if(stage.requires&&!has(stage.requires)){
    render('<p class="challenge-help">'+stage.missing+'</p><p class="challenge-feedback" role="status">這道機關還不能開始。</p>');
    onStage(stage.id);return;
@@ -95,7 +99,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  function choose(){
   current=null;active=null;
   render('<p class="challenge-help">這份證據由兩道機關守著，先做哪一道都可以。卡住的時候，可以先換另一道。</p><div class="stage-picks">'
-   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires);return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'>'+s.label+'<small>'+(done?'已完成':blocked?'還缺少需要的物品':'尚未完成')+'</small></button>';}).join('')
+   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires);return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
    +'</div>');
   document.querySelectorAll('[data-stage-pick]').forEach(button=>button.onclick=()=>run(stages.find(s=>s.id===button.dataset.stagePick)));
  }
