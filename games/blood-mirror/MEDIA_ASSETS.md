@@ -35,9 +35,9 @@ assets/music/
   03_crypt_The_Breath_Between.mp3         第五幕
   04_queen_Veras_Lullaby.mp3              第六幕
   05_mirror_The_Price_of_a_Name.mp3       第七幕
-  06_dawn_Nameless_Dawn.mp3
-  07_frost_Winter_Without_Names.mp3
-  08_crown_Crown_of_Blood.mp3
+  06_dawn_Nameless_Dawn_v4.mp3            真結局
+  07_frost_Winter_Without_Names_v4.mp3    霜潮結局
+  08_crown_Crown_of_Blood_v4.mp3          王冠結局
 ~~~
 
 ## CG 圖像

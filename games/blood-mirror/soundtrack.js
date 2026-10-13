@@ -7,8 +7,8 @@ export const soundtrackFiles={
  library:'01_library_The_Thirteenth_Toll.mp3',mine:'02_mine_Seven_Beds_of_Silver.mp3',
  crypt:'03_crypt_The_Breath_Between.mp3',queen:'04_queen_Veras_Lullaby.mp3',
  ballroom:'12_ballroom_Waltz_of_Wax.mp3',hunter:'13_hunter_A_Heart_in_Glass.mp3',
- mirror:'05_mirror_The_Price_of_a_Name.mp3',dawn:'06_dawn_Nameless_Dawn.mp3',
- frost:'07_frost_Winter_Without_Names.mp3',crown:'08_crown_Crown_of_Blood.mp3'
+ mirror:'05_mirror_The_Price_of_a_Name.mp3',dawn:'06_dawn_Nameless_Dawn_v4.mp3',
+ frost:'07_frost_Winter_Without_Names_v4.mp3',crown:'08_crown_Crown_of_Blood_v4.mp3'
 };
 // The full theme (about five minutes) is used by the listening room and the credits, never as a loop.
 export const fullThemeFile='11_theme_full_Who_Deserves_to_Live.mp3';
@@ -22,13 +22,16 @@ const trackFiles={...soundtrackFiles,credits:fullThemeFile};
 const LOUDNESS={
  '01_library_The_Thirteenth_Toll.mp3':-18.9,'02_mine_Seven_Beds_of_Silver.mp3':-19.1,
  '03_crypt_The_Breath_Between.mp3':-18.9,'04_queen_Veras_Lullaby.mp3':-18.9,
- '05_mirror_The_Price_of_a_Name.mp3':-18.9,'06_dawn_Nameless_Dawn.mp3':-21,
- '07_frost_Winter_Without_Names.mp3':-20.4,'08_crown_Crown_of_Blood.mp3':-20.2,
+ '05_mirror_The_Price_of_a_Name.mp3':-18.9,'06_dawn_Nameless_Dawn_v4.mp3':-18.5,
+ '07_frost_Winter_Without_Names_v4.mp3':-18.5,'08_crown_Crown_of_Blood_v4.mp3':-18.4,
  '10_theme_intro_Who_Deserves_to_Live.mp3':-22.2,'11_theme_full_Who_Deserves_to_Live.mp3':-15.3,
  '12_ballroom_Waltz_of_Wax.mp3':-18.9,'13_hunter_A_Heart_in_Glass.mp3':-18.9
 };
 const TARGET_LUFS=-18,MAX_BOOST_DB=4;
 export const trackGain=file=>{const lufs=LOUDNESS[file];return lufs===undefined?1:Math.pow(10,Math.min(MAX_BOOST_DB,TARGET_LUFS-lufs)/20);};
+// The listening room's <audio> element cannot boost above 1, so every track is scaled by the same
+// ceiling (the largest boost). All tracks then sit the same distance below the game's level.
+export const listeningVolume=file=>trackGain(file)/Math.pow(10,MAX_BOOST_DB/20);
 
 const CROSSFADE=1.5,RESUME_FADE=0.6,SYNTH_LEVEL=0.9;
 const themes={

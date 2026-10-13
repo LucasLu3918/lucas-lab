@@ -2,7 +2,7 @@
 
 > 注意：本檔中的 `source-audio/` 路徑指倉庫旁的 `../draft/lucas-lab/bgm-audition/`（封存與試聽資料），不在版本控制內。
 
-> 目前遊戲使用的第一至第七幕場景配樂已全面換成「場景配樂 v3」（見檔尾）；本節以下的第一至第五幕舊曲目已歸檔，只保留標題曲與三個結局曲目的說明。
+> 目前遊戲使用的第一至第七幕場景配樂已全面換成「場景配樂 v3」，三個結局配樂已換成「結局配樂 v4」（見檔尾）；本節以下的第一至第五幕與結局舊曲目已歸檔，只保留標題曲的說明。
 
 共 9 段音樂，每段約 31–36 秒。這是音樂概念試聽，不代表已部署至遊戲。
 
@@ -87,3 +87,18 @@
 - 來源：現行 MP3 重新編碼（ffmpeg libmp3lame，-ar 44100，去除 metadata）。倉庫內沒有無損母檔，因此是第二代有損編碼；若要更高品質，需回到原始 wav 重新產生。
 - 整合響度（EBU R128）量測後更新 `soundtrack.js` 的 `LOUDNESS` 表；`playlist.json` 的 bytes 已同步。
 - 替換前的版本保存在 `draft/lucas-lab/bgm-audition/bitrate-2026-10-13/previous-shipped/`（倉庫外，供回滾）。
+
+## 結局配樂 v4（真結局、霜潮、王冠，本機 MiniMax Music 3 產生）
+
+- 產生日期：2026-10-13；工具與段落標籤同場景配樂 v3（`structure.txt`，90 秒要求，30 步）；後製沿用 `process.py`（壓縮、首尾 4 秒交叉淡化成循環、−18 LUFS、128 kbps MP3）。模型授權同 v3（minimax-music3-community），公開部署前須確認輸出使用條款。
+- 提示詞要求純器樂、無人聲，並依各結局的情境寫作：真結局為溫暖鋼琴與小提琴、動機解開為大調；霜潮為風聲與孤獨大提琴、燈光逐漸亮起；王冠為管風琴與收斂銅管、鐘聲與玻璃鈴帶出動機。
+- 提示詞與結構檔保留在 `draft/lucas-lab/bgm-audition/ending-v4-preview/`（試聽頁）與 `draft/lucas-lab/bgm-audition/generation/`；原始 wav 未保留。
+
+| 結局 | 檔案 | 秒數 | 種子 | 整合響度 |
+|---|---|---|---|---|
+| 真結局 無名的黎明 | `06_dawn_Nameless_Dawn_v4.mp3` | 86.0 | 5101 | −18.5 LUFS |
+| 霜潮 沒有名字的冬天 | `07_frost_Winter_Without_Names_v4.mp3` | 86.0 | 5202 | −18.5 LUFS |
+| 王冠 血色王冠 | `08_crown_Crown_of_Blood_v4.mp3` | 86.0 | 5303 | −18.4 LUFS |
+
+- 取代的 v1 三首（32–34 秒，TimGM6mb 音色庫，首尾有靜音；06 結尾約 1.2 秒空白）已歸檔至 `draft/lucas-lab/bgm-audition/ending-v1-archive/`，不隨網站發布。
+- `soundtrack.js` 的 `LOUDNESS` 已填入上表實測值；`playlist.json` 的秒數與位元組已同步。
