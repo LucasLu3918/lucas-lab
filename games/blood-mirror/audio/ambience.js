@@ -6,8 +6,7 @@ const BEDS={
  queen:{filter:'bandpass',freq:1400,level:0.12,swell:0.4,event:{kind:'crackle',every:[0.6,1.8],freq:3200,peak:0.03}},
  mirror:{filter:'highpass',freq:300,level:0.16,swell:0.05,reverse:true},
  ballroom:{filter:'bandpass',freq:900,level:0.11,swell:0.22,event:{kind:'tick',every:[1.2,2.4],freq:2600,peak:0.025}},
- hunter:{filter:'lowpass',freq:300,level:0.2,swell:0.1,event:{kind:'crackle',every:[0.9,2.2],freq:2800,peak:0.03}},
- chamber:{filter:'lowpass',freq:260,level:0.14,swell:0.08}
+ hunter:{filter:'lowpass',freq:300,level:0.2,swell:0.1,event:{kind:'crackle',every:[0.9,2.2],freq:2800,peak:0.03}}
 };
 // The bed loops every 8 s; the last SEAM seconds are cross-faded into the head so the loop point
 // is inaudible. The mirror's reversed swell repeats every 4 s, so two swells fit one loop exactly.

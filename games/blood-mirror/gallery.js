@@ -1,5 +1,5 @@
 import {conceptMarkup,placeConcepts} from './concept-art.js';
-import {soundtrackFiles,fullThemeFile} from './soundtrack.js';
+import {soundtrackFiles,fullThemeFile,listeningVolume} from './soundtrack.js';
 // Original artwork archive; boards include design proposals and ending spoilers.
 export const galleryCategories=[{id:'all',label:'全部作品'},{id:'character',label:'角色'},{id:'scene',label:'場景'},{id:'concept',label:'概念圖'},{id:'ending',label:'結局 CG'}];
 export const galleryAssets=[
@@ -33,12 +33,14 @@ export const filterArtwork=category=>galleryAssets.filter(asset=>category==='all
 export function createGallery({getEndings,openModal,closeModal,onPreviewStart,onPreviewStop}){
  const filters=document.querySelector('#gallery-filters'),grid=document.querySelector('#gallery-grid'),status=document.querySelector('#gallery-status');
  const player=document.querySelector('#gallery-audio'),trackSelect=document.querySelector('#gallery-track');
+ // Match the in-game loudness trim (soundtrack.js) so every track sounds at the same level here.
+ const setLevel=()=>{player.volume=listeningVolume(decodeURIComponent(new URL(player.src).pathname.split('/').pop()));};
  const trackTitles={home:'標題 · 主題曲前奏',library:'第一幕 · 黑鐘書庫',ballroom:'第二幕 · 血色舞會',hunter:'第三幕 · 獵人的心臟',mine:'第四幕 · 銀骨礦坑',crypt:'第五幕 · 玻璃棺室',queen:'第六幕 · 王后寢宮',mirror:'第七幕 · 鏡中之國',dawn:'真結局 · 無名的黎明',frost:'結局二 · 霜潮',crown:'結局三 · 血色王冠'};
  let suppressResume=false;
  const stopPreview=(resume=true)=>{if(!player.paused){suppressResume=!resume;player.pause();}};
  player.addEventListener('play',onPreviewStart);player.addEventListener('pause',()=>{if(!suppressResume)onPreviewStop();suppressResume=false;});player.addEventListener('ended',onPreviewStop);
  player.addEventListener('error',()=>{document.querySelector('#gallery-audio-status').textContent='配樂暫時無法播放，請稍後再試。';onPreviewStop();});
- trackSelect.onchange=()=>{stopPreview();player.src=trackSelect.value;player.load();document.querySelector('#gallery-audio-status').textContent='';};
+ trackSelect.onchange=()=>{stopPreview();player.src=trackSelect.value;setLevel();player.load();document.querySelector('#gallery-audio-status').textContent='';};
  document.querySelector('#gallery-listening').addEventListener('toggle',e=>{if(!e.target.open)stopPreview();});
  let category='all',selectedId=null;
  const enhance=image=>{
@@ -53,7 +55,7 @@ export function createGallery({getEndings,openModal,closeModal,onPreviewStart,on
   const oldTrack=trackSelect.value;
   trackSelect.innerHTML=Object.entries(soundtrackFiles).filter(([id])=>!['dawn','frost','crown'].includes(id)||getEndings().includes(id)).map(([id,file])=>`<option value="assets/music/${file}">${trackTitles[id]}</option>`).join('')+`<option value="assets/music/${fullThemeFile}">主題曲〈誰值得活下去〉完整版</option>`;
   if([...trackSelect.options].some(o=>o.value===oldTrack))trackSelect.value=oldTrack;
-  if(!player.getAttribute('src'))player.src=trackSelect.value;
+  if(!player.getAttribute('src')){player.src=trackSelect.value;setLevel();}
   filters.innerHTML=galleryCategories.map(c=>`<button type="button" data-gallery-filter="${c.id}" aria-pressed="${c.id===category}">${c.label}</button>`).join('');
   const assets=filterArtwork(category),discovered=getEndings();
   status.textContent=`${assets.length} 件作品 · 結局收藏 ${galleryAssets.filter(a=>a.ending&&canViewArtwork(a,discovered)).length} / 3`;

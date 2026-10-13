@@ -12,17 +12,8 @@ const CUES={
  solve:{notes:[220,329.63,440],length:.9,gap:.15,peak:.18,duck:-6,release:true},
  wrong:{notes:[98,92.5],wave:'triangle',length:.35,gap:.12,peak:.16,duck:-2},
  door:{notes:[73.42,98,110],length:1,gap:.18,peak:.2,duck:-5,noise:{freq:220,length:.6,peak:.08}},
- lock:{notes:[196,147],wave:'triangle',length:.2,gap:.08,peak:.13,noise:{freq:1800,length:.04,peak:.06}},
- gear:{notes:[246.94,233.08],wave:'triangle',length:.12,gap:.09,peak:.1,noise:{freq:2600,length:.05,peak:.05}},
- bell:{notes:[392,523.25],length:1.4,gap:.2,peak:.13,duck:-3},
- achievement:{notes:[523.25,659.25,784],length:.8,gap:.13,peak:.15,duck:-5,release:true},
- stitch:{notes:[587.33],length:.15,peak:.09},
- seal:{notes:[330,392,494],length:.8,gap:.16,peak:.15,duck:-4},
- // Cues that are mostly a noise texture (glass, steam, a heartbeat thump).
- glass:{notes:[1760,2349.32],length:.5,gap:.05,peak:.04,noise:{freq:4200,length:.35,peak:.14}},
- steam:{noise:{freq:900,length:.9,peak:.12}},
- heart:{notes:[110],length:.18,peak:.16,noise:{freq:110,length:.18,peak:.12}},
- crack:{noise:{freq:2600,length:.5,peak:.14}}
+ // A glass chime with a shimmer of noise (the mirror's shards).
+ glass:{notes:[1760,2349.32],length:.5,gap:.05,peak:.04,noise:{freq:4200,length:.35,peak:.14}}
 };
 // Variation keeps repeated cues (a run of clicks or wrong answers) from sounding mechanical.
 const VARY_CENTS=30,VARY_LEVEL=0.12;
