@@ -494,7 +494,9 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
 .large-text .speaker{font-size:15px}
 .large-text .dialogue-toggle,.large-text .dialogue-count,.large-text .clue-group-title span,.large-text .clue-view{font-size:14px}
 .large-text .dialogue-foot .text-button,.large-text .dialogue-foot .secondary-button,.large-text .dialogue-actions .primary-button,.large-text .dialogue-actions .secondary-button{font-size:15px}
-.large-text .hud-objective{font-size:14px;line-height:1.5;white-space:normal;border-radius:14px}
+/* Block flow, not the phone's flex row: the label runs on into the sentence instead of taking a line of its own. */
+.large-text .hud-objective{display:block;font-size:14px;line-height:1.5;white-space:normal;border-radius:14px}
+.large-text .hud-objective .hud-label{display:inline;margin-right:.5em}
 .large-text .hud-meta,.large-text .hud-kicker,.large-text .hud-label,.large-text .scene-clues summary{font-size:14px}
 .large-text .room-tabs button span,.large-text .tray .inventory button span{font-size:13px}
 .large-text .hotspot span{font-size:15px}
