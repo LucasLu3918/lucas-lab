@@ -21,8 +21,9 @@ export const PROLOGUE_PUZZLE='prologue';
 const chapterIds=()=>chapters.map(c=>c.id);
 // A two-stage evidence also records each finished stage ("mine.names"), so the player can do them in either order.
 const stageIds=()=>chapters.filter(c=>c.stages?.length>1).flatMap(c=>c.stages.map(stage=>c.id+'.'+stage));
-// The optional "帳本的背面" levels are puzzles of their own, outside the chapter chain.
-const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE,...stageIds(),...abyss.levels.map(level=>level.puzzle)];
+// The optional "帳本的背面" levels are puzzles of their own, outside the chapter chain; each also records its finished mechanisms.
+const abyssIds=()=>abyss.levels.flatMap(level=>[level.puzzle,...level.stages.map(stage=>level.puzzle+'.'+stage)]);
+const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE,...stageIds(),...abyssIds()];
 const knownIds=list=>Array.isArray(list)?[...new Set(list.filter(id=>puzzleIds().includes(id)))]:[];
 
 // Engine state -> v2 object. `puzzles` lists the hands-on puzzles completed so far.

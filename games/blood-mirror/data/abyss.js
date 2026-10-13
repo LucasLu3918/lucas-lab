@@ -19,7 +19,9 @@ export const abyss={
    number:'E1',
    title:'逆走鐘樓',
    subtitle:'第十三座鐘塔',
-   thumb:'belfry',
+   // The mechanisms of the puzzle in play order (puzzles/index.js); the save records each finished one as "<puzzle>.<stage>".
+   stages:['belfry-gears','belfry-pendulum','belfry-wheel'],
+   thumb:'belfry-gears',
    scene:[
     {text:'書庫的暗門後，有一段沒有出現在任何地圖上的樓梯。'},
     {text:'學院有十二座鐘塔，妳數過。樓梯卻通向第十三座。'},

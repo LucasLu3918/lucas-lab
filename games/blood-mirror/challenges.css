@@ -366,3 +366,35 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .belfry-hint .secondary-button{width:auto;margin:0;padding:8px 16px}
 #modal .belfry-hint-text{margin:8px 0 0;padding:8px 12px;border-left:3px solid #77eeff;background:#10202a;font-size:13px;line-height:1.85;color:#cfe9ee}
 #modal .belfry-hint-text[hidden],#modal #bf-run[hidden]{display:none}
+#modal #bf-run:disabled{opacity:.5}
+/* the pendulum (puzzles/pendulum.js) */
+#modal .pend-beam{fill:#3b2d1a;stroke:var(--brass-mid);stroke-width:1.5}
+#modal .pend-pivot{fill:var(--brass);stroke:#17110c;stroke-width:1}
+#modal .pend-rod{stroke:var(--brass);stroke-width:3;stroke-linecap:round}
+#modal .pend-rod.old{stroke:#8d7a55;stroke-width:2.4}
+#modal .pend-bob{fill:#e0b84f;stroke:#7a5a14;stroke-width:1.5}
+#modal .pend-bob.old{fill:#9d8a62}
+#modal .pend-disc{fill:#c9ab6a;stroke:#5c4627;stroke-width:1.2}
+#modal .pend-disc.big{fill:#c9ab6a;stroke:#5c4627;stroke-width:1.2}
+#modal .pend-label{font-size:12px;fill:#d9c9a4;text-anchor:middle}
+#modal .pend-scale{font-size:9px;fill:#8f8168;text-anchor:end}
+#modal .pend-tick{stroke:#6b5a3a;stroke-width:1}
+#modal .pend-bell{font-size:20px;fill:#ffd98a;text-anchor:middle;font-weight:700}
+#modal .belfry-weight b{font-size:11px;margin-top:2px}
+#modal .belfry-weight{width:96px}
+/* the star wheel (puzzles/starwheel.js) */
+#modal .wheel-board{max-width:420px;margin:0 auto}
+#modal .wheel-ring{fill:none;stroke:var(--brass);stroke-width:7}
+#modal .wheel-hub{fill:#2a1d12;stroke:var(--brass-mid);stroke-width:2}
+#modal .wheel-notch{stroke:#8d7a55;stroke-width:3;stroke-linecap:round}
+#modal .wheel-ruby{fill:#d8344f;stroke:#ffd9de;stroke-width:1.5;filter:drop-shadow(0 0 6px #ff4f6a99)}
+#modal .wheel-glyph{font:600 15px var(--serif);fill:#ffe9ad;text-anchor:middle;opacity:0;transition:opacity .35s}
+#modal .wheel-svg.lit .wheel-glyph{opacity:1}
+body.reduce-motion #modal .wheel-glyph{transition:none}
+#modal .wheel-hammer{stroke:#d8344f;stroke-width:4;stroke-linecap:round}
+#modal .wheel-hammer-head{fill:#ff6b82;stroke:#fff;stroke-width:1.5}
+#modal .wheel-toll{font:700 26px var(--serif);fill:#ffe9ad;text-anchor:middle}
+#modal .wheel-engraving{margin:10px 0 0;padding:8px 12px;border-left:3px solid #e0b84f;background:#1f170d;font-size:13px;line-height:1.85;color:#ecd9a8}
+#modal .wheel-engraving[hidden]{display:none}
+#modal .wheel-step{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
+#modal .wheel-step .secondary-button{width:44px;padding:0;margin:0}

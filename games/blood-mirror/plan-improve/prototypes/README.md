@@ -9,8 +9,12 @@
 | `e2-optics.html` | E2 稜鏡舞廳（光路） | `e2-optics.solve.cjs` | 三關各只有一組光束解；提示依解收斂 |
 | `e3-apothecary.html` | E3 毒蘋果調配室 | `e3-apothecary.solve.cjs` | 證詞唯一解、量杯最短解唯一、調色配方唯一 |
 | `e5-box.html` | E5 七重魔鏡匣 | `e5-box.solve.cjs` | 注音密碼可還原、缺任一關都解不開、各面閘門 |
+| `e1-pendulum.html` | E1 鐘擺（週期與擺長） | `../../../../scripts/blood-mirror-abyss.test.mjs` | 由 `build-belfry-prototypes.cjs` 從正式模組產生；唯一解是掛「輕」與「重」，擺長 4 格、週期比 2 |
+| `e1-starwheel.html` | E1 星輪（點燭讀刻字、設定步幅） | 同上 | 同上；唯一步幅 5，第 13 聲落回紅寶石 |
 
-> **E1 已有正式實作**：`../../puzzles/gears13.js`（規則與介面）、`../../data/abyss.js`（關卡資料）、`../../abyss.js`（入口），測試在 `scripts/blood-mirror-abyss.test.mjs`。`e1-gears.html` 只保留作為設計紀錄，之後規則以正式版為準；詳見 `../plan-expert-levels.md` 7.8。
+> **E1 已有正式實作**：`../../puzzles/gears13.js`、`pendulum.js`、`starwheel.js`（規則與介面）、`../../data/abyss.js`（關卡資料）、`../../abyss.js`（入口），測試在 `scripts/blood-mirror-abyss.test.mjs`。`e1-gears.html` 只保留作為設計紀錄，之後規則以正式版為準；詳見 `../plan-expert-levels.md` 7.8、7.9。
+
+兩頁以 `node build-belfry-prototypes.cjs` 重新產生。預覽窗格對本機檔案只顯示靜態快照、腳本不會執行，請用一般瀏覽器開啟；它們的規則與介面和遊戲內完全相同，在遊戲內已實測。
 
 ## 執行驗證
 

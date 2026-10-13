@@ -138,8 +138,10 @@ node scripts/blood-mirror.browser.cjs
 
 ### 帳本的背面 E1 逆走鐘樓（2026-10-14）
 
-- `assets/puzzles/belfry.webp`（960×411，約 40 KB）與 `assets/puzzles/thumbs/belfry.webp`（224×128，約 8 KB）：**暫用**，由企劃概念圖 `plan-improve/concepts-expert/e1_belfry_clockwork.webp`（本機 Z-Image Turbo，1344×768）以 `cwebp` 裁切縮放而成（特寫：`-crop 0 140 1344 575 -resize 960 411 -q 68`；縮圖：整張 `-resize 224 128 -q 78`）。概念圖是方向稿，不是正式美術；是否另產正式稿由作者決定。不算在前面 14 張之內，只在機關視窗與重玩選單載入。
-- 齒輪、軸座、輸出軸與提示面板都是程式繪製的 SVG（`puzzles/gears13.js`、`challenges.css`），沒有圖檔。
+- 三道機關各有一張特寫與縮圖（不算在前面 14 張之內，只在機關視窗、機關選擇與重玩選單載入）：`belfry-gears`（約 40 KB）、`belfry-pendulum`（約 26 KB）、`belfry-wheel`（約 20 KB），特寫 960×411、縮圖 224×128（共約 100 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，種子 2101／2102、2201／2202、2301／2302，每個機關 2 張候選目視挑選；選用 gears-0、pendulum-1、wheel-0）。提示詞要求無文字、無人物；齒輪特寫指定灰兔右耳要有一排紅色縫線（候選 0 做到了），星輪的輪緣只有符文般的刻痕，沒有可讀文字。轉檔：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576 再 `-resize 224 128 -q 76`。PNG 母檔與全部候選在 `draft/lucas-lab/blood-mirror/`（`source-art/puzzles/belfry-*.png`、`candidates/belfry/`），不在版本控制內。**這不是使用者驗收。**
+- 先前暫用的概念圖裁切（`belfry.webp`）已移除；概念圖 `plan-improve/concepts-expert/` 仍只當方向稿。
+- 齒輪、軸座、擺錘、配重、星輪與提示面板都是程式繪製的 SVG／CSS（`puzzles/gears13.js`、`pendulum.js`、`starwheel.js`、`challenges.css`），沒有圖檔。
 
 ## 新增場景視角與熱點稽核（2026-10-13）
 
