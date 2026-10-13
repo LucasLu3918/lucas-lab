@@ -54,7 +54,7 @@ table.zt td b{display:block;font-size:15px}
   <button id="prev" aria-label="上一面">◀</button><button id="next" aria-label="下一面">▶</button>
   <button id="reset">重來</button>
 </header>
-<p id="goal">魔鏡匣有六面，每一面都要用前面關卡取得的東西打開。點匣子的任一面，或用 ◀ ▶ 轉動，再照下方的說明操作。六面都打開，匣子就會開啟。卡住時按「燭光提示」。</p>
+<p id="goal">魔鏡匣有六面，每一面都要用前面關卡取得的東西打開（它是魔鏡記帳留下的底稿匣）。點匣子的任一面，或用 ◀ ▶ 轉動，再照下方的說明操作。六面都打開，匣子就會開啟。卡住時按「燭光提示」。</p>
 <div id="inv"></div>
 <div id="sim">試玩用：<span id="simctl"></span></div>
 <div id="stage"><div id="cube" class="v0"></div></div>
@@ -69,7 +69,7 @@ const ZHUYIN37=['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ','ㄌ','ㄍ','ㄎ','ㄏ
 const ITEMS={
  ring:{name:'時辰環',from:'E1',key:'ㄎ',note:'第十三聲鐘響，鐘盤要停在第 13 格。'},
  prism:{name:'稜鏡',from:'E2',key:'ㄒ',note:'透過稜鏡才看得到面上隱藏的刻線。'},
- antidote:{name:'解藥',from:'E3',key:'ㄋ',note:'毒蘋果在提米手上，他是第 7 位。'},
+ antidote:{name:'回魂藥',from:'E3',key:'ㄋ',note:'毒蘋果在學徒甘松手上，他是第 7 位。'},
  thread:{name:'紅線',from:'E4',key:'ㄧ',note:'紅線依序穿過：星、月、燈、門。'}
 };
 const KEY_ORDER=['ring','prism','antidote','thread'];
@@ -83,7 +83,7 @@ const CIPHER=encrypt(PLAIN,KEYS);
 // Face solutions
 const LIGHT=['R','B','G'];           // engraved line revealed by the prism: red, blue, green
 const THREAD=['星','月','燈','門'];     // the order the red thread passes
-const APPLE=7;                       // the poisoned miner's number
+const APPLE=7;                       // the poisoned apple's holder (apprentice 甘松)'s number
 const TIME=13;
 const FACES=[
  {id:'time',name:'時辰面',needs:'ring',glyph:'⌚'},
@@ -98,9 +98,9 @@ const owns=(inv,need)=>!need||(need==='all4'?KEY_ORDER.every(k=>inv.items[k]):!!
 const HINTS={
  time:['這一面有一個 13 格的撥盤。想想哪一聲鐘響是這座學院多出來的。','第十三聲鐘響是多出來的那一聲。','把撥盤轉到第 13 格。'],
  light:['面上有一條看不見的刻線。舉起稜鏡看看。','刻線是三種顏色的順序，依序按下三個顏色鈕。','紅 → 藍 → 綠。'],
- apple:['蘋果鎖要注入解藥，但要選對那一顆蘋果。','毒蘋果在哪位礦工手上？物品欄的 E3 線索寫著他的編號。','選第 7 顆蘋果。'],
+ apple:['蘋果鎖要滴入回魂藥，但要選對那一顆蘋果。','毒蘋果在哪位學徒手上？物品欄的 E3 線索寫著他的編號。','選第 7 顆蘋果。'],
  thread:['紅線要穿過四個孔，順序不能錯。','E4 的線索寫了紅線經過的四樣東西，依那個順序點孔。','星 → 月 → 燈 → 門。'],
- shards:['七個孩子各有一個位置，碎片上刻著編號。','把每片碎片放進和它編號相同的位置。','碎片 n 放進第 n 個位置。'],
+ shards:['七片碎片各記得一個孩子的名字，各有一個位置，碎片上刻著編號。','把每片碎片放進和它編號相同的位置。','碎片 n 放進第 n 個位置。'],
  cipher:['這是一組移位密碼：下面的密文符號，要依序用你取得的四個鑰匙符號各移回去一次。','每個鑰匙符號在注音順序表上有編號（ㄅ＝1 … ㄩ＝37）。把密文符號往回數那麼多格，就是明文。','第 1 個字用 E1 的鑰匙，第 2 個用 E2，第 3 個用 E3，第 4 個用 E4。答案是「'+PLAIN+'」。']
 };
 if(typeof module!=='undefined')module.exports={ZHUYIN37,ITEMS,KEY_ORDER,PLAIN,idx,shift,encrypt,decrypt,KEYS,CIPHER,LIGHT,THREAD,APPLE,TIME,FACES,owns,HINTS};
@@ -159,8 +159,8 @@ function pushSeq(v,answer,id){
  status(`已按 ${seq.length} 個。`,'');const s=$('#seq');if(s)s.textContent=`（已按 ${seq.length} 個）`;
 }
 function pApple(p,head){
- p.innerHTML=head+`解藥要注入其中一顆小蘋果。選哪一顆？<div class="cols">${[1,2,3,4,5,6,7].map(n=>`<button class="slot" data-n="${n}" aria-label="蘋果 ${n}">${n}</button>`).join('')}</div>`;
- p.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{lastChange=Date.now();if(+b.dataset.n===APPLE){status('解藥滲入第 7 顆蘋果，鎖開了。','ok');solve('apple');}else status(`第 ${b.dataset.n} 顆沒有反應。`,'bad');});
+ p.innerHTML=head+`回魂藥要滴入其中一顆小蘋果。選哪一顆？<div class="cols">${[1,2,3,4,5,6,7].map(n=>`<button class="slot" data-n="${n}" aria-label="蘋果 ${n}">${n}</button>`).join('')}</div>`;
+ p.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{lastChange=Date.now();if(+b.dataset.n===APPLE){status('回魂藥滲入第 7 顆蘋果，鎖開了。','ok');solve('apple');}else status(`第 ${b.dataset.n} 顆沒有反應。`,'bad');});
 }
 function pThread(p,head){
  const holes=['門','星','燈','月']; // shown scrambled so position gives nothing away
@@ -169,7 +169,7 @@ function pThread(p,head){
 }
 function pShards(p,head){
  const n=inv.shards,tray=[...Array(n).keys()].map(i=>i+1).filter(i=>!placed[i]);
- p.innerHTML=head+`七個孩子各有一個位置。碎片上刻著編號：先點一片碎片，再點位置。${n<7?`<br><span style="color:#cdbf9f">你只收集了 ${n} 片，沒收集的位置會留空（完整結局需要 7 片）。</span>`:''}
+ p.innerHTML=head+`七片碎片，各記得七十三個孩子之中的一個名字，也各有一個位置。碎片上刻著編號：先點一片碎片，再點位置。${n<7?`<br><span style="color:#cdbf9f">你只收集了 ${n} 片，沒收集的位置會留空（完整結局需要 7 片）。</span>`:''}
   <div class="cols" id="tray">${tray.map(i=>`<button class="slot${sel===i?' on':''}" data-s="${i}" aria-label="碎片 ${i}">◆${i}</button>`).join('')||'<span style="color:#cdbf9f">（碎片都放好了）</span>'}</div>
   <div class="cols">${[1,2,3,4,5,6,7].map(i=>`<button class="slot${placed[i]?' on':''}" data-p="${i}" aria-label="位置 ${i}">${placed[i]?'◆'+i:'位置 '+i}</button>`).join('')}</div>`;
  p.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{sel=sel===+b.dataset.s?null:+b.dataset.s;renderPanel();});
@@ -184,7 +184,7 @@ function pShards(p,head){
 function pCipher(p,head){
  const rows=[0,1,2,3].map(i=>{const out=shift(CIPHER[i],'ㄅ',1);return i;});
  const plain=[...CIPHER].map((c,i)=>ZHUYIN37[(((idx(c)-1-offsets[i])%37)+37)%37]).join('');
- p.innerHTML=head+`王后留下四個符號的密文。每個符號要用<b>對應關卡的鑰匙符號</b>往回數：鑰匙符號在下表的編號是幾，就往回數幾格。
+ p.innerHTML=head+`王后留在匣內字條上的四個符號密文。每個符號要用<b>對應關卡的鑰匙符號</b>往回數：鑰匙符號在下表的編號是幾，就往回數幾格。
   <table class="zt"><tr>${ZHUYIN37.slice(0,19).map((z,i)=>`<td><b>${z}</b>${i+1}</td>`).join('')}</tr><tr>${ZHUYIN37.slice(19).map((z,i)=>`<td><b>${z}</b>${i+20}</td>`).join('')}</tr></table>
   ${[0,1,2,3].map(i=>`<div class="letter"><span class="big">${CIPHER[i]}</span><span>往回數 <button data-o="${i}" data-s="-5" aria-label="第 ${i+1} 個減五">−5</button><button data-o="${i}" data-s="-1" aria-label="第 ${i+1} 個減一">−1</button> <b id="o${i}">${offsets[i]}</b> <button data-o="${i}" data-s="1" aria-label="第 ${i+1} 個加一">＋1</button><button data-o="${i}" data-s="5" aria-label="第 ${i+1} 個加五">＋5</button> 格 →</span><span class="big" id="r${i}">${ZHUYIN37[(((idx(CIPHER[i])-1-offsets[i])%37)+37)%37]}</span><span style="font-size:12px;color:#cdbf9f">第 ${i+1} 個用 ${ITEMS[KEY_ORDER[i]].from} 的鑰匙</span></div>`).join('')}
   <div>目前讀出：<b class="zy" id="word">${plain}</b></div>`;
@@ -199,7 +199,7 @@ function checkBox(){
  const all=FACES.every(f=>done[f.id]||skipped[f.id]);
  if(!all)return;
  const sk=FACES.filter(f=>skipped[f.id]).length,full=sk===0&&inv.shards===7;
- status(full?'六面全部打開：魔鏡匣開啟。進入完整的「鏡之背面」。':`匣子開啟（略過 ${sk} 面、碎片 ${inv.shards}/7）：進入縮減版的「鏡之背面」。`,'ok');
+ status(full?'六面全部打開：魔鏡匣開啟。進入完整的「帳本的背面」。匣底另有一行小字：ㄒㄩㄝ（雪）。薇菈說她不知道雪為什麼是白色，這是留給妳自己去找的答案。':`匣子開啟（略過 ${sk} 面、碎片 ${inv.shards}/7）：進入縮減版的「帳本的背面」。`,'ok');
 }
 function updateHint(){
  const f=FACES[cur],t=hintTier[f.id]||0,st=faceState(cur);
