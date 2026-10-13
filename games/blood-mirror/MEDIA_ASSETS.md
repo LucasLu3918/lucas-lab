@@ -128,7 +128,7 @@ node scripts/blood-mirror.browser.cjs
 
 ## 機關特寫圖與黃銅介面（2026-10-13）
 
-- 機關特寫（`assets/puzzles/<機關 id>.webp`，960×411，各 ≤ 44 KB，共 14 張約 500 KB；PNG 母檔在 `source-art/puzzles/`，不發布）：musicbox、ledger、watch、masks、light、runeheart、pipes、names、rune、rubbing、memory、stitch、reflection、maze。檔名即 `puzzles/index.js` 各階段的 `id`；只在機關視窗開啟時載入，不計入首屏。
+- 機關特寫（`assets/puzzles/<機關 id>.webp`，960×411，各 ≤ 44 KB，共 14 張約 500 KB；PNG 母檔不在版本控制內，見下方「母檔存放」）：musicbox、ledger、watch、masks、light、runeheart、pipes、names、rune、rubbing、memory、stitch、reflection、maze。檔名即 `puzzles/index.js` 各階段的 `id`；只在機關視窗開啟時載入，不計入首屏。
 - 產生方式：本機 ComfyUI，沿用 `source-art/manifest.json` 的 Z-Image Turbo 流程（9 步、`res_multistep`、1344×576，再以 `cwebp -q 78 -m 6 -resize 960 411` 轉檔）。每個機關出 2 張候選，目視挑選；提示詞限制為無文字、無人物。這不是使用者驗收。
 - 黃銅質感：樣式在 `challenges.css` 結尾（`#modal` 下的設計語彙，漸層與 `box-shadow`，不使用圖檔）；視窗外框在 `styles/stage.css` 結尾。
 - 線索視窗的場景特寫（`concept-art.js` 的 `zoomStyle`）：直接放大熱點座標附近的場景圖，沒有新增素材。
@@ -136,15 +136,15 @@ node scripts/blood-mirror.browser.cjs
 
 ## 新增場景視角與熱點稽核（2026-10-13）
 
-- 新場景視角（1600×896 WebP，各 ≤ 126 KB，共約 500 KB；PNG 母檔在 `source-art/views/`，不發布）：`library-desk`（書庫書桌）、`queen-vanity`（王后梳妝台）、`mine-dorm`（礦工宿舍）、`mirror-children`（牽著手的孩子）、`crypt-bedside`（玻璃棺旁）。各章 `views` 的第一個仍是抵達視角；封印與證據熱點留在抵達視角（`blood-mirror-m6.test.mjs` 規定）。已加入魔鏡藝廊的「場景」分類。
+- 新場景視角（1600×896 WebP，各 ≤ 126 KB，共約 500 KB；PNG 母檔不在版本控制內，見下方「母檔存放」）：`library-desk`（書庫書桌）、`queen-vanity`（王后梳妝台）、`mine-dorm`（礦工宿舍）、`mirror-children`（牽著手的孩子）、`crypt-bedside`（玻璃棺旁）。各章 `views` 的第一個仍是抵達視角；封印與證據熱點留在抵達視角（`blood-mirror-m6.test.mjs` 規定）。已加入魔鏡藝廊的「場景」分類。
 - 產生方式同上（本機 ComfyUI、Z-Image Turbo、每個場景出 2 張候選目視挑選）。不是使用者驗收。
 - 熱點稽核：以標註圖逐幕比對 84 個熱點與畫面物件，移動 48 個到對應物件上（例如懷錶移到書桌的懷錶、玻璃心臟移到罐中心臟、閥柄移到紅色閥輪）。原圖裡沒有的物件（鐘塔手札、被撕走書頁的禁書、打翻的墨水、蠟印、醫師畫像、王冠、祈禱書、搖籃、藍圖牆、礦工提燈、牽手的孩子、露西的髮帶、白紗、守夜燭台、玻璃外的低語）改放在新視角。
 - 座標準則：同一視角的熱點在 812×457 橫向手機舞台上至少相距 48 px；手機版 y 不超過約 80%（底部面板），桌面左半部 y 不超過約 75%（對話框）。
 
-- 母檔狀態：`source-art/puzzles/`（14 張，約 15 MB）與 `source-art/views/`（5 張，約 10 MB）的 PNG 母檔保留在作者本機，**尚未納入版本控制**（提交時被內容安全檢查擋下，待作者決定如何保存，例如 Git LFS 或另存封存）。發布用的 WebP 不受影響。
+- 母檔存放：機關特寫（14 張）、新場景視角（5 張）與白雪立繪的 PNG 母檔（約 26 MB）以及每次出圖的全部候選圖，都**不在版本控制內**（提交時被內容安全檢查擋下），保存在作者本機的草稿資料夾 `draft/lucas-lab/blood-mirror/`（內有 README.md）。發布用的 WebP 不受影響；若要放回，維持 `games/blood-mirror/source-art/` 下的相同相對路徑。
 
 ## 白雪立繪（2026-10-13）
 
-- `assets/portraits/snow.webp`（640×936，42 KB）：與其他人物立繪同規格的半身油畫立繪。以本機 ComfyUI 的 Flux 2 Klein 4B base 圖像編輯（20 步、CFG 5），用 `assets/snow-white.webp` 主視覺當參考圖維持臉部與服飾（黑長捲髮、灰綠眼、紅唇、金冠與紅寶石耳環、黑絲絨金紅刺繡禮服），挑自 4 張候選的種子 33。PNG 母檔保留在作者本機 `source-art/m6/portraits/snow.png`，未納入版本控制。不是使用者驗收。
+- `assets/portraits/snow.webp`（640×936，42 KB）：與其他人物立繪同規格的半身油畫立繪。以本機 ComfyUI 的 Flux 2 Klein 4B base 圖像編輯（20 步、CFG 5），用 `assets/snow-white.webp` 主視覺當參考圖維持臉部與服飾（黑長捲髮、灰綠眼、紅唇、金冠與紅寶石耳環、黑絲絨金紅刺繡禮服），挑自 4 張候選的種子 33。PNG 母檔不在版本控制內，見上方「母檔存放」。不是使用者驗收。
 - 使用位置：首頁「旅程回顧」卡的頭像（有存檔時才載入，首次造訪不增加請求）、線索筆記視窗的抬頭、魔鏡藝廊的「角色」分類（`snow-portrait`）。白雪仍是第二人稱的「妳」、不會說話，所以對話框的說話者表沒有她。
 - 試過但放棄的做法：Qwen Image Edit 2511 bf16（約 39 GB）與 2509 fp8（約 19 GB）在 48 GB 的 Mac 上載入後會讓 ComfyUI 後端因記憶體不足當掉；Flux 2 Klein 9B fp8 在 MPS 上不支援 Float8。
