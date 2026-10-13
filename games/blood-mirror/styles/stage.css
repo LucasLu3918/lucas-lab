@@ -366,3 +366,62 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .fx-fly svg{width:22px;height:22px}
 /* The toast becomes a manual popover so it can show above an open dialog; undo the popover UA box. */
 .toast[popover]{top:auto;right:auto;margin:0;color:var(--text)}
+
+/* Header: the brand mark is the crowned mirror; the actions share one chip shape and one 18px icon. The sound icon
+   is a block, so it centers on its label instead of sitting on the text baseline. */
+nav button{font-size:13px}
+.brand{gap:14px}
+.brand-mark{width:44px;height:44px;filter:drop-shadow(0 0 12px rgba(195,172,128,.16))}
+.brand small{font-size:9px;letter-spacing:3px;color:#a8946f;margin-top:2px}
+.header-actions{gap:10px}
+.sound-button,.header-actions .icon-button{height:40px;min-height:40px;border:1px solid var(--line);border-radius:999px;color:var(--gold);transition:border-color .2s,background .2s,color .2s}
+.sound-button{display:inline-flex;align-items:center;gap:8px;padding:0 16px 0 13px;font-size:12px;line-height:1;letter-spacing:1.5px;color:var(--muted)}
+.header-actions .icon-button{width:40px;padding:0}
+#sound-icon{display:grid;place-items:center;flex:none;width:18px;height:18px;color:var(--gold)}
+#sound-icon svg,.header-actions .icon-button svg{display:block;width:18px;height:18px}
+.sound-button[aria-pressed="true"]{color:var(--text);border-color:rgba(195,172,128,.45);background:rgba(195,172,128,.08)}
+.sound-button:hover:not(:disabled),.header-actions .icon-button:hover:not(:disabled){color:var(--text);border-color:var(--gold);background:rgba(195,172,128,.08)}
+@media(max-width:850px){
+ .header-actions{gap:8px}
+ .sound-button,.header-actions .icon-button{height:44px;min-height:44px}
+ .header-actions .icon-button{width:44px}
+}
+@media(max-width:560px){
+ .sound-button{width:44px;padding:0;justify-content:center}
+ .brand-mark{width:36px;height:36px}
+ .brand small{font-size:8px;letter-spacing:2px}
+}
+
+/* Title screen: the hero grows with its content and the bottom strip sits in the flow, so the meta row and the
+   age badge never slide under its rule or get clipped by the hero edge. */
+.hero{display:flex;flex-direction:column;height:auto;max-height:none;min-height:max(720px,calc(100svh - 140px))}
+.hero-content{flex:1 0 auto;padding-bottom:48px}
+.hero-bottom{position:relative;inset:auto;flex:none;margin:0 5.4%;font-size:12px;color:#9a8e80}
+.hero-bottom button{font-size:12px}
+.hero-description{font-size:14px}
+.game-meta{flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#bcae9b}
+.game-meta i{margin-right:8px}
+.game-meta i svg{width:16px;height:16px}
+.content-note{flex-wrap:wrap;gap:8px 12px;margin-top:16px;font-size:12px;line-height:1.6;color:#968b80}
+.content-note span{display:inline-flex;align-items:center;justify-content:center;flex:none;height:22px;padding:0 8px;border:1px solid rgba(195,172,128,.45);border-radius:4px;font:600 11px/1 Georgia,serif;letter-spacing:.5px;color:var(--gold)}
+@media(max-width:1150px){.hero-description{font-size:13px}}
+@media(max-width:560px){
+ .game-meta{gap:10px 20px;font-size:12px}
+ .hero-bottom{margin:0 24px;height:auto;min-height:63px;padding:12px 0;gap:12px}
+ .hero-bottom>span{font-size:11px;letter-spacing:1px}
+ .hero-bottom button{font-size:11px;letter-spacing:1px}
+}
+.hero-bottom>span{word-break:keep-all}
+
+/* Home: a sealed chapter reads as unavailable (no forward arrow, quieter text); tapping it still explains why.
+   Small print on the home page stays at 11px or larger so it survives a phone held at arm's length. */
+.chapter-card.locked{background:#141115}
+.chapter-card.locked h3{color:#a99c8b}
+.chapter-card.locked .card-number{color:#c1a67955}
+.chapter-card:not(.locked):hover{border-color:rgba(195,172,128,.45)}
+.chapter-card .card-status{font-size:11px}
+.chapter-card p{font-size:12px}
+.section-heading .eyebrow{font-size:10px}
+.section-heading>p{font-size:13px}
+.story-strip button,footer,footer button{font-size:12px}
+@media(max-width:560px){.section-heading .eyebrow{font-size:10px}footer{font-size:11px}}
