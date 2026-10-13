@@ -37,3 +37,14 @@ test('small clue objects come from the light item sheet and every region positio
  for(const id of Object.keys(conceptArt))assert.doesNotMatch(conceptStyle(id),/NaN|Infinity/,id);
  assert.match(conceptStyle('clock'),/background-position:0% 0%/);
 });
+// Measured object extents on the item sheet (sheet pixels: x0, y0, x1, y1). A crop that misses its object shows only
+// the stone or the frame, which is how the silver key went unrecognised; a crop that is too loose makes it tiny.
+const objectBounds={vial:[407,61,467,170],feather:[337,19,380,62],apple:[290,92,324,129],key:[333,153,371,193]};
+test('each memory object crop contains its object and is not loose around it',()=>{
+ for(const [id,[x0,y0,x1,y1]] of Object.entries(objectBounds)){
+  const [x,y,w,h]=conceptArt[id].rect;
+  assert.ok(x<=x0&&y<=y0&&x+w>=x1&&y+h>=y1,`${id} crop ${[x,y,w,h]} must contain the object ${[x0,y0,x1,y1]}`);
+  const fill=((x1-x0)*(y1-y0))/(w*h);
+  assert.ok(fill>=0.3,`${id} object fills only ${(fill*100).toFixed(0)}% of its crop`);
+ }
+});
