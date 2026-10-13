@@ -38,8 +38,11 @@
  .tile-board,.pipes-board,.reflection-board{width:min(100%,315px)}
  .pipe-terminal strong{font-size:12px}.pipe-actions{gap:6px}.pipe-actions .secondary-button{font-size:11px}
  .rune-key{min-height:56px;font-size:29px}
- .memory-card{min-height:57px;font-size:26px}
- .memory-text{font-size:11.5px;line-height:1.45}
+ /* Four columns leave a phone card ~60px wide: the memory text and object label clip or overlap. Two columns give
+    each card room for its object and its line of testimony. */
+ .memory-board{grid-template-columns:repeat(2,minmax(0,1fr));max-width:320px}
+ .memory-card{aspect-ratio:1/1;min-height:0;font-size:26px}
+ .memory-text{font-size:13px;line-height:1.5}
  .reflection-cell{min-height:55px}
  .ending-art{background-position:center 30%}
 }
