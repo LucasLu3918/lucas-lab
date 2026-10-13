@@ -5,6 +5,7 @@
 // localStorage.setItem replaces a key in one step, so a write cannot be left half-done; the backup key
 // instead guards against a save that is later unreadable, and a save from a newer build is never overwritten.
 import {chapters} from '../data/chapters/index.js';
+import {abyss} from '../data/abyss.js';
 import {restoreState} from './state.js';
 
 export const SAVE_VERSION=2;
@@ -20,7 +21,8 @@ export const PROLOGUE_PUZZLE='prologue';
 const chapterIds=()=>chapters.map(c=>c.id);
 // A two-stage evidence also records each finished stage ("mine.names"), so the player can do them in either order.
 const stageIds=()=>chapters.filter(c=>c.stages?.length>1).flatMap(c=>c.stages.map(stage=>c.id+'.'+stage));
-const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE,...stageIds()];
+// The optional "帳本的背面" levels are puzzles of their own, outside the chapter chain.
+const puzzleIds=()=>[...chapterIds(),PROLOGUE_PUZZLE,...stageIds(),...abyss.levels.map(level=>level.puzzle)];
 const knownIds=list=>Array.isArray(list)?[...new Set(list.filter(id=>puzzleIds().includes(id)))]:[];
 
 // Engine state -> v2 object. `puzzles` lists the hands-on puzzles completed so far.

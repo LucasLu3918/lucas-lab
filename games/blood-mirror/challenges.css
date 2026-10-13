@@ -306,3 +306,63 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .stage-pick:disabled .stage-thumb{filter:grayscale(.85) brightness(.55)}
 #modal .stage-pick:disabled small::before{content:'✓ ';color:var(--brass)}
 @media (max-width:560px){#modal .stage-thumb{width:88px;height:56px}}
+
+/* 帳本的背面 (鏡淵): the home entry, the level list and the belfry gear train (puzzles/gears13.js) */
+.abyss-entry{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 7% 48px;padding:26px 30px;border:1px solid var(--line);background:radial-gradient(ellipse at 15% 50%,#3a1f2a55,transparent 70%),#151116}
+.abyss-entry h2{font:400 22px var(--serif);letter-spacing:3px;margin:0 0 8px}
+.abyss-entry p{margin:0;font-size:12px;color:#a59a8d;letter-spacing:.6px}
+.abyss-entry .eyebrow{margin:0 0 10px}
+.abyss-entry .abyss-progress{margin-top:8px;color:var(--gold);letter-spacing:1px}
+.abyss-entry button{flex:none;border:1px solid var(--line);padding:12px 22px;color:var(--gold);letter-spacing:1px}
+@media (max-width:560px){.abyss-entry{margin:0 24px 36px;padding:22px 20px;flex-direction:column;align-items:stretch}.abyss-entry button{width:100%}}
+#modal .abyss-scene{margin:0 0 6px}
+#modal .abyss-line{margin:0 0 10px;font:15px/1.95 var(--serif);color:#d2c6b6}
+#modal .abyss-line.spoken{color:#cfc0a6}
+#modal .abyss-line b{display:block;font:11px var(--sans);letter-spacing:2px;color:var(--gold);margin-bottom:1px}
+#modal .abyss-levels{display:grid;gap:10px;margin:14px 0 4px}
+#modal .abyss-level{display:flex;align-items:center;gap:14px;padding:8px 14px 8px 8px;text-align:left;margin:0}
+#modal .abyss-reward{display:flex;align-items:center;gap:16px;margin:14px 0 4px;padding:14px 18px;border:1px solid var(--brass-mid);background:#1b140d;color:var(--brass-hi);font:16px var(--serif);letter-spacing:2px}
+#modal .abyss-reward small{display:block;margin-top:2px;font:11px var(--sans);letter-spacing:1px;color:#b8a07a}
+#modal .abyss-mark{flex:none;width:52px;height:52px;display:grid;place-items:center;border:2px solid var(--brass);border-radius:50%;font:26px var(--serif);color:var(--brass-hi);background:radial-gradient(circle at 35% 30%,#6e5632,#241a0f 72%);box-shadow:0 0 18px #c9ab6a40}
+#modal .belfry-rules{margin:0 0 12px;padding-left:22px;font-size:13px;line-height:1.9;color:#c0b199}
+#modal .belfry-status{min-height:46px;margin:0 0 10px;padding:6px 12px;border-left:2px solid var(--brass-mid);font-size:13px;line-height:1.8;color:var(--brass-hi)}
+#modal .belfry-status[data-tone=ok]{border-left-color:#7fd08a;color:#bfeac5}
+#modal .belfry-status[data-tone=bad]{border-left-color:#d8665f;color:#f1b3ad}
+#modal .belfry-board{border:2px solid var(--brass);border-radius:8px;background:radial-gradient(circle at 40% 40%,#2a1a24,#0b0710);box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+#modal .belfry-svg{display:block;width:100%;height:auto;touch-action:manipulation}
+#modal .belfry-gear .gear-body{fill:#e0b84f;stroke:#7a5a14;stroke-width:.35}
+#modal .belfry-gear.layer1 .gear-body{fill:#d9825b;fill-opacity:.93;stroke:#7a3418}
+#modal .belfry-gear .gear-web{fill:none;stroke:#7a5a14;stroke-width:.3;opacity:.7}
+#modal .belfry-gear.layer1 .gear-web{stroke:#7a3418}
+#modal .belfry-gear .gear-axle{fill:#7a5a14}
+#modal .belfry-gear.layer1 .gear-axle{fill:#7a3418}
+#modal .belfry-gear.bad .gear-body{stroke:#ff3b33;stroke-width:.9}
+#modal .belfry-socket{fill:#000;stroke:#6b5a3a;stroke-width:.5;pointer-events:none}
+#modal .belfry-socket.out{stroke:#ff5555;stroke-width:.9}
+#modal .belfry-hit{fill:transparent;cursor:pointer}
+#modal .belfry-hit:hover{fill:#ffffff14}
+#modal .belfry-hit:focus-visible{outline:none;stroke:var(--brass-hi);stroke-width:.8;fill:#ffffff14}
+#modal .belfry-out-ring{fill:none;stroke:#ff5555;stroke-width:.5;stroke-dasharray:1.2 1;pointer-events:none}
+#modal .belfry-out-mark{fill:#ff3b33;pointer-events:none}
+#modal .belfry-crank{stroke:#fff;stroke-width:.6;pointer-events:none}
+#modal .belfry-knob{fill:#fff;pointer-events:none}
+#modal .belfry-label{font-size:2.6px;fill:#e9dcc3;text-anchor:middle;pointer-events:none}
+#modal .belfry-label.out{fill:#ff8f8f}
+#modal .belfry-label.dim{opacity:.55}
+#modal .belfry-ruler{stroke:#99ffdd;stroke-width:.25;stroke-dasharray:1 1;pointer-events:none}
+#modal .belfry-dist{font-size:3.4px;font-weight:700;paint-order:stroke;stroke:#0b0710;stroke-width:.6px;fill:#99ffdd;text-anchor:middle;pointer-events:none}
+#modal .belfry-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 4px}
+#modal .belfry-row .secondary-button{width:auto;margin:0;padding:8px 14px}
+#modal #bf-layers{display:flex;gap:8px;flex-wrap:wrap}
+#modal .belfry-layer[aria-pressed=true],#modal #bf-ruler[aria-pressed=true]{background:#4a3414;border-color:var(--brass);color:var(--brass-hi)}
+#modal .belfry-note{font-size:12px;color:#9fb8a6;font-variant-numeric:tabular-nums}
+#modal .belfry-tray{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#modal .belfry-gear-button{width:76px;min-height:92px;display:flex;flex-direction:column;align-items:center;padding:4px;border:2px solid #3a2a14;border-radius:8px;background:#150d1a;color:#e9dcc3;font-size:12px}
+#modal .belfry-gear-button[aria-pressed=true]{border-color:var(--brass);background:#2d1d10}
+#modal .belfry-gear-button:disabled{opacity:.35}
+#modal .belfry-gear-button svg{width:60px;height:60px}
+#modal .belfry-gear-button:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+#modal .belfry-hint{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:6px}
+#modal .belfry-hint .secondary-button{width:auto;margin:0;padding:8px 16px}
+#modal .belfry-hint-text{margin:8px 0 0;padding:8px 12px;border-left:3px solid #77eeff;background:#10202a;font-size:13px;line-height:1.85;color:#cfe9ee}
+#modal .belfry-hint-text[hidden],#modal #bf-run[hidden]{display:none}

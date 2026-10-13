@@ -136,6 +136,11 @@ node scripts/blood-mirror.browser.cjs
 - 線索視窗的場景特寫（`concept-art.js` 的 `zoomStyle`）：直接放大熱點座標附近的場景圖，沒有新增素材。
 - 機關選擇縮圖（`assets/puzzles/thumbs/<機關 id>.webp`，224×128，14 張共約 66 KB）：由上述母檔置中裁切；只在兩選一的選擇畫面載入。
 
+### 帳本的背面 E1 逆走鐘樓（2026-10-14）
+
+- `assets/puzzles/belfry.webp`（960×411，約 40 KB）與 `assets/puzzles/thumbs/belfry.webp`（224×128，約 8 KB）：**暫用**，由企劃概念圖 `plan-improve/concepts-expert/e1_belfry_clockwork.webp`（本機 Z-Image Turbo，1344×768）以 `cwebp` 裁切縮放而成（特寫：`-crop 0 140 1344 575 -resize 960 411 -q 68`；縮圖：整張 `-resize 224 128 -q 78`）。概念圖是方向稿，不是正式美術；是否另產正式稿由作者決定。不算在前面 14 張之內，只在機關視窗與重玩選單載入。
+- 齒輪、軸座、輸出軸與提示面板都是程式繪製的 SVG（`puzzles/gears13.js`、`challenges.css`），沒有圖檔。
+
 ## 新增場景視角與熱點稽核（2026-10-13）
 
 - 新場景視角（1600×896 WebP，各 ≤ 126 KB，共約 500 KB；PNG 母檔不在版本控制內，見下方「母檔存放」）：`library-desk`（書庫書桌）、`queen-vanity`（王后梳妝台）、`mine-dorm`（礦工宿舍）、`mirror-children`（牽著手的孩子）、`crypt-bedside`（玻璃棺旁）。各章 `views` 的第一個仍是抵達視角；封印與證據熱點留在抵達視角（`blood-mirror-m6.test.mjs` 規定）。已加入魔鏡藝廊的「場景」分類。
