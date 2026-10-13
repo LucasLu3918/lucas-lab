@@ -26,11 +26,13 @@
 
 ~~~text
 assets/music/
-  01_library_Black_Bell_Archive.mp3
-  02_mine_Seven_Forgotten_Names.mp3
-  03_crypt_Glass_Sleep.mp3
-  04_queen_The_Queens_Lament.mp3
-  05_mirror_A_Name_for_a_Life.mp3
+  01_library_The_Thirteenth_Toll.mp3      第一幕
+  12_ballroom_Waltz_of_Wax.mp3            第二幕
+  13_hunter_A_Heart_in_Glass.mp3          第三幕
+  02_mine_Seven_Beds_of_Silver.mp3        第四幕
+  03_crypt_The_Breath_Between.mp3         第五幕
+  04_queen_Veras_Lullaby.mp3              第六幕
+  05_mirror_The_Price_of_a_Name.mp3       第七幕
   06_dawn_Nameless_Dawn.mp3
   07_frost_Winter_Without_Names.mp3
   08_crown_Crown_of_Blood.mp3
@@ -120,6 +122,6 @@ node scripts/blood-mirror.browser.cjs
 
 - 場景圖（1664×944 WebP，均 ≤ 130 KB；PNG 母檔在 `source-art/m6/`，不發布）：`ballroom.webp`、`hunter-cabin.webp` 為章節場景；`mirror-hall.webp`、`balcony.webp`、`black-pine-path.webp` 目前只在魔鏡藝廊展示。
 - 產生方式：本機 ComfyUI（Z-Image Turbo，8 步，經 AIPS `creative` 流程），逐張目視審查；獵人小屋與黑松林各重做一次（玻璃心臟須為器官形狀、整體維持油畫質感）。這不是使用者驗收。
-- 配樂：`assets/music/12_ballroom_Blood_Waltz.mp3`（150 秒）、`13_hunter_The_Hunters_Heart.mp3`（58.6 秒），本機 MiniMax Music 3 產生，來源與授權見 `assets/music/SOURCE_NOTES.md`；尚未人工聆聽。
+- 配樂：第一至第七幕的場景配樂已全面換成 v3（本機 MiniMax Music 3 產生，每首約 77–86 秒、可循環、−18 LUFS），舊曲歸檔於 `source-audio/bgm-v1-archive/`；來源、種子與授權見 `assets/music/SOURCE_NOTES.md`。
 - 人物立繪（`assets/portraits/*.webp`，640×936，各 ≤ 42 KB；PNG 母檔在 `source-art/m6/portraits/`）：eli、orion、nyla、heso、lucy、hunter、vera、mirror。本機 ComfyUI Z-Image Turbo 文字生圖，逐張目視審查通過（魔鏡倒影有一張面孔，與「無臉」的原設定略有出入）；無圖像編輯模型，故沒有白雪。人工驗收待你確認。
 

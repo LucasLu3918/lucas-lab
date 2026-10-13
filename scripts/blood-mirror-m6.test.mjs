@@ -59,7 +59,7 @@ test('assets and music for both acts exist', () => {
   for(const id of ['ballroom','hunter']){
     assert.ok(existsSync(new URL('../games/blood-mirror/assets/'+rooms[at(id)].image,import.meta.url)),rooms[at(id)].image);
   }
-  for(const file of ['12_ballroom_Blood_Waltz.mp3','13_hunter_The_Hunters_Heart.mp3'])assert.ok(existsSync(new URL('../games/blood-mirror/assets/music/'+file,import.meta.url)),file);
+  for(const file of ['12_ballroom_Waltz_of_Wax.mp3','13_hunter_A_Heart_in_Glass.mp3'])assert.ok(existsSync(new URL('../games/blood-mirror/assets/music/'+file,import.meta.url)),file);
 });
 
 test('a choice needs its act solved, only stores valid options, and survives a save', () => {

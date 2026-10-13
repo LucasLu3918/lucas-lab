@@ -1,5 +1,7 @@
 # 《血色魔鏡》原創配樂試聽提案
 
+> 目前遊戲使用的第一至第七幕場景配樂已全面換成「場景配樂 v3」（見檔尾）；本節以下的第一至第五幕舊曲目已歸檔，只保留標題曲與三個結局曲目的說明。
+
 共 9 段音樂，每段約 31–36 秒。這是音樂概念試聽，不代表已部署至遊戲。
 
 ## 聲音設計原則
@@ -18,27 +20,27 @@
 2. **黑鐘書庫・第十三聲**（第一幕，34.7 秒）
    - 情境：第十三聲鐘響，禁書庫深處傳來倒轉的懷錶。
    - 音色：鐘聲・管風琴・滴答；氛圍：秘密與不安
-   - 檔案：`01_library_Black_Bell_Archive.mp3`
+   - 檔案：`01_library_Black_Bell_Archive.mp3`（已由下方「場景配樂 v3」取代，原檔存於 `source-audio/bgm-v1-archive/`）
 
 3. **銀骨礦坑・被遺忘的人**（第二幕，32.7 秒）
    - 情境：金屬敲擊與蒸汽聲在礦坑迴響，悲劇底下仍留有救贖。
    - 音色：低音大提琴・金屬・蒸汽；氛圍：壓迫與抗爭
-   - 檔案：`02_mine_Seven_Forgotten_Names.mp3`
+   - 檔案：`02_mine_Seven_Forgotten_Names.mp3`（已由下方「場景配樂 v3」取代，原檔存於 `source-audio/bgm-v1-archive/`）
 
 4. **玻璃棺室・停止的呼吸**（第三幕，35.6 秒）
    - 情境：呼吸近乎停止；玻璃、記憶與另一個世界發出微光。
    - 音色：空靈合唱・玻璃音・氣流；氛圍：死寂與驚懼
-   - 檔案：`03_crypt_Glass_Sleep.mp3`
+   - 檔案：`03_crypt_Glass_Sleep.mp3`（已由下方「場景配樂 v3」取代，原檔存於 `source-audio/bgm-v1-archive/`）
 
 5. **王后寢宮・她最後的謊言**（第四幕，31.1 秒）
    - 情境：王后的愛與謊言化作緩慢華爾滋，逐漸露出悲傷。
    - 音色：大提琴獨奏・鋼琴・柔弦；氛圍：愛與悔恨
-   - 檔案：`04_queen_The_Queens_Lament.mp3`
+   - 檔案：`04_queen_The_Queens_Lament.mp3`（已由下方「場景配樂 v3」取代，原檔存於 `source-audio/bgm-v1-archive/`）
 
 6. **鏡中之國・名字的代價**（第五幕，33.7 秒）
    - 情境：名字成為交易代價，童謠被扭曲，鏡界像審判庭。
    - 音色：幽暗合唱・鐘聲・心跳；氛圍：抉擇與犧牲
-   - 檔案：`05_mirror_A_Name_for_a_Life.mp3`
+   - 檔案：`05_mirror_A_Name_for_a_Life.mp3`（已由下方「場景配樂 v3」取代，原檔存於 `source-audio/bgm-v1-archive/`）
 
 7. **真結局・無名的黎明**（真結局，32.7 秒）
    - 情境：無人記得她，音樂卻記得：主旋律重新獲得微光。
@@ -59,8 +61,20 @@
 - 試聽音樂旋律、編曲與環境聲為本次重新設計；使用 TimGM6mb.sf2 音色庫（Debian 套件標示 GPL-2）。
 - 若網站正式公開部署，需先確認採樣音色庫的重製、散布及相應授權義務。較穩妥的方式是換用可公開發行及商用的音源或純演算法合成音色，再重新輸出與檢查。
 - 在使用者確認試聽方向前，尚未修改任何 GitHub 檔案或部署。
-## 第六章新增配樂（M6，本機 MiniMax Music 3 產生）
-- 產生日期：2026-10-11；工具：本機 MiniMax-Music3 MLX（`generate.py`，30 步，純器樂）；模型授權為 minimax-music3-community，公開部署前須確認輸出使用條款。
-- `12_ballroom_Blood_Waltz.mp3`：血色舞會，150 秒，種子 2208，128 kbps，約 2.4 MB。
-- `13_hunter_The_Hunters_Heart.mp3`：獵人的心臟，58.6 秒（模型提早結束），種子 4177，128 kbps，約 0.9 MB。
-- 尚未人工聆聽：循環點、情緒與品質需要真人確認；只做了時長與無靜音段檢查。
+## 場景配樂 v3（第一至第七幕，本機 MiniMax Music 3 產生）
+- 產生日期：2026-10-13；工具：本機 MiniMax-Music3 MLX（`generate.py`，30 步，要求 90 秒），以段落標籤（`[Intro]`、`[Verse]`、`[Instrumental]`…）描述曲式，否則模型會提早結束；提示詞要求純器樂、無人聲／合唱／哼唱／旁白、無鼓組，並共用「下行四音動機」。模型授權為 minimax-music3-community，公開部署前須確認輸出使用條款。
+- 後製：輕度壓縮（threshold −27 dB、ratio 2.4）、首尾 4 秒交叉淡化成可循環、統一響度到 −18 LUFS、128 kbps MP3（`soundtrack.js` 的 `LOUDNESS` 已填入實測值）。
+- 取代了先前版本：五幕舊曲（ZIP 試聽包）與 M6 的血色舞會、獵人的心臟；原檔存於 `source-audio/bgm-v1-archive/`，不會隨網站發布。
+
+| 幕 | 檔案 | 秒數 | 種子 |
+|---|---|---|---|
+| 第一幕 黑鐘書庫 | `01_library_The_Thirteenth_Toll.mp3` | 77.3（模型提早收尾） | 4101 |
+| 第二幕 血色舞會 | `12_ballroom_Waltz_of_Wax.mp3` | 86.0 | 4202 |
+| 第三幕 獵人的心臟 | `13_hunter_A_Heart_in_Glass.mp3` | 86.0 | 4303 |
+| 第四幕 銀骨礦坑 | `02_mine_Seven_Beds_of_Silver.mp3` | 86.0 | 4404 |
+| 第五幕 玻璃棺室 | `03_crypt_The_Breath_Between.mp3` | 86.0 | 4505 |
+| 第六幕 王后寢宮 | `04_queen_Veras_Lullaby.mp3` | 86.0 | 4606 |
+| 第七幕 鏡中之國 | `05_mirror_The_Price_of_a_Name.mp3` | 86.0 | 4707 |
+
+- 以使用者試聽 v3 後同意採用（2026-10-13）。程式只做了時長、響度、靜音與接縫處的客觀檢查；人聲殘留與情緒細節由使用者聆聽判斷。
+- 較早的 v2（不同提示詞）保留在 `source-audio/bgm-v2-preview/`，v3 對照頁在 `source-audio/bgm-v3-preview/`，皆不發布。

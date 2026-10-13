@@ -4,10 +4,10 @@ import {createMixer} from './audio/mixer.js';
 
 export const soundtrackFiles={
  home:'10_theme_intro_Who_Deserves_to_Live.mp3',
- library:'01_library_Black_Bell_Archive.mp3',mine:'02_mine_Seven_Forgotten_Names.mp3',
- crypt:'03_crypt_Glass_Sleep.mp3',queen:'04_queen_The_Queens_Lament.mp3',
- ballroom:'12_ballroom_Blood_Waltz.mp3',hunter:'13_hunter_The_Hunters_Heart.mp3',
- mirror:'05_mirror_A_Name_for_a_Life.mp3',dawn:'06_dawn_Nameless_Dawn.mp3',
+ library:'01_library_The_Thirteenth_Toll.mp3',mine:'02_mine_Seven_Beds_of_Silver.mp3',
+ crypt:'03_crypt_The_Breath_Between.mp3',queen:'04_queen_Veras_Lullaby.mp3',
+ ballroom:'12_ballroom_Waltz_of_Wax.mp3',hunter:'13_hunter_A_Heart_in_Glass.mp3',
+ mirror:'05_mirror_The_Price_of_a_Name.mp3',dawn:'06_dawn_Nameless_Dawn.mp3',
  frost:'07_frost_Winter_Without_Names.mp3',crown:'08_crown_Crown_of_Blood.mp3'
 };
 // The full theme (about five minutes) is used by the listening room and the credits, never as a loop.
@@ -20,12 +20,12 @@ const trackFiles={...soundtrackFiles,credits:fullThemeFile};
 // The tracks span about 10 dB, so each one is trimmed to TARGET_LUFS (boosts capped at MAX_BOOST_DB)
 // and a scene change never jumps in volume. Re-measure when a file is replaced.
 const LOUDNESS={
- '01_library_Black_Bell_Archive.mp3':-19.3,'02_mine_Seven_Forgotten_Names.mp3':-17.9,
- '03_crypt_Glass_Sleep.mp3':-21.2,'04_queen_The_Queens_Lament.mp3':-20.5,
- '05_mirror_A_Name_for_a_Life.mp3':-19.9,'06_dawn_Nameless_Dawn.mp3':-20.6,
+ '01_library_The_Thirteenth_Toll.mp3':-18.4,'02_mine_Seven_Beds_of_Silver.mp3':-18.7,
+ '03_crypt_The_Breath_Between.mp3':-18.4,'04_queen_Veras_Lullaby.mp3':-18.4,
+ '05_mirror_The_Price_of_a_Name.mp3':-18.5,'06_dawn_Nameless_Dawn.mp3':-20.6,
  '07_frost_Winter_Without_Names.mp3':-19.9,'08_crown_Crown_of_Blood.mp3':-19.7,
  '10_theme_intro_Who_Deserves_to_Live.mp3':-22.2,'11_theme_full_Who_Deserves_to_Live.mp3':-15.3,
- '12_ballroom_Blood_Waltz.mp3':-12.4,'13_hunter_The_Hunters_Heart.mp3':-17.8
+ '12_ballroom_Waltz_of_Wax.mp3':-18.4,'13_hunter_A_Heart_in_Glass.mp3':-18.4
 };
 const TARGET_LUFS=-18,MAX_BOOST_DB=4;
 export const trackGain=file=>{const lufs=LOUDNESS[file];return lufs===undefined?1:Math.pow(10,Math.min(MAX_BOOST_DB,TARGET_LUFS-lufs)/20);};
