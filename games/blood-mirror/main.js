@@ -444,4 +444,14 @@ $('#view-prev').onclick=()=>stepView(-1);$('#view-next').onclick=()=>stepView(1)
 document.addEventListener('keydown',event=>{if((event.key==='ArrowLeft'||event.key==='ArrowRight')&&view==='game'&&!$('#modal').open&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!/^(INPUT|SELECT|TEXTAREA)$/.test(event.target.tagName)){stepView(event.key==='ArrowRight'?1:-1);}});
 document.addEventListener('keydown',event=>{if(event.key.toLowerCase()==='m'&&view==='game'&&!$('#modal').open&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!/^(INPUT|SELECT|TEXTAREA)$/.test(event.target.tagName)){event.preventDefault();toggleSound();}});
 document.addEventListener('keydown',event=>{if(event.key.toLowerCase()==='l'&&view==='game'&&!$('#modal').open&&!event.ctrlKey&&!event.metaKey&&!event.altKey){event.preventDefault();lightCandles();}});
+// Gamepad navigation (手把導覽) loads only once a pad connects; the hooks say what back, menu and the shoulders mean on this screen.
+const gamepadHooks={
+ root:()=>$('#modal').open?$('#modal'):$('#'+view),
+ back:()=>{if($('#modal').open)closeModal();else if(view==='game')openPause();},
+ menu:()=>{if($('#modal').open){if($('#modal-title').textContent==='暫停')closeModal();return;}if(view==='game')openPause();},
+ shoulder:dir=>{if(view==='game'&&!$('#modal').open)stepView(dir);},
+ // Scene hotspots can sit past the edge of a panned phone frame; pan just enough to bring one into view.
+ reveal:element=>{if(!element.closest('#hotspots'))return;const s=scene.getBoundingClientRect(),r=element.getBoundingClientRect(),margin=48;const shift=r.left<s.left+margin?s.left+margin-r.left:r.right>s.right-margin?s.right-margin-r.right:0;if(shift){panX+=shift;clampPan();}}
+};
+addEventListener('gamepadconnected',()=>{import('./gamepad.js').then(({startGamepadNav})=>startGamepadNav(gamepadHooks)).catch(()=>{});});
 hydrateIcons();enableButtonArrows();state.muted=true;updateSound();renderHome();

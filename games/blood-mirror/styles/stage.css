@@ -500,3 +500,7 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
 .large-text .hotspot span{font-size:15px}
 .large-text .clue-row .clue-name{font-size:16px}
 .large-text .clue-row .clue-state{font-size:14px}
+
+/* Gamepad navigation moves focus by script, so the ring is drawn on every focused control, not only on :focus-visible. */
+body.gamepad-nav :is(button,select,input,summary,a):focus{outline:3px solid var(--stage-gold-hi,#e2cc9b);outline-offset:3px}
+body.gamepad-nav .hotspot:focus svg,body.gamepad-nav .hotspot:focus span{opacity:1}
