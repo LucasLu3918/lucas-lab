@@ -3,6 +3,8 @@
 // Module 1: a gear's pitch radius is teeth / 2, so two gears mesh when the sockets are (teeth + teeth) / 2 apart.
 // A gear closer than that jams, farther away it spins free. Layer 0 (gold) and layer 1 (copper) never touch;
 // the two gears on one socket turn together. The rules are pure so scripts/blood-mirror-abyss.test.mjs can search them.
+import {animate} from './clock.js';
+import {hintMarkup,bindHints} from './belfry-hints.js';
 const EPS=0.01;
 const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
 export const CRANK_TEETH=12,CRANK_SOCKET='S0';
@@ -156,7 +158,7 @@ const STATUS_WAIT={warm:'輸出軸還沒有被帶動。',main:'輸出軸還沒�
 export function mountGears13(ctx){
  const motion=()=>!document.body.classList.contains('reduce-motion');
  let level=LEVELS.warm,board=emptyBoard(level),picked=null,layer=0,turns=0,running=null,ruler=false,result=null;
- let tier=0,tierStep=null,hintsUsed=0,lastChange=Date.now();
+ let hints=null;
  let nodesEl=[],crankHandle=null,outMarker=null;
 
  ctx.render('<div class="belfry">'
@@ -166,14 +168,13 @@ export function mountGears13(ctx){
   +'<div class="belfry-row"><span id="bf-layers"></span><button id="bf-ruler" class="secondary-button" aria-pressed="false">顯示軸座距離</button><button id="bf-reset" class="secondary-button">重來</button></div>'
   +'<div id="bf-tray" class="belfry-tray" role="group" aria-label="齒輪托盤"></div>'
   +'<button id="bf-run" class="primary-button" hidden></button>'
-  +'<div class="belfry-hint"><button id="bf-hint" class="secondary-button">燭光提示</button><span id="bf-hint-note" class="belfry-note"></span></div>'
-  +'<p id="bf-hint-text" class="belfry-hint-text" role="status" hidden></p></div>');
+  +hintMarkup+'</div>');
  const $=id=>document.getElementById(id),svg=$('bf-svg');
  const alive=()=>svg.isConnected;
  const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
 
  function setLevel(next){
-  level=next;board=emptyBoard(level);picked=null;layer=0;turns=0;running=null;ruler=false;tier=0;tierStep=null;
+  level=next;board=emptyBoard(level);picked=null;layer=0;turns=0;running=null;ruler=false;
   $('bf-goal').innerHTML=GOAL[level.key];
   $('bf-rules').innerHTML=RULES[level.key].map(text=>'<li>'+text+'</li>').join('');
   $('bf-layers').innerHTML=level.layers>1?LAYER_NAME.map((name,i)=>'<button class="secondary-button belfry-layer" data-layer="'+i+'" aria-pressed="'+(i===layer)+'">'+name+'</button>').join(''):'';
@@ -306,16 +307,12 @@ export function mountGears13(ctx){
  const label=id=>{const [socket,l]=id.split('.');return name(socket)+(level.layers>1&&socket!==CRANK_SOCKET?' '+LAYER_NAME[l].slice(0,2):'');};
 
  function update(){
-  lastChange=Date.now();
   drawBoard();drawTray();
   const [text,tone]=describe();say(text,tone);
   const run=$('bf-run');
   run.hidden=!result.solved||!!running;
   run.textContent=level.key==='warm'?'轉動曲柄，看它們同速同向 ⟶':'轉動曲柄 13 圈 ⟶';
-  const step=hintStep(level,board);
-  if(step!==tierStep){tierStep=step;tier=0;$('bf-hint-text').hidden=true;}
-  if(!step){$('bf-hint-text').hidden=true;$('bf-hint').hidden=true;$('bf-hint-note').textContent='';}
-  else{$('bf-hint').hidden=false;}
+  hints?.changed();
  }
 
  // The crank runs a fixed number of turns, then the stage ends (the warm-up goes on to the real train).
@@ -323,13 +320,13 @@ export function mountGears13(ctx){
   if(running)return;
   running={need};$('bf-run').hidden=true;ctx.playCue('door');
   if(!motion()){turns=need;pose();finish();return;}
-  let last=performance.now();
-  const frame=now=>{
-   if(!alive()||!running)return;
-   turns=Math.min(need,turns+Math.min(.05,(now-last)/1000)*(need>3?1.4:.7));last=now;pose();
-   if(turns>=need)finish();else requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
+  // Time-based (puzzles/clock.js): the run takes the same time on any frame rate, and goes on in a background tab.
+  const rate=need>3?1.4:.7;
+  animate(elapsed=>{
+   if(!alive()||!running)return false;
+   turns=Math.min(need,elapsed/1000*rate);pose();
+   if(turns>=need){finish();return false;}
+  });
  }
  function finish(){
   running=null;
@@ -342,25 +339,9 @@ export function mountGears13(ctx){
  }
  $('bf-run').onclick=()=>run(level.key==='warm'?2:13);
 
- function showHint(auto){
-  const step=hintStep(level,board);
-  if(!step)return;
-  if(step!==tierStep){tierStep=step;tier=0;}
-  if(auto){if(tier>0)return;tier=1;}
-  else{tier=Math.min(tier+1,HINTS[step].length);hintsUsed++;}
-  const box=$('bf-hint-text');
-  box.hidden=false;
-  box.textContent=(auto?'魔鏡低語：':'燭光提示 '+tier+' / '+HINTS[step].length+'：')+HINTS[step][tier-1];
-  $('bf-hint-note').textContent=tier<HINTS[step].length?'再按一次，看更明確的':'這已經是最明確的提示';
- }
- $('bf-hint').onclick=()=>showHint(false);
  $('bf-reset').onclick=()=>{if(running)return;board=emptyBoard(level);picked=null;turns=0;update();say('齒輪盤已清空。');};
  $('bf-ruler').onclick=()=>{ruler=!ruler;$('bf-ruler').setAttribute('aria-pressed',String(ruler));drawBoard();};
- // After three quiet minutes on an unsolved board the mirror lights the first hint by itself.
- const watch=setInterval(()=>{
-  if(!alive()){clearInterval(watch);return;}
-  if(Date.now()-lastChange>180000&&hintStep(level,board)&&tier===0)showHint(true);
- },5000);
+ hints=bindHints({hints:HINTS,currentStep:()=>hintStep(level,board),alive});
 
  const counter=document.createElement('span');counter.id='bf-counter';counter.className='belfry-note';
  $('bf-layers').parentElement.appendChild(counter);

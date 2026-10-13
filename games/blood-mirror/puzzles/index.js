@@ -33,7 +33,12 @@ export const puzzles={
  mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]},
  // "帳本的背面" levels (data/abyss.js). `optional` puzzles stay out of the background preload and survive a new journey,
  // because they belong to no act: only the saved list says whether they are done.
- belfry:{id:'belfry',title:'逆走鐘樓',subtitle:'ABYSS · 齒輪列',optional:true,stages:[{id:'belfry',label:'逆走鐘樓',mount:lazy('gears13','mountGears13')}]}
+ // Its three mechanisms run in the order gears, pendulum (either first), then the star wheel, which `after` keeps closed until both are done.
+ belfry:{id:'belfry',title:'逆走鐘樓',subtitle:'ABYSS · 齒輪、擺錘與星輪',optional:true,stages:[
+  {id:'belfry-gears',label:'齒輪列',mount:lazy('gears13','mountGears13')},
+  {id:'belfry-pendulum',label:'鐘擺',mount:lazy('pendulum','mountPendulum')},
+  {id:'belfry-wheel',label:'星輪',mount:lazy('starwheel','mountStarWheel'),after:['belfry-gears','belfry-pendulum'],waiting:'星輪靠齒輪列和鐘擺一起推動。先讓齒輪列咬合、讓鐘擺的節奏對上刻痕，它才會轉動。'}
+ ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
 const stageArtSrc=stage=>stage?'assets/puzzles/'+stage.id+'.webp':'';
@@ -54,7 +59,7 @@ export function isStageComplete(chapter,stage){return completed.has(chapter)||co
 // The stage the player last worked on, {chapter, stage}, kept after the modal closes. Used by the hints.
 export function activeStage(){return active;}
 // A stage module that was never opened holds no state to reset.
-export function resetPuzzles(){for(const id of [...completed])if(!puzzles[id]?.optional)completed.delete(id);active=null;loaded.pipes?.resetPipes();}
+export function resetPuzzles(){for(const id of [...completed])if(!puzzles[String(id).split('.')[0]]?.optional)completed.delete(id);active=null;loaded.pipes?.resetPipes();}
 // Fetches every stage module in the background once the player is in a scene; a failed fetch is retried on open.
 export function preloadStages(){for(const entry of Object.values(puzzles))if(!entry.optional)for(const stage of entry.stages)stage.mount.preload?.().catch(()=>{});}
 
@@ -68,6 +73,9 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  if(!entry){complete();return;}
  const stages=entry.stages,multi=stages.length>1,finished=new Set();
  let current=null;
+ // A stage with `after` stays closed until the stages it names are done (in this run, or saved when not replaying).
+ const stageIsDone=name=>finished.has(name)||(!fresh&&isStageComplete(id,name));
+ const waitingOn=stage=>(stage.after||[]).filter(name=>!stageIsDone(name));
  // A replay (fresh) ignores saved stages; otherwise a stage counts as done once saved or finished in this run.
  const remaining=()=>stages.filter(s=>!finished.has(s.id)&&(fresh||!isStageComplete(id,s.id)));
  const render=html=>{
@@ -93,6 +101,10 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  };
  const run=stage=>{
   current=stage;active={chapter:id,stage:stage.id};preloadImages([stageArtSrc(stage)]);
+  if(waitingOn(stage).length){
+   render('<p class="challenge-help">'+stage.waiting+'</p><p class="challenge-feedback" role="status">這道機關還不能開始。</p>');
+   onStage(stage.id);return;
+  }
   if(stage.requires&&!has(stage.requires)){
    render('<p class="challenge-help">'+stage.missing+'</p><p class="challenge-feedback" role="status">這道機關還不能開始。</p>');
    onStage(stage.id);return;
@@ -104,7 +116,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  function choose(){
   current=null;active=null;
   render('<p class="challenge-help">這份證據由兩道機關守著，先做哪一道都可以。卡住的時候，可以先換另一道。</p><div class="stage-picks">'
-   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires);return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
+   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires),waiting=waitingOn(s).length>0;return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':waiting?'要先完成前面的機關':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
    +'</div>');
   document.querySelectorAll('[data-stage-pick]').forEach(button=>button.onclick=()=>run(stages.find(s=>s.id===button.dataset.stagePick)));
  }

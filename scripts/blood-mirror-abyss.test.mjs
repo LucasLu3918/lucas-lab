@@ -4,9 +4,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {LEVELS,CRANK_TEETH,emptyBoard,evaluate,solveAll,HINTS,hintStep,toothPath,phases} from '../games/blood-mirror/puzzles/gears13.js';
+import {WEIGHTS,TOLERANCE,length as pendulumLength,ratio as pendulumRatio,pendulumSolved,solveAll as pendulumSolveAll,HINTS as PENDULUM_HINTS,hintStep as pendulumHintStep} from '../games/blood-mirror/puzzles/pendulum.js';
+import {NOTCHES,RUBY,NUMERALS,numeralAt,notchOf,playTolls,solveAll as wheelSolveAll,HINTS as WHEEL_HINTS,hintStep as wheelHintStep} from '../games/blood-mirror/puzzles/starwheel.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
-import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
+import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
 import {rooms,initialState,toSaveV2,fromSaveV2,exportSave,parseSave,loadSave,writeSave,SAVE_KEY} from '../games/blood-mirror/engine/index.js';
 
 const board=(level,placed)=>{const b=emptyBoard(level);for(const [socket,layers] of Object.entries(placed))b[socket]=layers;return b;};
@@ -92,21 +94,30 @@ test('abyss levels sit outside the seven acts and own a registered puzzle',()=>{
  for(const level of abyss.levels){
   assert.ok(!ids.includes(level.puzzle),level.id+' must not be a chapter');
   assert.ok(puzzles[level.puzzle]?.optional,level.id+' puzzle is registered as optional');
-  assert.equal(puzzles[level.puzzle].stages.length,1);
-  for(const file of ['assets/puzzles/'+puzzles[level.puzzle].stages[0].id+'.webp','assets/puzzles/thumbs/'+level.thumb+'.webp']){
+  const stageIds=puzzles[level.puzzle].stages.map(stage=>stage.id);
+  assert.deepEqual(stageIds,level.stages,'the save and the registry list the same mechanisms');
+  assert.ok(stageIds.includes(level.thumb));
+  // Every mechanism has its own painted banner and thumbnail, each within the 500 KB bitmap budget.
+  for(const file of stageIds.flatMap(id=>['assets/puzzles/'+id+'.webp','assets/puzzles/thumbs/'+id+'.webp'])){
    const url=new URL('../games/blood-mirror/'+file,import.meta.url);
    assert.ok(fs.existsSync(url),file+' missing');
    assert.ok(fs.statSync(url).size<=500*1024,file+' over 500 KB');
   }
+  // A stage that waits for others names stages that exist and come before it.
+  puzzles[level.puzzle].stages.forEach((stage,index)=>{
+   for(const name of stage.after||[])assert.ok(stageIds.indexOf(name)>=0&&stageIds.indexOf(name)<index,stage.id+' waits for '+name);
+   if(stage.after)assert.ok(stage.waiting.length>10);
+  });
  }
+ assert.deepEqual(puzzles.belfry.stages.map(stage=>stage.after||[]),[[],[],['belfry-gears','belfry-pendulum']]);
 });
 
 test('finishing a belfry level is saved, survives export and a new journey, and unknown ids are dropped',()=>{
- setPuzzleCompletions(['library','belfry','nope']);
- assert.deepEqual(completedPuzzles().sort(),['belfry','library']);
+ setPuzzleCompletions(['library','belfry','belfry.belfry-gears','belfry.nope','nope']);
+ assert.deepEqual(completedPuzzles().sort(),['belfry','belfry.belfry-gears','library']);
  const save=toSaveV2({...initialState(),started:true},completedPuzzles());
- assert.deepEqual([...save.puzzles].sort(),['belfry','library']);
- assert.deepEqual(fromSaveV2(JSON.parse(JSON.stringify(save))).puzzles.sort(),['belfry','library']);
+ assert.deepEqual([...save.puzzles].sort(),['belfry','belfry.belfry-gears','library']);
+ assert.deepEqual(fromSaveV2(JSON.parse(JSON.stringify(save))).puzzles.sort(),['belfry','belfry.belfry-gears','library']);
  assert.deepEqual(parseSave(exportSave({...initialState(),started:true},['belfry'])).puzzles,['belfry']);
  const store=storage();
  assert.equal(writeSave({...initialState(),started:true},['belfry'],store),true);
@@ -116,7 +127,73 @@ test('finishing a belfry level is saved, survives export and a new journey, and 
  resetPuzzles();
  assert.equal(isPuzzleComplete('library'),false);
  assert.equal(isPuzzleComplete('belfry'),true);
+ assert.equal(isStageComplete('belfry','belfry-gears'),true,'a finished mechanism survives a new journey too');
  resetPuzzles();
  setPuzzleCompletions([]);
  assert.equal(typeof startPuzzle,'function');
+});
+
+test('the pendulum has exactly one answer: weights of 0.75 and 2.25, a rod of 4 units and a period of 2',()=>{
+ const found=pendulumSolveAll();
+ assert.deepEqual(found,[['a','b']]);
+ assert.equal(pendulumLength(['a','b']),4);
+ assert.equal(pendulumRatio(['a','b']),2);
+ // The tempting guess, doubling the length, only gives a ratio of about 1.41, and no weight combination reaches it.
+ assert.ok(Math.abs(Math.sqrt(2)-1.414)<.001);
+ for(let mask=0;mask<8;mask++)assert.notEqual(pendulumLength(WEIGHTS.filter((_,i)=>mask>>i&1).map(weight=>weight.id)),2,'no combination doubles the length');
+ // The nearest wrong combinations are clearly out of tolerance.
+ let nearest=Infinity;
+ for(let mask=0;mask<8;mask++){
+  const attached=WEIGHTS.filter((_,i)=>mask>>i&1).map(weight=>weight.id);
+  if(!pendulumSolved(attached))nearest=Math.min(nearest,Math.abs(pendulumRatio(attached)-2));
+ }
+ assert.ok(nearest>TOLERANCE*3,'nearest wrong ratio is '+nearest);
+});
+
+test('pendulum hints follow the weights hung and name the answer',()=>{
+ for(const step of ['idle','fast','slow'])assert.equal(PENDULUM_HINTS[step].length,3);
+ assert.equal(pendulumHintStep([]),'idle');
+ assert.equal(pendulumHintStep(['a']),'fast');
+ assert.equal(pendulumHintStep(['a','b','c']),'slow');
+ assert.equal(pendulumHintStep(['a','b']),null);
+ for(const step of ['idle','fast','slow']){
+  assert.ok(PENDULUM_HINTS[step][2].includes('0.75')&&PENDULUM_HINTS[step][2].includes('2.25'));
+  assert.ok(PENDULUM_HINTS[step][1].includes('4 倍')&&PENDULUM_HINTS[step][1].includes('3 格'));
+ }
+});
+
+test('the star wheel has exactly one step, 5, and the thirteenth toll returns to the ruby',()=>{
+ assert.deepEqual(wheelSolveAll(),[5]);
+ for(let toll=1;toll<=12;toll++)assert.equal(numeralAt(notchOf(5,toll)),toll);
+ assert.equal(notchOf(5,13),RUBY);
+ // The engraving uses each numeral once and leaves only the ruby blank.
+ const numerals=Array.from({length:NOTCHES},(_,notch)=>numeralAt(notch)).sort((a,b)=>a-b);
+ assert.deepEqual(numerals,[0,1,2,3,4,5,6,7,8,9,10,11,12]);
+ for(let step=1;step<NOTCHES;step++){
+  if(step===5)continue;
+  const result=playTolls(step);
+  assert.equal(result.ok,false,'step '+step);
+  assert.equal(result.fault.toll,1,'a wrong step is caught on the first toll');
+ }
+ assert.deepEqual(NUMERALS.length,12);
+});
+
+test('star wheel hints name the answer and follow the candle',()=>{
+ for(const step of ['dark','lit'])assert.equal(WHEEL_HINTS[step].length,3);
+ assert.equal(wheelHintStep(false,false),'dark');
+ assert.equal(wheelHintStep(false,true),'lit');
+ assert.equal(wheelHintStep(true,true),null);
+ assert.ok(WHEEL_HINTS.lit[2].includes('第 5 格')&&WHEEL_HINTS.lit[2].includes('5'));
+ assert.equal(numeralAt(5),1,'the numeral 一 sits five notches clockwise from the ruby');
+ assert.equal(numeralAt(10),2);
+});
+
+test('the mechanisms animate with a clock that does not depend on requestAnimationFrame alone',()=>{
+ const source=fs.readFileSync(new URL('../games/blood-mirror/puzzles/clock.js',import.meta.url),'utf8');
+ assert.match(source,/requestAnimationFrame/);
+ assert.match(source,/setTimeout/);
+ for(const file of ['gears13','pendulum','starwheel']){
+  const text=fs.readFileSync(new URL('../games/blood-mirror/puzzles/'+file+'.js',import.meta.url),'utf8');
+  assert.ok(!/requestAnimationFrame/.test(text.replace(/\/\/.*$/gm,'')),file+' goes through clock.js');
+ }
 });
