@@ -243,6 +243,14 @@ body.mode-story .journey-guide{display:grid}
 }
 @media (max-width:420px){
  .dialogue-actions .primary-button{padding:8px 12px;font-size:12px}
+ /* Six tools (hint, candle, journal, gallery, sound, menu) share the row with the chapter title. */
+ .hud-tools{gap:4px}
+ .hud .tool-button{min-width:40px;min-height:40px}
+ .hud-chapter h1{font-size:17px;letter-spacing:1px}
+}
+@media (max-width:380px){
+ .hud-tools{gap:3px}
+ .hud-chapter h1{font-size:16px;letter-spacing:.5px}
 }
 
 /* Hotspot rings from the site stylesheet are replaced by the glimmer dot. */
