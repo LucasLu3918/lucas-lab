@@ -161,6 +161,8 @@ function followJourney(){
 function renderResume(){
  $('#resume-card').classList.toggle('hidden',!state.started);
  if(!state.started)return;
+ // Snow White's portrait loads only once a journey exists, so a first visit makes no extra request.
+ const face=$('#resume-portrait');if(!face.getAttribute('src'))face.src='assets/portraits/snow.webp';face.hidden=false;
  const guide=journeyGuide(state,restoredRoom());
  $('#resume-title').textContent=guide.endingTitle||guide.chapter+' · '+guide.title;
  $('#resume-summary').textContent=`真相 ${guide.solved} / ${rooms.length} · 本幕已查看 ${guide.discovered} / ${guide.total} 處線索 · 結局收藏 ${state.endings.length} / ${Object.keys(endings).length}${state.endings.length?` · 人物記憶 ${state.memories?.length||0} / ${memoryCollection(state).length}`:''}`;
@@ -176,7 +178,7 @@ function renderJourneyGuide(){
 }
 function openJournal(){
  const sections=journalChapters(state,id=>restoredRoom(rooms.findIndex(room=>room.id===id)));
- modal('被留下的真相','JOURNAL · 線索筆記',`<div class="journal-controls"><label for="journal-chapter">查看章節</label><select id="journal-chapter"><option value="all">全部已解鎖章節</option>${sections.map(section=>`<option value="${section.index}">${section.chapter} · ${section.title}</option>`).join('')}${state.endings.length||state.memories?.length?'<option value="memories">人物記憶</option>':''}<option value="clues">推理簿</option><option value="collection">收藏</option></select><p id="journal-summary" class="modal-note" role="status"></p></div><div id="journal-entries"></div>`);
+ modal('被留下的真相','JOURNAL · 線索筆記',`<div class="journal-owner"><img src="assets/portraits/snow.webp" alt="" width="56" height="56" decoding="async"><p><strong>白雪公主</strong><span>她一路留下的線索與記憶</span></p></div><div class="journal-controls"><label for="journal-chapter">查看章節</label><select id="journal-chapter"><option value="all">全部已解鎖章節</option>${sections.map(section=>`<option value="${section.index}">${section.chapter} · ${section.title}</option>`).join('')}${state.endings.length||state.memories?.length?'<option value="memories">人物記憶</option>':''}<option value="clues">推理簿</option><option value="collection">收藏</option></select><p id="journal-summary" class="modal-note" role="status"></p></div><div id="journal-entries"></div>`);
  const select=$('#journal-chapter');select.value=String(state.room);
  const draw=()=>{
   if(select.value==='clues'){const book=clueBook();$('#journal-summary').textContent=book.summary;$('#journal-entries').innerHTML=book.html;return;}
