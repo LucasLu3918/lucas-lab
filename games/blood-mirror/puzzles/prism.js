@@ -124,57 +124,135 @@ const sym=(c,x,y,r,fill)=>{
 const diamond=(x,y,r,fill)=>'<path d="M'+x+' '+(y-r)+'L'+(x+r)+' '+y+'L'+x+' '+(y+r)+'L'+(x-r)+' '+y+'Z" fill="'+fill+'"/>';
 const maskSyms=(mask,cx,cy,r,fill)=>{const colours=[1,2,4].filter(c=>mask&c);return colours.map((c,i)=>sym(c,cx+(i-(colours.length-1)/2)*r*2.3,cy,r,fill)).join('');};
 
-function boardMarkup(L,S){
- const W=L.w*CELL,H=L.h*CELL,r=trace(L,S);
- let s='<defs><filter id="prism-glow"><feGaussianBlur stdDeviation="1.1"/></filter></defs>';
- for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++)s+='<rect x="'+x*CELL+'" y="'+y*CELL+'" width="'+CELL+'" height="'+CELL+'" fill="'+((x+y)%2?'#1c1424':'#120c1a')+'"/>';
- for(const e of L.emitters){
-  const c=COLORS[e.c],x=px(e.x);
-  s+='<path d="M'+(x-3.4)+' -3.4L'+(x+3.4)+' -3.4L'+x+' -8.6Z" fill="#e8f0ff" fill-opacity=".85" stroke="#9fb4d8" stroke-width=".4"/>'
-   +(c===7?diamond(x,-4.9,1.7,'#0b0710'):sym(c,x,-4.5,1.7,'#0b0710'))
-   +'<text x="'+x+'" y="-9.4" font-size="2.6" text-anchor="middle" fill="'+rgbOf(c)+'">'+({R:'紅',G:'綠',B:'藍',W:'白'})[e.c]+'</text>';
- }
- // Masks sit under the beams so the light visibly passes through them.
- L.targets.forEach((t,i)=>{
-  const x=px(t.x),y=px(t.y),got=r.got[i],ok=got===t.need,over=got&~t.need;
-  s+='<g><ellipse cx="'+x+'" cy="'+y+'" rx="4.2" ry="3.4" fill="'+(ok?'#1d2f1d':'#161018')+'" stroke="'+(ok?'#6f6':over?'#f66':'#7a6a4a')+'" stroke-width="'+(ok?.9:.6)+'"/>'
-   +'<ellipse cx="'+(x-1.5)+'" cy="'+(y-.4)+'" rx=".8" ry=".6" fill="'+(ok?'#cfc':'#000')+'"/><ellipse cx="'+(x+1.5)+'" cy="'+(y-.4)+'" rx=".8" ry=".6" fill="'+(ok?'#cfc':'#000')+'"/>'
-   +maskSyms(t.need,x,y+5.3,1.4)+(over?'<text x="'+x+'" y="'+(y-4.6)+'" font-size="2.4" text-anchor="middle" fill="#f66">顏色太多</text>':'')+'</g>';
- });
- for(const f of L.filters||[]){
-  const x=px(f.x),y=px(f.y);
-  s+='<g><path d="M'+x+' '+(y-4.4)+'L'+(x+4.4)+' '+y+'L'+x+' '+(y+4.4)+'L'+(x-4.4)+' '+y+'Z" fill="'+rgbOf(f.c)+'" fill-opacity=".22" stroke="'+rgbOf(f.c)+'" stroke-width=".7"/>'+sym(f.c,x,y,1.5,rgbOf(f.c))+'</g>';
- }
- (L.crystals||[]).forEach((c,i)=>{
-  const x=px(c.x),y=px(c.y),lit=bits(r.crystalIn[i])>=2,a=Math.atan2(c.dir[1],c.dir[0]);
-  const hex=[0,1,2,3,4,5].map(k=>(x+Math.cos(k*Math.PI/3+Math.PI/6)*4.6).toFixed(2)+','+(y+Math.sin(k*Math.PI/3+Math.PI/6)*4.6).toFixed(2)).join(' ');
-  const tip=[x+Math.cos(a)*3.7,y+Math.sin(a)*3.7];
-  s+='<g><polygon points="'+hex+'" fill="'+(lit?rgbOf(r.crystalIn[i]):'#20182c')+'" fill-opacity="'+(lit?.5:1)+'" stroke="'+(lit?'#fff':'#8a7aa8')+'" stroke-width=".6"/>'
-   +'<path d="M'+tip[0]+' '+tip[1]+'l'+Math.cos(a+2.6)*2.1+' '+Math.sin(a+2.6)*2.1+'M'+tip[0]+' '+tip[1]+'l'+Math.cos(a-2.6)*2.1+' '+Math.sin(a-2.6)*2.1+'" stroke="#e0b84f" stroke-width=".6" fill="none"/>'
-   +(r.crystalIn[i]?maskSyms(r.crystalIn[i],x,y,1.1,'#fff'):'')+'</g>';
- });
- s+='<g class="prism-beams">';
+// Art layer only: the rules above never read any of this. Painted parts (assets/puzzles/prism-parts.webp, one 4x2 atlas of 256 px cells)
+// sit on a painted parquet floor. The scene is built once; paint() then changes only what the board state changes, so a click moves a
+// mirror, a dancer or a beam without rebuilding the SVG (no flicker, no lost focus, and the blades and dancers can ease into place).
+const BRASS='url(#prism-brass)';
+const ATLAS='assets/puzzles/prism-parts.webp',FLOOR='assets/puzzles/prism-floor.webp';
+const SPRITE={maskLit:0,maskDark:1,blade:2,base:3,dancer:4,crystal:5,filter:6,emitter:7};
+// One part, centred on (x,y) and fitted into a size x size box: a nested svg crops the atlas cell.
+const spr=(name,x,y,size,cls,tall)=>{const i=SPRITE[name],h=tall||size;
+ return '<svg class="'+(cls||'')+'" x="'+(x-size/2)+'" y="'+(y-h/2)+'" width="'+size+'" height="'+h+'" viewBox="'+(i%4)*256+' '+(i>>2)*256+' 256 256"'+(tall?' preserveAspectRatio="none"':'')+' overflow="hidden" pointer-events="none"><image href="'+ATLAS+'" width="1024" height="512" preserveAspectRatio="none"/></svg>';};
+const PRISM_DEFS=(()=>{
+ let s='<defs><linearGradient id="prism-brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7a1"/><stop offset=".45" stop-color="#c79a3a"/><stop offset="1" stop-color="#6e4b17"/></linearGradient>'
+  +'<radialGradient id="prism-pool" cx=".5" cy=".2" r=".85"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".14"/><stop offset=".6" stop-color="#ffe2a8" stop-opacity=".02"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>';
+ // One soft halo per light colour: gradient stops cannot take the colour of whatever draws them.
+ for(let m=1;m<=7;m++)s+='<radialGradient id="prism-halo-'+m+'"><stop offset="0" stop-color="'+rgbOf(m)+'" stop-opacity=".75"/><stop offset="1" stop-color="'+rgbOf(m)+'" stop-opacity="0"/></radialGradient>';
+ return s+'</defs>';
+})();
+
+function floorMarkup(L){
+ const W=L.w*CELL,H=L.h*CELL;
+ let s='<rect x="-1.8" y="-1.8" width="'+(W+3.6)+'" height="'+(H+3.6)+'" rx="1.4" fill="#0c0712" stroke="'+BRASS+'" stroke-width=".8"/>'
+  +'<image href="'+FLOOR+'" x="-1" y="-1" width="'+(W+2)+'" height="'+(H+2)+'" preserveAspectRatio="xMidYMid slice"/>'
+  +'<rect x="-1" y="-1" width="'+(W+2)+'" height="'+(H+2)+'" fill="#0a0610" fill-opacity=".2"/>';
+ // The grid is part of the puzzle, so it stays legible on top of the wood: alternate cells are darker, cell edges are a thin gold line.
+ for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++)s+='<rect x="'+x*CELL+'" y="'+y*CELL+'" width="'+CELL+'" height="'+CELL+'" fill="'+((x+y)%2?'#000':'#1a0f26')+'" fill-opacity="'+((x+y)%2?.24:.12)+'" stroke="#f3dca0" stroke-opacity=".09" stroke-width=".18"/>';
+ s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#prism-pool)"/>'
+  +'<rect x="-.8" y="-.8" width="'+(W+1.6)+'" height="'+(H+1.6)+'" fill="none" stroke="#c79a3a" stroke-opacity=".55" stroke-width=".25"/>';
+ for(const [cx,cy] of [[-1.8,-1.8],[W+1.8,-1.8],[-1.8,H+1.8],[W+1.8,H+1.8]])s+=diamond(cx,cy,1.6,BRASS);
+ return s;
+}
+function emitterMarkup(e){
+ const c=COLORS[e.c],x=px(e.x),col=rgbOf(c);
+ return '<g>'+spr('emitter',x,-6.5,10.6)
+  +'<ellipse cx="'+x+'" cy="-1.6" rx="3.6" ry="1.5" fill="'+col+'" fill-opacity=".55"/>'
+  +'<circle cx="'+x+'" cy="-6.3" r="2" fill="#120a1a" fill-opacity=".85" stroke="#e0b84f" stroke-width=".3"/>'
+  +(c===7?diamond(x,-6.3,1.2,'#fff'):sym(c,x,-6.2,1.1,'#fff'))
+  +'<text x="'+x+'" y="-11.3" font-size="2.6" text-anchor="middle" fill="'+col+'">'+({R:'紅',G:'綠',B:'藍',W:'白'})[e.c]+'</text></g>';
+}
+// A mask is two painted layers (dark lacquer, lit porcelain) that cross-fade, a halo, and the colours it needs on a small plaque.
+function maskMarkup(t,i){
+ const x=px(t.x),y=px(t.y),need=[1,2,4].filter(c=>t.need&c),plaque=need.length*3.3+1.2;
+ return '<g data-mask="'+i+'"><ellipse class="prism-halo" cx="'+x+'" cy="'+y+'" rx="7" ry="5.4" fill="url(#prism-halo-7)"/>'
+  +spr('maskDark',x,y-.2,11.4,'prism-mask-dark')+spr('maskLit',x,y-.2,11.4,'prism-mask-lit')
+  +'<rect class="prism-plaque" x="'+(x-plaque/2)+'" y="'+(y+3.9)+'" width="'+plaque+'" height="3.1" rx="1.5" fill="#0b0710" fill-opacity=".78" stroke="#8a6c3a" stroke-width=".25"/>'
+  +maskSyms(t.need,x,y+5.45,1.15)+'<text class="prism-over" x="'+x+'" y="'+(y-5.4)+'" font-size="2.4" text-anchor="middle" fill="#ff8a8a">顏色太多</text></g>';
+}
+function filterMarkup(f){
+ const x=px(f.x),y=px(f.y),col=rgbOf(f.c);
+ return '<g>'+spr('filter',x,y,10.8)
+  +'<path class="prism-tint" d="M'+x+' '+(y-3.1)+'L'+(x+2.5)+' '+y+'L'+x+' '+(y+3.1)+'L'+(x-2.5)+' '+y+'Z" fill="'+col+'" fill-opacity=".92"/>'
+  +sym(f.c,x,y,1.3,'#fff')+'</g>';
+}
+function crystalMarkup(c,i){
+ const x=px(c.x),y=px(c.y),a=Math.atan2(c.dir[1],c.dir[0]),tip=[x+Math.cos(a)*4.9,y+Math.sin(a)*4.9];
+ const oct=[0,1,2,3,4,5,6,7].map(k=>(x+Math.cos(k*Math.PI/4+Math.PI/8)*4.1).toFixed(2)+','+(y+Math.sin(k*Math.PI/4+Math.PI/8)*4.1).toFixed(2)).join(' ');
+ return '<g data-crystal="'+i+'"><circle class="prism-halo" cx="'+x+'" cy="'+y+'" r="7.4" fill="url(#prism-halo-7)"/>'+spr('crystal',x,y,10)
+  +'<polygon class="prism-tint prism-crystal-tint" points="'+oct+'" fill="#fff" fill-opacity="0"/>'
+  +'<path d="M'+tip[0]+' '+tip[1]+'l'+Math.cos(a+2.6)*2.3+' '+Math.sin(a+2.6)*2.3+'M'+tip[0]+' '+tip[1]+'l'+Math.cos(a-2.6)*2.3+' '+Math.sin(a-2.6)*2.3+'" stroke="#f1cf6a" stroke-width=".8" stroke-linecap="round" fill="none"/>'
+  +'<g class="prism-crystal-syms"></g></g>';
+}
+const dancerSprite=(x,y)=>spr('dancer',x,y-.6,11.6);
+// Both of a dancer's cells are drawn once; paint() fades the one he is not standing on into a ghost and eases him across.
+function dancerMarkup(b,i){
+ return '<g class="prism-ghost" data-ghost="'+i+'" opacity=".28">'+dancerSprite(0,0)+'</g>'
+  +'<g class="prism-hit" data-dancer="'+i+'" tabindex="0" role="button"><g class="prism-dancer"><ellipse cx="0" cy="4.6" rx="3" ry=".9" fill="#000" fill-opacity=".45"/>'+dancerSprite(0,0)+'</g>'
+  +'<rect class="prism-hitbox" x="0" y="0" width="10" height="10" fill="transparent"/></g>';
+}
+function mirrorMarkup(m,i){
+ const x=px(m.x),y=px(m.y);
+ return '<g class="prism-hit" data-mirror="'+i+'" tabindex="0" role="button" transform="translate('+x+' '+y+')"><circle r="5" fill="none" stroke="transparent" stroke-width=".6"/>'
+  +'<ellipse cx=".5" cy="1" rx="4" ry="3.6" fill="#000" fill-opacity=".4"/>'+spr('base',0,0,8.2)
+  +'<g class="prism-blade">'+spr('blade',0,0,11.4,'',17)+'</g><rect x="-5" y="-5" width="10" height="10" fill="transparent"/></g>';
+}
+
+// The static scene, built once per board.
+function boardMarkup(L){
+ const W=L.w*CELL,H=L.h*CELL;
+ let s=PRISM_DEFS+floorMarkup(L);
+ for(const e of L.emitters)s+=emitterMarkup(e);
+ L.targets.forEach((t,i)=>{s+=maskMarkup(t,i);});
+ for(const f of L.filters||[])s+=filterMarkup(f);
+ (L.crystals||[]).forEach((c,i)=>{s+=crystalMarkup(c,i);});
+ s+='<g class="prism-beams"></g>';
+ L.blockers.forEach((b,i)=>{s+=dancerMarkup(b,i);});
+ L.mirrors.forEach((m,i)=>{s+=mirrorMarkup(m,i);});
+ return {markup:s,viewBox:'-3 -14.2 '+(W+6)+' '+(H+18.2)};
+}
+const beamMarkup=r=>{
+ let s='';
  for(const beam of r.beams)for(const seg of beam.segs){
-  const c=seg.mask,d=seg.pts.map(p=>px(p[0])+','+px(p[1])).join(' ');
-  s+='<polyline points="'+d+'" fill="none" stroke="'+rgbOf(c)+'" stroke-width="3.4" stroke-opacity=".28" filter="url(#prism-glow)" stroke-linejoin="round"/>'
-   +'<polyline points="'+d+'" fill="none" stroke="'+rgbOf(c)+'" stroke-width="1.3" stroke-linejoin="round"/>';
+  const c=seg.mask,d=seg.pts.map(p=>px(p[0])+','+px(p[1])).join(' '),col=rgbOf(c);
+  s+='<polyline points="'+d+'" fill="none" stroke="'+col+'" stroke-width="6.5" stroke-opacity=".14" stroke-linejoin="round"/>'
+   +'<polyline points="'+d+'" fill="none" stroke="'+col+'" stroke-width="3.4" stroke-opacity=".26" stroke-linejoin="round"/>'
+   +'<polyline points="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.3" stroke-linejoin="round"/>'
+   +'<polyline points="'+d+'" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".4" stroke-linejoin="round"/>';
   for(let i=1;i<seg.pts.length-1;i+=3)s+=c===7?diamond(px(seg.pts[i][0]),px(seg.pts[i][1]),1.1,'#fff'):maskSyms(c,px(seg.pts[i][0]),px(seg.pts[i][1]),1.0,'#fff');
  }
- s+='</g>';
- // A dancer shows a faint ghost on the cell it can be pushed to.
+ return s;
+};
+// Brings the built scene in line with the board state. Touches only what changed.
+function paint(svg,L,S){
+ const r=trace(L,S),set=(el,k,v)=>{if(el&&el.getAttribute(k)!==String(v))el.setAttribute(k,v);};
+ L.targets.forEach((t,i)=>{
+  const g=svg.querySelector('[data-mask="'+i+'"]'),got=r.got[i],ok=got===t.need,over=!!(got&~t.need);
+  g.querySelector('.prism-mask-lit').style.opacity=ok?1:0;
+  const halo=g.querySelector('.prism-halo');halo.style.opacity=ok?.9:0;
+  g.querySelector('.prism-over').style.opacity=over?1:0;
+  g.querySelector('.prism-plaque').setAttribute('stroke',ok?'#e0b84f':over?'#ff6b6b':'#8a6c3a');
+ });
+ (L.crystals||[]).forEach((c,i)=>{
+  const g=svg.querySelector('[data-crystal="'+i+'"]'),cin=r.crystalIn[i],lit=bits(cin)>=2;
+  const tint=g.querySelector('.prism-crystal-tint');
+  if(cin){tint.setAttribute('fill',rgbOf(cin));tint.style.opacity=lit?.9:.45;}else tint.style.opacity=0;
+  const halo=g.querySelector('.prism-halo');halo.setAttribute('fill','url(#prism-halo-'+(cin||7)+')');halo.style.opacity=lit?1:0;
+  g.querySelector('.prism-crystal-syms').innerHTML=cin?maskSyms(cin,px(c.x),px(c.y),1.1,'#fff'):'';
+ });
+ svg.querySelector('.prism-beams').innerHTML=beamMarkup(r);
  L.blockers.forEach((b,i)=>{
   const cur=S.k[i]?b.b:b.a,alt=S.k[i]?b.a:b.b;
-  const figure=(p,ghost)=>'<g opacity="'+(ghost?.28:1)+'" transform="translate('+px(p[0])+' '+px(p[1])+')"><circle cy="-2.4" r="1.5" fill="#d9c9a8"/><path d="M-2.3 3.4L0 -.8L2.3 3.4Z" fill="#7a1530" stroke="#c9a24a" stroke-width=".3"/></g>';
-  s+=figure(alt,true)+'<g class="prism-hit" data-dancer="'+i+'" tabindex="0" role="button" aria-label="舞者 '+(i+1)+'，在第 '+(cur[0]+1)+' 欄、第 '+(cur[1]+1)+' 列（點一下推到第 '+(alt[0]+1)+' 欄、第 '+(alt[1]+1)+' 列）">'+figure(cur,false)+'<rect x="'+(px(cur[0])-5)+'" y="'+(px(cur[1])-5)+'" width="10" height="10" fill="transparent"/></g>';
+  const live=svg.querySelector('[data-dancer="'+i+'"]'),body=live.querySelector('.prism-dancer'),ghost=svg.querySelector('[data-ghost="'+i+'"]');
+  body.style.transform='translate('+px(cur[0])+'px,'+px(cur[1])+'px)';
+  ghost.style.transform='translate('+px(alt[0])+'px,'+px(alt[1])+'px)';
+  const box=live.querySelector('.prism-hitbox');set(box,'x',px(cur[0])-5);set(box,'y',px(cur[1])-5);
+  set(live,'aria-label','舞者 '+(i+1)+'，在第 '+(cur[0]+1)+' 欄、第 '+(cur[1]+1)+' 列（點一下推到第 '+(alt[0]+1)+' 欄、第 '+(alt[1]+1)+' 列）');
  });
  L.mirrors.forEach((m,i)=>{
-  const x=px(m.x),y=px(m.y),a=S.m[i]==='/'?[-3.6,3.6,3.6,-3.6]:[-3.6,-3.6,3.6,3.6];
-  s+='<g class="prism-hit" data-mirror="'+i+'" tabindex="0" role="button" aria-label="鏡子 '+(i+1)+'，在第 '+(m.x+1)+' 欄、第 '+(m.y+1)+' 列，目前 '+S.m[i]+'（點一下轉向）"><circle cx="'+x+'" cy="'+y+'" r="4.6" fill="#1a1024" stroke="#6b5a3a" stroke-width=".4"/>'
-   +'<line x1="'+(x+a[0])+'" y1="'+(y+a[1])+'" x2="'+(x+a[2])+'" y2="'+(y+a[3])+'" stroke="#e0b84f" stroke-width="1.6" stroke-linecap="round"/>'
-   +'<line x1="'+(x+a[0])+'" y1="'+(y+a[1])+'" x2="'+(x+a[2])+'" y2="'+(y+a[3])+'" stroke="#fff6cf" stroke-width=".5" stroke-linecap="round"/>'
-   +'<rect x="'+(x-5)+'" y="'+(y-5)+'" width="10" height="10" fill="transparent"/></g>';
+  const g=svg.querySelector('[data-mirror="'+i+'"]');
+  g.querySelector('.prism-blade').style.transform='rotate('+(S.m[i]==='/'?-45:45)+'deg)';
+  set(g,'aria-label','鏡子 '+(i+1)+'，在第 '+(m.x+1)+' 欄、第 '+(m.y+1)+' 列，目前 '+S.m[i]+'（點一下轉向）');
  });
- return {markup:s,viewBox:'-3 -13 '+(W+6)+' '+(H+17)};
 }
 
 const LEGEND='<ol class="belfry-rules"><li>光有形狀，不靠顏色也看得出來：◆ 白（含三色）、▲ 紅、● 綠、■ 藍；黃＝▲＋●。面具下方的符號，就是它需要的光。</li>'
@@ -207,24 +285,30 @@ function mountPrism(stageId,ctx){
  const tiers=new Proxy({},{get:()=>[1,2,3].map(tier=>hint(L,S,sol,tier))});
  const hints=bindHints({hints:tiers,currentStep:()=>finished?null:hintStep(L,S,sol),alive});
 
- function draw(focus){
-  const {markup,viewBox}=boardMarkup(L,S);
-  svg.setAttribute('viewBox',viewBox);svg.innerHTML=markup;
-  for(const g of svg.querySelectorAll('[data-mirror]')){
-   const act=()=>flip('m',+g.dataset.mirror);
-   g.onclick=act;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}};
+ // The scene is built once and bound once; draw() only repaints what the state changed, so the focused mirror keeps focus on its own.
+ let built=false;
+ function draw(){
+  if(!built){
+   const {markup,viewBox}=boardMarkup(L);
+   svg.setAttribute('viewBox',viewBox);svg.innerHTML=markup;built=true;
+   for(const g of svg.querySelectorAll('[data-mirror]')){
+    const act=()=>flip('m',+g.dataset.mirror);
+    g.onclick=act;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}};
+   }
+   for(const g of svg.querySelectorAll('[data-dancer]')){
+    const act=()=>flip('k',+g.dataset.dancer);
+    g.onclick=act;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}};
+   }
   }
-  for(const g of svg.querySelectorAll('[data-dancer]')){
-   const act=()=>flip('k',+g.dataset.dancer);
-   g.onclick=act;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}};
-  }
-  if(focus)svg.querySelector(focus)?.focus({preventScroll:true});
+  paint(svg,L,S);
+  // Eased moves start only after the first paint, so nothing slides in from the corner when the board opens.
+  if(!svg.classList.contains('ready'))setTimeout(()=>svg.classList.add('ready'),60);
  }
  function flip(kind,index){
   if(finished)return;
   if(kind==='m')S.m[index]=S.m[index]==='/'?'\\':'/';else S.k[index]^=1;
   ctx.playCue('click');
-  draw(kind==='m'?'[data-mirror="'+index+'"]':'[data-dancer="'+index+'"]');
+  draw();
   update();
  }
  function update(){
