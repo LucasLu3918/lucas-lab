@@ -44,6 +44,12 @@ export const puzzles={
   {id:'prism-rays',label:'濾鏡',mount:lazy('prism','mountPrismRays')},
   {id:'prism-blend',label:'合光水晶',mount:lazy('prism','mountPrismBlend')},
   {id:'prism-ballroom',label:'舞廳',mount:lazy('prism','mountPrismBallroom'),after:['prism-rays','prism-blend'],waiting:'舞池的機關還沒有動力。先讓吊燈的光路和合光水晶運作，舞者才會動起來。'}
+ ]},
+ // Its three mechanisms share puzzles/apothecary.js: the testimony and the vessels (either first), then the mixing, which `after` keeps closed until both are done.
+ apothecary:{id:'apothecary',title:'毒蘋果調配室',subtitle:'ABYSS · 證詞、量杯與調色',optional:true,stages:[
+  {id:'apothecary-testimony',label:'七人證詞',mount:lazy('apothecary','mountApothecaryTestimony')},
+  {id:'apothecary-vessels',label:'回魂藥量杯',mount:lazy('apothecary','mountApothecaryVessels')},
+  {id:'apothecary-mixing',label:'調色',mount:lazy('apothecary','mountApothecaryMixing'),after:['apothecary-testimony','apothecary-vessels'],waiting:'配方的顏色要等兩件事完成才看得見：誰拿著那顆蘋果，以及剛好四格的原液。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
@@ -72,8 +78,9 @@ export function preloadStages(){for(const entry of Object.values(puzzles))if(!en
 // Opens a puzzle inside the modal. `success` runs after the puzzle has been recorded as complete.
 // Options: `has(item)` checks the inventory, `onStage(stage)` / `onStageDone(stage)` run when a stage
 // mounts / is solved, and
-// `extra` = {html(stage), bind(stage)} appends the step-aware hint panel below the stage.
-export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,onStage=()=>{},onStageDone=()=>{},extra=null}){
+// `extra` = {html(stage), bind(stage)} appends the step-aware hint panel below the stage, and
+// `stageLines` = {<stage id>: html} shows a few lines of story after that stage is solved (not on a replay), before the next one.
+export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,onStage=()=>{},onStageDone=()=>{},extra=null,stageLines={}}){
  const entry=puzzles[id];
  const complete=()=>{active=null;completed.add(id);persist();playCue('solve');success();};
  if(!entry){complete();return;}
@@ -103,7 +110,13 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
   const left=remaining();
   if(!left.length){complete();return;}
   playCue('door');
-  if(left.length===1||fresh)run(left[0]);else choose();
+  const next=()=>{if(left.length===1||fresh)run(left[0]);else choose();};
+  if(stageLines[stage.id]&&!fresh){
+   render(stageLines[stage.id]+'<button class="primary-button" data-stage-note>繼續 ⟶</button>');
+   const go=document.querySelector('[data-stage-note]');go.onclick=next;go.focus({preventScroll:true});
+   return;
+  }
+  next();
  };
  const run=stage=>{
   current=stage;active={chapter:id,stage:stage.id};preloadImages([stageArtSrc(stage)]);
