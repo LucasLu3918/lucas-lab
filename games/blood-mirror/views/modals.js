@@ -65,7 +65,7 @@ export function clueBookMarkup(words=[]){
 }
 
 // The 收藏 tab: mirror shards, achievements, and the button to the secret epilogue once every shard is found.
-export function collectionMarkup({shardIds,found,achievements,unlocked,titleOf,secretTitle}){
+export function collectionMarkup({shardIds,found,achievements,unlocked,titleOf,secretTitle,closingTitle=''}){
  const ready=shardIds.every(id=>found.includes(id));
  return `<h3>鏡之碎片 ${shardIds.filter(id=>found.includes(id)).length} / ${shardIds.length}</h3>`
   +`<ul class="shard-list">${shardIds.map(id=>`<li class="${found.includes(id)?'found':''}">${found.includes(id)?'◇ '+titleOf(id)+' · 已收藏':'◆ 尚未發現'}</li>`).join('')}</ul>`
@@ -74,6 +74,7 @@ export function collectionMarkup({shardIds,found,achievements,unlocked,titleOf,s
    const got=unlocked.includes(item.id);
    return `<li class="${got?'unlocked':'locked'}"><strong>${got?item.title:'？？？'}</strong><span>${got?item.text:'尚未達成。'}</span></li>`;
   }).join('')}</ul>`
+  +(closingTitle?`<h3>稱號</h3><ul class="achievement-list"><li class="unlocked"><strong>${closingTitle}</strong><span>翻到帳冊的最後一頁，名字被留了下來。</span></li></ul>`:'')
   +`<button id="secret-epilogue" class="primary-button" ${ready?'':'disabled'}>${ready?secretTitle+' · 閱讀祕密尾聲 ⟶':'集滿碎片後解鎖祕密尾聲'}</button>`;
 }
 

@@ -246,5 +246,29 @@ export const abyss={
    enter:'翻開羅盤',
    reward:{name:'魔鏡羅盤',mark:'歸',caption:'羅盤背面刻著的字'}
   }
- ]
+ ],
+ // The last page (最後一頁): opens once E9 is done. The world still forgets her; only the ledger remembers. Both answers give the same title,
+ // and the choice is not saved. The title is not stored either: it follows from E9 being complete (main.js collection tab).
+ closing:{
+  id:'closing',
+  requires:'compass',
+  title:'最後一頁',
+  subtitle:'簽名欄上的名字',
+  thumb:'compass-final',
+  scene:[
+   {text:'羅盤的指針停在帳冊的最後一頁。簽名欄是空的，只留著一道被擦過的痕跡。'},
+   {speaker:'mirror',text:'「所有人都忘了妳。可是帳冊記得每一個名字，連被擦掉的也記得。」'},
+   {text:'頁底有一行很小的字：白雪。墨還沒有乾。'}
+  ],
+  prompt:'妳要讓這個名字留在這一頁嗎？',
+  options:[
+   {id:'keep',label:'「留著。」',text:'墨慢慢乾了。這一頁不會再有人翻開，可是它在。'},
+   {id:'close',label:'合上帳冊',text:'帳冊輕輕合上，名字留在裡面，像一件不必被看見的事。'}
+  ],
+  ending:[
+   {speaker:'mirror',text:'「我記了那麼多筆帳。這是唯一一筆，我希望它永遠不要被結清。」'},
+   {text:'妳走出帳冊的時候，沒有人認得妳。可是有一頁紙，記得妳。'}
+  ],
+  reward:{name:'被帳冊記住的人',mark:'頁',caption:'收藏稱號'}
+ }
 };
