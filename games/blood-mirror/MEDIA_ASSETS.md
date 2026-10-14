@@ -243,3 +243,11 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
 - 結果：橫幅合計由約 1.5 MB 增為約 3.3 MB（`dist/games` 約 22.3 MB，上限 26 MB）；單張最大約 138 KB（上限 500 KB）。頁面上的 `<img>` 仍標 960×411，顯示尺寸與版面不變，高解析螢幕會更清楚。
 - 沒有重新產圖，構圖與內容與之前相同。
 
+## 肖像與場景重新轉檔（2026-10-15）
+
+- 範圍：9 張人物肖像 `assets/portraits/*.webp`，以及有無損母檔的 10 張主線場景（`balcony`、`ballroom`、`black-pine-path`、`crypt-bedside`、`hunter-cabin`、`library-desk`、`mine-dorm`、`mirror-children`、`mirror-hall`、`queen-vanity`）。母檔用像素比對找出：場景母檔在 `source-art/m6/` 與 `source-art/views/`，尺寸與出貨檔完全相同；肖像母檔是 832×1216（`source-art/m6/portraits/`）。
+- 做法：場景維持原尺寸，`cwebp -q 85 -m 6 -sharp_yuv`；肖像照原本 640×936 輸出（遊戲內最寬只顯示 240 像素，640 寬已足夠高解析螢幕），`-q 88 -resize 640 936`。
+- 結果：肖像每張由 16–41 KB 增為 34–71 KB；場景每張增加約 20–60 KB；合計約多 0.7 MB。肖像的眼睛與眉眼細節較清楚；場景差異很小（原本壓縮就不算重，只是更乾淨）。
+- 沒有重新產圖；先前文件中「肖像各 ≤ 42 KB」的限制作廢，改以全站素材預算（`dist/games` ≤ 26 MB、單張 ≤ 500 KB）為準。
+- 沒有母檔、沒有動的：`chamber`、`crypt`、`mine`、`mirror`、`queen`、`snow-white`、`endings/dawn`、設計板與物件圖示。
+
