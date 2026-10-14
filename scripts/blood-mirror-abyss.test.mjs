@@ -8,6 +8,7 @@ import {WEIGHTS,TOLERANCE,length as pendulumLength,ratio as pendulumRatio,pendul
 import {NOTCHES,RUBY,NUMERALS,numeralAt,notchOf,playTolls,solveAll as wheelSolveAll,HINTS as WHEEL_HINTS,hintStep as wheelHintStep} from '../games/blood-mirror/puzzles/starwheel.js';
 import {STAGES as PRISM,solutions as prismSolutions,signature as prismSignature,solved as prismSolved,litCount,allStates as prismStates,trace as prismTrace,bits,hint as prismHint,hintStep as prismHintStep,solutionOf,diagnose} from '../games/blood-mirror/puzzles/prism.js';
 import * as apo from '../games/blood-mirror/puzzles/apothecary.js';
+import * as gal from '../games/blood-mirror/puzzles/gallery.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -114,6 +115,7 @@ test('abyss levels sit outside the seven acts and own a registered puzzle',()=>{
  assert.deepEqual(puzzles.belfry.stages.map(stage=>stage.after||[]),[[],[],['belfry-gears','belfry-pendulum']]);
  assert.deepEqual(puzzles.prism.stages.map(stage=>stage.after||[]),[[],[],['prism-rays','prism-blend']]);
  assert.deepEqual(puzzles.apothecary.stages.map(stage=>stage.after||[]),[[],[],['apothecary-testimony','apothecary-vessels']]);
+ assert.deepEqual(puzzles.gallery.stages.map(stage=>stage.after||[]),[[],['gallery-align']]);
 });
 
 test('finishing a belfry level is saved, survives export and a new journey, and unknown ids are dropped',()=>{
@@ -327,4 +329,109 @@ test('E3 level data: lines match the draft, the reward is ㄋ, stage lines belon
  const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/apothecary.js',import.meta.url),'utf8');
  assert.ok(!/requestAnimationFrame/.test(src.replace(/\/\/.*$/gm,'')));
  assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+});
+
+// ---- E4 gallery: every view a player can reach (flip any of four panels, enlarge none or one) is enumerated.
+const GP=Object.keys(gal.ANCHORS);
+const galViews=[];
+for(let mask=0;mask<16;mask++){
+ const flip=Object.fromEntries(GP.map((p,i)=>[p,!!(mask>>i&1)]));
+ galViews.push({zoom:null,flip});
+ for(const p of GP)galViews.push({zoom:{panel:p},flip});
+}
+const galStart={zoom:null,flip:{A:false,B:false,C:false,D:false}};
+const galWhere={};
+for(const view of galViews)for(const pair of gal.valid(view))(galWhere[pair]=galWhere[pair]||[]).push(view);
+
+test('E4 rules: only four pairs can ever be linked, and each needs exactly the move it teaches',()=>{
+ assert.equal(galViews.length,80);
+ assert.deepEqual(Object.keys(galWhere).sort(),['A.door~D.door','A.moonL~B.moon','A.moonR~B.moon','C.lantern~D.chandelier']);
+ // The opening view accepts only the moons, so the first thing to do is the stack.
+ assert.deepEqual(gal.valid(galStart).sort(),['A.moonL~B.moon','A.moonR~B.moon']);
+ const unzoomed=(view,...panels)=>!view.zoom||!panels.includes(view.zoom.panel);
+ for(const pair of ['A.moonL~B.moon','A.moonR~B.moon'])assert.ok(galWhere[pair].every(view=>unzoomed(view,'A','B')),pair);
+ assert.ok(galWhere['C.lantern~D.chandelier'].every(view=>view.zoom&&view.zoom.panel==='C'),'the lantern only fits once it is enlarged');
+ assert.ok(galWhere['A.door~D.door'].every(view=>unzoomed(view,'A','D')&&view.flip.A!==view.flip.D),'the door needs exactly one flip');
+ // The size rule really acts: the lantern is too small for either lamp unzoomed and too small/big for the small lamp zoomed.
+ const lantern=gal.ANCHORS.C[0],zoomedC={zoom:{panel:'C'},flip:galStart.flip};
+ const ratio=(view,id)=>gal.size(view,'C',lantern)/gal.size(view,'D',gal.ANCHORS.D.find(a=>a.id===id));
+ assert.ok(ratio(galStart,'chandelier')<1/gal.SIZE_TOL);
+ assert.ok(Math.abs(ratio(zoomedC,'chandelier')-1)<0.1);
+ assert.ok(ratio(galStart,'doorLamp')<1/gal.SIZE_TOL&&ratio(zoomedC,'doorLamp')>gal.SIZE_TOL,'the small lamp is never the answer');
+ // Nothing is hidden when a panel is enlarged, and every rejection the interface can give is worded.
+ const reasons=new Set();
+ for(const view of galViews)for(const p of GP)for(const q of GP)if(p<q)for(const a of gal.ANCHORS[p])for(const b of gal.ANCHORS[q])reasons.add(gal.match(view,p,a,q,b).reason);
+ for(const reason of ['type','big','small','side'])assert.ok(reasons.has(reason)&&gal.REASONS[reason].length>5,reason);
+});
+
+test('E4 rules: of the 24 orders only the thread order and its reverse are accepted, and a wrong one names the first gap',()=>{
+ const perms=list=>list.length<2?[list]:list.flatMap((x,i)=>perms([...list.slice(0,i),...list.slice(i+1)]).map(rest=>[x,...rest]));
+ const all=perms(GP);
+ assert.equal(all.length,24);
+ assert.deepEqual(all.filter(gal.isChain).map(o=>o.join('')).sort(),['BADC','CDAB']);
+ for(const order of all)if(!gal.isChain(order))assert.ok(gal.firstBadGap(order)>=0);
+ assert.equal(gal.firstBadGap(['A','B','C','D']),1,'B and C share no thread');
+ // The three threads join the four panels into one path.
+ const edges=gal.KINDS.map(k=>[k.a[0],k.b[0][0]]);
+ assert.equal(new Set(edges.flat()).size,4);
+});
+
+test('E4 stages: a move is judged by the stage it is made in, and the merge stage opens with two threads hanging',()=>{
+ const moon=gal.find('B.moon'),moonL=gal.find('A.moonL'),lantern=gal.find('C.lantern'),chandelier=gal.find('D.chandelier'),doorA=gal.find('A.door'),doorD=gal.find('D.door');
+ const zoomC={zoom:{panel:'C'},flip:galStart.flip},flipA={zoom:null,flip:{...galStart.flip,A:true}};
+ assert.deepEqual(gal.judgeMove('align',[],galStart,'B',moon.anchor,'A',moonL.anchor),{kind:'link',thread:0});
+ assert.equal(gal.judgeMove('align',[0],galStart,'B',moon.anchor,'A',moonL.anchor).text,'這條紅線已經接上了。');
+ assert.equal(gal.judgeMove('align',[0],galStart,'C',lantern.anchor,'D',chandelier.anchor).kind,'bad');
+ assert.deepEqual(gal.judgeMove('align',[0],zoomC,'C',lantern.anchor,'D',chandelier.anchor),{kind:'link',thread:1});
+ // The door is for the merge stage: in the align stage it is refused even when flipped.
+ assert.equal(gal.judgeMove('align',[0,1],flipA,'A',doorA.anchor,'D',doorD.anchor).kind,'bad');
+ assert.equal(gal.judgeMove('merge',[0,1],galStart,'A',doorA.anchor,'D',doorD.anchor).text,gal.REASONS.side);
+ assert.deepEqual(gal.judgeMove('merge',[0,1],flipA,'A',doorA.anchor,'D',doorD.anchor),{kind:'link',thread:2});
+ assert.deepEqual(gal.STAGES.merge.preset,gal.STAGES.align.need,'the merge stage starts where the align stage ends');
+});
+
+test('E4 hints: three tiers per step, the step follows the board, and the last tier names the move',()=>{
+ for(const [step,tiers] of Object.entries(gal.HINTS))assert.equal(tiers.length,3,step);
+ assert.equal(gal.hintStep('align',[],galStart),'stack');
+ assert.equal(gal.hintStep('align',[0],galStart),'size-zoom');
+ assert.equal(gal.hintStep('align',[0],{zoom:{panel:'C'},flip:galStart.flip}),'size-drag');
+ assert.equal(gal.hintStep('align',[0,1],galStart),null);
+ assert.equal(gal.hintStep('merge',[0,1],galStart),'flip-toggle');
+ assert.equal(gal.hintStep('merge',[0,1],{zoom:null,flip:{...galStart.flip,D:true}}),'flip-drag');
+ assert.equal(gal.hintStep('merge',[0,1],{zoom:null,flip:{...galStart.flip,A:true,D:true}}),'flip-toggle','both flipped is no flip');
+ assert.equal(gal.hintStep('merge',[0,1,2],galStart),'order');
+ assert.ok(gal.HINTS.stack[2].includes('陽台')&&gal.HINTS.stack[2].includes('月亮'));
+ assert.ok(gal.HINTS['size-zoom'][2].includes('黑松林')&&gal.HINTS['size-zoom'][2].includes('大吊燈'));
+ assert.ok(gal.HINTS['flip-toggle'][2].includes('翻面'));
+ assert.ok(gal.HINTS.order[2].includes('陽台、鏡廊、舞廳、黑松林'));
+});
+
+test('E4 touch: the snap radius never drops under 22 pixels and always picks the nearest valid link',()=>{
+ for(const scale of [1,0.7,0.46,0.38])assert.ok(gal.snapRadius(scale)*scale>=22-1e-9,'scale '+scale);
+ assert.equal(gal.snapRadius(1),22);
+ // Two anchors in one panel are at least 28 board units apart, so one drop can only be near one valid link at a time.
+ let closest=1e9;
+ for(const view of galViews)for(const p of GP){
+  const pts=gal.ANCHORS[p].map(a=>gal.at(view,p,a));
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)closest=Math.min(closest,Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1]));
+ }
+ assert.ok(closest>=20,'closest anchors '+closest);
+});
+
+test('E4 level data: lines match the draft, the reward is ㄧ in the palm, one stage line before the last stage, no animation loop',()=>{
+ const e4=abyss.levels[3];
+ assert.equal(e4.id,'e4');assert.equal(e4.puzzle,'gallery');assert.equal(e4.number,'E4');
+ assert.deepEqual(e4.reward,{name:'紅線',mark:'ㄧ',place:'手心'});
+ assert.ok(e4.enter.length>0);
+ assert.deepEqual(e4.stages,['gallery-align','gallery-merge']);
+ assert.deepEqual(Object.keys(e4.stageLines),['gallery-align']);
+ assert.ok(e4.unlock.some(line=>line.text.includes('紅線在最後一格打了結')));
+ assert.equal(e4.scene.length,4);
+ for(const file of ['puzzles/gallery.js']){
+  const src=fs.readFileSync(new URL('../games/blood-mirror/'+file,import.meta.url),'utf8');
+  assert.ok(!/requestAnimationFrame/.test(src.replace(/\/\/.*$/gm,'')));
+  assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+ }
+ // The four panels use art that already ships with the scenes, so E4 adds no scene image to the first screen.
+ for(const {art} of Object.values(gal.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
 });

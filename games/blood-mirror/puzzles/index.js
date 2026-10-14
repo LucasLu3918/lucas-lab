@@ -50,6 +50,11 @@ export const puzzles={
   {id:'apothecary-testimony',label:'七人證詞',mount:lazy('apothecary','mountApothecaryTestimony')},
   {id:'apothecary-vessels',label:'回魂藥量杯',mount:lazy('apothecary','mountApothecaryVessels')},
   {id:'apothecary-mixing',label:'調色',mount:lazy('apothecary','mountApothecaryMixing'),after:['apothecary-testimony','apothecary-vessels'],waiting:'配方的顏色要等兩件事完成才看得見：誰拿著那顆蘋果，以及剛好四格的原液。'}
+ ]},
+ // Its two mechanisms share puzzles/gallery.js: aligning the panels, then merging them, which `after` keeps closed until the first is done.
+ gallery:{id:'gallery',title:'無限鏡廊',subtitle:'ABYSS · 疊放、大小、翻面與排序',optional:true,stages:[
+  {id:'gallery-align',label:'對位',mount:lazy('gallery','mountGalleryAlign')},
+  {id:'gallery-merge',label:'合一',mount:lazy('gallery','mountGalleryMerge'),after:['gallery-align'],waiting:'最後一段紅線要等前面的畫格對位以後才看得見。先把月亮和提燈的紅線接好。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
