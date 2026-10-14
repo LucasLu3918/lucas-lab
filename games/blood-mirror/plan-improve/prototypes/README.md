@@ -8,7 +8,7 @@
 | `e1-gears.html` | E1 逆走鐘樓（齒輪列） | `e1-gears.solve.cjs` | 窮舉：唯一最小解（39／6／24）；提示與解一致 |
 | `e2-optics.html` | E2 稜鏡舞廳（光路） | `e2-optics.solve.cjs` | 三關各只有一組光束解；提示依解收斂 |
 | `e2-prism.html` | E2 稜鏡舞廳（濾鏡、合光水晶、舞者；正式版規劃的三段） | `e2-prism.solve.cjs`（盤面由 `e2-prism.gen.cjs` 搜尋寫入） | 三關各只有一組光束解；解必須用到該關的新規則；起點離最近的解至少 2、2、4 步；第 3 關任何單步翻轉都不會多亮一個面具；提示依解收斂 |
-| `e3-apothecary.html` | E3 毒蘋果調配室 | `e3-apothecary.solve.cjs` | 證詞唯一解、量杯最短解唯一、調色配方唯一 |
+| `e3-apothecary.html` | E3 毒蘋果調配室 | `e3-apothecary.solve.cjs`（證詞由 `e3-testimony.gen.cjs` 搜尋） | 證詞唯一解且單句最多排除 2 人、量杯最短解唯一、調色配方唯一與方向詞 |
 | `e5-box.html` | E5 七重魔鏡匣 | `e5-box.solve.cjs` | 注音密碼可還原、缺任一關都解不開、各面閘門 |
 | `e1-pendulum.html` | E1 鐘擺（週期與擺長） | `../../../../scripts/blood-mirror-abyss.test.mjs` | 由 `build-belfry-prototypes.cjs` 從正式模組產生；唯一解是掛「輕」與「重」，擺長 4 格、週期比 2 |
 | `e1-starwheel.html` | E1 星輪（點燭讀刻字、設定步幅） | 同上 | 同上；唯一步幅 5，第 13 聲落回紅寶石 |

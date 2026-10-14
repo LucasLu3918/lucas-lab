@@ -7,6 +7,7 @@ import {LEVELS,CRANK_TEETH,emptyBoard,evaluate,solveAll,HINTS,hintStep,toothPath
 import {WEIGHTS,TOLERANCE,length as pendulumLength,ratio as pendulumRatio,pendulumSolved,solveAll as pendulumSolveAll,HINTS as PENDULUM_HINTS,hintStep as pendulumHintStep} from '../games/blood-mirror/puzzles/pendulum.js';
 import {NOTCHES,RUBY,NUMERALS,numeralAt,notchOf,playTolls,solveAll as wheelSolveAll,HINTS as WHEEL_HINTS,hintStep as wheelHintStep} from '../games/blood-mirror/puzzles/starwheel.js';
 import {STAGES as PRISM,solutions as prismSolutions,signature as prismSignature,solved as prismSolved,litCount,allStates as prismStates,trace as prismTrace,bits,hint as prismHint,hintStep as prismHintStep,solutionOf,diagnose} from '../games/blood-mirror/puzzles/prism.js';
+import * as apo from '../games/blood-mirror/puzzles/apothecary.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -79,7 +80,7 @@ test('gear outlines and starting angles are well formed for every tray gear',()=
 test('the E1 lines match the dialogue draft and use known speakers',()=>{
  const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
  const lines=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
- const all=[...abyss.entry,...abyss.levels.flatMap(level=>[...level.scene,...level.unlock])];
+ const all=[...abyss.entry,...abyss.levels.flatMap(level=>[...level.scene,...level.unlock,...Object.values(level.stageLines||{}).flat()])];
  for(const {speaker,text} of all){
   assert.ok(!speaker||speakers[speaker],'unknown speaker '+speaker);
   assert.ok(text.length>0&&text.length<=80,'line over 80 characters: '+text);
@@ -112,6 +113,7 @@ test('abyss levels sit outside the seven acts and own a registered puzzle',()=>{
  }
  assert.deepEqual(puzzles.belfry.stages.map(stage=>stage.after||[]),[[],[],['belfry-gears','belfry-pendulum']]);
  assert.deepEqual(puzzles.prism.stages.map(stage=>stage.after||[]),[[],[],['prism-rays','prism-blend']]);
+ assert.deepEqual(puzzles.apothecary.stages.map(stage=>stage.after||[]),[[],[],['apothecary-testimony','apothecary-vessels']]);
 });
 
 test('finishing a belfry level is saved, survives export and a new journey, and unknown ids are dropped',()=>{
@@ -263,4 +265,66 @@ test('E2 lines match the draft, carry the reward, and the fire spirits have a cu
  assert.match(juice,/\bchoir:/);
  const prism=fs.readFileSync(new URL('../games/blood-mirror/puzzles/prism.js',import.meta.url),'utf8');
  assert.ok(!/requestAnimationFrame/.test(prism.replace(/\/\/.*$/gm,'')),'beams need no animation loop');
+});
+
+test('E3 testimony: only 甘松 is consistent, no shortcut, and a wrong guess names one contradicting statement',()=>{
+ assert.deepEqual(apo.candidates(),[6]);
+ const all=[0,1,2,3,4,5,6];
+ assert.ok(Math.max(...all.map(i=>apo.refutedBy(i).length))<=2,'a statement refutes more than two apprentices');
+ const alive=idx=>all.filter(q=>idx.every(i=>!apo.refutedBy(i).includes(q)));
+ let fewest=7;for(let m=1;m<128;m++){const idx=all.filter(i=>m>>i&1);if(idx.length<fewest&&alive(idx).length===1)fewest=idx.length;}
+ assert.ok(fewest>=4,'only '+fewest+' statements already single out the holder');
+ assert.ok(all.filter(i=>alive(all.filter(j=>j!==i)).length>1).length>=4,'too few necessary statements');
+ assert.ok(!apo.holds(apo.TESTIMONY[6],6),'甘松 own statement is the lie');
+ for(let p=0;p<6;p++){const i=apo.firstConflict(p);assert.ok(apo.conflicts(p).includes(i));}
+ apo.TESTIMONY.forEach(st=>{assert.ok(apo.say(st).length>8);if(st.k==='not')assert.ok(st.s.length<=3);if(st.k==='in')assert.ok(st.s.length>=4);});
+ // the apprentice cards are the draft's (single source), and hints work for every notebook
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const rows=[...draft.matchAll(/^\| \d \| (\S+) \| .+? \| (「.+」) \|$/gm)].map(m=>[m[1],m[2]]);
+ assert.deepEqual(rows,apo.APPRENTICES.map((n,i)=>[n,apo.CARD_LINES[i]]));
+ for(let m=0;m<64;m++){const h=apo.HINTS.A(6,[0,1,2,3,4,5].filter(i=>m>>i&1));assert.equal(h.length,3);assert.ok(h[2].includes('甘松'));h.forEach(t=>assert.ok(t.length>10));}
+});
+
+test('E3 vessels: the shortest pouring order has 8 moves and is unique, no position is a dead end, hints follow the board',()=>{
+ const best=apo.shortest(apo.START);assert.equal(best.length,8);
+ let s=[...apo.START];for(const t of best)s=apo.pour(s,t);assert.ok(apo.goalB(s));
+ const key=x=>x.join(','),dist=new Map([[key(apo.START),0]]),ways=new Map([[key(apo.START),1]]),queue=[apo.START];
+ for(let i=0;i<queue.length;i++){const x=queue[i];for(let t=0;t<3;t++){const n=apo.pour(x,t);if(!n)continue;const k=key(n);if(!dist.has(k)){dist.set(k,dist.get(key(x))+1);ways.set(k,ways.get(key(x)));queue.push(n);}else if(dist.get(k)===dist.get(key(x))+1)ways.set(k,ways.get(k)+ways.get(key(x)));}}
+ let bestLen=1e9,count=0;for(const [k,d] of dist)if(apo.goalB(k.split(',').map(Number))){if(d<bestLen){bestLen=d;count=ways.get(k);}else if(d===bestLen)count+=ways.get(k);}
+ assert.equal(count,1,'the shortest pouring order is not unique');
+ assert.equal(dist.size,16);
+ for(const k of dist.keys()){const x=k.split(',').map(Number);assert.ok(apo.shortest(x),'dead end at '+k);const h=apo.HINTS.B(x);assert.equal(h.length,3);h.forEach(t=>assert.ok(t.length>5));}
+});
+
+test('E3 mixing: one recipe fits, direction words exist everywhere, and every mix can climb to the recipe',()=>{
+ const gcd=(a,b)=>b?gcd(b,a%b):a,prim=d=>{const g=gcd(gcd(d[0],d[1]),d[2]);return d.map(v=>v/g).join();};
+ const D=d=>apo.colorDist(apo.mixColor(...d),apo.mixColor(...apo.TARGET));
+ const nb=d=>{const o=[];for(let i=0;i<3;i++)for(const sg of [-1,1]){const n=[...d];n[i]+=sg;if(n[i]<0||n[i]>apo.MAXDROP||!n.some(Boolean))continue;o.push(n);}return o;};
+ let accepted=0,nearest=1e9;
+ for(let r=0;r<=4;r++)for(let y=0;y<=4;y++)for(let b=0;b<=4;b++){
+  const d=[r,y,b];assert.ok(apo.dirWord(d).length>3);assert.equal(apo.HINTS.C(d).length,3);
+  if(!(r+y+b))continue;
+  if(apo.colorOk(d)){accepted++;assert.equal(prim(d),apo.TARGET.join());continue;}
+  if(prim(d)!==apo.TARGET.join())nearest=Math.min(nearest,D(d));
+  // closer moves of at most two drops always reach the recipe
+  let cur=d,steps=0;
+  while(!apo.colorOk(cur)){const cand=[...nb(cur),...nb(cur).flatMap(nb)].filter(n=>n.some(Boolean)&&D(n)<D(cur)-1e-9).sort((a,c)=>D(a)-D(c));assert.ok(cand.length,'stuck at '+cur);cur=cand[0];assert.ok(++steps<20);}
+ }
+ assert.equal(accepted,1);
+ assert.ok(nearest>apo.TOL*1.5,'nearest wrong recipe is too close: '+nearest);
+ assert.ok(Object.values(apo.MARKS).length===3&&new Set(Object.values(apo.MARKS)).size===3,'pigments need a shape as well as a colour');
+});
+
+test('E3 level data: lines match the draft, the reward is ㄋ, stage lines belong to real stages, no animation loop',()=>{
+ const e3=abyss.levels[2];
+ assert.equal(e3.id,'e3');assert.equal(e3.puzzle,'apothecary');assert.equal(e3.reward.mark,'ㄋ');
+ assert.ok(e3.enter.length>0);
+ assert.deepEqual(e3.stages,['apothecary-testimony','apothecary-vessels','apothecary-mixing']);
+ const keys=Object.keys(e3.stageLines);
+ assert.deepEqual(keys,['apothecary-testimony','apothecary-vessels']);
+ for(const key of keys)assert.ok(e3.stages.includes(key)&&key!==e3.stages.at(-1),'a stage line before the last stage: '+key);
+ assert.ok(e3.stageLines['apothecary-testimony'].some(line=>line.text.includes('被寫成說謊的人')));
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/apothecary.js',import.meta.url),'utf8');
+ assert.ok(!/requestAnimationFrame/.test(src.replace(/\/\/.*$/gm,'')));
+ assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
 });

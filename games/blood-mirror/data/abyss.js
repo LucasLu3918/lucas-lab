@@ -55,6 +55,36 @@ export const abyss={
    ],
    enter:'走進舞廳',
    reward:{name:'稜鏡',mark:'ㄒ'}
+  },
+  {
+   id:'e3',
+   puzzle:'apothecary',
+   number:'E3',
+   title:'毒蘋果調配室',
+   subtitle:'王后還是醫師的時候',
+   stages:['apothecary-testimony','apothecary-vessels','apothecary-mixing'],
+   thumb:'apothecary-testimony',
+   scene:[
+    {text:'薇菈在成為王后之前，是這座王宮的醫師。這間藥房還留著她的字跡。'},
+    {text:'帳冊裡寫著七名學徒：白芷、遠志、決明、茯苓、紫蘇、杜仲、甘松。'},
+    {speaker:'mirror',text:'「他們每人替王后調過一顆蘋果。只有一顆，會把人的意識送進鏡子。」'},
+    {speaker:'mirror',text:'「七個人都留了證詞。拿著那顆蘋果的人，說的是帳本要他說的話。」'}
+   ],
+   // Shown right after one mechanism is solved, before the next one opens (puzzles/index.js startPuzzle).
+   stageLines:{
+    'apothecary-testimony':[
+     {text:'甘松的證詞只有一句，字跡卻不是他的。那是帳冊替他寫下的話。'},
+     {speaker:'mirror',text:'「他不是說謊的人。他是被寫成說謊的人。」'}
+    ],
+    'apothecary-vessels':[
+     {text:'蘋果汁在 B 杯停在剛好四格。杯壁映出的人影，比妳的動作慢了一拍。'}
+    ]
+   },
+   unlock:[
+    {text:'藥液的顏色和手持鏡裡的一模一樣。妳取得回魂藥——毒蘋果的反面，能讓意識從鏡中回到身體。'}
+   ],
+   enter:'走進藥房',
+   reward:{name:'回魂藥',mark:'ㄋ',place:'瓶底'}
   }
  ]
 };
