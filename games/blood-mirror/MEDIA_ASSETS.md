@@ -193,5 +193,7 @@ Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, p
 | File | Use | Notes |
 |---|---|---|
 | `arrow-gilt.webp` | Scene view arrows (`.view-arrow::after`, `mix-blend-mode:screen`, mirrored for the left one) | seed 8102, cropped to 480×70, black background |
-| `seal-wax.webp` | Sealed chapter cards (`.chapter-card.locked`) | seed 8201, circular alpha mask via sharp, 176×176 |
-| `velvet.webp` | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
+| `seal-wax.webp` (inlined) | Sealed chapter cards (`.chapter-card.locked`) | seed 8201, circular alpha mask via sharp, 176×176 |
+| `velvet.webp` (inlined) | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
+
+Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to save two first-screen requests; the `.webp` files are not shipped, regenerate them from the masters with `convert.cjs` / `seal-alpha.cjs`, then re-inline. Only `arrow-gilt.webp` is a separate file.
