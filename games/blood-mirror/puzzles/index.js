@@ -82,6 +82,12 @@ export const puzzles={
   {id:'scale-fruit',label:'蘋果與鏡',mount:lazy('scale','mountScaleFruit')},
   {id:'scale-thorn',label:'玫瑰與匕首',mount:lazy('scale','mountScaleThorn')},
   {id:'scale-final',label:'最後一台',mount:lazy('scale','mountScaleFinal'),after:['scale-fruit','scale-thorn'],waiting:'最後一台要用前兩頁算出的四個重量。先把兩頁都配平。'}
+ ]},
+ // The frozen moments (E8). Naming the guests and ordering the pictures can be done in either order; the last page needs both.
+ frozen:{id:'frozen',title:'凝結的三刻',subtitle:'ABYSS · 停住的舞會',optional:true,stages:[
+  {id:'frozen-faces',label:'誰站在哪裡',mount:lazy('frozen','mountFrozenFaces')},
+  {id:'frozen-order',label:'三張畫的先後',mount:lazy('frozen','mountFrozenOrder')},
+  {id:'frozen-final',label:'摔杯的人',mount:lazy('frozen','mountFrozenFinal'),after:['frozen-faces','frozen-order'],waiting:'要先知道每位賓客是誰，也要排好三張畫的時間。先把前兩道做完。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).

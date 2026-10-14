@@ -203,6 +203,27 @@ export const abyss={
    ],
    enter:'走進稱量廳',
    reward:{name:'鉛砝碼',mark:'重',caption:'托盤底下砝碼上的字'}
+  },
+  {
+   id:'e8',
+   puzzle:'frozen',
+   number:'E8',
+   title:'凝結的三刻',
+   subtitle:'停在摔杯前後的舞會',
+   stages:['frozen-faces','frozen-order','frozen-final'],
+   thumb:'frozen-faces',
+   scene:[
+    {text:'舞廳裡的時間停在一只高腳杯離手的那一瞬。三幅畫框掛在牆上，畫的是同一群戴面具的賓客。'},
+    {speaker:'mirror',text:'「我不會記錯誰在哪裡，只是從來沒有人問我，先發生的是哪一刻。」'},
+    {text:'畫框下壓著一頁證人的記憶，每一條都只說了一半。'}
+   ],
+   unlock:[
+    {text:'三個時刻接在一起，賓客們的腳步終於落了地。杯子在最後一刻離了手，沒有人伸手去接。'},
+    {speaker:'mirror',text:'「摔碎的不是杯子。是大家都以為會有人接住它。」'},
+    {text:'畫框背後掛著一只停擺的懷錶，錶蓋內側刻著一個字：時。'}
+   ],
+   enter:'走進舞廳',
+   reward:{name:'停擺的懷錶',mark:'時',caption:'錶蓋內側刻著的字'}
   }
  ]
 };
