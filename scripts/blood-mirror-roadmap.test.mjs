@@ -17,7 +17,8 @@ test('chapter stages match the puzzle registry, and every stage has a label (r1,
 });
 
 test('stages that need an earlier item name an item from an earlier act (r10)',()=>{
- const needs=Object.values(puzzles).flatMap(entry=>entry.stages.filter(stage=>stage.requires).map(stage=>({chapter:entry.id,...stage})));
+ // The optional levels (鏡淵) may require a finished level instead of an item; abyss.test covers them.
+ const needs=Object.values(puzzles).filter(entry=>!entry.optional).flatMap(entry=>entry.stages.filter(stage=>stage.requires).map(stage=>({chapter:entry.id,...stage})));
  assert.deepEqual(needs.map(n=>n.chapter+':'+n.requires).sort(),['crypt:contract','mirror:watch']);
  for(const need of needs){
   assert.ok(items[need.requires],need.requires);

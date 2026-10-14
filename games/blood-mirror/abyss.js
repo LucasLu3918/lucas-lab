@@ -26,16 +26,19 @@ export function openAbyss(api){
   document.getElementById('abyss-close').onclick=closeModal;
   document.querySelector('[data-abyss]')?.focus({preventScroll:true});
  };
+ // A level with `reduced` ends in the short version while something it needs (a shard) is missing: no reward, a softer ending.
+ const short=item=>!!item.reduced&&!(item.fullNeeds||[]).every(api.options().has);
  const reward=item=>{
   api.playCue('restore');api.refresh();
-  modal(item.title,item.number+' · 解封',lines(item.unlock)
-   +'<div class="abyss-reward" role="group" aria-label="獲得"><span class="abyss-mark" aria-hidden="true">'+item.reward.mark+'</span><span>'+item.reward.name+'<small>'+(item.reward.place||'內側')+'的記號：'+item.reward.mark+'</small></span></div>'
+  const cut=short(item);
+  modal(item.title,item.number+' · 解封',lines(cut?item.reduced.unlock:item.unlock)
+   +(cut?'':'<div class="abyss-reward" role="group" aria-label="獲得"><span class="abyss-mark" aria-hidden="true">'+item.reward.mark+'</span><span>'+item.reward.name+'<small>'+(item.reward.caption||(item.reward.place||'內側')+'的記號：'+item.reward.mark)+'</small></span></div>')
    +'<button id="abyss-back" class="primary-button">回到帳本的背面 ⟶</button>');
   document.getElementById('abyss-back').onclick=list;
   document.getElementById('abyss-back').focus({preventScroll:true});
  };
  const stageNotes=item=>Object.fromEntries(Object.entries(item.stageLines||{}).map(([id,list])=>[id,lines(list)]));
- const play=(item,fresh)=>startPuzzle(item.puzzle,{...api.options(),fresh,stageLines:stageNotes(item),success:()=>{if(fresh){api.toast('重玩完成，進度不受影響。');list();}else reward(item);}});
+ const play=(item,fresh)=>startPuzzle(item.puzzle,{...api.options(),fresh,stageLines:stageNotes(item),success:()=>{if(fresh)api.toast('重玩完成，進度不受影響。');if(fresh&&!item.reduced)list();else reward(item);}});
  function level(item){
   const done=isPuzzleComplete(item.puzzle);
   modal(item.title,item.number+' · '+item.subtitle,lines(item.scene)

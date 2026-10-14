@@ -477,3 +477,69 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .gal-slot span,#modal .gal-card span{position:relative;padding:1px 6px;border-radius:10px;background:#000b;font-size:12px;white-space:nowrap;color:#fff}
 #modal .gal-card.used{opacity:.35}
 #modal .gal-line{display:block;width:100%;max-width:540px;margin:12px auto}
+/* E5 七重魔鏡匣 (puzzles/box.js): the six faces of the box */
+#modal .box-body{margin:6px 0 4px}
+#modal .box-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:10px 0}
+#modal .box-row.wrap{gap:8px}
+#modal .box-row .secondary-button,#modal .box-row .primary-button{flex:none;width:auto;min-width:44px;min-height:44px;margin:0;padding:0 16px}
+#modal .box-line{margin:10px 0;font-size:13px;line-height:2;color:#cdbf9f}
+#modal .box-dim{color:#7d7288}
+#modal .box-readout{flex:1 1 0;min-width:0;text-align:center;font-size:14px;color:var(--brass-hi)}
+#modal .box-chip{display:inline-flex;align-items:center;gap:4px;margin:0 3px;padding:1px 9px;border:1px solid #6b5a3a;border-radius:12px;background:#120b17;font-size:13px;color:#e9dcc3}
+#modal .box-chip b{font-weight:400}
+#modal .box-dial{display:block;width:min(100%,300px);height:auto;margin:6px auto;touch-action:manipulation}
+#modal .box-dial-rim{fill:#171018;stroke:var(--brass);stroke-width:2}
+#modal .box-dial-face{fill:#0b0710;stroke:#6b5a3a;stroke-width:1}
+#modal .box-notch{cursor:pointer}
+#modal .box-notch .hit{fill:#241522;stroke:#6b5a3a;stroke-width:1}
+#modal .box-notch text{font-size:9px;fill:#e9dcc3;pointer-events:none}
+#modal .box-notch.on .hit{fill:#5a3a14;stroke:var(--brass-hi);stroke-width:2}
+#modal .box-notch.on text{fill:#fff}
+#modal .box-notch:focus-visible .hit{stroke:#fff;stroke-width:2.5}
+#modal .box-pointer{stroke:var(--brass-hi);stroke-width:3;stroke-linecap:round}
+#modal .box-hub{fill:var(--brass)}
+#modal .box-glass{min-height:56px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;border:1px solid #3a2a14;border-radius:8px;background:linear-gradient(145deg,#0b0710,#171018)}
+#modal .box-glass.lit{border-color:var(--brass);background:radial-gradient(ellipse at 50% 0,#2a1a2e,#0b0710 80%)}
+#modal .box-glass-title{font-size:12px;color:#b8a07a}
+#modal .box-color{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:64px;min-height:48px;padding:0 12px;border:2px solid currentColor;border-radius:8px;background:#120b17;font:15px var(--serif);cursor:pointer}
+#modal .box-color b{font-weight:400;font-size:18px}
+#modal .box-color:hover{background:#241522}
+#modal .c-R{color:#ff7a7a}#modal .c-G{color:#6bff95}#modal .c-B{color:#7fa8ff}#modal .c-Y{color:#ffd966}#modal .c-P{color:#d59bff}
+#modal .box-apples{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:10px 0}
+#modal .box-apple{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;padding:6px;border:2px solid #8a6a2a;border-radius:50% 50% 46% 46%/58% 58% 42% 42%;background:radial-gradient(circle at 38% 30%,#6a2a30,#1b0c10 75%);color:#f2e6cf;cursor:pointer}
+#modal .box-apple b{font:12px var(--sans);color:#d8be8f}
+#modal .box-apple span{font:15px var(--serif);letter-spacing:1px}
+#modal .box-apple.on{border-color:#fff;box-shadow:0 0 14px #e0b84f88}
+#modal .box-apple.tried{opacity:.4}
+#modal .box-holes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+#modal .box-hole{position:relative;aspect-ratio:16/9;min-height:56px;padding:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border:2px solid #8a6a2a;border-radius:8px;background:#000;cursor:pointer}
+#modal .box-hole img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+#modal .box-hole span{position:relative;margin-bottom:6px;padding:1px 10px;border-radius:10px;background:#000b;font-size:13px;color:#fff}
+#modal .box-hole.used{opacity:.4;cursor:default}
+#modal .box-shard{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 14px;border:2px solid #8a6a2a;border-radius:6px 18px 6px 18px;background:linear-gradient(135deg,#2a2f3a,#0f1218);color:#dfe8f5;font:14px var(--serif);cursor:pointer}
+#modal .box-shard.on{border-color:#fff;box-shadow:0 0 12px #9ec3ff88}
+#modal .box-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;margin:12px 0}
+#modal .box-slot{display:flex;align-items:center;justify-content:center;gap:4px;min-height:52px;padding:0 6px;border:2px dashed #6b5a3a;border-radius:50%/40%;background:#0b0710;color:#cdbf9f;font:13px var(--serif);cursor:pointer}
+#modal .box-slot.on{border-style:solid;border-color:var(--brass);color:var(--brass-hi);cursor:default}
+#modal .box-slot.gap{opacity:.55}
+#modal .box-keys{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:0;list-style:none}
+#modal .box-keys li{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #6b5a3a;border-radius:12px;background:#120b17;font-size:13px;color:#e9dcc3}
+#modal .box-keys small{color:#b8a07a}
+#modal .box-keys b{font:20px var(--serif);color:var(--brass-hi)}
+#modal .box-table{border-collapse:collapse;table-layout:fixed;width:100%;margin:6px 0 12px;font-size:11px;color:#9a8c70}
+#modal .box-table caption{text-align:left;font-size:12px;color:#b8a07a;padding-bottom:2px}
+#modal .box-table td{padding:1px 0;border:1px solid #3a2a14;text-align:center}
+#modal .box-table td b{display:block;font-size:15px;color:#e9dcc3}
+#modal .box-letter{margin:8px 0;padding:8px 10px;border:1px solid #3a2a14;border-radius:8px;background:#120b17}
+#modal .box-pair{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;color:#cdbf9f}
+#modal .box-back b{font-size:18px;color:#fff}
+#modal .box-sym{min-width:1.8em;padding:2px 8px;border:1px solid #6b5a3a;border-radius:8px;text-align:center;font:24px var(--serif);color:#e9dcc3}
+#modal .box-sym.out{border-color:var(--brass);color:var(--brass-hi)}
+#modal .box-from{display:block;margin:4px 0 0;font-size:11px;color:#b8a07a}
+#modal .box-count{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+#modal .box-count .secondary-button{width:auto;min-width:0;min-height:44px;margin:0;padding:0}
+#modal .box-word{font:26px var(--serif);letter-spacing:6px;color:var(--brass-hi)}
+#modal .box-slot small{display:block;font-size:10px;color:#b8a07a}
+#modal .box-slot.gap{flex-direction:column;gap:0}
+#modal .box-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px;color:#cdbf9f}
+#modal .box-pick select{min-height:44px;min-width:76px;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:8px}

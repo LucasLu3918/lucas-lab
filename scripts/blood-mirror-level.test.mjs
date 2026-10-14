@@ -11,7 +11,7 @@ import {puzzles} from '../games/blood-mirror/puzzles/index.js';
 const before=room=>room.spots.filter(spot=>spot.item&&!spot.after).map(spot=>spot.item);
 const after=room=>[...room.spots.filter(spot=>spot.item&&spot.after==='solved').map(spot=>spot.item),...(room.grants||[])];
 const sealKeys=rooms.map(room=>room.requires).filter(Boolean);
-const stageKeys=Object.values(puzzles).flatMap(p=>p.stages.map(stage=>stage.requires)).filter(Boolean);
+const stageKeys=Object.values(puzzles).filter(p=>!p.optional).flatMap(p=>p.stages.map(stage=>stage.requires)).filter(Boolean);
 const shardKeys=rooms.flatMap(room=>room.spots.filter(spot=>spot.needs).map(spot=>spot.needs));
 const endingKeys=['blueprint'];
 

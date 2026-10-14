@@ -55,6 +55,16 @@ export const puzzles={
  gallery:{id:'gallery',title:'無限鏡廊',subtitle:'ABYSS · 疊放、大小、翻面與排序',optional:true,stages:[
   {id:'gallery-align',label:'對位',mount:lazy('gallery','mountGalleryAlign')},
   {id:'gallery-merge',label:'合一',mount:lazy('gallery','mountGalleryMerge'),after:['gallery-align'],waiting:'最後一段紅線要等前面的畫格對位以後才看得見。先把月亮和提燈的紅線接好。'}
+ ]},
+ // The box: one mechanism per face, all in puzzles/box.js. `requires` may name a finished level (E1-E4) as well as an item,
+ // and a list means all of them. The cipher disc sits inside the box, so `after` keeps it closed until the other five faces are open.
+ box:{id:'box',title:'七重魔鏡匣',subtitle:'ABYSS · 六面與一張字條',optional:true,stages:[
+  {id:'box-time',label:'時辰面',mount:lazy('box','mountBoxTime'),requires:'belfry',missing:'撥盤要用時辰環才轉得動。時辰環在「逆走鐘樓」（E1）的最深處，回到帳本的背面把它取回來。'},
+  {id:'box-light',label:'光之面',mount:lazy('box','mountBoxLight'),requires:'prism',missing:'這一面要用稜鏡才看得見刻線。稜鏡在「稜鏡舞廳」（E2），回到帳本的背面把它取回來。'},
+  {id:'box-apple',label:'蘋果鎖',mount:lazy('box','mountBoxApple'),requires:'apothecary',missing:'蘋果鎖要用回魂藥才打得開。回魂藥在「毒蘋果調配室」（E3），回到帳本的背面把它取回來。'},
+  {id:'box-thread',label:'鏡中鏡',mount:lazy('box','mountBoxThread'),requires:'gallery',missing:'這一面要把紅線穿過鏡孔。紅線在「無限鏡廊」（E4），回到帳本的背面把它取回來。'},
+  {id:'box-shards',label:'碎片面',mount:lazy('box','mountBoxShards')},
+  {id:'box-cipher',label:'密碼盤',mount:lazy('box','mountBoxCipher'),requires:['belfry','prism','apothecary','gallery'],missing:'字條上的密文要用四個關卡各給的一個記號才讀得出來：時辰環、稜鏡、回魂藥、紅線。還缺的，回到帳本的背面取回。',after:['box-time','box-light','box-apple','box-thread','box-shards'],waiting:'字條壓在匣子的最裡面。先把其他五面都打開。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
@@ -92,6 +102,8 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  const stages=entry.stages,multi=stages.length>1,finished=new Set();
  let current=null;
  // A stage with `after` stays closed until the stages it names are done (in this run, or saved when not replaying).
+ // `requires` is an item, a finished puzzle, or a list of them (all needed).
+ const owns=need=>[].concat(need||[]).every(item=>has(item)||completed.has(item));
  const stageIsDone=name=>finished.has(name)||(!fresh&&isStageComplete(id,name));
  const waitingOn=stage=>(stage.after||[]).filter(name=>!stageIsDone(name));
  // A replay (fresh) ignores saved stages; otherwise a stage counts as done once saved or finished in this run.
@@ -129,7 +141,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
    render('<p class="challenge-help">'+stage.waiting+'</p><p class="challenge-feedback" role="status">這道機關還不能開始。</p>');
    onStage(stage.id);return;
   }
-  if(stage.requires&&!has(stage.requires)){
+  if(!owns(stage.requires)){
    render('<p class="challenge-help">'+stage.missing+'</p><p class="challenge-feedback" role="status">這道機關還不能開始。</p>');
    onStage(stage.id);return;
   }
@@ -139,8 +151,8 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  // Both stages are open: the player decides which one to work on, and can switch at any time.
  function choose(){
   current=null;active=null;
-  render('<p class="challenge-help">這份證據由'+['','一','兩','三'][Math.min(3,entry.stages.length)]+'道機關守著，'+(entry.stages.some(item=>item.after)?'沒有鎖住的可以先做哪一道都行；鎖住的要等前面的完成。':'先做哪一道都可以。卡住的時候，可以先換另一道。')+'</p><div class="stage-picks">'
-   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires),waiting=waitingOn(s).length>0;return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':waiting?'要先完成前面的機關':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
+  render('<p class="challenge-help">這份證據由'+['','一','兩','三','四','五','六'][Math.min(6,entry.stages.length)]+'道機關守著，'+(entry.stages.some(item=>item.after)?'沒有鎖住的可以先做哪一道都行；鎖住的要等前面的完成。':'先做哪一道都可以。卡住的時候，可以先換另一道。')+'</p><div class="stage-picks">'
+   +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=!owns(s.requires),waiting=waitingOn(s).length>0;return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':waiting?'要先完成前面的機關':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
    +'</div>');
   document.querySelectorAll('[data-stage-pick]').forEach(button=>button.onclick=()=>run(stages.find(s=>s.id===button.dataset.stagePick)));
  }

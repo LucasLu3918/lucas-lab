@@ -176,3 +176,12 @@ node scripts/blood-mirror.browser.cjs
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每個機關 2 張候選目視挑選）。選用 align-4102（哥德長廊、紅線沿地面延伸）、merge-4201（疊在一起的金框畫，一條紅線穿過）。轉檔與縮圖參數同 E1–E3：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576（`-crop 168 0 1008 576`）再 `-resize 224 128 -q 76`。PNG 母檔與落選候選在 `draft/lucas-lab/blood-mirror/source-art/puzzles/`（候選在 `e4/`），不進版本控制。
 - 提示詞全程用正面描述，沒有否定句。第一輪即可用，沒有重畫。
 - 尚待作者驗收。**這不是使用者驗收。**
+
+## 鏡淵 E5 七重魔鏡匣（六面的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/box-{time,light,apple,thread,shards,cipher}.webp`（960×411，約 13、14、13、13、17、22 KB）與 `assets/puzzles/thumbs/box-*.webp`（224×128，各約 3–4 KB）。「鏡中鏡」面的四格畫面用既有場景圖（`mirror-hall`、`balcony`、`black-pine-path`、`ballroom`），沒有新增。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每面 2 張候選目視挑選）。選用 time-7101（黃銅撥盤）、light-7201（稜鏡與紅線）、apple-7301（蘋果形金鎖與藥滴）、thread-7401（兩個金框鏡孔與紅線）、shards-7502（碎片環）、cipher-7602（符號盤與字條）。轉檔與縮圖參數同 E1–E4：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576（`-crop 168 0 1008 576`）再 `-resize 224 128 -q 76`。PNG 母檔在 `draft/lucas-lab/blood-mirror/source-art/puzzles/box-*.png`，落選候選與提示詞在 `e5/`（含 `convert.cjs`），不進版本控制。
+- 提示詞全程用正面描述，沒有否定句；一輪即可用。
+- 已知：碎片面的圖是八片碎片（模型沒有畫成七片），密碼盤上的刻字是模型生成的偽字符，不是注音；兩者只是氛圍圖，正式機關是 HTML。
+- 尚待作者驗收。**這不是使用者驗收。**
+
