@@ -39,7 +39,7 @@ export function openAbyss(api){
   const done=isPuzzleComplete(item.puzzle);
   modal(item.title,item.number+' · '+item.subtitle,lines(item.scene)
    +(done?'<p class="modal-note">這一頁已經翻過。再玩一次不會改動任何進度。</p>':'')
-   +'<button id="abyss-enter" class="primary-button">'+(done?'再玩一次':'走進鐘塔')+' ⟶</button>'
+   +'<button id="abyss-enter" class="primary-button">'+(done?'再玩一次':item.enter)+' ⟶</button>'
    +'<button id="abyss-list" class="secondary-button">返回</button>');
   document.getElementById('abyss-enter').onclick=()=>play(item,done);
   document.getElementById('abyss-list').onclick=list;

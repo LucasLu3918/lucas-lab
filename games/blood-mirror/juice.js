@@ -15,6 +15,7 @@ export const FEEDBACK={
  restore:{burst:{n:8,look:'mote'},haptic:10},
  wrong:{shake:{trauma:.8,x:1,y:0,roll:0,speed:36},flash:'blood',haptic:[30,50,30]},
  solve:{burst:{n:26,look:'mote',at:'.success-gem',spread:1.8},pop:['.success-gem svg'],impact:true,shake:{trauma:.5,x:.5,y:1,roll:1,speed:30},flash:'gold',haptic:[20,40,70]},
+ choir:{shake:{trauma:.3,x:1,y:.3,roll:.3,speed:44},flash:'blood',haptic:[15,30,15,30,15]},
  door:{shake:{trauma:.35,x:.4,y:1,roll:.5,speed:24},haptic:25}
 };
 
