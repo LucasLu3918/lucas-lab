@@ -234,3 +234,12 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
 - 檔案：`assets/puzzles/compass-{inner,outer,final}.webp`（960×411）與 `assets/puzzles/thumbs/compass-*.webp`（224×128）。
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選）。轉檔與縮圖參數同 E1–E8。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/e9/`，不進版本控制。
 - 已知：橫幅只是氛圍，圖中羅盤的環數與刻字不代表謎題內容；謎題裡的環是 `puzzles/compass.js` 依資料畫的向量圖。
+
+## 機關橫幅重新轉檔（2026-10-15）
+
+- 範圍：`assets/puzzles/` 底下全部 45 張橫幅（縮圖 `thumbs/` 不動）。
+- 原因：試玩回報美術不夠精緻；原先是縮成 960×411、`-q 72`，每張只有 11–46 KB，暗部與天鵝絨有塗抹感與色帶，手稿刻字糊掉。
+- 做法：改從 1344×576 的 PNG 母檔重新轉檔，不縮小，`cwebp -q 85 -m 6 -sharp_yuv`。母檔對應是用像素比對找出的（每張橫幅對上產生它的那張候選圖）。`apothecary-mixing` 照原本的裁切（`-crop 0 80 1100 471`，切掉右緣畫框）轉成 1100×471，同樣不縮小。
+- 結果：橫幅合計由約 1.5 MB 增為約 3.3 MB（`dist/games` 約 22.3 MB，上限 26 MB）；單張最大約 138 KB（上限 500 KB）。頁面上的 `<img>` 仍標 960×411，顯示尺寸與版面不變，高解析螢幕會更清楚。
+- 沒有重新產圖，構圖與內容與之前相同。
+
