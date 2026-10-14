@@ -402,6 +402,12 @@ body.reduce-motion #modal .wheel-glyph{transition:none}
 #modal .prism-board{max-width:560px;margin:0 auto}
 #modal .prism-beams{mix-blend-mode:screen}
 #modal .prism-hit{cursor:pointer;outline:none}
+#modal .prism-tint{mix-blend-mode:color;pointer-events:none}
+#modal .prism-mask-lit,#modal .prism-halo,#modal .prism-over{opacity:0}
+#modal .prism-svg.ready .prism-mask-lit,#modal .prism-svg.ready .prism-halo,#modal .prism-svg.ready .prism-over,#modal .prism-svg.ready .prism-crystal-tint{transition:opacity .35s ease}
+#modal .prism-svg.ready .prism-blade{transition:transform .24s cubic-bezier(.3,1.5,.5,1)}
+#modal .prism-svg.ready .prism-dancer,#modal .prism-svg.ready .prism-ghost{transition:transform .3s ease}
+body.reduce-motion #modal .prism-svg .prism-mask-lit,body.reduce-motion #modal .prism-svg .prism-halo,body.reduce-motion #modal .prism-svg .prism-over,body.reduce-motion #modal .prism-svg .prism-crystal-tint,body.reduce-motion #modal .prism-svg .prism-blade,body.reduce-motion #modal .prism-svg .prism-dancer,body.reduce-motion #modal .prism-svg .prism-ghost{transition:none}
 #modal .prism-hit:focus-visible circle:first-child,#modal .prism-hit:focus-visible rect{stroke:#fff;stroke-width:1}
 
 /* E3 apothecary (puzzles/apothecary.js): testimony cards read through a hand mirror, one-way vessels, colour mixing. */
