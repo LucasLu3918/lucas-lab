@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E4 無限鏡廊 原型 v3（疊放、大小、翻面、排序）</title>
+<style>
+:root{--gold:#e8c46a;--red:#c8172f;--ink:#e9e3d6;--bg:#0b0a0f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,"Noto Sans TC",sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid #2a2530}
+header h1{font-size:15px;margin:0 8px 0 0}
+button{font:inherit;color:var(--ink);background:#1d1a24;border:1px solid #3a3446;border-radius:8px;padding:8px 12px;min-height:44px;cursor:pointer}
+button:focus-visible,.panel:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#caption{padding:8px 12px;min-height:7.6em;color:#f3e6bd}
+#feedback{padding:0 12px 6px;min-height:3.4em;color:#ffb3b3}
+#stage{flex:1;min-height:260px;position:relative;overflow:hidden}
+#board{position:absolute;left:50%;top:0;width:744px;height:440px;transform-origin:0 0}
+.panel{position:absolute;width:352px;height:200px;border:6px solid #8a6a2a;border-radius:4px;overflow:hidden;background:#000;touch-action:none;box-shadow:0 0 0 2px #3d2f12,0 6px 18px #000a;cursor:grab}
+.panel.drag{opacity:1;cursor:grabbing;box-shadow:0 0 0 2px var(--gold),0 12px 28px #000c}
+.layer{position:absolute;left:0;top:0;width:340px;height:188px;transform-origin:0 0}
+.layer img{position:absolute;left:0;top:0;width:100%;height:100%;display:block;-webkit-user-drag:none;user-select:none}
+.ring{position:absolute;border:2px dashed #fff;box-shadow:0 0 0 1px #000a,inset 0 0 0 1px #000a;border-radius:50%;pointer-events:none}
+.ring.on{border-color:#6f6;border-style:solid}
+.ring[data-notch]::after{content:"";position:absolute;top:50%;width:0;height:0;margin-top:-7px;border:7px solid transparent}
+.ring[data-notch="R"]::after{right:-14px;border-left-color:var(--gold)}
+.ring[data-notch="L"]::after{left:-14px;border-right-color:var(--gold)}
+.tag{position:absolute;left:6px;top:4px;background:#000b;padding:1px 8px;border-radius:10px;font-size:12px;z-index:3}
+.tools{position:absolute;right:4px;bottom:4px;display:flex;gap:4px;z-index:3}
+.tools button{min-height:44px;min-width:44px;padding:4px 8px;font-size:13px}
+#guide{position:absolute;left:0;top:0;width:744px;height:440px;pointer-events:none;z-index:50;overflow:visible}
+#order{position:absolute;inset:0;background:#0b0a0f;z-index:60;display:none;padding:12px}
+#order.on{display:block}
+.row{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+#flips{padding:0 12px;margin:4px 0}
+.slot,.card{flex:1 1 20%;min-width:56px;aspect-ratio:16/9;border:2px dashed #5a4f68;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#9a90a8;background:#000}
+.card{border-style:solid;border-color:#8a6a2a;padding:0;cursor:pointer}
+.card img,.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card span,.slot span{position:relative;background:#000b;padding:1px 6px;border-radius:10px;font-size:12px;white-space:nowrap}
+.card.used{opacity:.35}
+#done{position:absolute;inset:0;background:#0b0a0f;z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+#done.on{display:flex}
+#done .glyph{font-size:96px;color:var(--red);line-height:1}
+.small{font-size:12px;color:#9a90a8}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+ <h1>E4 無限鏡廊 原型 v3</h1>
+ <button id="assist" aria-pressed="true">標記：開</button>
+ <button id="reset">重來</button>
+ <span class="small" id="info"></span>
+</header>
+<div id="caption" aria-live="polite"></div>
+<div id="flips" class="row" role="group" aria-label="翻面（鏡像）"></div>
+<div id="feedback" aria-live="polite"></div>
+<div id="stage"><div id="board"></div></div>
+<script src="e4-gallery.model.js"></script>
+<script>
+'use strict';
+const E=window.E4,SLOT={A:[16,16],B:[376,16],C:[16,224],D:[376,224]};
+const ART=p=>'../../assets/'+E.PANELS[p].art+'.webp';
+const board=document.getElementById('board'),stage=document.getElementById('stage'),
+ cap=document.getElementById('caption'),fb=document.getElementById('feedback'),info=document.getElementById('info');
+let scale=1,assist=true,view,links,pos,els={},live=null,order,mode,held=null;
+const KIND=k=>k.includes('B.moon')?0:k.includes('lantern')?1:2;
+const CAPS=[
+ '① 把陽台的月亮拖到鏡廊鏡子裡的月亮上，讓兩個月亮重疊。放開時會自動吸附。',
+ '② 黑松林的提燈比舞廳的吊燈小很多。點黑松林把整格放大，再把舞廳拖到放大的黑松林上，讓舞廳的大吊燈對準提燈。（再點一次放大的格子就縮回去）',
+ '③ 鏡廊的門開向右，舞廳的門開向左（金色小三角是開口的方向）。按其中一格的「翻面」，再把兩扇門重疊。',
+ '④ 三條紅線都接上了。把四格依紅線的順序排成一列。',
+ ''
+];
+function layout(){
+ scale=Math.min(stage.clientWidth/744,stage.clientHeight/440);
+ board.style.transform='scale('+scale+')';board.style.marginLeft=(-372*scale)+'px';
+ info.textContent='吸附半徑約 '+Math.round(radius()*scale)+' px';
+}
+const radius=()=>Math.max(0.06*E.PH,22/scale);
+addEventListener('resize',layout);
+
+function reset(){
+ view={zoom:null,flip:{A:false,B:false,C:false,D:false}};links=[];pos={};live=null;order=[];mode='play';
+ for(const p in SLOT)pos[p]=[...SLOT[p]];
+ fb.textContent='';build();render();
+ for(const id of ['done','order']){const x=document.getElementById(id);if(x)x.className='';}
+}
+function build(){
+ board.innerHTML='<svg id="guide" viewBox="0 0 744 440"></svg>';els={};
+ for(const p in E.PANELS){
+  const el=document.createElement('div');el.className='panel';el.tabIndex=0;el.setAttribute('role','button');el.dataset.p=p;
+  el.setAttribute('aria-label','畫格：'+E.PANELS[p].name+'。拖曳疊到另一格；方向鍵移動；Enter 放大或縮小；F 翻面');
+  let rings='';
+  for(const a of E.ANCHORS[p])rings+=`<div class="ring" data-a="${a.id}" title="${a.label}"></div>`;
+  el.innerHTML=`<div class="layer"><img src="${ART(p)}" alt="" draggable="false">${rings}</div><span class="tag">${E.PANELS[p].name}</span>`+
+   '';
+  board.appendChild(el);els[p]=el;bind(p);
+ }
+ const fl=document.getElementById('flips');
+ fl.innerHTML='<span class="small" style="align-self:center">翻面：</span>'+Object.keys(E.PANELS).map(p=>`<button data-flip="${p}" aria-pressed="false" aria-label="翻面：${E.PANELS[p].name}">⇋ ${E.PANELS[p].name}</button>`).join('');
+ fl.querySelectorAll('[data-flip]').forEach(b=>b.onclick=()=>{if(mode==='play')doFlip(b.dataset.flip);});
+}
+// layer coordinates are the box (340x188 inside the border), model coordinates are 352x200, so scale by 340/352 only for display
+const K=340/E.PW;
+// the zoomed panel fills the board width and sits behind; the other panels keep their size and float on top of it
+const sizeOf=p=>E.mag(view,p);
+const TRAY=0.3,trayPos=p=>{const ids=Object.keys(E.PANELS).filter(q=>q!==view.zoom.panel);return [16+ids.indexOf(p)*(E.PW*TRAY+14),440-E.PH*TRAY-10];};
+const inTray=p=>!!view.zoom&&view.zoom.panel!==p&&held!==p;
+const effPos=p=>{const m=sizeOf(p);return m!==1?[(E.BOARD_W-E.PW*m)/2,(440-E.PH*m)/2]:inTray(p)?trayPos(p):pos[p];};
+function render(){
+ for(const p in els){
+  const el=els[p],layer=el.querySelector('.layer'),img=layer.querySelector('img');
+  const m=sizeOf(p),ep=effPos(p),fl=E.flipped(view,p),z=m!==1;
+  el.style.width=E.PW*m+'px';el.style.height=E.PH*m+'px';el.style.borderWidth=6*m+'px';
+  el.style.left=ep[0]+'px';el.style.top=ep[1]+'px';
+  el.style.zIndex=z?0:(held===p?10:inTray(p)?5:1);
+  el.style.transform=inTray(p)?`scale(${TRAY})`:'none';el.style.transformOrigin='0 0';
+  layer.style.width=340*m+'px';layer.style.height=188*m+'px';
+  img.style.transform=fl?'scaleX(-1)':'none';
+  for(const a of E.ANCHORS[p]){
+   const r=el.querySelector(`[data-a="${a.id}"]`),x=fl?E.SRC[0]-a.x:a.x;
+   const rr=Math.max(a.r*E.F*K*m,9); // tiny objects still get a visible ring (display only; matching uses the real size)
+   r.style.left=(x*E.F*K*m-rr)+'px';r.style.top=(a.y*E.F*K*m-rr)+'px';
+   r.style.width=r.style.height=(2*rr)+'px';
+   r.style.display=assist?'block':'none';
+   const sd=E.side(view,p,a);if(sd)r.dataset.notch=sd;
+   r.classList.toggle('on',links.some(k=>k.ends.includes(p+'.'+a.id)));
+  }
+  el.querySelector('.tag').textContent=E.PANELS[p].name+(fl?'（翻面）':'')+(z?'（放大）':'');
+  const fb2=document.querySelector(`#flips [data-flip="${p}"]`);if(fb2)fb2.setAttribute('aria-pressed',fl);
+ }
+ cap.textContent=mode==='play'?CAPS[Math.min(links.length,3)]:'';
+ drawThreads();
+}
+const home=(p,a)=>[SLOT[p][0]+6+a.x*E.F*K,SLOT[p][1]+6+a.y*E.F*K];
+function drawThreads(){
+ const g=document.getElementById('guide');let s='';
+ for(const k of links){const [p,a]=[k.ends[0],k.ends[1]].map(e=>{const [pp,id]=e.split('.');return home(pp,E.ANCHORS[pp].find(x=>x.id===id));});
+  s+=`<line x1="${p[0]}" y1="${p[1]}" x2="${a[0]}" y2="${a[1]}" stroke="#c8172f" stroke-width="3" stroke-linecap="round"/><circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#c8172f"/><circle cx="${a[0]}" cy="${a[1]}" r="5" fill="#c8172f"/>`;}
+ if(live)s+=`<line x1="${live.p[0]}" y1="${live.p[1]}" x2="${live.q[0]}" y2="${live.q[1]}" stroke="${live.ok?'#6f6':'#fff'}" stroke-width="${live.ok?3:1.5}" stroke-dasharray="${live.ok?'0':'5 4'}"/>`;
+ g.innerHTML=s;
+}
+// position of an anchor on the board (board units), using the same maths as the model but with the 340px content box
+const boardPos=(p,a)=>{const m=E.at(view,p,a),ep=effPos(p),b=6*sizeOf(p);return m?[ep[0]+b+m[0]*K,ep[1]+b+m[1]*K]:null;};
+function candidates(p){
+ const out=[];
+ for(const a of E.ANCHORS[p]){const pa=boardPos(p,a);if(!pa)continue;
+  for(const q in E.ANCHORS)if(q!==p&&!inTray(q))for(const b of E.ANCHORS[q]){const pb=boardPos(q,b);if(!pb)continue;
+   const d=Math.hypot(pa[0]-pb[0],pa[1]-pb[1]);if(d>radius())continue;
+   out.push({a,q,b,d,pa,pb,m:E.match(view,p,a,q,b)});}}
+ return out.sort((x,y)=>x.d-y.d);
+}
+function resolve(p){
+ const c=candidates(p);if(!c.length)return {kind:'none'};
+ const ok=c.find(x=>x.m.ok);
+ if(!ok){const r=c[0].m.reason;return {kind:'bad',text:E.REASONS[r]||''};}
+ const key=E.key(p,ok.a,ok.q,ok.b),k=KIND(key);
+ if(links.some(l=>l.kind===k))return {kind:'bad',text:'這條紅線已經接上了。'};
+ return {kind:'link',key,kind2:k,ends:[p+'.'+ok.a.id,ok.q+'.'+ok.b.id]};
+}
+function bind(p){
+ const el=els[p];let drag=null,moved=false;
+ el.addEventListener('pointerdown',e=>{
+  if(mode!=='play'||e.button>0)return;
+  el.setPointerCapture(e.pointerId);drag={sx:e.clientX,sy:e.clientY,ox:pos[p][0],oy:pos[p][1],tx:e.clientX,ty:e.clientY};moved=false;
+  el.style.zIndex=10;
+ });
+ el.addEventListener('pointermove',e=>{
+  if(!drag)return;const dx=(e.clientX-drag.sx)/scale,dy=(e.clientY-drag.sy)/scale;
+  if(!moved&&Math.hypot(dx,dy)*scale<6)return;if(sizeOf(p)!==1)return;
+  if(!moved&&view.zoom){ // picking a tile out of the tray: it grows to full size under the finger
+   const b=board.getBoundingClientRect();pos[p]=[(e.clientX-b.left)/scale-E.PW/2,(e.clientY-b.top)/scale-E.PH/2];
+   drag.sx=e.clientX;drag.sy=e.clientY;drag.ox=pos[p][0];drag.oy=pos[p][1];held=p;render();
+  }
+  const ddx=(e.clientX-drag.sx)/scale,ddy=(e.clientY-drag.sy)/scale;
+  moved=true;el.classList.add('drag');
+  pos[p]=[drag.ox+ddx,drag.oy+ddy];el.style.left=pos[p][0]+'px';el.style.top=pos[p][1]+'px';
+  const r=resolve(p);const c=candidates(p)[0];
+  live=c?{p:c.pa,q:c.pb,ok:r.kind==='link'}:null;drawThreads();
+ });
+ const end=e=>{
+  if(!drag)return;const wasMoved=moved;drag=null;el.classList.remove('drag');
+  if(!wasMoved){
+   // tap = fill the board width with this panel, or go back
+   held=null;view.zoom=view.zoom&&view.zoom.panel===p?null:{panel:p};
+   fb.textContent='';render();return;
+  }
+  const r=resolve(p);live=null;held=null; // the panel counts as full size until the drop has been judged
+  if(r.kind==='link'){
+   links.push({key:r.key,kind:r.kind2,ends:r.ends});fb.textContent='';
+   pos[p]=[...SLOT[p]];view.zoom=null;
+   el.style.transition='left .35s,top .35s';setTimeout(()=>el.style.transition='',700);
+   render();if(links.length===3)startOrder();
+  }else{
+   fb.textContent=r.kind==='bad'?r.text:'';
+   pos[p]=[...SLOT[p]];render();
+  }
+ };
+ el.addEventListener('blur',()=>{if(held===p){held=null;render();}});
+ el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+ el.addEventListener('keydown',e=>{
+  if(mode!=='play')return;
+  if(e.key==='f'||e.key==='F'){e.preventDefault();doFlip(p);return;}
+  if(e.key==='Enter'||e.key==='+'||e.key==='-'){e.preventDefault();
+   view.zoom=view.zoom&&view.zoom.panel===p?null:{panel:p};render();return;}
+  const step=e.shiftKey?3:10,m={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[e.key];
+  if(m){e.preventDefault();if(inTray(p)){pos[p]=[(E.BOARD_W-E.PW)/2,(440-E.PH)/2];held=p;}pos[p]=[pos[p][0]+m[0],pos[p][1]+m[1]];render();
+   const r=resolve(p);if(r.kind==='link'){links.push({key:r.key,kind:r.kind2,ends:r.ends});pos[p]=[...SLOT[p]];held=null;view.zoom=null;render();if(links.length===3)startOrder();}}
+ });
+}
+function doFlip(p){view.flip[p]=!view.flip[p];fb.textContent='';render();}
+
+// order mode: tap the four panels in thread order
+function startOrder(){
+ mode='order';order=[];renderOrder();
+}
+function renderOrder(){
+ let o=document.getElementById('order');
+ if(!o){o=document.createElement('div');o.id='order';stage.appendChild(o);}
+ const names=k=>k.ends.map(e=>E.PANELS[e[0]].name).join(' ⟷ ');
+ const what=['月亮','提燈與吊燈','門'];
+ o.className='on';
+ o.innerHTML=`<div>紅線：${links.slice().sort((a,b)=>a.kind-b.kind).map(k=>names(k)+'（'+what[k.kind]+'）').join('；')}</div>
+  <div class="row" id="slots"></div><div class="row" id="cards"></div><div class="small">依序點選四格；點已放的格子可以取消。</div>`;
+ o.querySelector('#slots').innerHTML=[0,1,2,3].map(i=>order[i]?`<button class="slot" data-i="${i}" aria-label="第 ${i+1} 格：${E.PANELS[order[i]].name}（點選取消）"><img src="${ART(order[i])}" alt=""><span>${i+1}｜${E.PANELS[order[i]].name}</span></button>`:`<div class="slot"><span>第 ${i+1} 格</span></div>`).join('');
+ o.querySelector('#cards').innerHTML=Object.keys(E.PANELS).map(p=>`<button class="card${order.includes(p)?' used':''}" data-p="${p}" aria-label="${E.PANELS[p].name}"><img src="${ART(p)}" alt=""><span>${E.PANELS[p].name}</span></button>`).join('');
+ o.querySelectorAll('.slot[data-i]').forEach(b=>b.onclick=()=>{order.splice(+b.dataset.i);fb.textContent='';renderOrder();});
+ o.querySelectorAll('.card').forEach(b=>b.onclick=()=>{
+  if(order.includes(b.dataset.p))return;order.push(b.dataset.p);
+  if(order.length===4){
+   if(E.isChain(order)){finish();return;}
+   const i=E.firstBadGap(order);fb.textContent='第 '+(i+1)+' 格（'+E.PANELS[order[i]].name+'）和第 '+(i+2)+' 格（'+E.PANELS[order[i+1]].name+'）之間沒有紅線。';
+   order=[];
+  }else fb.textContent='';
+  renderOrder();
+ });
+}
+function finish(){
+ mode='done';const o=document.getElementById('order');if(o)o.className='';
+ let d=document.getElementById('done');
+ if(!d){d=document.createElement('div');d.id='done';stage.appendChild(d);}
+ d.innerHTML='<div class="glyph">ㄧ</div><p>四格依序排好，紅線連成一條直線。<br>妳把這截紅線收進手心。</p><button id="again">再玩一次</button>';
+ d.className='on';document.getElementById('again').onclick=reset;cap.textContent='完成。';
+}
+document.getElementById('assist').onclick=e=>{assist=!assist;e.target.textContent='標記：'+(assist?'開':'關');e.target.setAttribute('aria-pressed',assist);render();};
+document.getElementById('reset').onclick=()=>{const o=document.getElementById('order');if(o)o.className='';reset();};
+layout();reset();
+window.__e4={get mode(){return mode},get links(){return links},get order(){return order},view:()=>view,pos:()=>pos,scale:()=>scale,els:()=>els,radius,boardPos};
+</script>
+</body>
+</html>
