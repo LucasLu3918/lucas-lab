@@ -110,6 +110,39 @@ export const abyss={
    ],
    enter:'走進鏡廊',
    reward:{name:'紅線',mark:'ㄧ',place:'手心'}
+  },
+  {
+   id:'e5',
+   puzzle:'box',
+   number:'E5',
+   title:'七重魔鏡匣',
+   subtitle:'帳冊的底稿匣',
+   // One mechanism per face of the box. The first five need the tool of E1-E4 (and the shards for the fifth); the cipher disc waits for the other five.
+   stages:['box-time','box-light','box-apple','box-thread','box-shards','box-cipher'],
+   thumb:'box-time',
+   scene:[
+    {text:'黑暗中懸著一只匣子，六面都是黑鏡，像是把整本帳冊壓成了一塊。'},
+    {speaker:'mirror',text:'「這是底稿匣。每一面，都要用妳一路帶來的東西打開。」'},
+    {text:'七片碎片在匣旁繞圈，每一片都記得一個孩子的名字。'},
+    {speaker:'mirror',text:'「匣裡有一張字條。王后寫的，用的是小時候教過妳的那套記號。」'}
+   ],
+   unlock:[
+    {text:'六面同時鬆開。匣子沒有發出任何聲音，像一本帳冊終於翻到最後一頁。'},
+    {text:'字條上只有一個名字：露西。帳冊最後一筆抵押的簽名欄，一直是空白的。'},
+    {text:'匣底還有一行小字，針腳一樣細：ㄒㄩㄝ。'},
+    {speaker:'vera',text:'「為什麼雪是白色，我不知道。我希望妳以後有機會自己找到答案。」'},
+    {text:'第一場雪落下時，妳知道有人替它記了一筆，卻沒有向任何人收費。'}
+   ],
+   // Shown instead of `unlock` (and without the reward) while a shard is missing; playing the box again shows whichever applies then.
+   fullNeeds:['shard-library','shard-ballroom','shard-hunter','shard-mine','shard-crypt','shard-queen','shard-mirror'],
+   reduced:{
+    unlock:[
+     {text:'匣子打開了，缺了幾個角。字條被一層霧遮住，只看得見一個名字的輪廓。'},
+     {text:'妳認得那個輪廓。有些答案，要等妳回頭把缺的那幾面補上。'}
+    ]
+   },
+   enter:'走近匣子',
+   reward:{name:'王后的字條',mark:'露西',caption:'匣內字條上的名字'}
   }
  ]
 };

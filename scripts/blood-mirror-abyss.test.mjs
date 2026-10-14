@@ -9,10 +9,11 @@ import {NOTCHES,RUBY,NUMERALS,numeralAt,notchOf,playTolls,solveAll as wheelSolve
 import {STAGES as PRISM,solutions as prismSolutions,signature as prismSignature,solved as prismSolved,litCount,allStates as prismStates,trace as prismTrace,bits,hint as prismHint,hintStep as prismHintStep,solutionOf,diagnose} from '../games/blood-mirror/puzzles/prism.js';
 import * as apo from '../games/blood-mirror/puzzles/apothecary.js';
 import * as gal from '../games/blood-mirror/puzzles/gallery.js';
+import * as box from '../games/blood-mirror/puzzles/box.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
-import {rooms,initialState,toSaveV2,fromSaveV2,exportSave,parseSave,loadSave,writeSave,SAVE_KEY} from '../games/blood-mirror/engine/index.js';
+import {rooms,initialState,toSaveV2,fromSaveV2,exportSave,parseSave,loadSave,writeSave,SAVE_KEY,shardIds} from '../games/blood-mirror/engine/index.js';
 
 const board=(level,placed)=>{const b=emptyBoard(level);for(const [socket,layers] of Object.entries(placed))b[socket]=layers;return b;};
 const storage=(entries={})=>{const data=new Map(Object.entries(entries));return {getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,String(v)),raw:k=>data.get(k)};};
@@ -81,7 +82,7 @@ test('gear outlines and starting angles are well formed for every tray gear',()=
 test('the E1 lines match the dialogue draft and use known speakers',()=>{
  const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
  const lines=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
- const all=[...abyss.entry,...abyss.levels.flatMap(level=>[...level.scene,...level.unlock,...Object.values(level.stageLines||{}).flat()])];
+ const all=[...abyss.entry,...abyss.levels.flatMap(level=>[...level.scene,...level.unlock,...(level.reduced?.unlock||[]),...Object.values(level.stageLines||{}).flat()])];
  for(const {speaker,text} of all){
   assert.ok(!speaker||speakers[speaker],'unknown speaker '+speaker);
   assert.ok(text.length>0&&text.length<=80,'line over 80 characters: '+text);
@@ -116,6 +117,7 @@ test('abyss levels sit outside the seven acts and own a registered puzzle',()=>{
  assert.deepEqual(puzzles.prism.stages.map(stage=>stage.after||[]),[[],[],['prism-rays','prism-blend']]);
  assert.deepEqual(puzzles.apothecary.stages.map(stage=>stage.after||[]),[[],[],['apothecary-testimony','apothecary-vessels']]);
  assert.deepEqual(puzzles.gallery.stages.map(stage=>stage.after||[]),[[],['gallery-align']]);
+ assert.deepEqual(puzzles.box.stages.map(stage=>stage.after||[]),[[],[],[],[],[],['box-time','box-light','box-apple','box-thread','box-shards']]);
 });
 
 test('finishing a belfry level is saved, survives export and a new journey, and unknown ids are dropped',()=>{
@@ -434,4 +436,139 @@ test('E4 level data: lines match the draft, the reward is ㄧ in the palm, one s
  }
  // The four panels use art that already ships with the scenes, so E4 adds no scene image to the first screen.
  for(const {art} of Object.values(gal.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
+});
+
+test('E5 cipher: the four keys are the marks of E1-E4, every key matters and every letter has one shift',()=>{
+ assert.equal(box.ZHUYIN37.length,37);assert.equal(new Set(box.ZHUYIN37).size,37);
+ assert.deepEqual(box.KEYS,['ㄎ','ㄒ','ㄋ','ㄧ']);
+ assert.deepEqual(box.KEY_LEVELS.map(level=>level.number),['E1','E2','E3','E4']);
+ assert.equal(box.CIPHER,'ㄖㄑㄙㄥ');
+ assert.equal(box.decrypt(box.CIPHER),box.PLAIN);
+ assert.equal(box.encrypt(box.PLAIN),box.CIPHER);
+ for(const symbol of [...box.PLAIN,...box.KEYS,...box.CIPHER])assert.ok(box.idx(symbol)>=1,symbol);
+ // Swapping any one key for another symbol breaks the reading, so no level can be skipped.
+ for(let i=0;i<4;i++)for(const z of box.ZHUYIN37){
+  if(z===box.KEYS[i])continue;
+  const keys=[...box.KEYS];keys[i]=z;
+  assert.notEqual(box.decrypt(box.CIPHER,keys),box.PLAIN,'key '+i+' = '+z+' also works');
+ }
+ // Counting back, only one number of places per letter gives the plain letter; the disc reads PLAIN for exactly one setting.
+ for(let i=0;i<4;i++){
+  let good=0;
+  for(let n=0;n<37;n++){const offsets=[0,0,0,0];offsets[i]=n;if(box.reading(offsets)[i]===box.PLAIN[i])good++;}
+  assert.equal(good,1);
+ }
+ assert.deepEqual(box.KEYS.map(box.idx),[10,14,7,35]);
+ assert.equal(box.reading(box.KEYS.map(box.idx)),box.PLAIN);
+ assert.equal(box.reading([0,0,0,0]),box.CIPHER);
+});
+
+test('E5 faces: each face needs exactly the level that gives its tool, the cipher needs all four, the shards need nothing',()=>{
+ const none=()=>false,all=()=>true,only=id=>x=>x===id;
+ assert.equal(box.FACES.length,6);
+ for(const face of box.FACES){
+  assert.ok(box.faceOpen(face,all),face.id+' closed with everything');
+  if(face.needs.length)assert.ok(!box.faceOpen(face,none),face.id+' open with nothing');
+ }
+ assert.equal(box.faceOpen(box.FACES.find(face=>face.id==='shards'),none),true);
+ const cipher=box.FACES.find(face=>face.id==='cipher');
+ for(const level of box.KEY_LEVELS){
+  assert.ok(!box.faceOpen(cipher,x=>x!==level.puzzle),'cipher opens without '+level.number);
+  assert.deepEqual(box.missing(cipher,x=>x!==level.puzzle).map(item=>item.number),[level.number]);
+ }
+ for(const [id,puzzle] of [['time','belfry'],['light','prism'],['apple','apothecary'],['thread','gallery']]){
+  const face=box.FACES.find(item=>item.id===id);
+  assert.deepEqual(face.needs,[puzzle]);
+  assert.ok(box.faceOpen(face,only(puzzle)));
+ }
+ // The registry says the same: stage ids, the levels each stage requires, and the cipher waiting for the other five.
+ assert.deepEqual(puzzles.box.stages.map(stage=>stage.id),box.FACES.map(face=>face.stage));
+ puzzles.box.stages.forEach((stage,i)=>assert.deepEqual([].concat(stage.requires||[]),box.FACES[i].needs,stage.id));
+ for(const stage of puzzles.box.stages)if(stage.requires)assert.ok(stage.missing.length>10);
+ assert.deepEqual(abyss.levels[4].stages,box.FACES.map(face=>face.stage));
+});
+
+test('E5 answers agree with the earlier levels and have one solution each',()=>{
+ // Apple: the holder is the same apprentice E3 builds its testimony around.
+ assert.deepEqual(box.APPRENTICES,apo.APPRENTICES);
+ assert.equal(box.HOLDER,apo.CULPRIT);
+ assert.equal(box.APPRENTICES[box.HOLDER],'甘松');
+ // Thread: the four panels and the chain are E4's, and of the 24 orders only the chain and its reverse pass.
+ assert.deepEqual(box.PANELS,gal.PANELS);
+ assert.deepEqual(box.CHAIN,gal.CHAIN);
+ const perms=a=>a.length<2?[a]:a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(rest=>[x,...rest]));
+ const good=perms(['A','B','C','D']).filter(order=>box.prefixOk(order));
+ assert.equal(good.length,2);
+ assert.deepEqual(good.map(order=>order.join('')).sort(),['BADC','CDAB']);
+ // Every wrong first pick is already refused, so the thread never needs more than one wrong pick to be told.
+ for(const p of ['A','D'])assert.equal(box.prefixOk([p]),false);
+ // Light: three of five colours in order; one sequence of 125 works, the others do nothing.
+ const colors=Object.keys(box.COLORS);
+ let works=0;
+ for(const a of colors)for(const b of colors)for(const c of colors)if([a,b,c].every((x,i)=>x===box.LIGHT[i]))works++;
+ assert.equal(works,1);
+ assert.equal(colors.length,5);
+ assert.equal(new Set(Object.values(box.COLORS).map(color=>color.shape)).size,5,'colours also differ by shape');
+ // Dial: thirteen notches, and E1's answer is the last one.
+ assert.equal(box.TIME_SLOTS,13);assert.equal(box.TIME,13);
+});
+
+test('E5 shards: one slot per act, matching the engine, and a missing shard only leaves its slot empty',()=>{
+ assert.equal(box.ACT_SHARDS.length,7);
+ assert.deepEqual(box.ACT_SHARDS.map(shard=>shard.act),[1,2,3,4,5,6,7]);
+ assert.deepEqual(box.ACT_SHARDS.map(shard=>shard.title),rooms.map(room=>room.title));
+ for(const shard of box.ACT_SHARDS)assert.ok(shardIds.includes(shard.id),shard.id);
+ const e5=abyss.levels[4];
+ assert.deepEqual(e5.fullNeeds,box.ACT_SHARDS.map(shard=>shard.id));
+ // The prologue shard is not one of the seven; the box does not need it.
+ assert.ok(!e5.fullNeeds.includes('shard-prologue'));
+ assert.ok(box.HINTS.shards[2].includes('黑鐘書庫')&&box.HINTS.shards[2].includes('鏡中之國'));
+});
+
+test('E5 hints: every step has three tiers and the last one gives the answer',()=>{
+ for(const step of ['time','light-lift','light-seq','apple','thread','shards','cipher']){
+  assert.equal(box.HINTS[step].length,3,step);
+  box.HINTS[step].forEach(text=>assert.ok(text.length>8,step));
+ }
+ assert.ok(box.HINTS.time[2].includes('13'));
+ assert.ok(['紅','藍','綠'].every(name=>box.HINTS['light-seq'][2].includes(name)));
+ assert.ok(box.HINTS['light-seq'][2].indexOf('紅')<box.HINTS['light-seq'][2].indexOf('藍')&&box.HINTS['light-seq'][2].indexOf('藍')<box.HINTS['light-seq'][2].indexOf('綠'));
+ assert.ok(box.HINTS['light-lift'][1].includes('稜鏡'));
+ assert.ok(box.HINTS.apple[2].includes('甘松'));
+ assert.ok(box.HINTS.thread[2].includes('陽台')&&box.HINTS.thread[2].includes('黑松林'));
+ assert.ok(box.HINTS.cipher[2].includes(box.PLAIN));
+ assert.ok(box.KEYS.every(key=>box.HINTS.cipher[2].includes(key)));
+});
+
+test('E5 level data: lines match the draft, the full ending needs all seven shards, a shorter one covers the gap, no animation loop',()=>{
+ const e5=abyss.levels[4];
+ assert.equal(e5.id,'e5');assert.equal(e5.puzzle,'box');assert.equal(e5.number,'E5');
+ assert.equal(e5.scene.length,4);
+ assert.equal(e5.unlock.length,5);
+ assert.equal(e5.reduced.unlock.length,2);
+ assert.ok(e5.unlock.some(line=>line.text.includes('露西')));
+ assert.ok(e5.unlock.some(line=>line.text.includes('ㄒㄩㄝ')));
+ assert.ok(e5.unlock.some(line=>line.speaker==='vera'));
+ // Vera speaks once, and only in the full ending.
+ assert.equal([...e5.scene,...e5.reduced.unlock].filter(line=>line.speaker==='vera').length,0);
+ assert.equal(e5.reward.name,'王后的字條');
+ assert.ok(e5.enter.length>0);
+ assert.equal(e5.stageLines,undefined);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/box.js',import.meta.url),'utf8');
+ assert.ok(!/requestAnimationFrame/.test(src.replace(/\/\/.*$/gm,'')));
+ assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+ // The thread face shows pictures that already ship with the scenes.
+ for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
+ // The levels are listed in order and E5 comes last, after the four that give it its keys.
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5']);
+});
+
+test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
+ setPuzzleCompletions(['box.box-time','box.box-light','box.nope','box']);
+ assert.deepEqual(completedPuzzles().sort(),['box','box.box-light','box.box-time']);
+ const save=toSaveV2({...initialState(),started:true},completedPuzzles());
+ assert.deepEqual([...save.puzzles].sort(),['box','box.box-light','box.box-time']);
+ resetPuzzles();
+ assert.equal(isStageComplete('box','box-time'),true);
+ setPuzzleCompletions([]);
 });
