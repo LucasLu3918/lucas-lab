@@ -43,6 +43,8 @@ const journeySave={
     const box=await select.boundingBox();
     assert.ok(box.x>=0&&box.x+box.width<=width,'act select fits the viewport @'+width);
     assert.ok(box.height>=44,'act select is a 44px touch target @'+width);
+    // A real touch must land on the select itself (the stage toolbar once swallowed it with pointer-events:none).
+    assert.equal(await page.evaluate(()=>{const el=document.querySelector('#room-select'),b=el.getBoundingClientRect();return document.elementFromPoint(b.left+b.width/2,b.top+b.height/2)===el;}),true,'act select receives pointer events @'+width);
     await select.selectOption('0');
    }else{
     assert.equal(await select.isVisible(),false,'act select is hidden at '+width);

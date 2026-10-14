@@ -75,9 +75,11 @@ function clueStatus(spot,r,done,restored,damaged){
 }
 function renderClues(spots,r,views,done,restored,damaged){
  const row=spot=>{const [text,tone]=clueStatus(spot,r,done,restored,damaged);return `<button class="clue-row ${tone}" data-clue="${spot.id}"><span class="clue-icon">${icon(spotIcon(spot))}</span><span class="clue-name">${spot.label}</span><small class="clue-state">${text}</small></button>`};
+ // The seal spot (lock) is never marked seen: it counts once the act is solved.
+ const found=spot=>state.seen.includes(spot.id)||(spot.lock&&done);
  const groups=views.length>1?views.map(v=>({label:v.label,list:spots.filter(spot=>spotView(spot,r)===v.id)})).filter(g=>g.list.length):[{label:'',list:spots}];
- $('#clue-list').innerHTML=groups.map(g=>`<div class="clue-group" role="group"${g.label?` aria-label="${g.label}"`:''}>${g.label?`<p class="clue-group-title">${g.label}<span>${g.list.filter(spot=>state.seen.includes(spot.id)).length} / ${g.list.length}</span></p>`:''}${g.list.map(row).join('')}</div>`).join('');
- $('#clue-count').textContent=spots.filter(spot=>state.seen.includes(spot.id)).length+' / '+spots.length;
+ $('#clue-list').innerHTML=groups.map(g=>`<div class="clue-group" role="group"${g.label?` aria-label="${g.label}"`:''}>${g.label?`<p class="clue-group-title">${g.label}<span>${g.list.filter(found).length} / ${g.list.length}</span></p>`:''}${g.list.map(row).join('')}</div>`).join('');
+ $('#clue-count').textContent=spots.filter(found).length+' / '+spots.length;
 }
 // Clue modals show portraits and item sprites; fetch the room's set while the player is still looking at the scene.
 function warmRoom(r){preloadImages([...r.spots.filter(spot=>spot.portrait).map(spot=>'assets/portraits/'+spot.portrait+'.webp'),...roomViews(r).slice(1).map(v=>'assets/'+v.image)]);preloadConcepts(Object.values(itemArtwork));}

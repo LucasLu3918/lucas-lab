@@ -59,7 +59,7 @@ body.reduce-motion .hotspot::before{animation:none}
 .stage-top{top:0;z-index:5;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:26px;background:linear-gradient(rgba(8,6,8,.86),rgba(8,6,8,.5) 62%,rgba(8,6,8,0))}
 .stage-bottom{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
 .stage-bottom-row{display:flex;flex-direction:column;gap:8px;min-width:0}
-.stage-top button,.stage-top summary,.stage-top .clue-panel,.stage-top .hud-objective,.stage-bottom>.journey-guide{pointer-events:auto}
+.stage-top button,.stage-top select,.stage-top summary,.stage-top .clue-panel,.stage-top .hud-objective,.stage-bottom>.journey-guide{pointer-events:auto}
 .stage-bottom-row>*{pointer-events:auto}
 
 /* HUD: chapter on the left, tools on the right, the objective on its own row beneath. */

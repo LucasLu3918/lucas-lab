@@ -250,7 +250,8 @@ function mountGallery(ctx,stage){
     const notch=layer.querySelector('[data-n="'+a.id+'"]');
     if(notch){
      const sd=side(view,p,a),nr=Math.max(a.r*F*K*m,9);
-     notch.dataset.side=sd;notch.style.left=(pt[0]*K+(sd==='R'?nr+2:-nr-16))+'px';notch.style.top=(pt[1]*K-7)+'px';
+     notch.dataset.side=sd;const nw=Math.max(30,Math.round(nr*0.9)),nh=Math.round(nw*2/3); // the handle grows with a zoomed door
+     notch.style.width=nw+'px';notch.style.height=nh+'px';notch.style.left=(pt[0]*K+(sd==='R'?nr+2:-nr-nw-2))+'px';notch.style.top=(pt[1]*K-nh/2)+'px';
     }
    }
    el.querySelector('.gal-tag').textContent=PANELS[p].name+(fl?'（翻面）':'')+(zoomed?'（放大）':'');
