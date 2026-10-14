@@ -13,6 +13,7 @@ import * as box from '../games/blood-mirror/puzzles/box.js';
 import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import * as scale from '../games/blood-mirror/puzzles/scale.js';
+import * as frozen from '../games/blood-mirror/puzzles/frozen.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -563,7 +564,7 @@ test('E5 level data: lines match the draft, the full ending needs all seven shar
  // The thread face shows pictures that already ship with the scenes.
  for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
  // The levels are listed in order: E5 comes after the four that give it its keys, and the breather E-X is appended after it.
- assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6','e7']);
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6','e7','e8']);
 });
 
 test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
@@ -791,5 +792,75 @@ test('E7 level data: lines match the draft, the stages are registered and ordere
  assert.deepEqual(completedPuzzles().sort(),['scale.scale-fruit','scale.scale-thorn']);
  resetPuzzles();
  assert.equal(isStageComplete('scale','scale-thorn'),true);
+ setPuzzleCompletions([]);
+});
+
+test('E8 faces: each frame has exactly one line-up, and every clue is needed',()=>{
+ for(const [name,stage] of Object.entries(frozen.STAGES)){
+  assert.deepEqual(frozen.solve(stage),[stage.truth],name+' unique');
+  assert.equal(frozen.judge(stage,stage.truth),'');
+ }
+ const faces=frozen.STAGES.faces;
+ faces.clues.forEach((_,i)=>assert.ok(frozen.solve(faces,i).length>1,'faces without clue '+(i+1)));
+ assert.equal(new Set(faces.figures.map(f=>f.mask+f.tone)).size,faces.figures.length,'every face differs in mask shape and tone');
+ assert.equal(frozen.judge(faces,['duke','','','','','']),'blank');
+ const swapped=[...faces.truth];[swapped[0],swapped[1]]=[swapped[1],swapped[0]];
+ assert.ok(Number.isInteger(frozen.judge(faces,swapped)),'a wrong line-up names a clue');
+});
+
+test('E8 order and final: one time order, one set of holders, and each step needs the other',()=>{
+ assert.deepEqual(frozen.orderSolve(),[[1,2,0]]);
+ assert.equal(frozen.orderSolve(1).length,2,'without the direction clue the order can be read backwards');
+ assert.ok(frozen.orderSolve(0).length>1,'without the one-swap rule the order is not fixed');
+ assert.equal(frozen.orderJudge([1,2,0]),'');
+ assert.equal(frozen.orderJudge([0,1,2]),1);
+ assert.equal(frozen.orderJudge([0,1,1]),'blank');
+ // the three pictures: neighbours in time differ by one swap, the two ends by two
+ const [a,b,c]=frozen.MOMENTS;
+ const diff=(x,y)=>x.filter((v,i)=>v!==y[i]).length;
+ assert.deepEqual([diff(a,b),diff(b,c),diff(a,c)],[2,2,4]);
+ // holders are three different people; the answer is the last one, named from the roster
+ assert.equal(new Set(frozen.HOLDERS).size,3);
+ assert.deepEqual(frozen.finalAnswer(),['maid','doctor','hunter']);
+ assert.equal(frozen.finalJudge(['maid','doctor','hunter']),'');
+ assert.equal(frozen.finalJudge(['doctor','maid','hunter']),'wrong');
+ assert.equal(frozen.finalJudge(['maid','doctor','']),'blank');
+ // reading the frames in the shuffled order (the trap) gives a different answer
+ assert.notDeepEqual([0,1,2].map(f=>frozen.ROSTER[frozen.FRAMES[f].holder]),frozen.finalAnswer());
+ // every figure is told apart by shape and tone in the pictures too
+ for(const frame of frozen.FRAMES)assert.equal(new Set(frame.slots).size,6);
+ for(const [i,html] of frozen.FRAMES.entries())assert.ok(frozen.rowSvg(frame_row(i),frozen.FRAMES[i].slots.indexOf(frozen.FRAMES[i].holder)).includes('frz-glass'));
+ function frame_row(i){return frozen.FRAMES[i].slots.map(k=>frozen.FIGURES[k]);}
+});
+
+test('E8 hints: three tiers per step and the last one gives the answer',()=>{
+ for(const step of ['warm','faces','order','final']){
+  assert.equal(frozen.HINTS[step].length,3,step);
+  assert.equal(frozen.hintStep(step),step);
+ }
+ assert.ok(frozen.HINTS.order[2].includes('乙、丙、甲'));
+ assert.ok(frozen.HINTS.final[2].includes('獵人'));
+ assert.ok(frozen.HINTS.faces[2].includes('醫師、公爵、侍女、伯爵夫人、獵人、樂師'));
+});
+
+test('E8 level data: lines match the draft, the stages are registered and ordered, banners ship, no animation loop',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const e8=abyss.levels[8];
+ assert.equal(e8.id,'e8');assert.equal(e8.puzzle,'frozen');assert.equal(e8.number,'E8');
+ for(const {speaker,text} of [...e8.scene,...e8.unlock])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.equal(e8.scene.length,3);assert.equal(e8.unlock.length,3);
+ assert.deepEqual(e8.reward,{name:'停擺的懷錶',mark:'時',caption:'錶蓋內側刻著的字'});
+ assert.deepEqual(e8.stages,puzzles.frozen.stages.map(stage=>stage.id));
+ assert.equal(puzzles.frozen.optional,true);
+ assert.deepEqual(puzzles.frozen.stages[2].after,['frozen-faces','frozen-order']);
+ assert.equal(puzzles.frozen.stages[0].after,undefined);assert.equal(puzzles.frozen.stages[1].after,undefined);
+ for(const id of e8.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/frozen.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
+ assert.ok(!/requestAnimationFrame/.test(src));
+ assert.ok(!/style="/.test(src)&&!/\.style\./.test(src),'the page CSP blocks inline styles');
+ setPuzzleCompletions(['frozen.frozen-faces','frozen.frozen-order']);
+ assert.deepEqual(completedPuzzles().sort(),['frozen.frozen-faces','frozen.frozen-order']);
+ resetPuzzles();
  setPuzzleCompletions([]);
 });

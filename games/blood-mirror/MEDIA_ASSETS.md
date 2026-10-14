@@ -186,6 +186,13 @@ node scripts/blood-mirror.browser.cjs
 - 尚待作者驗收。**這不是使用者驗收。**
 
 
+## 鏡淵 E8 凝結的三刻（三道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/frozen-{faces,order,final}.webp`（960×411，約 33、33、22 KB）與 `assets/puzzles/thumbs/frozen-*.webp`（224×128，各約 4–6 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選；final 只看了第一張就採用）。選用 faces-9602（六位戴面具的賓客圍著證人記憶簿）、order-9601（紅絲絨牆上三幅金框畫與一只懷錶）、final-9601（半空中的水晶杯與滿地碎片）。轉檔與縮圖參數同 E1–E7。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/e8/`，不進版本控制。
+- 已知：橫幅只是氛圍，圖中賓客的面具、人數與站位不代表謎題內容。**謎題裡的賓客不是生成圖**，而是 `puzzles/frozen.js` 依資料畫的向量圖，線索與畫面出自同一份資料。
+- 尚待作者驗收。**這不是使用者驗收。**
+
 ## 鏡淵 E7 稱量廳（三道機關的橫幅與縮圖）
 
 - 檔案：`assets/puzzles/scale-{fruit,thorn,final}.webp`（960×411，約 18、20、17 KB）與 `assets/puzzles/thumbs/scale-*.webp`（224×128，各約 3–4 KB）。
