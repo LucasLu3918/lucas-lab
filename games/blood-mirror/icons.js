@@ -7,12 +7,12 @@ const paths = {
   journal: 'M7 3.5h10.5a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H7z M7 3.5v17 M4.5 7.5H7 M4.5 12H7 M4.5 16.5H7 M11 8h4.5',
   gallery: 'M4 5h16v14H4z M4 15l4.5-4.5 4 4 2.5-2.5L20 17 M15.5 9.5h.01',
   menu: 'M4 7h16 M4 12h16 M4 17h16',
-  chevL: 'm15.5 5-7 7 7 7',
-  chevR: 'm8.5 5 7 7-7 7',
-  arrowR: 'M4.5 12h15 M13.5 6l6 6-6 6',
-  arrowL: 'M19.5 12h-15 M10.5 6l-6 6 6 6',
-  arrowD: 'M12 4.5v15 M6 13.5l6 6 6-6',
-  arrowUR: 'M7 17 17 7 M8.5 7H17v8.5',
+  arrowR: 'M6.4 12h9.4',
+  arrowL: 'M17.6 12H8.2',
+  arrowD: 'M12 6.4v9.4',
+  arrowUR: 'M6.4 12h9.4',
+  viewL: 'M14.5 5.5 8 12l6.5 6.5',
+  viewR: 'M9.5 5.5 16 12l-6.5 6.5',
   undo: 'M9 14 4 9l5-5 M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
   chevD: 'm6 9 6 6 6-6',
   sound: 'M3.5 10a1 1 0 0 1 1-1H7l4.5-3.8v13.6L7 15H4.5a1 1 0 0 1-1-1z M15 9.2a4 4 0 0 1 0 5.6 M17.8 6.5a7.8 7.8 0 0 1 0 11',
@@ -87,7 +87,23 @@ const byItem = {
   candle: 'candle', thimble: 'thimble', ribbon: 'ribbon', foxmask: 'mask', glove: 'glove', knife: 'knife', toy: 'toy'
 };
 
-export const icon = (name) => `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${paths[name] || paths.inspect}"/></svg>`;
+// Arrows are drawn as a quill: a fine shaft, a small diamond at the tail and a filled spearhead with a notched back.
+// The solid parts live in `solids` (filled, 1px rounded edge) so the line icons around them stay outline-only.
+const solids = {
+  arrowR: 'M21.5 12 15 7.7 16.6 12 15 16.3z M3 12l1.7-1.7L6.4 12l-1.7 1.7z',
+  arrowL: 'M2.5 12 9 7.7 7.4 12 9 16.3z M21 12l-1.7-1.7-1.7 1.7 1.7 1.7z',
+  arrowD: 'M12 21.5 7.7 15l4.3 1.6 4.3-1.6z M12 3l-1.7 1.7L12 6.4l1.7-1.7z',
+  arrowUR: 'M21.5 12 15 7.7 16.6 12 15 16.3z M3 12l1.7-1.7L6.4 12l-1.7 1.7z',
+  viewL: 'M3.6 12l1.6-1.6L6.8 12l-1.6 1.6z',
+  viewR: 'M20.4 12l-1.6-1.6-1.6 1.6 1.6 1.6z'
+};
+const turn = { arrowUR: ' transform="rotate(-45 12 12)"' };
+
+export const icon = (name) => {
+  const key = paths[name] ? name : 'inspect';
+  const solid = solids[key] ? `<path d="${solids[key]}" fill="currentColor" stroke-width="1"/>` : '';
+  return `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g${turn[key] || ''}><path d="${paths[key]}"/>${solid}</g></svg>`;
+};
 
 export function spotIcon(spot) {
   if (spot.memory) return 'memory';

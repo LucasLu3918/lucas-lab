@@ -185,3 +185,13 @@ node scripts/blood-mirror.browser.cjs
 - 已知：碎片面的圖是八片碎片（模型沒有畫成七片），密碼盤上的刻字是模型生成的偽字符，不是注音；兩者只是氛圍圖，正式機關是 HTML。
 - 尚待作者驗收。**這不是使用者驗收。**
 
+
+## UI ornaments (`assets/ui/`)
+
+Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, prompts and `convert.cjs` / `seal-alpha.cjs` live in `draft/lucas-lab/blood-mirror/source-art/ui/`.
+
+| File | Use | Notes |
+|---|---|---|
+| `arrow-gilt.webp` | Scene view arrows (`.view-arrow::after`, `mix-blend-mode:screen`, mirrored for the left one) | seed 8102, cropped to 480×70, black background |
+| `seal-wax.webp` | Sealed chapter cards (`.chapter-card.locked`) | seed 8201, circular alpha mask via sharp, 176×176 |
+| `velvet.webp` | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
