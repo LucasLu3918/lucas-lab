@@ -65,6 +65,11 @@ export const puzzles={
   {id:'box-thread',label:'鏡中鏡',mount:lazy('box','mountBoxThread'),requires:'gallery',missing:'這一面要把紅線穿過鏡孔。紅線在「無限鏡廊」（E4），回到帳本的背面把它取回來。'},
   {id:'box-shards',label:'碎片面',mount:lazy('box','mountBoxShards')},
   {id:'box-cipher',label:'密碼盤',mount:lazy('box','mountBoxCipher'),requires:['belfry','prism','apothecary','gallery'],missing:'字條上的密文要用四個關卡各給的一個記號才讀得出來：時辰環、稜鏡、回魂藥、紅線。還缺的，回到帳本的背面取回。',after:['box-time','box-light','box-apple','box-thread','box-shards'],waiting:'字條壓在匣子的最裡面。先把其他五面都打開。'}
+ ]},
+ // The shadow cabin (the breather): turn a carving until its shadow fills the outline on the wall. The second carving waits for the first.
+ shadow:{id:'shadow',title:'影戲小屋',subtitle:'ABYSS · 木雕與牆上的影子',optional:true,stages:[
+  {id:'shadow-key',label:'鑰匙的影子',mount:lazy('shadow','mountShadowKey')},
+  {id:'shadow-queen',label:'戴冠的影子',mount:lazy('shadow','mountShadowQueen'),after:['shadow-key'],waiting:'這塊木雕要等第一塊的影子對好，才會被擺到燈前。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).

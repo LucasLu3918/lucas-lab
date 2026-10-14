@@ -10,6 +10,7 @@ import {STAGES as PRISM,solutions as prismSolutions,signature as prismSignature,
 import * as apo from '../games/blood-mirror/puzzles/apothecary.js';
 import * as gal from '../games/blood-mirror/puzzles/gallery.js';
 import * as box from '../games/blood-mirror/puzzles/box.js';
+import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -559,8 +560,8 @@ test('E5 level data: lines match the draft, the full ending needs all seven shar
  assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
  // The thread face shows pictures that already ship with the scenes.
  for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
- // The levels are listed in order and E5 comes last, after the four that give it its keys.
- assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5']);
+ // The levels are listed in order: E5 comes after the four that give it its keys, and the breather E-X is appended after it.
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex']);
 });
 
 test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
@@ -570,5 +571,62 @@ test('finishing E5 faces is saved face by face, the box counts as done once all 
  assert.deepEqual([...save.puzzles].sort(),['box','box.box-light','box.box-time']);
  resetPuzzles();
  assert.equal(isStageComplete('box','box-time'),true);
+ setPuzzleCompletions([]);
+});
+
+test('E-X key: one stretch of yaw fits, the mirrored view and the starting pose do not',()=>{
+ const stage=shadow.STAGES.key,found=shadow.solveAll(stage);
+ assert.ok(found.length>=3&&found.length<=12,'cluster size '+found.length);
+ assert.ok(found.every(pose=>pose.pitch===0&&Math.abs(pose.yaw-stage.solution.yaw)<=25),JSON.stringify(found));
+ assert.ok(found.some(pose=>pose.yaw===stage.solution.yaw));
+ assert.equal(shadow.matches(stage,(stage.solution.yaw+180)%360,0),false,'the back of the key is a mirror image');
+ assert.equal(shadow.matches(stage,stage.start.yaw,stage.start.pitch),false);
+});
+
+test('E-X carving: only one small cluster of poses fits, and neither dial alone solves it',()=>{
+ const stage=shadow.STAGES.queen,found=shadow.solveAll(stage);
+ assert.ok(found.length>=1&&found.length<=9,'cluster size '+found.length);
+ for(const pose of found){
+  assert.ok(Math.abs(pose.yaw-stage.solution.yaw)<=10&&Math.abs(pose.pitch-stage.solution.pitch)<=10,'a second answer: '+JSON.stringify(pose));
+ }
+ assert.ok(found.some(pose=>pose.yaw===stage.solution.yaw&&pose.pitch===stage.solution.pitch));
+ // The opposite view (yaw + 180, pitch negated) casts the mirror image of the picture, which must not fit.
+ assert.equal(shadow.matches(stage,(stage.solution.yaw+180)%360,-stage.solution.pitch),false);
+ assert.equal(shadow.matches(stage,stage.start.yaw,stage.start.pitch),false);
+ for(let yaw=0;yaw<360;yaw+=shadow.STEP)assert.equal(shadow.matches(stage,yaw,0),false,'pitch 0 solves at yaw '+yaw);
+ for(let pitch=shadow.PITCH_RANGE[0];pitch<=shadow.PITCH_RANGE[1];pitch+=shadow.STEP)assert.equal(shadow.matches(stage,stage.start.yaw,pitch),false,'start yaw solves at pitch '+pitch);
+});
+
+test('E-X hints follow the board and the last tier names the angles',()=>{
+ for(const [name,stage] of Object.entries(shadow.STAGES)){
+  assert.equal(shadow.hintStep(name,stage.solution.yaw,stage.solution.pitch),null);
+  assert.equal(shadow.hintStep(name,stage.start.yaw,stage.start.pitch),'far');
+  for(const list of Object.values(shadow.HINTS[name])){
+   assert.equal(list.length,3);
+   assert.ok(list[2].includes(String(stage.solution.yaw)),name);
+  }
+ }
+ assert.ok(shadow.HINTS.queen.far[2].includes(String(shadow.STAGES.queen.solution.pitch)));
+});
+
+test('E-X level data: lines match the draft, the stages are registered, banners ship, no animation loop',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const ex=abyss.levels[5];
+ assert.equal(ex.id,'ex');assert.equal(ex.puzzle,'shadow');assert.equal(ex.number,'E-X');
+ for(const {speaker,text} of [...ex.scene,...ex.unlock])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.deepEqual(ex.stages,puzzles.shadow.stages.map(stage=>stage.id));
+ assert.equal(puzzles.shadow.optional,true);
+ assert.deepEqual(puzzles.shadow.stages[1].after,['shadow-key']);
+ assert.ok(ex.enter.length>0);
+ for(const id of ex.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/shadow.js',import.meta.url),'utf8');
+ assert.ok(!/requestAnimationFrame/.test(src.replace(/\/\/.*$/gm,'')));
+ assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+ // Finishing stages is saved with the usual keys, and a new journey keeps them.
+ setPuzzleCompletions(['shadow.shadow-key']);
+ assert.deepEqual(completedPuzzles(),['shadow.shadow-key']);
+ resetPuzzles();
+ assert.equal(isStageComplete('shadow','shadow-key'),true);
  setPuzzleCompletions([]);
 });

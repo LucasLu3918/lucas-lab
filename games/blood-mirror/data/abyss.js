@@ -143,6 +143,24 @@ export const abyss={
    },
    enter:'走近匣子',
    reward:{name:'王后的字條',mark:'露西',caption:'匣內字條上的名字'}
+  },
+  {
+   id:'ex',
+   puzzle:'shadow',
+   number:'E-X',
+   title:'影戲小屋',
+   subtitle:'燈前的木雕',
+   stages:['shadow-key','shadow-queen'],
+   thumb:'shadow-key',
+   scene:[
+    {text:'獵人的小屋很安靜。燈前的木雕轉了一圈，牆上的影子跟著變了形。'},
+    {speaker:'mirror',text:'「影子也是一筆帳。讓它回到它原本的樣子。」'}
+   ],
+   unlock:[
+    {text:'牆上的剪影合上了。那是一個戴著細冠的女人，背對著妳，沒有回頭。'}
+   ],
+   enter:'走進小屋',
+   reward:{name:'剪影木片',mark:'影',caption:'牆上剪影的記號'}
   }
  ]
 };
