@@ -8,8 +8,8 @@
  --stage-text:#eee5d6;
  --stage-muted:#c9bfb1;
  --stage-panel:rgba(20,17,20,.94);
- --stage-radius:10px;
- --stage-radius-sm:6px;
+ --stage-radius:4px;
+ --stage-radius-sm:3px;
  --stage-frost:#9fb6c8;
  --serif:'Noto Serif TC','Songti TC',Georgia,serif;
 }
@@ -71,7 +71,7 @@ body.reduce-motion .hotspot::before{animation:none}
 .hud-kicker{display:block;font:11px/1 Georgia,serif;letter-spacing:3px;color:var(--stage-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hud-chapter h1{margin:5px 0 0;font:600 18px/1.25 var(--serif);letter-spacing:2px;color:var(--stage-text);overflow-wrap:anywhere}
 .hud-subtitle{display:none;margin:2px 0 0;font-size:12px;color:var(--stage-muted);letter-spacing:1px}
-.hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;max-width:100%;padding:6px 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:13px;line-height:1.5;color:var(--stage-text)}
+.hud-objective{margin:0;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;max-width:100%;padding:6px 12px;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.78);font-size:13px;line-height:1.5;color:var(--stage-text)}
 .hud-label{color:var(--stage-gold);letter-spacing:2px;font-size:11px}
 .hud-meta{margin:0;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--stage-muted);padding-left:4px}
 .hud-meta progress{display:none;width:88px;height:6px;accent-color:var(--stage-gold)}
@@ -87,12 +87,12 @@ body.reduce-motion .hotspot::before{animation:none}
 .stage-subbar{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .room-tabs{flex:1 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border:0;padding:1px 0 2px;-webkit-overflow-scrolling:touch}
 .room-tabs::-webkit-scrollbar{display:none}
-.room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
+.room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
 .room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
 .room-tabs button:disabled{opacity:.4;cursor:default}
 /* Act picker below 1024px: seven act tabs need about 830px, so a narrower strip would clip the last acts with no scrollbar.
    The select lists all seven acts in one 44px control. 16px text stops iOS zooming in. */
-.room-select{display:none;flex:1 1 auto;min-width:0;min-height:44px;padding:0 34px 0 14px;border:1px solid var(--stage-gold-hi);border-radius:999px;background:rgba(16,15,16,.82) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23e2cc9b' stroke-width='1.6'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E") no-repeat right 12px center/12px 12px;color:var(--stage-gold-hi);font:inherit;font-size:16px;letter-spacing:0;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
+.room-select{display:none;flex:1 1 auto;min-width:0;min-height:44px;padding:0 34px 0 14px;border:1px solid var(--stage-gold-hi);border-radius:4px;background:rgba(16,15,16,.82) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23e2cc9b' stroke-width='1.6'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E") no-repeat right 12px center/12px 12px;color:var(--stage-gold-hi);font:inherit;font-size:16px;letter-spacing:0;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
 .room-select option{background:#15121a;color:var(--stage-text)}
 .room-select option:disabled{color:#7a7065}
 @media (max-width:1023px){
@@ -106,7 +106,7 @@ body.reduce-motion .hotspot::before{animation:none}
  .room-tabs button{min-height:44px}
 }
 .scene-clues{position:relative;flex:0 0 auto;margin:0;padding:0;border:0;background:none;font-size:13px}
-.scene-clues summary{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;list-style:none;cursor:pointer;color:var(--stage-gold-hi);white-space:nowrap;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.82);font-size:12px;letter-spacing:1px}
+.scene-clues summary{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;list-style:none;cursor:pointer;color:var(--stage-gold-hi);white-space:nowrap;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.82);font-size:12px;letter-spacing:1px}
 .scene-clues summary::-webkit-details-marker{display:none}
 .scene-clues summary .summary-chevron{display:grid;place-items:center;transition:transform .2s}
 .scene-clues summary .summary-chevron svg{width:14px;height:14px}
@@ -195,7 +195,7 @@ body.mode-story .journey-guide{display:grid}
  .hud{grid-template-columns:minmax(0,1fr) minmax(0,auto) minmax(0,1fr);grid-template-areas:"chapter center tools";gap:16px}
  .hud-tools{flex-wrap:nowrap}
  .hud-center{align-items:center;max-width:min(56ch,40vw)}
- .hud-objective{border-radius:999px;padding:6px 16px}
+ .hud-objective{border-radius:4px;padding:6px 16px}
  .hud-meta{justify-content:center;padding-left:0}
  .hud-meta progress,.hud-meta time{display:inline-block}
  .hud-tools{gap:8px}
@@ -229,7 +229,7 @@ body.mode-story .journey-guide{display:grid}
  .hud-kicker,.hud-subtitle{display:none}
  .hud-chapter h1{margin:0;font-size:16px;letter-spacing:2px}
  .hud-center{align-items:center;flex-direction:row;justify-content:center;gap:10px}
- .hud-objective{display:block;border-radius:999px;padding:4px 12px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hud-objective{display:block;border-radius:4px;padding:4px 12px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .hud-meta{flex:0 0 auto}
  .hud .tool-button{min-width:40px;min-height:40px}
  .room-tabs button{min-height:32px}
@@ -296,7 +296,7 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 /* First-visit pan hint on phones; it fades once the player starts panning. */
 .pause-menu{display:grid;gap:10px}
 @media (max-width:720px){
- .scene::after{content:'⟷ 左右滑動環顧房間';position:absolute;left:50%;top:44%;transform:translateX(-50%);z-index:3;padding:4px 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.72);color:var(--stage-gold-hi);font-size:12px;pointer-events:none;white-space:nowrap;animation:stage-pan-hint 1s 7s forwards}
+ .scene::after{content:'⟷ 左右滑動環顧房間';position:absolute;left:50%;top:44%;transform:translateX(-50%);z-index:3;padding:4px 12px;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.72);color:var(--stage-gold-hi);font-size:12px;pointer-events:none;white-space:nowrap;animation:stage-pan-hint 1s 7s forwards}
  .scene.panned::after{display:none}
 }
 @keyframes stage-pan-hint{to{opacity:0}}
@@ -304,10 +304,13 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 /* Views: arrows on both sides of the scene (the arrow keys switch views too) */
 .view-arrow{position:absolute;top:46%;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid var(--stage-line);background:rgba(16,15,16,.55);color:var(--stage-gold-hi);display:grid;place-items:center;padding:0;line-height:0}
 .view-arrow>span{display:grid;place-items:center;width:100%;height:100%}
-.view-arrow svg{width:22px;height:22px;display:block}
+.view-arrow svg{width:24px;height:24px;display:block;transition:transform .25s}
+.view-arrow{box-shadow:inset 0 0 0 3px rgba(16,15,16,.55),inset 0 0 0 4px rgba(226,204,155,.26),0 2px 14px rgba(0,0,0,.45)}
+#view-prev:hover svg,#view-prev:focus-visible svg{transform:translateX(-2px)}#view-next:hover svg,#view-next:focus-visible svg{transform:translateX(2px)}
+@media (prefers-reduced-motion:reduce){.view-arrow svg{transition:none}#view-prev:hover svg,#view-next:hover svg{transform:none}}
 .view-arrow[hidden]{display:none}
 #view-prev{left:8px}#view-next{right:8px}
-.view-arrow:hover,.view-arrow:focus-visible{background:rgba(16,15,16,.85);border-color:var(--stage-gold-hi)}
+.view-arrow:hover,.view-arrow:focus-visible{background:rgba(16,15,16,.85);border-color:var(--stage-gold-hi);box-shadow:inset 0 0 0 3px rgba(16,15,16,.85),inset 0 0 0 4px rgba(226,204,155,.5),0 0 18px rgba(226,204,155,.22)}
 .clue-view{font-style:normal;color:var(--stage-muted);font-size:11px}
 
 /* One icon family (icons.js): sizes are set here so every glyph in the play route shares a grid and line weight. */
@@ -328,7 +331,7 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .success-gem{display:grid;place-items:center}
 
 /* Title screen: the secondary action matches the primary one in height and shape. */
-.hero-buttons .text-button{min-height:54px;padding:0 24px;border:1px solid var(--line);border-radius:6px;background:transparent}
+.hero-buttons .text-button{min-height:54px;padding:0 24px;border:1px solid var(--line);border-radius:4px;background:transparent}
 .hero-buttons .text-button:hover:not(:disabled){border-color:var(--gold);background:rgba(195,172,128,.08)}
 .hero-buttons button{transition:none}
 
@@ -352,7 +355,7 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 
 /* Gallery: every card shows its picture in the same 4:3 frame; the preview dialog still shows the whole image. */
 .artwork-card img{object-fit:cover;object-position:50% 22%}
-.gallery-filters button{border-radius:999px}
+.gallery-filters button{border-radius:4px}
 .gallery-listening{padding:4px 18px;border-radius:var(--stage-radius)}
 .gallery-listening[open]{padding-bottom:18px}
 .gallery-listening summary{display:flex;align-items:center}
@@ -411,7 +414,7 @@ nav button{font-size:13px}
 .brand-mark{width:44px;height:44px;filter:drop-shadow(0 0 12px rgba(195,172,128,.16))}
 .brand small{font-size:10px;letter-spacing:3px;color:#a8946f;margin-top:2px}
 .header-actions{gap:10px}
-.sound-button,.header-actions .icon-button{height:40px;min-height:40px;border:1px solid var(--line);border-radius:999px;color:var(--gold);transition:border-color .2s,background .2s,color .2s}
+.sound-button,.header-actions .icon-button{height:40px;min-height:40px;border:1px solid var(--line);border-radius:4px;color:var(--gold);transition:border-color .2s,background .2s,color .2s}
 .sound-button{display:inline-flex;align-items:center;gap:8px;padding:0 16px 0 13px;font-size:12px;line-height:1;letter-spacing:1.5px;color:var(--muted)}
 .header-actions .icon-button{width:40px;padding:0}
 #sound-icon{display:grid;place-items:center;flex:none;width:18px;height:18px;color:var(--gold)}
@@ -495,7 +498,7 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
 .large-text .dialogue-toggle,.large-text .dialogue-count,.large-text .clue-group-title span,.large-text .clue-view{font-size:14px}
 .large-text .dialogue-foot .text-button,.large-text .dialogue-foot .secondary-button,.large-text .dialogue-actions .primary-button,.large-text .dialogue-actions .secondary-button{font-size:15px}
 /* Block flow, not the phone's flex row: the label runs on into the sentence instead of taking a line of its own. */
-.large-text .hud-objective{display:block;font-size:14px;line-height:1.5;white-space:normal;border-radius:14px}
+.large-text .hud-objective{display:block;font-size:14px;line-height:1.5;white-space:normal;border-radius:4px}
 .large-text .hud-objective .hud-label{display:inline;margin-right:.5em}
 .large-text .hud-meta,.large-text .hud-kicker,.large-text .hud-label,.large-text .scene-clues summary{font-size:14px}
 .large-text .room-tabs button span,.large-text .tray .inventory button span{font-size:13px}
@@ -510,6 +513,64 @@ body.gamepad-nav .hotspot:focus svg,body.gamepad-nav .hotspot:focus span{opacity
 /* Phone frames are wider than the screen: unseen hotspots past an edge are counted in a chip row at the end of the
    top progress line (main.js). The row sits above the scene, so no chip ever covers a hotspot. */
 .offscreen-chips{display:flex;gap:6px;margin-left:auto;flex:0 0 auto}
-.offscreen-hint{min-height:44px;padding:0 12px;border:1px solid var(--stage-line);border-radius:999px;background:rgba(16,15,16,.78);color:var(--stage-gold-hi);font-size:12px;letter-spacing:.5px;white-space:nowrap}
+.offscreen-hint{min-height:44px;padding:0 12px;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.78);color:var(--stage-gold-hi);font-size:12px;letter-spacing:.5px;white-space:nowrap}
 .offscreen-hint[hidden]{display:none}
 .offscreen-hint:hover,.offscreen-hint:focus-visible{background:rgba(16,15,16,.92);border-color:var(--stage-gold-hi)}
+
+/* One frame for every panel: the modal's gold corner brackets (see #modal .modal-shell::after) drawn as background layers,
+   so no extra elements or positioning are needed. Radii are two tiers: 4px for every rectangle, round only for icon buttons. */
+.dialogue,.tray,.journey-guide,.scene-clues .clue-panel,.hud-objective{
+ --br:rgba(217,191,138,.62);
+ background-image:
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br));
+ background-size:12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px;
+ background-position:left 4px top 4px,left 4px top 4px,right 4px top 4px,right 4px top 4px,left 4px bottom 4px,left 4px bottom 4px,right 4px bottom 4px,right 4px bottom 4px;
+ background-repeat:no-repeat}
+.hud-objective{background-image:none}
+
+/* Divider: line, diamond, line (same as the modal heading). */
+.divider{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--stage-gold)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--stage-line))}
+.divider::after{background:linear-gradient(270deg,transparent,var(--stage-line))}
+.divider i{width:6px;height:6px;transform:rotate(45deg);background:currentColor}
+
+/* Chapter cards and abyss level rows wear the same brackets; the card's picture sits under them. */
+.chapter-card::before{content:'';position:absolute;inset:6px;z-index:1;pointer-events:none;--br:rgba(217,191,138,.55);
+ background:
+  linear-gradient(var(--br),var(--br)) 0 0/12px 1px,linear-gradient(var(--br),var(--br)) 0 0/1px 12px,
+  linear-gradient(var(--br),var(--br)) 100% 0/12px 1px,linear-gradient(var(--br),var(--br)) 100% 0/1px 12px,
+  linear-gradient(var(--br),var(--br)) 0 100%/12px 1px,linear-gradient(var(--br),var(--br)) 0 100%/1px 12px,
+  linear-gradient(var(--br),var(--br)) 100% 100%/12px 1px,linear-gradient(var(--br),var(--br)) 100% 100%/1px 12px;
+ background-repeat:no-repeat;transition:opacity .3s}
+.chapter-card.locked::before{opacity:.3}
+.chapter-card{border-radius:4px}
+.abyss-level{border-radius:4px}
+
+/* Generated art (assets/ui, local Z-Image Turbo): the scene's view arrows are a gilt dart in a squared frame; the glyph stays in the markup for assistive tech and as the fallback. */
+.view-arrow{width:84px;border-radius:4px}
+.view-arrow svg{opacity:0;position:absolute}
+.view-arrow::after{content:'';position:absolute;inset:0;background:url(../assets/ui/arrow-gilt.webp) center/64px auto no-repeat;mix-blend-mode:screen;transition:transform .25s,filter .25s;pointer-events:none}
+#view-prev::after{transform:scaleX(-1)}
+#view-prev:hover::after,#view-prev:focus-visible::after{transform:scaleX(-1) translateX(2px);filter:brightness(1.25)}
+#view-next:hover::after,#view-next:focus-visible::after{transform:translateX(2px);filter:brightness(1.25)}
+@media (prefers-reduced-motion:reduce){.view-arrow::after{transition:none}#view-prev:hover::after,#view-prev:focus-visible::after{transform:scaleX(-1)}#view-next:hover::after,#view-next:focus-visible::after{transform:none}}
+@media (max-width:600px){.view-arrow{width:56px}.view-arrow::after{background-size:44px auto}}
+
+/* Velvet grain under every framed panel; the tint keeps it barely visible. */
+.dialogue,.tray,.journey-guide,.scene-clues .clue-panel{
+ background-image:
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  linear-gradient(var(--br),var(--br)),linear-gradient(var(--br),var(--br)),
+  url(../assets/ui/velvet.webp);
+ background-size:12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px,192px 192px;
+ background-position:left 4px top 4px,left 4px top 4px,right 4px top 4px,right 4px top 4px,left 4px bottom 4px,left 4px bottom 4px,right 4px bottom 4px,right 4px bottom 4px,0 0;
+ background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat;
+ background-blend-mode:normal,normal,normal,normal,normal,normal,normal,normal,soft-light}
+
+/* Sealed chapters carry a wax seal instead of just a lock icon. */
+.chapter-card.locked{background-image:url(../assets/ui/seal-wax.webp);background-repeat:no-repeat;background-position:50% 38%;background-size:88px 88px}

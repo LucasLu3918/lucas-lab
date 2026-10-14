@@ -162,16 +162,16 @@ footer>span:nth-child(2){color:#b9ada2}
   radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) 4px calc(100% - 4px)/9px 9px no-repeat,
   radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) calc(100% - 4px) calc(100% - 4px)/9px 9px no-repeat,
   radial-gradient(ellipse at 50% 0,#2b2117,#0f0a08 78%);
- border:2px solid var(--brass);border-radius:8px;
+ border:2px solid var(--brass);border-radius:4px;
  box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 0 3px #c9ab6a4d,inset 0 0 26px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a;
 }
 #modal :is(.rune-board,.memory-board,.heart-ring){padding:14px;box-sizing:border-box}
-#modal .pipes-board{border:2px solid var(--brass);border-radius:8px;box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+#modal .pipes-board{border:2px solid var(--brass);border-radius:4px;box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 #modal .ledger-figure{border:2px solid var(--brass);border-radius:3px;box-shadow:0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 
 /* Raised keys: rune keys, seal choices and the maze pad. */
 #modal :is(.rune-key,.seal-choice,.maze-key){
- background:linear-gradient(#41331f,#1c150d);border:1px solid var(--brass-mid);border-radius:6px;
+ background:linear-gradient(#41331f,#1c150d);border:1px solid var(--brass-mid);border-radius:4px;
  color:var(--brass-hi);text-shadow:0 1px 0 #000a;box-shadow:var(--bevel);
  transition:transform .06s,box-shadow .06s,background .12s;
 }
@@ -221,7 +221,7 @@ footer>span:nth-child(2){color:#b9ada2}
 
 /* Memory cards: engraved brass backs, wine-dark faces. */
 #modal .memory-card{
- background:linear-gradient(155deg,#3d2f1c,#130e0a);border:2px solid var(--brass-mid);border-radius:6px;color:var(--brass);
+ background:linear-gradient(155deg,#3d2f1c,#130e0a);border:2px solid var(--brass-mid);border-radius:4px;color:var(--brass);
  box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c9ab6a40,var(--bevel);text-shadow:0 1px 0 #000a;
 }
 #modal .memory-card.turned{background:linear-gradient(155deg,#4e2a37,#251119);border-color:var(--brass-hi);color:#f7dab0}
@@ -230,7 +230,7 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .mask-row{padding:2px 0}
 #modal .mask-slot{width:28px;height:28px;line-height:26px;border:1px solid var(--brass-mid);border-radius:50%;background:radial-gradient(circle at 35% 28%,#4a3a22,#1a130b);color:var(--brass-hi);box-shadow:var(--bevel)}
 #modal .mask-row select{
- appearance:none;-webkit-appearance:none;min-height:44px;padding:0 38px 0 12px;border:1px solid var(--brass-mid);border-radius:6px;
+ appearance:none;-webkit-appearance:none;min-height:44px;padding:0 38px 0 12px;border:1px solid var(--brass-mid);border-radius:4px;
  background:
   linear-gradient(45deg,transparent 50%,var(--brass) 50%) calc(100% - 20px) 50%/7px 7px no-repeat,
   linear-gradient(135deg,var(--brass) 50%,transparent 50%) calc(100% - 14px) 50%/7px 7px no-repeat,
@@ -239,13 +239,13 @@ footer>span:nth-child(2){color:#b9ada2}
 }
 #modal .mask-row select:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
 #modal .mask-row select option{background:#17110c;color:#f0dca8}
-#modal .mask-clues{counter-reset:clue;list-style:none;padding:12px 14px;border:1px solid #c9ab6a40;border-radius:8px;background:#0e0a0788}
+#modal .mask-clues{counter-reset:clue;list-style:none;padding:12px 14px;border:1px solid #c9ab6a40;border-radius:4px;background:#0e0a0788}
 #modal .mask-clues li{counter-increment:clue;position:relative;padding-left:26px;margin:2px 0}
 #modal .mask-clues li::before{content:counter(clue);position:absolute;left:0;top:.45em;width:18px;height:18px;line-height:17px;text-align:center;font:11px Georgia,serif;color:var(--brass-ink);background:var(--brass);border-radius:50%}
-#modal .rune-carving{border:1px solid var(--brass-mid);border-radius:6px;background:linear-gradient(#1c150d,#110c08);box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c9ab6a33;color:var(--brass-hi);letter-spacing:3px}
+#modal .rune-carving{border:1px solid var(--brass-mid);border-radius:4px;background:linear-gradient(#1c150d,#110c08);box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c9ab6a33;color:var(--brass-hi);letter-spacing:3px}
 
 /* Code input: engraved dial. */
-#modal .code-input{background:linear-gradient(#0b0806,#17110c);border:2px solid var(--brass-mid);border-radius:6px;color:var(--brass-hi);box-shadow:inset 0 3px 10px #000c,0 1px 0 #f0dca826;text-shadow:0 0 10px #c9ab6a66}
+#modal .code-input{background:linear-gradient(#0b0806,#17110c);border:2px solid var(--brass-mid);border-radius:4px;color:var(--brass-hi);box-shadow:inset 0 3px 10px #000c,0 1px 0 #f0dca826;text-shadow:0 0 10px #c9ab6a66}
 #modal .code-input:focus{border-color:var(--brass-hi);outline:none;box-shadow:inset 0 3px 10px #000c,0 0 0 3px #c9ab6a40}
 
 /* Buttons inside dialogs. */
@@ -261,7 +261,7 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .challenge-feedback{color:var(--brass-hi);padding-left:12px;border-left:2px solid var(--brass-mid);margin-top:6px}
 
 /* Hint panel: a lantern drawer rather than a bare summary line. */
-#modal .stage-hints{margin-top:18px;padding:0 14px 12px;border:1px solid #c9ab6a40;border-radius:8px;background:linear-gradient(#17110c99,#0e0a0799)}
+#modal .stage-hints{margin-top:18px;padding:0 14px 12px;border:1px solid #c9ab6a40;border-radius:4px;background:linear-gradient(#17110c99,#0e0a0799)}
 #modal .stage-hints summary{color:var(--brass-hi);letter-spacing:2px;list-style:none}
 #modal .stage-hints summary::-webkit-details-marker{display:none}
 #modal .stage-hints summary::before{content:'✧';margin-right:8px;color:var(--brass)}
@@ -274,7 +274,7 @@ footer>span:nth-child(2){color:#b9ada2}
 /* Close-up picture at the head of each mechanism (see puzzles/index.js) and the scene zoom on clue dialogs. */
 #modal .stage-art{display:block;width:calc(100% + 64px);max-width:none;height:176px;margin:-24px -32px 16px;object-fit:cover;object-position:50% 45%;
  -webkit-mask-image:linear-gradient(#000 58%,transparent);mask-image:linear-gradient(#000 58%,transparent);border-bottom:0}
-#modal .spot-zoom{position:relative;width:100%;aspect-ratio:16/6.5;margin:0 0 18px;border:2px solid var(--brass);border-radius:8px;background-repeat:no-repeat;background-color:#0e0a07;
+#modal .spot-zoom{position:relative;width:100%;aspect-ratio:16/6.5;margin:0 0 18px;border:2px solid var(--brass);border-radius:4px;background-repeat:no-repeat;background-color:#0e0a07;
  box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 36px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 12px 30px #000a;overflow:hidden}
 #modal .spot-zoom::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 45%,#0b0806cc);pointer-events:none}
 #modal .spot-zoom .ui-icon{position:absolute;left:10px;bottom:10px;z-index:1;width:36px;height:36px;padding:7px;box-sizing:border-box;border:1px solid var(--brass);border-radius:50%;background:#120d09e6;color:var(--brass-hi)}
@@ -288,7 +288,7 @@ footer>span:nth-child(2){color:#b9ada2}
 }
 
 /* Music box: pins stand on a brass cylinder; a raised pin lifts and glows. */
-#modal .musicbox-pins{align-items:flex-end;gap:16px;width:fit-content;max-width:100%;margin:18px auto 14px;padding:22px 26px 26px;border:2px solid var(--brass);border-radius:14px;
+#modal .musicbox-pins{align-items:flex-end;gap:16px;width:fit-content;max-width:100%;margin:18px auto 14px;padding:22px 26px 26px;border:2px solid var(--brass);border-radius:4px;
  background:linear-gradient(#0f0a08 0,#2b2117 14%,#0f0a08 100%);
  box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 0 3px #c9ab6a4d,inset 0 0 24px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 #modal .music-pin{position:relative;width:52px;height:80px;border:1px solid var(--brass);border-radius:26px 26px 8px 8px;color:var(--brass-hi);
@@ -328,7 +328,7 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .belfry-status{min-height:46px;margin:0 0 10px;padding:6px 12px;border-left:2px solid var(--brass-mid);font-size:13px;line-height:1.8;color:var(--brass-hi)}
 #modal .belfry-status[data-tone=ok]{border-left-color:#7fd08a;color:#bfeac5}
 #modal .belfry-status[data-tone=bad]{border-left-color:#d8665f;color:#f1b3ad}
-#modal .belfry-board{border:2px solid var(--brass);border-radius:8px;background:radial-gradient(circle at 40% 40%,#2a1a24,#0b0710);box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
+#modal .belfry-board{border:2px solid var(--brass);border-radius:4px;background:radial-gradient(circle at 40% 40%,#2a1a24,#0b0710);box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 #modal .belfry-svg{display:block;width:100%;height:auto;touch-action:manipulation}
 #modal .belfry-gear .gear-body{fill:#e0b84f;stroke:#7a5a14;stroke-width:.35}
 #modal .belfry-gear.layer1 .gear-body{fill:#d9825b;fill-opacity:.93;stroke:#7a3418}
@@ -357,7 +357,7 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .belfry-layer[aria-pressed=true],#modal #bf-ruler[aria-pressed=true]{background:#4a3414;border-color:var(--brass);color:var(--brass-hi)}
 #modal .belfry-note{font-size:12px;color:#9fb8a6;font-variant-numeric:tabular-nums}
 #modal .belfry-tray{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-#modal .belfry-gear-button{width:76px;min-height:92px;display:flex;flex-direction:column;align-items:center;padding:4px;border:2px solid #3a2a14;border-radius:8px;background:#150d1a;color:#e9dcc3;font-size:12px}
+#modal .belfry-gear-button{width:76px;min-height:92px;display:flex;flex-direction:column;align-items:center;padding:4px;border:2px solid #3a2a14;border-radius:4px;background:#150d1a;color:#e9dcc3;font-size:12px}
 #modal .belfry-gear-button[aria-pressed=true]{border-color:var(--brass);background:#2d1d10}
 #modal .belfry-gear-button:disabled{opacity:.35}
 #modal .belfry-gear-button svg{width:60px;height:60px}
@@ -407,7 +407,7 @@ body.reduce-motion #modal .wheel-glyph{transition:none}
 /* E3 apothecary (puzzles/apothecary.js): testimony cards read through a hand mirror, one-way vessels, colour mixing. */
 #modal .apo-note{font-size:12px;color:#cdbf9f}
 #modal .apo-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0}
-#modal .apo-card{display:flex;flex-direction:column;gap:4px;min-height:170px;padding:8px;border:2px solid #3a2a14;border-radius:10px;background:#150d1a;color:#e9dcc3;text-align:left}
+#modal .apo-card{display:flex;flex-direction:column;gap:4px;min-height:170px;padding:8px;border:2px solid #3a2a14;border-radius:4px;background:#150d1a;color:#e9dcc3;text-align:left}
 #modal .apo-card svg{width:34px;height:34px}
 #modal .apo-card-line{font-size:12px;font-style:italic;color:#cdbf9f}
 #modal .apo-say{font-size:13px;line-height:1.5}
@@ -422,7 +422,7 @@ body.reduce-motion #modal .wheel-glyph{transition:none}
 #modal .apo-tube.off{opacity:.3;cursor:default}
 #modal .apo-tube:focus-visible path:first-of-type{stroke:#fff}
 #modal .apo-mixer{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:8px 0}
-#modal .apo-swatch{position:relative;height:96px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border:2px solid #6b5a3a;border-radius:10px;font-size:12px;color:#fff}
+#modal .apo-swatch{position:relative;height:96px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border:2px solid #6b5a3a;border-radius:4px;font-size:12px;color:#fff}
 #modal .apo-swatch span{position:relative;z-index:1;margin-bottom:4px;padding:0 6px;border-radius:4px;background:#000a}
 #modal .apo-swatch.glass::after{content:"";position:absolute;inset:0;background:rgba(40,160,90,.42)}
 #modal .apo-swatch.lit{box-shadow:0 0 18px 4px #fff8}
@@ -436,7 +436,7 @@ body.reduce-motion #modal .wheel-glyph{transition:none}
 
 /* E4 gallery (puzzles/gallery.js): four panels on a 744x548 board scaled to the modal; one panel can fill the board, the rest wait as tiles. */
 #modal .gal-caption{margin:6px 0;min-height:4.6em;font-size:13px;line-height:1.7;color:#f3e6bd}
-#modal .gal-stage{position:relative;width:100%;max-width:744px;margin:6px auto;overflow:hidden;border-radius:6px;background:#0b0a0f}
+#modal .gal-stage{position:relative;width:100%;max-width:744px;margin:6px auto;overflow:hidden;border-radius:4px;background:#0b0a0f}
 #modal .gal-stage[hidden]{display:none}
 #modal .gal-board{position:absolute;left:0;top:0;width:744px;height:548px;transform-origin:0 0}
 #modal .gal-guide{position:absolute;left:0;top:0;width:744px;height:548px;overflow:visible;pointer-events:none;z-index:50}
@@ -451,7 +451,7 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .gal-ring.on{border-style:solid;border-color:#e8c46a}
 #modal .gal-notch{position:absolute;width:30px;height:20px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 20'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff3c0'/%3E%3Cstop offset='.55' stop-color='%23e8c46a'/%3E%3Cstop offset='1' stop-color='%23a8761f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='6' y='8' width='16' height='4' rx='2' fill='url(%23g)' stroke='%233a2406' stroke-width='.8'/%3E%3Ccircle cx='5' cy='10' r='4.6' fill='url(%23g)' stroke='%233a2406' stroke-width='.8'/%3E%3Ccircle cx='5' cy='10' r='1.7' fill='%233a2406'/%3E%3Ccircle cx='5' cy='10' r='.6' fill='%23ffe9a0'/%3E%3Ccircle cx='22.5' cy='10' r='2.6' fill='url(%23g)' stroke='%233a2406' stroke-width='.8'/%3E%3Cpath d='M25.4 5.2L29.4 10l-4 4.8z' fill='%23ffd978' stroke='%233a2406' stroke-width='.7' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 0 3px #000c)}
 #modal .gal-notch[data-side="L"]{transform:scaleX(-1)}
-#modal .gal-tag{position:absolute;left:6px;top:4px;padding:1px 8px;border-radius:10px;background:#000b;font-size:12px;color:#fff}
+#modal .gal-tag{position:absolute;left:6px;top:4px;padding:1px 8px;border-radius:4px;background:#000b;font-size:12px;color:#fff}
 #modal .gal-tools{display:flex;flex-direction:column;gap:4px;margin:6px 0}
 #modal .gal-tools[hidden]{display:none}
 #modal .gal-tools-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
@@ -463,17 +463,17 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .gal-place summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
 #modal .gal-place-body{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
 #modal .gal-place-body label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:#cdbf9f}
-#modal .gal-place-body select{min-height:44px;max-width:100%;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:8px}
+#modal .gal-place-body select{min-height:44px;max-width:100%;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:4px}
 #modal .gal-place-body .secondary-button{width:auto;min-height:44px;margin:0;padding:0 16px}
 #modal .gal-order[hidden]{display:none}
 #modal .gal-threads,#modal .gal-order-note{font-size:13px;line-height:1.7;color:#cdbf9f}
 #modal .gal-slots,#modal .gal-cards{display:flex;gap:6px;margin:8px 0}
-#modal .gal-slot,#modal .gal-card{position:relative;flex:1 1 20%;min-width:56px;aspect-ratio:16/9;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#000;color:#cdbf9f;cursor:pointer}
+#modal .gal-slot,#modal .gal-card{position:relative;flex:1 1 20%;min-width:56px;aspect-ratio:16/9;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#000;color:#cdbf9f;cursor:pointer}
 #modal .gal-slot{border:2px dashed #5a4f68}
 #modal .gal-slot:not(.empty),#modal .gal-card{border:2px solid #8a6a2a}
 #modal .gal-slot.empty{cursor:default}
 #modal .gal-slot img,#modal .gal-card img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
-#modal .gal-slot span,#modal .gal-card span{position:relative;padding:1px 6px;border-radius:10px;background:#000b;font-size:12px;white-space:nowrap;color:#fff}
+#modal .gal-slot span,#modal .gal-card span{position:relative;padding:1px 6px;border-radius:4px;background:#000b;font-size:12px;white-space:nowrap;color:#fff}
 #modal .gal-card.used{opacity:.35}
 #modal .gal-line{display:block;width:100%;max-width:540px;margin:12px auto}
 /* E5 七重魔鏡匣 (puzzles/box.js): the six faces of the box */
@@ -484,7 +484,7 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-line{margin:10px 0;font-size:13px;line-height:2;color:#cdbf9f}
 #modal .box-dim{color:#7d7288}
 #modal .box-readout{flex:1 1 0;min-width:0;text-align:center;font-size:14px;color:var(--brass-hi)}
-#modal .box-chip{display:inline-flex;align-items:center;gap:4px;margin:0 3px;padding:1px 9px;border:1px solid #6b5a3a;border-radius:12px;background:#120b17;font-size:13px;color:#e9dcc3}
+#modal .box-chip{display:inline-flex;align-items:center;gap:4px;margin:0 3px;padding:1px 9px;border:1px solid #6b5a3a;border-radius:4px;background:#120b17;font-size:13px;color:#e9dcc3}
 #modal .box-chip b{font-weight:400}
 #modal .box-dial{display:block;width:min(100%,300px);height:auto;margin:6px auto;touch-action:manipulation}
 #modal .box-dial-rim{fill:#171018;stroke:var(--brass);stroke-width:2}
@@ -497,10 +497,10 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-notch:focus-visible .hit{stroke:#fff;stroke-width:2.5}
 #modal .box-pointer{stroke:var(--brass-hi);stroke-width:3;stroke-linecap:round}
 #modal .box-hub{fill:var(--brass)}
-#modal .box-glass{min-height:56px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;border:1px solid #3a2a14;border-radius:8px;background:linear-gradient(145deg,#0b0710,#171018)}
+#modal .box-glass{min-height:56px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;border:1px solid #3a2a14;border-radius:4px;background:linear-gradient(145deg,#0b0710,#171018)}
 #modal .box-glass.lit{border-color:var(--brass);background:radial-gradient(ellipse at 50% 0,#2a1a2e,#0b0710 80%)}
 #modal .box-glass-title{font-size:12px;color:#b8a07a}
-#modal .box-color{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:64px;min-height:48px;padding:0 12px;border:2px solid currentColor;border-radius:8px;background:#120b17;font:15px var(--serif);cursor:pointer}
+#modal .box-color{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:64px;min-height:48px;padding:0 12px;border:2px solid currentColor;border-radius:4px;background:#120b17;font:15px var(--serif);cursor:pointer}
 #modal .box-color b{font-weight:400;font-size:18px}
 #modal .box-color:hover{background:#241522}
 #modal .c-R{color:#ff7a7a}#modal .c-G{color:#6bff95}#modal .c-B{color:#7fa8ff}#modal .c-Y{color:#ffd966}#modal .c-P{color:#d59bff}
@@ -511,9 +511,9 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-apple.on{border-color:#fff;box-shadow:0 0 14px #e0b84f88}
 #modal .box-apple.tried{opacity:.4}
 #modal .box-holes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
-#modal .box-hole{position:relative;aspect-ratio:16/9;min-height:56px;padding:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border:2px solid #8a6a2a;border-radius:8px;background:#000;cursor:pointer}
+#modal .box-hole{position:relative;aspect-ratio:16/9;min-height:56px;padding:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;border:2px solid #8a6a2a;border-radius:4px;background:#000;cursor:pointer}
 #modal .box-hole img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
-#modal .box-hole span{position:relative;margin-bottom:6px;padding:1px 10px;border-radius:10px;background:#000b;font-size:13px;color:#fff}
+#modal .box-hole span{position:relative;margin-bottom:6px;padding:1px 10px;border-radius:4px;background:#000b;font-size:13px;color:#fff}
 #modal .box-hole.used{opacity:.4;cursor:default}
 #modal .box-shard{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 14px;border:2px solid #8a6a2a;border-radius:6px 18px 6px 18px;background:linear-gradient(135deg,#2a2f3a,#0f1218);color:#dfe8f5;font:14px var(--serif);cursor:pointer}
 #modal .box-shard.on{border-color:#fff;box-shadow:0 0 12px #9ec3ff88}
@@ -522,17 +522,17 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-slot.on{border-style:solid;border-color:var(--brass);color:var(--brass-hi);cursor:default}
 #modal .box-slot.gap{opacity:.55}
 #modal .box-keys{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:0;list-style:none}
-#modal .box-keys li{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #6b5a3a;border-radius:12px;background:#120b17;font-size:13px;color:#e9dcc3}
+#modal .box-keys li{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #6b5a3a;border-radius:4px;background:#120b17;font-size:13px;color:#e9dcc3}
 #modal .box-keys small{color:#b8a07a}
 #modal .box-keys b{font:20px var(--serif);color:var(--brass-hi)}
 #modal .box-table{border-collapse:collapse;table-layout:fixed;width:100%;margin:6px 0 12px;font-size:11px;color:#9a8c70}
 #modal .box-table caption{text-align:left;font-size:12px;color:#b8a07a;padding-bottom:2px}
 #modal .box-table td{padding:1px 0;border:1px solid #3a2a14;text-align:center}
 #modal .box-table td b{display:block;font-size:15px;color:#e9dcc3}
-#modal .box-letter{margin:8px 0;padding:8px 10px;border:1px solid #3a2a14;border-radius:8px;background:#120b17}
+#modal .box-letter{margin:8px 0;padding:8px 10px;border:1px solid #3a2a14;border-radius:4px;background:#120b17}
 #modal .box-pair{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;color:#cdbf9f}
 #modal .box-back b{font-size:18px;color:#fff}
-#modal .box-sym{min-width:1.8em;padding:2px 8px;border:1px solid #6b5a3a;border-radius:8px;text-align:center;font:24px var(--serif);color:#e9dcc3}
+#modal .box-sym{min-width:1.8em;padding:2px 8px;border:1px solid #6b5a3a;border-radius:4px;text-align:center;font:24px var(--serif);color:#e9dcc3}
 #modal .box-sym.out{border-color:var(--brass);color:var(--brass-hi)}
 #modal .box-from{display:block;margin:4px 0 0;font-size:11px;color:#b8a07a}
 #modal .box-count{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
@@ -541,4 +541,4 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-slot small{display:block;font-size:10px;color:#b8a07a}
 #modal .box-slot.gap{flex-direction:column;gap:0}
 #modal .box-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px;color:#cdbf9f}
-#modal .box-pick select{min-height:44px;min-width:76px;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:8px}
+#modal .box-pick select{min-height:44px;min-width:76px;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:4px}
