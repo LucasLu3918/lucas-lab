@@ -38,6 +38,12 @@ export const puzzles={
   {id:'belfry-gears',label:'齒輪列',mount:lazy('gears13','mountGears13')},
   {id:'belfry-pendulum',label:'鐘擺',mount:lazy('pendulum','mountPendulum')},
   {id:'belfry-wheel',label:'星輪',mount:lazy('starwheel','mountStarWheel'),after:['belfry-gears','belfry-pendulum'],waiting:'星輪靠齒輪列和鐘擺一起推動。先讓齒輪列咬合、讓鐘擺的節奏對上刻痕，它才會轉動。'}
+ ]},
+ // Its three mechanisms share puzzles/prism.js: the filter and the crystal (either first), then the ballroom, which `after` keeps closed until both are done.
+ prism:{id:'prism',title:'稜鏡舞廳',subtitle:'ABYSS · 濾鏡、合光與舞者',optional:true,stages:[
+  {id:'prism-rays',label:'濾鏡',mount:lazy('prism','mountPrismRays')},
+  {id:'prism-blend',label:'合光水晶',mount:lazy('prism','mountPrismBlend')},
+  {id:'prism-ballroom',label:'舞廳',mount:lazy('prism','mountPrismBallroom'),after:['prism-rays','prism-blend'],waiting:'舞池的機關還沒有動力。先讓吊燈的光路和合光水晶運作，舞者才會動起來。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).
@@ -115,7 +121,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
  // Both stages are open: the player decides which one to work on, and can switch at any time.
  function choose(){
   current=null;active=null;
-  render('<p class="challenge-help">這份證據由兩道機關守著，先做哪一道都可以。卡住的時候，可以先換另一道。</p><div class="stage-picks">'
+  render('<p class="challenge-help">這份證據由'+['','一','兩','三'][Math.min(3,entry.stages.length)]+'道機關守著，'+(entry.stages.some(item=>item.after)?'沒有鎖住的可以先做哪一道都行；鎖住的要等前面的完成。':'先做哪一道都可以。卡住的時候，可以先換另一道。')+'</p><div class="stage-picks">'
    +stages.map(s=>{const done=isStageComplete(id,s.id),blocked=s.requires&&!has(s.requires),waiting=waitingOn(s).length>0;return '<button class="choice-option stage-pick" data-stage-pick="'+s.id+'"'+(done?' disabled':'')+'><img class="stage-thumb" src="assets/puzzles/thumbs/'+s.id+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+s.label+'<small>'+(done?'已完成':waiting?'要先完成前面的機關':blocked?'還缺少需要的物品':'尚未完成')+'</small></span></button>';}).join('')
    +'</div>');
   document.querySelectorAll('[data-stage-pick]').forEach(button=>button.onclick=()=>run(stages.find(s=>s.id===button.dataset.stagePick)));

@@ -33,7 +33,28 @@ export const abyss={
     {text:'曲柄轉了十三圈，輸出軸剛好轉了一圈。第十三格的暗格彈開，裡面躺著一枚時辰環。'},
     {text:'環的內側刻著一個小記號：ㄎ。很久以前有人教過妳，這記號只有兩個人看得懂。'}
    ],
+   enter:'走進鐘塔',
    reward:{name:'時辰環',mark:'ㄎ'}
+  },
+  {
+   id:'e2',
+   puzzle:'prism',
+   number:'E2',
+   title:'稜鏡舞廳',
+   subtitle:'停住的冬至舞會',
+   stages:['prism-rays','prism-blend','prism-ballroom'],
+   thumb:'prism-rays',
+   scene:[
+    {text:'冬至舞會停在最華麗的那一刻。賓客凍成雕像，面具下的眼窩嵌著寶石。'},
+    {speaker:'mirror',text:'「吊燈裡有一百零八隻火精靈，一直替這場舞會燒著。」'},
+    {speaker:'mirror',text:'「它們的火只有三種顏色。讓每張面具，看見它該看見的那一種。」'}
+   ],
+   unlock:[
+    {text:'三張面具同時亮起。吊燈裡傳來一陣尖叫。'},
+    {text:'那些火精靈一直都在叫，只是從來沒有人聽得見。一枚稜鏡落進妳的手心，還帶著熱度。'}
+   ],
+   enter:'走進舞廳',
+   reward:{name:'稜鏡',mark:'ㄒ'}
   }
  ]
 };

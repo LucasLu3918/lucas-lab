@@ -157,3 +157,9 @@ node scripts/blood-mirror.browser.cjs
 - `assets/portraits/snow.webp`（640×936，42 KB）：與其他人物立繪同規格的半身油畫立繪。以本機 ComfyUI 的 Flux 2 Klein 4B base 圖像編輯（20 步、CFG 5），用 `assets/snow-white.webp` 主視覺當參考圖維持臉部與服飾（黑長捲髮、灰綠眼、紅唇、金冠與紅寶石耳環、黑絲絨金紅刺繡禮服），挑自 4 張候選的種子 33。PNG 母檔不在版本控制內，見上方「母檔存放」。不是使用者驗收。
 - 使用位置：首頁「旅程回顧」卡的頭像（有存檔時才載入，首次造訪不增加請求）、線索筆記視窗的抬頭、魔鏡藝廊的「角色」分類（`snow-portrait`）。白雪仍是第二人稱的「妳」、不會說話，所以對話框的說話者表沒有她。
 - 試過但放棄的做法：Qwen Image Edit 2511 bf16（約 39 GB）與 2509 fp8（約 19 GB）在 48 GB 的 Mac 上載入後會讓 ComfyUI 後端因記憶體不足當掉；Flux 2 Klein 9B fp8 在 MPS 上不支援 Float8。
+
+## 鏡淵 E2 稜鏡舞廳（三道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/prism-{rays,blend,ballroom}.webp`（960×411，約 15、18、22 KB）與 `assets/puzzles/thumbs/prism-{rays,blend,ballroom}.webp`（224×128，各約 3 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，種子 2401／2402、2501／2502、2601／2602，每個機關 2 張候選目視挑選；選用 rays-2402、blend-2501、ballroom-2602）。提示詞要求無文字、無臉；舞廳的賓客只有背影與空白面具。轉檔與縮圖參數同 E1：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576 再 `-resize 224 128 -q 76`。PNG 母檔在 `draft/lucas-lab/blood-mirror/source-art/puzzles/prism-*.png`，全部候選在 `candidates/prism/`，不在版本控制內。**這不是使用者驗收。**
+

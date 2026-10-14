@@ -12,6 +12,8 @@ const CUES={
  solve:{notes:[220,329.63,440],length:.9,gap:.15,peak:.18,duck:-6,release:true},
  wrong:{notes:[98,92.5],wave:'triangle',length:.35,gap:.12,peak:.16,duck:-2},
  door:{notes:[73.42,98,110],length:1,gap:.18,peak:.2,duck:-5,noise:{freq:220,length:.6,peak:.08}},
+ // The fire spirits of the chandelier (E2): a cluster of detuned high saw tones with a hiss, kept quiet.
+ choir:{notes:[1174.66,1244.51,1318.51,1396.91,1479.98],wave:'sawtooth',length:1.6,gap:.06,peak:.022,duck:-6,release:true,noise:{freq:5200,length:1.2,peak:.06}},
  // A glass chime with a shimmer of noise (the mirror's shards).
  glass:{notes:[1760,2349.32],length:.5,gap:.05,peak:.04,noise:{freq:4200,length:.35,peak:.14}}
 };

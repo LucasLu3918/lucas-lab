@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import {LEVELS,CRANK_TEETH,emptyBoard,evaluate,solveAll,HINTS,hintStep,toothPath,phases} from '../games/blood-mirror/puzzles/gears13.js';
 import {WEIGHTS,TOLERANCE,length as pendulumLength,ratio as pendulumRatio,pendulumSolved,solveAll as pendulumSolveAll,HINTS as PENDULUM_HINTS,hintStep as pendulumHintStep} from '../games/blood-mirror/puzzles/pendulum.js';
 import {NOTCHES,RUBY,NUMERALS,numeralAt,notchOf,playTolls,solveAll as wheelSolveAll,HINTS as WHEEL_HINTS,hintStep as wheelHintStep} from '../games/blood-mirror/puzzles/starwheel.js';
+import {STAGES as PRISM,solutions as prismSolutions,signature as prismSignature,solved as prismSolved,litCount,allStates as prismStates,trace as prismTrace,bits,hint as prismHint,hintStep as prismHintStep,solutionOf,diagnose} from '../games/blood-mirror/puzzles/prism.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -110,6 +111,7 @@ test('abyss levels sit outside the seven acts and own a registered puzzle',()=>{
   });
  }
  assert.deepEqual(puzzles.belfry.stages.map(stage=>stage.after||[]),[[],[],['belfry-gears','belfry-pendulum']]);
+ assert.deepEqual(puzzles.prism.stages.map(stage=>stage.after||[]),[[],[],['prism-rays','prism-blend']]);
 });
 
 test('finishing a belfry level is saved, survives export and a new journey, and unknown ids are dropped',()=>{
@@ -196,4 +198,69 @@ test('the mechanisms animate with a clock that does not depend on requestAnimati
   const text=fs.readFileSync(new URL('../games/blood-mirror/puzzles/'+file+'.js',import.meta.url),'utf8');
   assert.ok(!/requestAnimationFrame/.test(text.replace(/\/\/.*$/gm,'')),file+' goes through clock.js');
  }
+});
+
+const flipsBetween=(a,b)=>a.m.filter((v,i)=>v!==b.m[i]).length+a.k.filter((v,i)=>v!==b.k[i]).length;
+
+test('each prism stage has exactly one beam solution, and its own new rule is part of it',()=>{
+ assert.deepEqual(Object.keys(PRISM),['prism-rays','prism-blend','prism-ballroom']);
+ for(const [id,stage] of Object.entries(PRISM)){
+  const found=prismSolutions(stage.L);
+  assert.ok(found.length>=1,id+' has no solution');
+  assert.equal(new Set(found.map(S=>prismSignature(stage.L,S))).size,1,id+' has more than one beam solution');
+  assert.equal(prismSolved(stage.L,stage.init),false,id+' starts solved');
+  const result=prismTrace(stage.L,solutionOf(id));
+  assert.ok(result.stable);
+  if(stage.L.crystals.length)assert.ok(result.crystalIn.every(v=>bits(v)>=2),id+' uses its crystal');
+  if(stage.L.filters.length)assert.ok(result.beams.some(beam=>beam.segs.length>1),id+' uses its filter');
+ }
+ assert.equal(PRISM['prism-ballroom'].L.blockers.length,2);
+});
+
+test('the ballroom cannot be solved one mirror at a time, and its dancers really stand in the way',()=>{
+ const {L,init}=PRISM['prism-ballroom'],base=litCount(L,init);
+ assert.ok(base<L.targets.length);
+ const neighbours=[];
+ init.m.forEach((_,i)=>{const n={m:[...init.m],k:[...init.k]};n.m[i]=n.m[i]==='/'?'\\':'/';neighbours.push(n);});
+ init.k.forEach((_,i)=>{const n={m:[...init.m],k:[...init.k]};n.k[i]^=1;neighbours.push(n);});
+ for(const n of neighbours)assert.ok(litCount(L,n)<=base,'a single flip must not light another mask');
+ const sol=solutionOf('prism-ballroom'),onPath=new Set();
+ prismTrace(L,sol).beams.forEach(beam=>beam.cells.forEach(c=>onPath.add(c)));
+ L.blockers.forEach((b,i)=>assert.ok(onPath.has((sol.k[i]?b.a:b.b)+''),'dancer '+i+' blocks the solution light from its other cell'));
+ const nearest=Math.min(...prismSolutions(L).map(S=>flipsBetween(S,init)));
+ assert.ok(nearest>=4,'the start is '+nearest+' flips from a solution');
+ assert.equal(prismStates(L).length,512);
+});
+
+test('prism hints follow the board and the tier-3 fix always makes progress until solved',()=>{
+ for(const [id,stage] of Object.entries(PRISM)){
+  const sol=solutionOf(id);
+  let S={m:[...stage.init.m],k:[...stage.init.k]},steps=0;
+  while(!prismSolved(stage.L,S)){
+   assert.ok(prismHintStep(stage.L,S,sol),id+' names a step');
+   for(const tier of [1,2,3])assert.ok(prismHint(stage.L,S,sol,tier).length>10);
+   const d=diagnose(stage.L,S,sol);
+   if(d.mi>=0)S.m[d.mi]=sol.m[d.mi];else{assert.ok(d.ki>=0,id+' tier 3 names a dancer');S.k[d.ki]^=1;}
+   assert.ok(++steps<=stage.L.mirrors.length+stage.L.blockers.length+1,id+' hints do not converge');
+  }
+  assert.equal(prismHintStep(stage.L,S,sol),null);
+ }
+ // A blue mask never sends the player looking for the red filter.
+ const {L,init}=PRISM['prism-ballroom'];
+ assert.ok(!prismHint(L,init,solutionOf('prism-ballroom'),1).includes('濾鏡')||diagnose(L,init,solutionOf('prism-ballroom')).ti===0);
+});
+
+test('E2 lines match the draft, carry the reward, and the fire spirits have a cue of their own',()=>{
+ const e2=abyss.levels[1];
+ assert.equal(e2.id,'e2');
+ assert.equal(e2.puzzle,'prism');
+ assert.equal(e2.reward.mark,'ㄒ');
+ assert.ok(e2.enter.length>0);
+ assert.deepEqual(e2.stages,['prism-rays','prism-blend','prism-ballroom']);
+ const sfx=fs.readFileSync(new URL('../games/blood-mirror/audio/sfx.js',import.meta.url),'utf8');
+ const juice=fs.readFileSync(new URL('../games/blood-mirror/juice.js',import.meta.url),'utf8');
+ assert.match(sfx,/\bchoir:/);
+ assert.match(juice,/\bchoir:/);
+ const prism=fs.readFileSync(new URL('../games/blood-mirror/puzzles/prism.js',import.meta.url),'utf8');
+ assert.ok(!/requestAnimationFrame/.test(prism.replace(/\/\/.*$/gm,'')),'beams need no animation loop');
 });
