@@ -9,6 +9,10 @@ const lines=list=>'<div class="abyss-scene">'+list.map(line).join('')+'</div>';
 
 let introSeen=false;
 
+// The last page shows once E9 is done (data/abyss.js `closing`).
+const closingOpen=()=>isPuzzleComplete(abyss.closing.requires);
+const closingButton=()=>closingOpen()?'<div class="abyss-levels"><button class="choice-option abyss-level" data-abyss-closing><img class="stage-thumb" src="assets/puzzles/thumbs/'+abyss.closing.thumb+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+abyss.closing.title+'<small>'+abyss.closing.subtitle+'</small></span></button></div>':'';
+
 // api: { modal, closeModal, playCue, toast, options() -> startPuzzle options of the game, refresh() -> redraw the home entry }
 export function openAbyss(api){
  const {modal,closeModal}=api;
@@ -20,9 +24,11 @@ export function openAbyss(api){
     const done=isPuzzleComplete(level.puzzle);
     return '<button class="choice-option abyss-level" data-abyss="'+level.id+'"><img class="stage-thumb" src="assets/puzzles/thumbs/'+level.thumb+'.webp" alt="" width="112" height="64" decoding="async" draggable="false"><span class="stage-pick-text">'+level.number+' · '+level.title+'<small>'+level.subtitle+' · '+(done?'已完成':'尚未完成')+'</small></span></button>';
    }).join('')+'</div>'
+   +closingButton()
    +'<p class="modal-note">底稿還有更多頁，尚未翻開。這些關卡不影響主線結局，也不會改變旅程進度。</p>'
    +'<button id="abyss-close" class="secondary-button">合上帳冊</button>');
   document.querySelectorAll('[data-abyss]').forEach(button=>button.onclick=()=>level(abyss.levels.find(item=>item.id===button.dataset.abyss)));
+  document.querySelector('[data-abyss-closing]')?.addEventListener('click',closing);
   document.getElementById('abyss-close').onclick=closeModal;
   document.querySelector('[data-abyss]')?.focus({preventScroll:true});
  };
@@ -48,6 +54,24 @@ export function openAbyss(api){
   document.getElementById('abyss-enter').onclick=()=>play(item,done);
   document.getElementById('abyss-list').onclick=list;
   document.getElementById('abyss-enter').focus({preventScroll:true});
+ }
+ // One question, two answers: each has its own reply, then the same ending and the same title.
+ function closing(){
+  const page=abyss.closing;
+  modal(page.title,page.subtitle,lines(page.scene)+'<p class="abyss-line">'+page.prompt+'</p>'
+   +page.options.map(option=>'<button class="choice-option" data-closing="'+option.id+'">'+option.label+'</button>').join('')
+   +'<button id="abyss-list" class="secondary-button">返回</button>');
+  document.getElementById('abyss-list').onclick=list;
+  document.querySelectorAll('[data-closing]').forEach(button=>button.onclick=()=>{
+   const option=page.options.find(item=>item.id===button.dataset.closing);
+   api.playCue('restore');
+   modal(page.title,'小結尾',lines([{text:option.text},...page.ending])
+    +'<div class="abyss-reward" role="group" aria-label="獲得"><span class="abyss-mark" aria-hidden="true">'+page.reward.mark+'</span><span>'+page.reward.name+'<small>'+page.reward.caption+'</small></span></div>'
+    +'<button id="abyss-back" class="primary-button">回到帳本的背面 ⟶</button>');
+   document.getElementById('abyss-back').onclick=list;
+   document.getElementById('abyss-back').focus({preventScroll:true});
+  });
+  document.querySelector('[data-closing]')?.focus({preventScroll:true});
  }
  list();
 }

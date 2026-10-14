@@ -314,7 +314,7 @@ function openPrologue(){
 function openChapterIntro(){modal('第十三聲鐘響','CHAPTER I · 黑鐘書庫',chapterIntroBody+'<button id="intro-explore" class="primary-button">開始探索 ⟶</button>');$('#intro-explore').onclick=closeModal;}
 const mergeIds=(a=[],b=[])=>[...new Set([...a,...b])];
 // The 收藏 tab in the journal: mirror shards, achievements and the secret epilogue button.
-const collectionBook=()=>collectionMarkup({shardIds,found:state.shards||[],achievements,unlocked:state.achievements||[],titleOf:id=>rooms.find(room=>room.spots.some(spot=>spot.id===id))?.title??'序章',secretTitle:secretEpilogue.title});
+const collectionBook=()=>collectionMarkup({shardIds,found:state.shards||[],achievements,unlocked:state.achievements||[],titleOf:id=>rooms.find(room=>room.spots.some(spot=>spot.id===id))?.title??'序章',secretTitle:secretEpilogue.title,closingTitle:isChallengeComplete(abyss.closing.requires)?abyss.closing.reward.name:''});
 // The secret epilogue (祕密尾聲): two scenes, each a choice with its own reply, then a closing line.
 function openSecretEpilogue(){
  const lines=[...secretEpilogue.opening];let step=0;

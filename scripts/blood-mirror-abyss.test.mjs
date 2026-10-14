@@ -14,6 +14,7 @@ import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import * as scale from '../games/blood-mirror/puzzles/scale.js';
 import * as frozen from '../games/blood-mirror/puzzles/frozen.js';
+import {collectionMarkup} from '../games/blood-mirror/views/modals.js';
 import * as compass from '../games/blood-mirror/puzzles/compass.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
@@ -921,4 +922,26 @@ test('E9 level data: lines match the draft, needs the four marks, stages registe
  assert.ok(!/requestAnimationFrame/.test(src));
  assert.ok(!/style="/.test(src)&&!/\.style\./.test(src),'the page CSP blocks inline styles');
  assert.ok(compass.dialSvg([0,1,2,3],[0,0,0,0]).includes('cmp-needle'));
+});
+
+test('closing page: lines match the draft, opens with E9, both answers lead to the same title, nothing is saved',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const page=abyss.closing;
+ assert.equal(page.requires,'compass');assert.equal(page.requires,abyss.levels[9].puzzle);
+ for(const {speaker,text} of [...page.scene,...page.ending,...page.options.map(o=>({text:o.text}))])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.ok(draft.includes(page.prompt));
+ for(const option of page.options)assert.ok(draft.includes('選項'+(option.label.startsWith('「')?option.label:'「'+option.label+'」')),'option not in the draft: '+option.label);
+ assert.equal(page.options.length,2);
+ assert.equal(page.reward.name,'被帳冊記住的人');
+ assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/thumbs/'+page.thumb+'.webp',import.meta.url)));
+ // the world still forgets: the page never names anyone who is not already in the ledger scenes, and adds no after-the-ending event
+ for(const {text} of [...page.scene,...page.ending])assert.ok(!/想起|記起|回來|醒來/.test(text),'the world must not remember: '+text);
+ // no new save field: nothing in the page asks the save to store it
+ const src=fs.readFileSync(new URL('../games/blood-mirror/abyss.js',import.meta.url),'utf8');
+ assert.ok(!/state\.|localStorage|persist/.test(src.slice(src.indexOf('function closing'))),'the closing page must not save anything');
+ // the collection tab shows the title only once it is earned
+ const shelf={shardIds:['a'],found:[],achievements:[],unlocked:[],titleOf:id=>id,secretTitle:'尾聲'};
+ assert.ok(collectionMarkup({...shelf,closingTitle:page.reward.name}).includes(page.reward.name));
+ assert.ok(!collectionMarkup(shelf).includes('稱號'));
 });
