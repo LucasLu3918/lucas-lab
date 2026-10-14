@@ -63,10 +63,10 @@ const named=(stage,moves)=>{
 };
 // The last tier looks at the rings as they are now, so it is right whatever the player has already turned.
 export const hintsFor=(stage,current)=>[
- '每轉一格，鄰近的環會反方向轉兩格。先看哪一個環最靠近對準，再想它的鄰居會被拖到哪裡。',
  stage==='final'
-  ?'兩個內環的位置和兩個外環的位置會互相拖動。先把一個環對準，再用它不碰到的那一端的環調整，最後才補中間。'
-  :'兩個環互相拖動，所以一個環轉一格，另一個轉兩格。想想把其中一個環轉幾格，讓另一個環剛好回到標記。',
+  ?'轉一環一格，相鄰的環反向轉兩格，所以中間兩個環最容易把事情弄亂。先數數每個環上的記號離上方指針還差幾格，再想哪一個環的轉動剛好能同時修正兩個環。'
+  :'轉一環一格，相鄰的環會反向轉兩格。先數數兩個環上的記號各離上方指針還差幾格，再想轉哪一個環，能讓另一個環也跟著靠近指針。',
+ ()=>{const path=solve(current());return path&&path.length?'目前最短的轉法，第一步是：'+named(stage,path.slice(0,1))+'。照做之後再按一次提示，會依新的位置重新算。':'';},
  ()=>{const path=solve(current());return path&&path.length?'目前最短的轉法是（共 '+path.length+' 步）：'+named(stage,path)+'。':'';}
 ];
 export const hintStep=name=>name;
