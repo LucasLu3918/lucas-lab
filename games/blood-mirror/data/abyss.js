@@ -161,6 +161,27 @@ export const abyss={
    ],
    enter:'走進小屋',
    reward:{name:'剪影木片',mark:'影',caption:'牆上剪影的記號'}
+  },
+  {
+   id:'e6',
+   puzzle:'choir',
+   number:'E6',
+   title:'失聲合唱廳',
+   subtitle:'封了蠟的管風琴',
+   stages:['choir-pipes','choir-rhythm','choir-hymn'],
+   thumb:'choir-pipes',
+   scene:[
+    {text:'學院的合唱廳在冬至那夜之後，再也沒有出過聲。管風琴的七根管還立在原處，嘴口都被蠟封住。'},
+    {speaker:'mirror',text:'「聲音也是一筆帳。有人把每個音的價錢，記在管子的長度上。」'},
+    {text:'管子越長，音越低。譜架上只剩灰，灰裡壓著一排刻痕。'}
+   ],
+   unlock:[
+    {text:'三個聲部對上了拍，三根管同時開口。沒有聲音，只有蠟封裂開，吹出一口冷的氣。'},
+    {speaker:'mirror',text:'「這是妳第一次聽見它們。它們一直都在唱，只是沒有人記下那一頁。」'},
+    {text:'管底落下一片薄薄的銅片，上面刻著一個字：音。'}
+   ],
+   enter:'走進合唱廳',
+   reward:{name:'銅片',mark:'音',caption:'管底銅片上的字'}
   }
  ]
 };

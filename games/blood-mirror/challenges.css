@@ -555,3 +555,27 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .shadow-slider input{width:100%;min-height:44px;accent-color:var(--brass)}
 #modal .shadow-slider output{text-align:right;font-variant-numeric:tabular-nums;color:#d9c9a4}
 @media (max-width:480px){#modal .shadow-slider{grid-template-columns:78px 1fr 46px;gap:6px}}
+
+/* Silent choir hall (E6): pipes, beat rows and the hymn grid */
+#modal .choir-pipes{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#modal .choir-pipe{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px;min-height:44px;padding:6px 6px 4px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;color:#d9c9a4;cursor:pointer}
+#modal .choir-pipe svg{width:32px;height:104px}
+#modal .choir-pipe b{font-size:12px;font-weight:400}
+#modal .choir-pipe[aria-pressed=true]{border-color:var(--brass-hi);background:#2a1f12;box-shadow:0 0 0 2px #c9ab6a50}
+#modal .choir-bar{fill:#9d8a62;stroke:#5c4627;stroke-width:1.2}
+#modal .choir-pipe[aria-pressed=true] .choir-bar{fill:#e0b84f}
+#modal .choir-mouth{fill:#7a1f26}
+#modal .choir-staff,#modal .choir-voice{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px;margin:8px 0}
+#modal .choir-voice{grid-template-columns:96px 44px 1fr 44px}
+#modal .choir-label{font-size:13px;font-weight:400;color:var(--brass-hi);line-height:1.4}
+#modal .choir-label small{display:block;font-size:11px;color:#9fb8a6}
+#modal .choir-beats{display:flex;gap:3px}
+#modal .choir-dot{flex:1;max-width:22px;height:22px;border:1px solid #5c4627;border-radius:50%;background:#0b0710}
+#modal .choir-dot.lit{background:#e0b84f;border-color:#ffd98a}
+#modal .choir-step{min-width:44px;min-height:44px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;color:var(--brass-hi);font-size:20px;cursor:pointer}
+#modal .choir-facts{margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.8;color:#d9c9a4}
+#modal .choir-grid{display:grid;grid-template-columns:72px repeat(3,1fr);gap:6px;margin:10px 0}
+#modal .choir-grid-head,#modal .choir-grid-beat{font-size:12px;color:var(--brass-hi);align-self:center;text-align:center}
+#modal .choir-cell{min-height:44px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;cursor:pointer}
+#modal .choir-cell[aria-pressed=true]{background:#e0b84f;border-color:#ffd98a}
+@media (max-width:480px){#modal .choir-staff{grid-template-columns:64px 1fr}#modal .choir-voice{grid-template-columns:64px 44px 1fr 44px;gap:4px}#modal .choir-dot{height:16px}}

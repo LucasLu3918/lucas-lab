@@ -70,6 +70,12 @@ export const puzzles={
  shadow:{id:'shadow',title:'影戲小屋',subtitle:'ABYSS · 木雕與牆上的影子',optional:true,stages:[
   {id:'shadow-key',label:'鑰匙的影子',mount:lazy('shadow','mountShadowKey')},
   {id:'shadow-queen',label:'戴冠的影子',mount:lazy('shadow','mountShadowQueen'),after:['shadow-key'],waiting:'這塊木雕要等第一塊的影子對好，才會被擺到燈前。'}
+ ]},
+ // The silent choir hall (E6). The pipes and the rhythm can be done in either order; the hymn needs both.
+ choir:{id:'choir',title:'失聲合唱廳',subtitle:'ABYSS · 管長、拍子與聖歌',optional:true,stages:[
+  {id:'choir-pipes',label:'管長與音高',mount:lazy('choir','mountChoirPipes')},
+  {id:'choir-rhythm',label:'三個聲部',mount:lazy('choir','mountChoirRhythm')},
+  {id:'choir-hymn',label:'聖歌',mount:lazy('choir','mountChoirHymn'),after:['choir-pipes','choir-rhythm'],waiting:'聖歌要用前兩道機關的結果：三根管，和三個聲部的起拍。先把它們都完成。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).

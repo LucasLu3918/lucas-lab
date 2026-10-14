@@ -186,6 +186,14 @@ node scripts/blood-mirror.browser.cjs
 - 尚待作者驗收。**這不是使用者驗收。**
 
 
+## 鏡淵 E6 失聲合唱廳（三道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/choir-{pipes,rhythm,hymn}.webp`（960×411，約 19、18、20 KB）與 `assets/puzzles/thumbs/choir-*.webp`（224×128，各約 3–5 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選）。選用 pipes-9401（一排封蠟的黃銅管與藍燭）、rhythm-9402（譜架與三個黃銅齒輪）、hymn-9402（管風琴琴鍵、碎鏡與藍燭）。轉檔與縮圖參數同 E1–E5。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/e6/`，不進版本控制。
+- 提示詞全程用正面描述；一輪即可用。
+- 已知：圖中的管數與譜面只是氛圍（管有 9–10 根、譜上是偽字符），正式機關是 HTML，管長與拍子由 `puzzles/choir.js` 的規則決定。
+- 尚待作者驗收。**這不是使用者驗收。**
+
 ## 鏡淵 E-X 影戲小屋（兩道機關的橫幅與縮圖）
 
 - 檔案：`assets/puzzles/shadow-{key,queen}.webp`（960×411，約 11、18 KB）與 `assets/puzzles/thumbs/shadow-*.webp`（224×128，各約 2–4 KB）。

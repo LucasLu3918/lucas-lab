@@ -11,6 +11,7 @@ import * as apo from '../games/blood-mirror/puzzles/apothecary.js';
 import * as gal from '../games/blood-mirror/puzzles/gallery.js';
 import * as box from '../games/blood-mirror/puzzles/box.js';
 import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
+import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -561,7 +562,7 @@ test('E5 level data: lines match the draft, the full ending needs all seven shar
  // The thread face shows pictures that already ship with the scenes.
  for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
  // The levels are listed in order: E5 comes after the four that give it its keys, and the breather E-X is appended after it.
- assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex']);
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6']);
 });
 
 test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
@@ -628,5 +629,92 @@ test('E-X level data: lines match the draft, the stages are registered, banners 
  assert.deepEqual(completedPuzzles(),['shadow.shadow-key']);
  resetPuzzles();
  assert.equal(isStageComplete('shadow','shadow-key'),true);
+ setPuzzleCompletions([]);
+});
+
+test('E6 pipes: the octave and the chord each have exactly one answer, and the reversed chord is a trap',()=>{
+ assert.deepEqual(choir.solveOctave(),[[6,12]]);
+ assert.deepEqual(choir.solveChord(),[[10,12,15]]);
+ assert.deepEqual(choir.CHORD,[10,12,15]);
+ // Lengths 8, 10, 12 stand 4 : 5 : 6, which reads the pitch the wrong way round and is not the chord.
+ assert.equal(choir.isChord([8,10,12]),false);
+ assert.equal(choir.isReversedChord([8,10,12]),true);
+ assert.equal(choir.isReversedChord([10,12,15]),false);
+ // The trap exists among the seven pipes, so the wrong reading is a real near miss.
+ assert.ok(choir.PIPES.includes(8)&&choir.PIPES.includes(10)&&choir.PIPES.includes(12));
+ // Every wrong pair or triple fails, including pairs that are an octave in length only by chance of order.
+ assert.equal(choir.isOctave(6,9),false);assert.equal(choir.isOctave(12,6),true);
+ assert.equal(choir.isChord([10,12]),false);
+});
+
+test('E6 rhythm: the score fixes one start for each voice, and the voices are not interchangeable',()=>{
+ assert.deepEqual(choir.solveRhythm(),[[1,2,3]]);
+ assert.equal(choir.rhythmSolved([0,0,0]),false,'the starting board must not be solved');
+ assert.deepEqual(choir.VOICES.map(voice=>voice.period),[3,4,6]);
+ assert.equal(choir.SCORE.length,choir.BEATS);
+ // The 12 beats are the union of the three voices; beat 10 is shared by two of them.
+ assert.deepEqual(choir.SCORE.map((on,t)=>on?t+1:0).filter(Boolean),[2,3,4,5,7,8,10,11]);
+ assert.equal(choir.hits(0,1)[10]&&choir.hits(1,2)[10],true);
+});
+
+test('E6 hymn: each beat opens the pipes of the voices that land on it, and it needs both earlier results',()=>{
+ assert.deepEqual(choir.HYMN.map(pipes=>pipes.join('+')),['','10','12','15','10','','12','10','','15']);
+ assert.equal(choir.firstWrong(choir.HYMN),null);
+ // The slower the voice, the longer the pipe.
+ assert.deepEqual(choir.PIPE_OF_VOICE,[10,12,15]);
+ // A wrong cell names the first beat that differs (0-based), whichever way it is wrong.
+ const missing=choir.HYMN.map(pipes=>[...pipes]);missing[4]=[];
+ assert.equal(choir.firstWrong(missing),4);
+ const extra=choir.HYMN.map(pipes=>[...pipes]);extra[0]=[10];
+ assert.equal(choir.firstWrong(extra),0);
+ const swapped=choir.HYMN.map(pipes=>[...pipes]);swapped[1]=[12];
+ assert.equal(choir.firstWrong(swapped),1);
+ // Reading the voices the wrong way round (fast voice on the long pipe) gives a different hymn.
+ const flipped=Array.from({length:choir.HYMN_BEATS},(_,t)=>choir.VOICES.flatMap((voice,i)=>t%voice.period===choir.OFFSETS[i]?[choir.CHORD[2-i]]:[]));
+ assert.notEqual(choir.firstWrong(flipped),null);
+ // Any other start of any voice gives a different hymn too, so the rhythm result is really needed.
+ for(let voice=0;voice<3;voice++)for(let start=0;start<choir.VOICES[voice].period;start++){
+  if(start===choir.OFFSETS[voice])continue;
+  const offsets=choir.OFFSETS.map((o,i)=>i===voice?start:o);
+  const other=Array.from({length:choir.HYMN_BEATS},(_,t)=>choir.VOICES.flatMap((v,i)=>t%v.period===offsets[i]?[choir.PIPE_OF_VOICE[i]]:[]));
+  assert.notEqual(choir.firstWrong(other),null,'voice '+voice+' at '+start);
+ }
+});
+
+test('E6 hints: three tiers per step, the pipes step follows the choice, and the last tier gives the answer',()=>{
+ assert.equal(choir.pipesStep('warm',[]),'warm');
+ assert.equal(choir.pipesStep('chord',[10,12,15]),'chord');
+ assert.equal(choir.pipesStep('chord',[8,10,12]),'trap');
+ for(const [step,list] of Object.entries(choir.HINTS))assert.equal(list.length,3,step);
+ assert.ok(choir.HINTS.warm[2].includes('6')&&choir.HINTS.warm[2].includes('12'));
+ for(const length of choir.CHORD){assert.ok(choir.HINTS.chord[2].includes(String(length)));assert.ok(choir.HINTS.trap[2].includes(String(length)));}
+ assert.ok(choir.OFFSETS.every((offset,i)=>choir.HINTS.rhythm[2].includes('第 '+(offset+1)+' 拍')),choir.HINTS.rhythm[2]);
+ // The hymn answer in the last tier lists the same beats the rules produce.
+ assert.ok(choir.HINTS.hymn[2].includes('第 2、5、8 拍：長 10')&&choir.HINTS.hymn[2].includes('第 3、7 拍：長 12')&&choir.HINTS.hymn[2].includes('第 4、10 拍：長 15'));
+});
+
+test('E6 level data: lines match the draft, the stages are registered and ordered, banners ship, no animation loop or audio',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const e6=abyss.levels[6];
+ assert.equal(e6.id,'e6');assert.equal(e6.puzzle,'choir');assert.equal(e6.number,'E6');
+ for(const {speaker,text} of [...e6.scene,...e6.unlock])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.equal(e6.scene.length,3);assert.equal(e6.unlock.length,3);
+ assert.deepEqual(e6.reward,{name:'銅片',mark:'音',caption:'管底銅片上的字'});
+ assert.deepEqual(e6.stages,puzzles.choir.stages.map(stage=>stage.id));
+ assert.equal(puzzles.choir.optional,true);
+ const hymn=puzzles.choir.stages[2];
+ assert.deepEqual(hymn.after,['choir-pipes','choir-rhythm']);
+ assert.equal(puzzles.choir.stages[0].after,undefined);assert.equal(puzzles.choir.stages[1].after,undefined);
+ for(const id of e6.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/choir.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
+ assert.ok(!/requestAnimationFrame/.test(src));
+ assert.ok(!/AudioContext|new Audio/.test(src),'the hall is silent');
+ assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+ // Saved by stage, kept by a new journey.
+ setPuzzleCompletions(['choir.choir-pipes','choir.choir-rhythm']);
+ assert.deepEqual(completedPuzzles().sort(),['choir.choir-pipes','choir.choir-rhythm']);
+ resetPuzzles();
+ assert.equal(isStageComplete('choir','choir-rhythm'),true);
  setPuzzleCompletions([]);
 });
