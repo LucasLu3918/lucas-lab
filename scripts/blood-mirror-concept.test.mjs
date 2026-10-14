@@ -35,11 +35,12 @@ test('portrait tile edges represent only the selected portrait, and unknown asse
 test('small clue objects come from the light item sheet and every region positions to a finite offset',()=>{
  for(const id of ['clock','vial','feather','apple','key'])assert.equal(conceptArt[id].src,'assets/concepts/item-sheet.webp');
  for(const id of Object.keys(conceptArt))assert.doesNotMatch(conceptStyle(id),/NaN|Infinity/,id);
- assert.match(conceptStyle('clock'),/background-position:0% 0%/);
+ // the dial crop starts a little inside the sheet, so its offset is small but not zero
+ assert.match(conceptStyle('clock'),/background-position:4\.\d+% 50\.\d+%/);
 });
-// Measured object extents on the item sheet (sheet pixels: x0, y0, x1, y1). A crop that misses its object shows only
+// Measured object extents on the painted item sheet (sheet pixels: x0, y0, x1, y1). A crop that misses its object shows only
 // the stone or the frame, which is how the silver key went unrecognised; a crop that is too loose makes it tiny.
-const objectBounds={vial:[407,61,467,170],feather:[337,19,380,62],apple:[290,92,324,129],key:[333,153,371,193]};
+const objectBounds={vial:[725,40,830,227],feather:[948,38,1078,221],apple:[437,41,580,207],key:[1241,37,1315,219],clock:[62,64,319,320]};
 test('each memory object crop contains its object and is not loose around it',()=>{
  for(const [id,[x0,y0,x1,y1]] of Object.entries(objectBounds)){
   const [x,y,w,h]=conceptArt[id].rect;

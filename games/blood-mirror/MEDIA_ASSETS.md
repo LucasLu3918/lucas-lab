@@ -251,3 +251,10 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
 - 沒有重新產圖；先前文件中「肖像各 ≤ 42 KB」的限制作廢，改以全站素材預算（`dist/games` ≤ 26 MB、單張 ≤ 500 KB）為準。
 - 沒有母檔、沒有動的：`chamber`、`crypt`、`mine`、`mirror`、`queen`、`snow-white`、`endings/dawn`、設計板與物件圖示。
 
+## 物件圖示重新產圖（2026-10-15）
+
+- 範圍：`assets/concepts/item-sheet.webp`（原為使用者提供的 492×210，物件只有 46–74 像素）改為本機重新產圖的新圖集 1408×384：機關盤 384 像素，蘋果、藥瓶、羽毛、鑰匙各 256 像素。`concept-art.js` 的 `items` 與五個物件的 `rect` 同步更新；每個 `rect` 是用像素偵測量出的物件範圍加約 10 像素留白，所以物件占裁切區約八成。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、768×768，每個物件 3 張候選目視挑選）。選用：蘋果 9802、藥瓶 9802、羽毛 9801、鑰匙 9803、機關盤 9802；你確認後合成圖集，`cwebp -q 88 -m 6 -sharp_yuv`（約 35 KB）。母檔 `source-art/concepts/item-sheet.png` 是新圖集 PNG（舊的 492×210 留作 `item-sheet-old-492x210.png`）；全部候選與提示詞在 `source-art/items/`，不進版本控制。
+- 風格改變：原本是設計板裡「帶金框的圖示」，現在是深褐背景的靜物油畫。影響物品欄、線索彈窗、記憶翻牌與密碼機關的圖。
+- 測試：`blood-mirror-concept.test.mjs` 的物件範圍改用新量到的範圍。
+

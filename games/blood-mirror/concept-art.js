@@ -1,17 +1,16 @@
 // CSS sprites read WebP copies of the user-supplied boards (~300KB vs 2.6MB PNG);
 // the original PNGs stay as the full-resolution gallery archive.
 const board=(number)=>({src:`assets/concepts/design-board-${number}.webp`,width:1536,height:1024});
-// Small objects use a 22KB crop of board 3 (origin 281,327) so clue modals and memory cards do not wait on a whole board.
-const items={src:'assets/concepts/item-sheet.webp',width:492,height:210};
+// Small objects come from their own painted sheet (1408x384: the dial 384px, the four clue objects 256px each), so clue
+// modals and memory cards do not wait on a whole board. Each rect is the object's measured extent plus a little margin.
+const items={src:'assets/concepts/item-sheet.webp',width:1408,height:384};
 export const conceptArt={
  portrait:{...board(1),rect:[470,0,320,274],label:'魔鏡前的公主肖像'},
- clock:{...items,rect:[0,0,238,210],label:'古老的金色機關盤'},
- // Each object crop sits inside its gold slot frame (the frame itself is never in the crop), and tightly
- // around the object so it fills the card. The key was previously cropped from the empty stone beside its frame.
- vial:{...items,rect:[402,55,74,122],label:'紅色藥瓶'},
- feather:{...items,rect:[335,18,46,46],label:'白色羽毛'},
- apple:{...items,rect:[284,87,46,46],label:'紅蘋果'},
- key:{...items,rect:[330,149,50,50],label:'銀色鑰匙'},
+ clock:{...items,rect:[50,52,282,282],label:'古老的金色機關盤'},
+ vial:{...items,rect:[715,30,125,207],label:'紅色藥瓶'},
+ feather:{...items,rect:[938,28,150,203],label:'白色羽毛'},
+ apple:{...items,rect:[427,31,163,186],label:'紅蘋果'},
+ key:{...items,rect:[1231,27,94,202],label:'銀色鑰匙'},
  frost:{...board(3),rect:[420,674,369,214],label:'雪夜中的公主'},
  crown:{...board(3),rect:[807,674,368,214],label:'血色王冠下的公主'}
 };
