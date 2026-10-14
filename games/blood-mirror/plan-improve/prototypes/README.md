@@ -5,6 +5,7 @@
 | 檔案 | 關卡 | 驗證腳本 | 驗證了什麼 |
 |---|---|---|---|
 | `e4-panels.html` | E4 無限鏡廊（巢狀畫面） | — | 拖曳、疊放、放大對齊是否直覺（圖片內嵌自遊戲素材） |
+| `e4-gallery.html` | E4 無限鏡廊 v3（疊放、大小、翻面、排序；規劃 `../plan-e4-formal.md`） | `e4-gallery.solve.cjs`（規則在 `e4-gallery.model.js`） | 80 個畫面狀態裡只有 4 組合法連結；提燈要放大、門要翻面；24 種排序只接受 2 種 |
 | `e1-gears.html` | E1 逆走鐘樓（齒輪列） | `e1-gears.solve.cjs` | 窮舉：唯一最小解（39／6／24）；提示與解一致 |
 | `e2-optics.html` | E2 稜鏡舞廳（光路） | `e2-optics.solve.cjs` | 三關各只有一組光束解；提示依解收斂 |
 | `e2-prism.html` | E2 稜鏡舞廳（濾鏡、合光水晶、舞者；正式版規劃的三段） | `e2-prism.solve.cjs`（盤面由 `e2-prism.gen.cjs` 搜尋寫入） | 三關各只有一組光束解；解必須用到該關的新規則；起點離最近的解至少 2、2、4 步；第 3 關任何單步翻轉都不會多亮一個面具；提示依解收斂 |
@@ -34,3 +35,4 @@ for f in e1-gears e2-optics e2-prism e3-apothecary e5-box; do node $f.solve.cjs;
 - 原型只經過腳本與瀏覽器 DOM 點擊驗證，**沒有用真實手指測過**。
 - 圖形是示意（SVG／遊戲現有美術），不是正式美術。
 - E4 的 `e4-panels.html` 內嵌四張遊戲素材（約 480 KB），僅為了在沒有伺服器時能直接開啟。
+- `e4-gallery.html` 引用 `../../assets/*.webp`，要用靜態伺服器開啟（例如在 `games/blood-mirror` 目錄執行 `python3 -m http.server`，再開 `/plan-improve/prototypes/e4-gallery.html`）；它的規則在 `e4-gallery.model.js`，驗證腳本用 `vm` 載入同一份，所以規則只有一份。
