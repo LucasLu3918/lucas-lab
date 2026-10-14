@@ -15,6 +15,9 @@ import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import * as scale from '../games/blood-mirror/puzzles/scale.js';
 import * as frozen from '../games/blood-mirror/puzzles/frozen.js';
 import {collectionMarkup} from '../games/blood-mirror/views/modals.js';
+import * as musicbox from '../games/blood-mirror/puzzles/musicbox.js';
+import * as prism from '../games/blood-mirror/puzzles/prism.js';
+import * as watch from '../games/blood-mirror/puzzles/watch.js';
 import * as compass from '../games/blood-mirror/puzzles/compass.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
@@ -895,6 +898,7 @@ test('E9 hints: three tiers, and the last one names the shortest turns from wher
   const hints=compass.hintsFor(name,()=>stage.start);
   assert.equal(hints.length,3,name);
   const last=String(hints[2]()),n=compass.solve(stage.start).length;
+  assert.ok(String(hints[1]()).includes('第一步是'),name+' tier 2 names the first move');
   assert.ok(last.includes('共 '+n+' 步'),name);
   const after=compass.turn(stage.start,0,1);
   assert.ok(String(compass.hintsFor(name,()=>after)[2]()).includes('共 '+compass.solve(after).length+' 步'),name+' follows the board');
@@ -944,4 +948,66 @@ test('closing page: lines match the draft, opens with E9, both answers lead to t
  const shelf={shardIds:['a'],found:[],achievements:[],unlocked:[],titleOf:id=>id,secretTitle:'尾聲'};
  assert.ok(collectionMarkup({...shelf,closingTitle:page.reward.name}).includes(page.reward.name));
  assert.ok(!collectionMarkup(shelf).includes('稱號'));
+});
+
+test('hints: every stage of the acts has three distinct tiers, no broken quotes, and the last tier is the answer',()=>{
+ for(const room of rooms){
+  for(const stage of puzzles[room.id].stages){
+   const tiers=room.stepHints?.[stage.id];
+   assert.ok(tiers,room.id+'.'+stage.id+' has hints');
+   assert.equal(tiers.length,3,room.id+'.'+stage.id);
+   assert.equal(new Set(tiers).size,3,room.id+'.'+stage.id+' tiers differ');
+   for(const tier of tiers){assert.ok(tier.length>=14,'too short: '+tier);assert.ok(!/「」|「\u0020*」/.test(tier),'empty quotes in: '+tier);}
+  }
+  for(const [step,tiers] of Object.entries(room.stepHints||{}))assert.equal(tiers.length,3,room.id+'.'+step);
+ }
+ // seals and deduction rows end with the words themselves
+ for(const room of rooms)for(const step of ['seal','deduction']){
+  const tier=room.stepHints?.[step]?.[2];
+  if(tier&&room.id!=='queen'&&!(room.id==='library'&&step==='seal'))assert.ok(/→/.test(tier),room.id+'.'+step+' names the answer');
+ }
+});
+
+test('hints: the explicit answers in the hint text really solve the puzzle',()=>{
+ const library=rooms.find(room=>room.id==='library').stepHints;
+ // ledger: 1↔2, 2↔6, 3↔4, 4↔7, 5↔6, 6↔9, 7↔9 on the starting tiles
+ const tiles=[4,0,8,2,6,1,3,7,5];
+ for(const [a,b] of [[1,2],[2,6],[3,4],[4,7],[5,6],[6,9],[7,9]])[tiles[a-1],tiles[b-1]]=[tiles[b-1],tiles[a-1]];
+ assert.deepEqual(tiles,[0,1,2,3,4,5,6,7,8]);
+ assert.ok(library.ledger[2].includes('1↔2、2↔6、3↔4、4↔7、5↔6、6↔9、7↔9'));
+ // watch: minute gear twice, then the second gear twice (or the hour gear four times)
+ let gears=watch.startGears;
+ for(const i of [1,1,2,2])gears=watch.turnGear(gears,i);
+ assert.ok(watch.watchSolved(gears));
+ gears=watch.startGears;for(let k=0;k<4;k++)gears=watch.turnGear(gears,0);
+ assert.ok(watch.watchSolved(gears));
+ // reflection: the right half, row by row (dark, lit / lit, dark / lit, lit / lit, dark), mirrors the left half
+ const left=[true,false,false,true,true,true,false,true],right=[false,true,true,false,true,true,true,false];
+ assert.ok(left.every((value,i)=>value===right[i^1]));
+ assert.ok(rooms.find(room=>room.id==='mirror').stepHints.reflection[2].includes('第 1 列 暗、亮；第 2 列 亮、暗；第 3 列 亮、亮；第 4 列 亮、暗'));
+ // the light puzzle keeps its backslash in the text
+ assert.ok(rooms.find(room=>room.id==='ballroom').stepHints.light[2].includes('「\\」'));
+});
+
+test('hints: the prism hint always names a piece that really differs, in every unsolved position',()=>{
+ for(const [id,stage] of Object.entries(prism.STAGES)){
+  const sol=prism.solutionOf(id);
+  for(const S of prism.allStates(stage.L)){
+   if(prism.solved(stage.L,S))continue;
+   const d=prism.diagnose(stage.L,S,sol);
+   assert.ok(d,id+': an unsolved board always has a hint step');
+   assert.ok(d.mi>=0||d.ki>=0,id+': the hint names a piece');
+   if(d.mi>=0)assert.notEqual(S.m[d.mi],sol.m[d.mi]);else assert.notEqual(S.k[d.ki],sol.k[d.ki]);
+  }
+ }
+});
+
+test('hints: the prologue music box has three tiers and the last one reads the pins now',()=>{
+ assert.equal(musicbox.HINTS.length,3);
+ assert.equal(musicbox.hintStep([0,0,0,0]),'pins');
+ assert.equal(musicbox.hintStep(musicbox.lullaby),null);
+ assert.equal(musicbox.HINTS[2]([0,0,0,0]),'現在還要改：第 1 根要撥起、第 3 根要撥起、第 4 根要撥起。');
+ assert.equal(musicbox.HINTS[2]([1,1,1,1]),'現在還要改：第 2 根要放下。');
+ assert.equal(musicbox.HINTS[2](musicbox.lullaby),'');
+ assert.ok(musicbox.HINTS[1].includes('第 1 根撥起、第 2 根放下、第 3 根撥起、第 4 根撥起'));
 });

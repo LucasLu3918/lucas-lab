@@ -88,7 +88,11 @@ export function diagnose(L,S,sol){
  const onPath=pathCells(L,sol);
  const mi=sol.m.findIndex((v,i)=>S.m[i]!==v&&onPath.has(L.mirrors[i].x+','+L.mirrors[i].y));
  const ki=sol.k.findIndex((v,i)=>{if(S.k[i]===v)return false;const p=S.k[i]?L.blockers[i].b:L.blockers[i].a;return onPath.has(p[0]+','+p[1]);});
- return {ti,mi,ki,got:r.got[ti]};
+ // The board can be wrong only where the solution's light never passes (a mirror the beam skips, a dancer off its path).
+ // Fall back to any piece that differs, so a stuck player always gets a hint that names a real fix.
+ const anyMirror=mi>=0||ki>=0?mi:sol.m.findIndex((v,i)=>S.m[i]!==v);
+ const anyDancer=mi>=0||anyMirror>=0?ki:sol.k.findIndex((v,i)=>S.k[i]!==v);
+ return {ti,mi:anyMirror,ki:anyDancer,got:r.got[ti]};
 }
 // Candle-light hint, three tiers: which mask and what it needs, what kind of fix, the exact fix.
 export function hint(L,S,sol,tier){
