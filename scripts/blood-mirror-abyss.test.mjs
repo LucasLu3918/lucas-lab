@@ -14,6 +14,7 @@ import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import * as scale from '../games/blood-mirror/puzzles/scale.js';
 import * as frozen from '../games/blood-mirror/puzzles/frozen.js';
+import * as compass from '../games/blood-mirror/puzzles/compass.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -564,7 +565,7 @@ test('E5 level data: lines match the draft, the full ending needs all seven shar
  // The thread face shows pictures that already ship with the scenes.
  for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
  // The levels are listed in order: E5 comes after the four that give it its keys, and the breather E-X is appended after it.
- assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6','e7','e8']);
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6','e7','e8','e9']);
 });
 
 test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
@@ -863,4 +864,61 @@ test('E8 level data: lines match the draft, the stages are registered and ordere
  assert.deepEqual(completedPuzzles().sort(),['frozen.frozen-faces','frozen.frozen-order']);
  resetPuzzles();
  setPuzzleCompletions([]);
+});
+
+test('E9 compass: turning drags the neighbours, every position is reachable, the shortest ways are the true shortest',()=>{
+ assert.deepEqual(compass.turn([0,0,0,0],1,1),[6,1,6,0]);
+ assert.deepEqual(compass.turn([0,0],0,-1),[7,2]);
+ for(const k of [0,1,2,3])assert.deepEqual(compass.turn(compass.turn([3,5,1,7],k,1),k,-1),[3,5,1,7],'a turn undoes itself');
+ // an independent breadth-first search from the aligned rings gives the distance of every position
+ for(const [name,stage] of Object.entries(compass.STAGES)){
+  const n=stage.rings.length,dist=new Map([[Array(n).fill(0).join(),0]]);
+  let level=[Array(n).fill(0)];
+  while(level.length){const next=[];for(const s of level)for(const m of compass.MOVES(n)){const t=compass.turn(s,m.ring,m.dir),id=t.join();if(!dist.has(id)){dist.set(id,dist.get(s.join())+1);next.push(t);}}level=next;}
+  assert.equal(dist.size,8**n,name+': every position can be reached');
+  const path=compass.solve(stage.start);
+  assert.equal(path.length,dist.get(stage.start.join()),name+' shortest');
+  assert.ok(compass.aligned(path.reduce((s,m)=>compass.turn(s,m.ring,m.dir),stage.start)),name+' path aligns the rings');
+  assert.ok(stage.start.every(v=>v!==0),name+': no ring starts aligned');
+  assert.deepEqual(compass.solve(Array(n).fill(0)),[]);
+ }
+ const length=name=>compass.solve(compass.STAGES[name].start).length;
+ assert.deepEqual([length('inner'),length('outer'),length('final')],[4,6,12]);
+ assert.ok(length('final')>length('inner')+length('outer'),'the four rings cannot be done as two pairs');
+ assert.deepEqual(['inner','outer','final'].map(compass.allowance),[10,12,24]);
+});
+
+test('E9 hints: three tiers, and the last one names the shortest turns from where the rings are now',()=>{
+ for(const name of ['inner','outer','final']){
+  const stage=compass.STAGES[name];
+  const hints=compass.hintsFor(name,()=>stage.start);
+  assert.equal(hints.length,3,name);
+  const last=String(hints[2]()),n=compass.solve(stage.start).length;
+  assert.ok(last.includes('共 '+n+' 步'),name);
+  const after=compass.turn(stage.start,0,1);
+  assert.ok(String(compass.hintsFor(name,()=>after)[2]()).includes('共 '+compass.solve(after).length+' 步'),name+' follows the board');
+  assert.equal(compass.hintStep(name),name);
+ }
+ assert.equal(String(compass.hintsFor('inner',()=>[0,0])[2]()),'');
+});
+
+test('E9 level data: lines match the draft, needs the four marks, stages registered, banners ship, no animation loop',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const e9=abyss.levels[9];
+ assert.equal(e9.id,'e9');assert.equal(e9.puzzle,'compass');assert.equal(e9.number,'E9');
+ for(const {speaker,text} of [...e9.scene,...e9.unlock])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.equal(e9.scene.length,3);assert.equal(e9.unlock.length,3);
+ assert.deepEqual(e9.stages,puzzles.compass.stages.map(stage=>stage.id));
+ assert.equal(puzzles.compass.optional,true);
+ // the rings carry the marks of the four earlier levels, in ring order
+ assert.deepEqual(compass.MARKS,['影','音','重','時'].map((mark,i)=>abyss.levels.find(l=>l.reward.mark===mark)&&mark));
+ for(const stage of puzzles.compass.stages)assert.deepEqual(stage.requires,['shadow','choir','scale','frozen']);
+ assert.deepEqual(puzzles.compass.stages[2].after,['compass-inner','compass-outer']);
+ assert.equal(puzzles.compass.stages[0].after,undefined);assert.equal(puzzles.compass.stages[1].after,undefined);
+ for(const id of e9.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/compass.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
+ assert.ok(!/requestAnimationFrame/.test(src));
+ assert.ok(!/style="/.test(src)&&!/\.style\./.test(src),'the page CSP blocks inline styles');
+ assert.ok(compass.dialSvg([0,1,2,3],[0,0,0,0]).includes('cmp-needle'));
 });

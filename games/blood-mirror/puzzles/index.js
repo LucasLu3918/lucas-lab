@@ -88,6 +88,12 @@ export const puzzles={
   {id:'frozen-faces',label:'誰站在哪裡',mount:lazy('frozen','mountFrozenFaces')},
   {id:'frozen-order',label:'三張畫的先後',mount:lazy('frozen','mountFrozenOrder')},
   {id:'frozen-final',label:'摔杯的人',mount:lazy('frozen','mountFrozenFinal'),after:['frozen-faces','frozen-order'],waiting:'要先知道每位賓客是誰，也要排好三張畫的時間。先把前兩道做完。'}
+ ]},
+ // The mirror compass (E9). The four rings carry the marks of E-X, E6, E7 and E8, so all four levels must be done. The two pairs can be done in either order; the last page needs both.
+ compass:{id:'compass',title:'魔鏡羅盤',subtitle:'ABYSS · 四環的記號',optional:true,stages:[
+  {id:'compass-inner',label:'內圈兩環',mount:lazy('compass','mountCompassInner'),requires:['shadow','choir','scale','frozen'],missing:'羅盤的環上刻著四個記號：影、音、重、時。還缺的，回到帳本的背面，從影戲小屋、失聲合唱廳、稱量廳和凝結的三刻取回。'},
+  {id:'compass-outer',label:'外圈兩環',mount:lazy('compass','mountCompassOuter'),requires:['shadow','choir','scale','frozen'],missing:'羅盤的環上刻著四個記號：影、音、重、時。還缺的，回到帳本的背面，從影戲小屋、失聲合唱廳、稱量廳和凝結的三刻取回。'},
+  {id:'compass-final',label:'四環合一',mount:lazy('compass','mountCompassFinal'),requires:['shadow','choir','scale','frozen'],missing:'羅盤的環上刻著四個記號：影、音、重、時。還缺的，回到帳本的背面，從影戲小屋、失聲合唱廳、稱量廳和凝結的三刻取回。',after:['compass-inner','compass-outer'],waiting:'四個環要一起轉，得先分別讓兩個內環和兩個外環對準指針。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).

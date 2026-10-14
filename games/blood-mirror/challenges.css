@@ -634,3 +634,23 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .frz-recall summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--brass-hi);font-size:13px}
 #modal .frz-roster{margin:6px 0;padding-left:18px;font-size:13px;line-height:1.8;color:#d9c9a4}
 #modal .frz-held{fill:#e0b84f;stroke:#ffd98a}
+
+/* Mirror compass (E9): concentric rings turned with buttons, a needle at the top, a pad of turn buttons per ring */
+#modal .cmp-rule{margin:6px 0;font-size:13px;color:#d9c9a4}
+#modal .cmp-stage{max-width:340px;margin:8px auto}
+#modal .cmp-dial{display:block;width:100%;height:auto}
+#modal .cmp-band{fill:none;stroke:#1d1410}
+#modal .cmp-ring-0 .cmp-band{stroke:#241a3a}
+#modal .cmp-ring-1 .cmp-band{stroke:#3a2412}
+#modal .cmp-ring-2 .cmp-band{stroke:#262a2e}
+#modal .cmp-ring-3 .cmp-band{stroke:#3a3014}
+#modal .cmp-shape{fill:#b79a5e}
+#modal .cmp-mark-disc{fill:#e0b84f;stroke:#ffd98a;stroke-width:1.2}
+#modal .cmp-mark{fill:#2a1608;font-size:15px;font-weight:700}
+#modal .cmp-needle{fill:#c0283a;stroke:#f3e6c4;stroke-width:1.2;stroke-linejoin:round}
+#modal .cmp-needle-line{stroke:#c0283a;stroke-width:1.4;stroke-dasharray:3 3}
+#modal .cmp-pad{display:grid;gap:6px;margin:8px 0}
+#modal .cmp-row{display:grid;grid-template-columns:1fr 64px 1fr;gap:6px;align-items:center}
+#modal .cmp-turn{min-height:44px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;color:var(--brass-hi);font-size:22px;cursor:pointer}
+#modal .cmp-turn:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+#modal .cmp-name{text-align:center;color:var(--brass-hi);font-size:15px}
