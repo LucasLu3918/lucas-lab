@@ -250,8 +250,10 @@ function mountGallery(ctx,stage){
     const notch=layer.querySelector('[data-n="'+a.id+'"]');
     if(notch){
      const sd=side(view,p,a),nr=Math.max(a.r*F*K*m,9);
-     notch.dataset.side=sd;const nw=Math.max(30,Math.round(nr*0.9)),nh=Math.round(nw*2/3); // the handle grows with a zoomed door
-     notch.style.width=nw+'px';notch.style.height=nh+'px';notch.style.left=(pt[0]*K+(sd==='R'?nr+2:-nr-nw-2))+'px';notch.style.top=(pt[1]*K-nh/2)+'px';
+     notch.dataset.side=sd;// A zoomed door is big enough to hold its handle inside the ring, clear of the neighbouring windows; a small one keeps it just outside.
+     const inside=nr>=48,nw=inside?Math.round(nr*0.75):Math.max(30,Math.round(nr*0.9)),nh=Math.round(nw*2/3);
+     const cx=pt[0]*K,hx=inside?(sd==='R'?cx+nr-nw-6:cx-nr+6):(sd==='R'?cx+nr+2:cx-nr-nw-2);
+     notch.style.width=nw+'px';notch.style.height=nh+'px';notch.style.left=hx+'px';notch.style.top=(pt[1]*K-nh/2)+'px';
     }
    }
    el.querySelector('.gal-tag').textContent=PANELS[p].name+(fl?'（翻面）':'')+(zoomed?'（放大）':'');
