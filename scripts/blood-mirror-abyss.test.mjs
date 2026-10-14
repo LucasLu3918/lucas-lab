@@ -12,6 +12,7 @@ import * as gal from '../games/blood-mirror/puzzles/gallery.js';
 import * as box from '../games/blood-mirror/puzzles/box.js';
 import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import * as choir from '../games/blood-mirror/puzzles/choir.js';
+import * as scale from '../games/blood-mirror/puzzles/scale.js';
 import {abyss} from '../games/blood-mirror/data/abyss.js';
 import {speakers} from '../games/blood-mirror/data/chapters/index.js';
 import {puzzles,setPuzzleCompletions,completedPuzzles,resetPuzzles,isPuzzleComplete,isStageComplete,startPuzzle} from '../games/blood-mirror/puzzles/index.js';
@@ -562,7 +563,7 @@ test('E5 level data: lines match the draft, the full ending needs all seven shar
  // The thread face shows pictures that already ship with the scenes.
  for(const {art} of Object.values(box.PANELS))assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/'+art+'.webp',import.meta.url)),art);
  // The levels are listed in order: E5 comes after the four that give it its keys, and the breather E-X is appended after it.
- assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6']);
+ assert.deepEqual(abyss.levels.map(level=>level.id),['e1','e2','e3','e4','e5','ex','e6','e7']);
 });
 
 test('finishing E5 faces is saved face by face, the box counts as done once all six are, and a new journey keeps them',()=>{
@@ -716,5 +717,79 @@ test('E6 level data: lines match the draft, the stages are registered and ordere
  assert.deepEqual(completedPuzzles().sort(),['choir.choir-pipes','choir.choir-rhythm']);
  resetPuzzles();
  assert.equal(isStageComplete('choir','choir-rhythm'),true);
+ setPuzzleCompletions([]);
+});
+
+test('E7 pages: each pair of equations fixes both weights, and neither equation alone does',()=>{
+ assert.deepEqual(scale.solveWeights(scale.STAGES.fruit),[{apple:2,mirror:3}]);
+ assert.deepEqual(scale.solveWeights(scale.STAGES.thorn),[{rose:5,dagger:7}]);
+ assert.deepEqual(scale.solveWeights(scale.STAGES.final),[scale.WEIGHTS]);
+ // Drop any one equation and the weights are no longer fixed, so both are needed.
+ for(const name of ['fruit','thorn']){
+  const stage=scale.STAGES[name];
+  for(let drop=0;drop<stage.known.length;drop++){
+   const fewer={...stage,known:stage.known.filter((_,i)=>i!==drop)};
+   assert.ok(scale.solveWeights(fewer).length>1,name+' without equation '+drop);
+  }
+ }
+ // The true weights balance every page that is shown.
+ for(const stage of Object.values(scale.STAGES))for(const page of stage.known)assert.equal(scale.balanced(page,scale.WEIGHTS),true);
+ assert.ok(Object.values(scale.WEIGHTS).every(w=>w>=1&&w<=scale.MAX));
+});
+
+test('E7 open scales: each has exactly one right pan, and the last one needs all four weights',()=>{
+ assert.deepEqual(scale.solveAsk(scale.STAGES.fruit),[{apple:6}]);
+ assert.deepEqual(scale.solveAsk(scale.STAGES.thorn),[{rose:7}]);
+ assert.deepEqual(scale.solveAsk(scale.STAGES.final),[{apple:1,mirror:3,dagger:2}]);
+ // The failure reasons are told apart: a thing that is not allowed, a wrong number of pieces, and a wrong weight.
+ const final=scale.STAGES.final;
+ assert.equal(scale.judge(final,{apple:1,mirror:3,dagger:2}),'');
+ assert.equal(scale.judge(final,{apple:1,mirror:3,dagger:2,rose:1}),'thing');
+ assert.equal(scale.judge(final,{apple:2,mirror:3,dagger:2}),'total');
+ assert.equal(scale.judge(final,{apple:2,mirror:2,dagger:2}),'weight');
+ // Using any other weights for the apple, mirror or dagger would have given a different answer, so each result matters.
+ for(const sym of ['apple','mirror','rose','dagger']){
+  const wrong={...scale.WEIGHTS,[sym]:scale.WEIGHTS[sym]+1};
+  const left=scale.weightOf(final.ask.left,wrong);
+  const rightTrue=scale.weightOf([{sym:'apple',n:1},{sym:'mirror',n:3},{sym:'dagger',n:2}],wrong);
+  assert.notEqual(left,rightTrue,'a wrong '+sym+' still balances');
+ }
+ assert.equal(scale.judge(scale.STAGES.fruit,{apple:6}),'');
+ assert.equal(scale.judge(scale.STAGES.fruit,{apple:5}),'weight');
+ assert.equal(scale.judge(scale.STAGES.fruit,{mirror:4}),'thing');
+});
+
+test('E7 hints: three tiers per step and the last one names the weights and the pan',()=>{
+ for(const [name,list] of Object.entries(scale.HINTS))assert.equal(list.length,3,name);
+ assert.ok(scale.HINTS.fruit[2].includes('蘋果 2 磅')&&scale.HINTS.fruit[2].includes('鏡 3 磅')&&scale.HINTS.fruit[2].includes('6 個蘋果'));
+ assert.ok(scale.HINTS.thorn[2].includes('玫瑰 5 磅')&&scale.HINTS.thorn[2].includes('匕首 7 磅')&&scale.HINTS.thorn[2].includes('7 朵玫瑰'));
+ assert.ok(scale.HINTS.final[2].includes('1 個蘋果、3 面鏡、2 把匕首'));
+ assert.ok(scale.HINTS.final[1].includes('25 磅'));
+ assert.equal(scale.hintStep('fruit'),'fruit');
+});
+
+test('E7 level data: lines match the draft, the stages are registered and ordered, banners ship, no animation loop',()=>{
+ const draft=fs.readFileSync(new URL('../games/blood-mirror/plan-improve/expert-dialogue-draft.md',import.meta.url),'utf8');
+ const known=new Set([...draft.matchAll(/^- (\w+)｜(.+)$/gm)].map(m=>m[1]+'｜'+m[2]));
+ const e7=abyss.levels[7];
+ assert.equal(e7.id,'e7');assert.equal(e7.puzzle,'scale');assert.equal(e7.number,'E7');
+ for(const {speaker,text} of [...e7.scene,...e7.unlock])assert.ok(known.has((speaker||'narrator')+'｜'+text),'not in the dialogue draft: '+text);
+ assert.equal(e7.scene.length,3);assert.equal(e7.unlock.length,3);
+ assert.deepEqual(e7.reward,{name:'鉛砝碼',mark:'重',caption:'托盤底下砝碼上的字'});
+ assert.deepEqual(e7.stages,puzzles.scale.stages.map(stage=>stage.id));
+ assert.equal(puzzles.scale.optional,true);
+ assert.deepEqual(puzzles.scale.stages[2].after,['scale-fruit','scale-thorn']);
+ assert.equal(puzzles.scale.stages[0].after,undefined);assert.equal(puzzles.scale.stages[1].after,undefined);
+ for(const id of e7.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
+ const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/scale.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
+ assert.ok(!/requestAnimationFrame/.test(src));
+ assert.ok(!/style="/.test(src),'the page CSP blocks inline style attributes');
+ // Every thing has its own shape as well as its colour.
+ for(const sym of Object.keys(scale.WEIGHTS))assert.ok(scale.iconSvg(sym).includes('sym-'),sym);
+ assert.equal(new Set(Object.keys(scale.WEIGHTS).map(sym=>scale.iconSvg(sym))).size,4);
+ setPuzzleCompletions(['scale.scale-fruit','scale.scale-thorn']);
+ assert.deepEqual(completedPuzzles().sort(),['scale.scale-fruit','scale.scale-thorn']);
+ resetPuzzles();
+ assert.equal(isStageComplete('scale','scale-thorn'),true);
  setPuzzleCompletions([]);
 });

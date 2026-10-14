@@ -76,6 +76,12 @@ export const puzzles={
   {id:'choir-pipes',label:'管長與音高',mount:lazy('choir','mountChoirPipes')},
   {id:'choir-rhythm',label:'三個聲部',mount:lazy('choir','mountChoirRhythm')},
   {id:'choir-hymn',label:'聖歌',mount:lazy('choir','mountChoirHymn'),after:['choir-pipes','choir-rhythm'],waiting:'聖歌要用前兩道機關的結果：三根管，和三個聲部的起拍。先把它們都完成。'}
+ ]},
+ // The weighing hall (E7). The two pages can be done in either order; the last scale needs both.
+ scale:{id:'scale',title:'稱量廳',subtitle:'ABYSS · 天秤與四樣東西',optional:true,stages:[
+  {id:'scale-fruit',label:'蘋果與鏡',mount:lazy('scale','mountScaleFruit')},
+  {id:'scale-thorn',label:'玫瑰與匕首',mount:lazy('scale','mountScaleThorn')},
+  {id:'scale-final',label:'最後一台',mount:lazy('scale','mountScaleFinal'),after:['scale-fruit','scale-thorn'],waiting:'最後一台要用前兩頁算出的四個重量。先把兩頁都配平。'}
  ]}
 };
 // Painted close-up at the head of each mechanism (assets/puzzles/<stage id>.webp, 960x411).

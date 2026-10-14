@@ -186,6 +186,14 @@ node scripts/blood-mirror.browser.cjs
 - 尚待作者驗收。**這不是使用者驗收。**
 
 
+## 鏡淵 E7 稱量廳（三道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/scale-{fruit,thorn,final}.webp`（960×411，約 18、20、17 KB）與 `assets/puzzles/thumbs/scale-*.webp`（224×128，各約 3–4 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選）。選用 fruit-9502（三顆蘋果對兩面鏡，背後是帳冊）、thorn-9502（黑玫瑰與匕首對砝碼，背後是帳冊）、final-9501（長桌上的多座天秤與帳冊）。轉檔與縮圖參數同 E1–E6。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/e7/`，不進版本控制。
+- 提示詞全程用正面描述；一輪即可用。
+- 已知：final 的兩張候選都把天秤零件畫得分離（橫樑與盤不連在一起），只當氛圍圖；圖中盤裡的東西與數量不代表謎題內容，正式機關是 HTML，答案由 `puzzles/scale.js` 的規則決定。
+- 尚待作者驗收。**這不是使用者驗收。**
+
 ## 鏡淵 E6 失聲合唱廳（三道機關的橫幅與縮圖）
 
 - 檔案：`assets/puzzles/choir-{pipes,rhythm,hymn}.webp`（960×411，約 19、18、20 KB）與 `assets/puzzles/thumbs/choir-*.webp`（224×128，各約 3–5 KB）。

@@ -182,6 +182,27 @@ export const abyss={
    ],
    enter:'走進合唱廳',
    reward:{name:'銅片',mark:'音',caption:'管底銅片上的字'}
+  },
+  {
+   id:'e7',
+   puzzle:'scale',
+   number:'E7',
+   title:'稱量廳',
+   subtitle:'停在平衡上的天秤',
+   stages:['scale-fruit','scale-thorn','scale-final'],
+   thumb:'scale-fruit',
+   scene:[
+    {text:'稱量廳的天秤全都停在平衡上，盤裡放著蘋果、鏡子、黑玫瑰和一把短刀。'},
+    {speaker:'mirror',text:'「每一筆帳，最後都要稱一次。我從不記錯，只是很少有人問我重量。」'},
+    {text:'牆上的帳頁寫滿了等式，沒有一個數字有名字。'}
+   ],
+   unlock:[
+    {text:'最後一台天秤輕輕一沉，又穩穩停在中央。四樣東西的重量，終於各有了名字。'},
+    {speaker:'mirror',text:'「一樣東西值多少，不是它自己說了算，是放在它旁邊的東西說了算。」'},
+    {text:'托盤底下夾著一枚小小的鉛砝碼，刻著一個字：重。'}
+   ],
+   enter:'走進稱量廳',
+   reward:{name:'鉛砝碼',mark:'重',caption:'托盤底下砝碼上的字'}
   }
  ]
 };

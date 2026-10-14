@@ -579,3 +579,30 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .choir-cell{min-height:44px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;cursor:pointer}
 #modal .choir-cell[aria-pressed=true]{background:#e0b84f;border-color:#ffd98a}
 @media (max-width:480px){#modal .choir-staff{grid-template-columns:64px 1fr}#modal .choir-voice{grid-template-columns:64px 44px 1fr 44px;gap:4px}#modal .choir-dot{height:16px}}
+
+/* Weighing hall (E7): balanced pages, the open scale and its steppers */
+#modal .scale-pages{list-style:none;margin:10px 0;padding:0;display:grid;gap:8px}
+#modal .scale-recall{margin:10px 0}
+#modal .scale-recall summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--brass-hi);font-size:13px}
+#modal .scale-row{display:grid;grid-template-columns:1fr 28px 1fr;align-items:center;gap:6px;padding:8px;border:1px solid #3b2d1a;border-radius:4px;background:#120c10}
+#modal .scale-pan{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px;min-height:34px}
+#modal .scale-right{justify-content:flex-start}
+#modal .scale-eq{text-align:center;color:var(--brass-hi);font-size:18px}
+#modal .scale-sym{width:26px;height:28px}
+#modal .scale-lb{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:26px;padding:0 6px;border-radius:3px;background:#3a3a44;border:1px solid #6d6d7a;color:#e6e6ee;font-size:12px}
+#modal .scale-open{margin:12px 0 6px}
+#modal .scale-row.open{border-color:var(--brass-mid)}
+#modal .scale-steppers{display:grid;gap:6px;margin:8px 0}
+#modal .scale-stepper{display:grid;grid-template-columns:30px 1fr 44px 36px 44px;align-items:center;gap:6px;color:#d9c9a4;font-size:14px}
+#modal .scale-stepper output{text-align:center;font-variant-numeric:tabular-nums}
+#modal .sym-apple{fill:#c0392b;stroke:#6e1a14;stroke-width:1.2}
+#modal .sym-stem{fill:none;stroke:#8d7a55;stroke-width:1.6;stroke-linecap:round}
+#modal .sym-leaf{fill:#5f9a52;stroke:#2f5a2a;stroke-width:1}
+#modal .sym-mirror-frame{fill:#c9ab6a;stroke:#5c4627;stroke-width:1.2}
+#modal .sym-mirror-glass{fill:#9db8d8;stroke:#4b6a8f;stroke-width:1}
+#modal .sym-mirror-handle{stroke:#c9ab6a;stroke-width:2.4;stroke-linecap:round}
+#modal .sym-rose{fill:#15101a;stroke:#6b5a8a;stroke-width:1.4}
+#modal .sym-rose-line{fill:none;stroke:#8a6fb0;stroke-width:1.2;stroke-linecap:round}
+#modal .sym-dagger{fill:#c8d0dc;stroke:#6d7684;stroke-width:1.2}
+#modal .sym-hilt{fill:none;stroke:#c9ab6a;stroke-width:2.2;stroke-linecap:round}
+@media (max-width:480px){#modal .scale-sym{width:22px;height:24px}#modal .scale-row{grid-template-columns:1fr 20px 1fr;padding:6px}}
