@@ -85,6 +85,31 @@ export const abyss={
    ],
    enter:'走進藥房',
    reward:{name:'回魂藥',mark:'ㄋ',place:'瓶底'}
+  },
+  {
+   id:'e4',
+   puzzle:'gallery',
+   number:'E4',
+   title:'無限鏡廊',
+   subtitle:'一面接著一面的帳頁',
+   stages:['gallery-align','gallery-merge'],
+   thumb:'gallery-align',
+   scene:[
+    {text:'走廊沒有盡頭，兩側的鏡子一面接著一面，每一面都映出另一條走廊。'},
+    {speaker:'mirror',text:'「這是我替每座城市畫的帳頁。看得見的在外面，看不見的在鏡子裡。」'},
+    {text:'一條紅線穿過畫框，從孩子們的腕間一直延伸到看不見的地方。'},
+    {speaker:'mirror',text:'「把畫格疊起來。紅線會告訴妳，哪一頁和哪一頁是同一筆帳。」'}
+   ],
+   stageLines:{
+    'gallery-align':[
+     {text:'紅線第一次完整地出現了：它從月亮穿過鏡子，又在提燈上繞了一圈。'}
+    ]
+   },
+   unlock:[
+    {text:'四幅畫合成一個畫面。紅線在最後一格打了結，妳把這截紅線收進手心。'}
+   ],
+   enter:'走進鏡廊',
+   reward:{name:'紅線',mark:'ㄧ',place:'手心'}
   }
  ]
 };

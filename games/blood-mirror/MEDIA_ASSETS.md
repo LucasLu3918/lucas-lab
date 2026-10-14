@@ -169,3 +169,10 @@ node scripts/blood-mirror.browser.cjs
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每個機關 2 張候選目視挑選）。選用 testimony-4701、vessels-2802、mixing-5902。轉檔與縮圖參數同 E1、E2：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576 再 `-resize 224 128 -q 76`。**調色例外**：橫幅取原圖左側 `-crop 0 80 1100 471` 再縮成 960×411，縮圖取 `-crop 250 100 800 457`，都是為了切掉原圖右緣的畫框。PNG 母檔在 `draft/lucas-lab/blood-mirror/source-art/puzzles/apothecary-*.png`，全部候選（含被淘汰的兩輪）在 `candidates/apothecary/`，不在版本控制內。
 - **提示詞的教訓**：第一版（種子 2701／2702、2901／2902）背牆都被模型加了一幅肖像畫；提示詞寫「沒有畫、沒有肖像」反而更容易出現（第二輪仍有）。第三輪改成**正面描述**（「整面牆是滿滿的藥瓶架」「牆上沒有掛任何東西」，不出現 queen、painting 等字）後，證詞橫幅沒有畫；調色橫幅右緣仍有畫框，所以用裁切避開。第一版調色的手持鏡是立式，現在改成平放在桌上。
 - 尚待作者驗收。**這不是使用者驗收。**
+
+## 鏡淵 E4 無限鏡廊（兩道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/gallery-{align,merge}.webp`（960×411，約 35、46 KB）與 `assets/puzzles/thumbs/gallery-{align,merge}.webp`（224×128，約 5、7 KB）。畫格本身（`mirror-hall`、`balcony`、`black-pine-path`、`ballroom`）用既有場景圖，沒有新增。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每個機關 2 張候選目視挑選）。選用 align-4102（哥德長廊、紅線沿地面延伸）、merge-4201（疊在一起的金框畫，一條紅線穿過）。轉檔與縮圖參數同 E1–E3：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576（`-crop 168 0 1008 576`）再 `-resize 224 128 -q 76`。PNG 母檔與落選候選在 `draft/lucas-lab/blood-mirror/source-art/puzzles/`（候選在 `e4/`），不進版本控制。
+- 提示詞全程用正面描述，沒有否定句。第一輪即可用，沒有重畫。
+- 尚待作者驗收。**這不是使用者驗收。**

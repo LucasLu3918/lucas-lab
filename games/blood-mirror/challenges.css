@@ -433,3 +433,47 @@ body.reduce-motion #modal .wheel-glyph{transition:none}
 #modal .apo-pigment-B{color:#7ea0ff}
 #modal .apo-drop .secondary-button{width:auto;min-width:44px;min-height:44px;margin:0;padding:0 12px}
 #modal .apo-count{min-width:3em;text-align:center}
+
+/* E4 gallery (puzzles/gallery.js): four panels on a 744x548 board scaled to the modal; one panel can fill the board, the rest wait as tiles. */
+#modal .gal-caption{margin:6px 0;min-height:4.6em;font-size:13px;line-height:1.7;color:#f3e6bd}
+#modal .gal-stage{position:relative;width:100%;max-width:744px;margin:6px auto;overflow:hidden;border-radius:6px;background:#0b0a0f}
+#modal .gal-stage[hidden]{display:none}
+#modal .gal-board{position:absolute;left:0;top:0;width:744px;height:548px;transform-origin:0 0}
+#modal .gal-guide{position:absolute;left:0;top:0;width:744px;height:548px;overflow:visible;pointer-events:none;z-index:50}
+#modal .gal-panel{position:absolute;box-sizing:border-box;width:352px;height:200px;border:6px solid #8a6a2a;border-radius:4px;overflow:hidden;background:#000;touch-action:none;cursor:grab;box-shadow:0 0 0 2px #3d2f12,0 6px 18px #000a;transform-origin:0 0}
+#modal .gal-panel.drag{cursor:grabbing;box-shadow:0 0 0 2px #e8c46a,0 12px 28px #000c}
+#modal .gal-panel:focus-visible{outline:3px solid #e8c46a;outline-offset:2px}
+body:not(.reduce-motion) #modal .gal-panel{transition:left .3s,top .3s}
+body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
+#modal .gal-layer{position:absolute;left:0;top:0;transform-origin:0 0}
+#modal .gal-layer img{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;display:block;-webkit-user-drag:none;user-select:none}
+#modal .gal-ring{position:absolute;box-sizing:border-box;border:2px dashed #fff;border-radius:50%;box-shadow:0 0 0 1px #000a,inset 0 0 0 1px #000a;pointer-events:none}
+#modal .gal-ring.on{border-style:solid;border-color:#e8c46a}
+#modal .gal-notch{position:absolute;width:0;height:0;border:7px solid transparent;pointer-events:none}
+#modal .gal-notch[data-side="R"]{border-left:14px solid #e8c46a;border-right:0}
+#modal .gal-notch[data-side="L"]{border-right:14px solid #e8c46a;border-left:0}
+#modal .gal-tag{position:absolute;left:6px;top:4px;padding:1px 8px;border-radius:10px;background:#000b;font-size:12px;color:#fff}
+#modal .gal-tools{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+#modal .gal-tools[hidden]{display:none}
+#modal .gal-tools-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+#modal .gal-tools-row b{min-width:2.4em;font-size:13px}
+#modal .gal-tools .secondary-button{width:auto;min-width:44px;min-height:44px;margin:0;padding:0 12px}
+#modal .gal-tools [aria-pressed=true]{background:#5a3a14}
+#modal .gal-place{margin:6px 0;font-size:13px}
+#modal .gal-place[hidden]{display:none}
+#modal .gal-place summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+#modal .gal-place-body{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
+#modal .gal-place-body label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:#cdbf9f}
+#modal .gal-place-body select{min-height:44px;max-width:100%;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:8px}
+#modal .gal-place-body .secondary-button{width:auto;min-height:44px;margin:0;padding:0 16px}
+#modal .gal-order[hidden]{display:none}
+#modal .gal-threads,#modal .gal-order-note{font-size:13px;line-height:1.7;color:#cdbf9f}
+#modal .gal-slots,#modal .gal-cards{display:flex;gap:6px;margin:8px 0}
+#modal .gal-slot,#modal .gal-card{position:relative;flex:1 1 20%;min-width:56px;aspect-ratio:16/9;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#000;color:#cdbf9f;cursor:pointer}
+#modal .gal-slot{border:2px dashed #5a4f68}
+#modal .gal-slot:not(.empty),#modal .gal-card{border:2px solid #8a6a2a}
+#modal .gal-slot.empty{cursor:default}
+#modal .gal-slot img,#modal .gal-card img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+#modal .gal-slot span,#modal .gal-card span{position:relative;padding:1px 6px;border-radius:10px;background:#000b;font-size:12px;white-space:nowrap;color:#fff}
+#modal .gal-card.used{opacity:.35}
+#modal .gal-line{display:block;width:100%;max-width:540px;margin:12px auto}
