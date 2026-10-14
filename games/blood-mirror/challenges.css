@@ -542,3 +542,16 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .box-slot.gap{flex-direction:column;gap:0}
 #modal .box-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px;color:#cdbf9f}
 #modal .box-pick select{min-height:44px;min-width:76px;font:inherit;color:#e9dcc3;background:#1d1a24;border:1px solid #3a3446;border-radius:4px}
+
+/* Shadow cabin (E-X): the wall, the outline, the shadow, and the two turning dials */
+#modal .sh-wall{fill:#1a1017;stroke:#3b2d1a;stroke-width:1.5}
+#modal .sh-target{fill:#c9ab6a;fill-opacity:.28;stroke:none}
+#modal .sh-shade{fill:#07040a;stroke:none}
+#modal .belfry-svg.matched .sh-target{fill-opacity:.55}
+#modal .sh-lamp-glow{fill:#ffd98a;fill-opacity:.18}
+#modal .sh-lamp{fill:#ffd98a}
+#modal .shadow-controls{display:grid;gap:10px;margin:12px 0}
+#modal .shadow-slider{display:grid;grid-template-columns:96px 1fr 52px;align-items:center;gap:10px;min-height:44px;font-size:14px;color:var(--brass-hi)}
+#modal .shadow-slider input{width:100%;min-height:44px;accent-color:var(--brass)}
+#modal .shadow-slider output{text-align:right;font-variant-numeric:tabular-nums;color:#d9c9a4}
+@media (max-width:480px){#modal .shadow-slider{grid-template-columns:78px 1fr 46px;gap:6px}}

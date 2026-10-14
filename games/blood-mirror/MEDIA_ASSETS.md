@@ -186,6 +186,14 @@ node scripts/blood-mirror.browser.cjs
 - 尚待作者驗收。**這不是使用者驗收。**
 
 
+## 鏡淵 E-X 影戲小屋（兩道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/shadow-{key,queen}.webp`（960×411，約 11、18 KB）與 `assets/puzzles/thumbs/shadow-*.webp`（224×128，各約 2–4 KB）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選）。選用 key-9201（油燈、木雕鑰匙與牆上的大影子）、queen-9302（背對、戴冠、長辮的木雕與牆上剪影）。轉檔與縮圖參數同 E1–E5。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/ex/`，不進版本控制。
+- 提示詞全程用正面描述，沒有否定句；一輪即可用。
+- 已知：圖中木雕與影子的角度只是氛圍，正式機關是 SVG 圓盤投影，答案由 `puzzles/shadow.js` 的規則決定。
+- 尚待作者驗收。**這不是使用者驗收。**
+
 ## UI ornaments (`assets/ui/`)
 
 Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, prompts and `convert.cjs` / `seal-alpha.cjs` live in `draft/lucas-lab/blood-mirror/source-art/ui/`.
