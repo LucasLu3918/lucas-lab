@@ -228,3 +228,9 @@ Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, p
 | `velvet.webp` (inlined) | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
 
 Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to save two first-screen requests; the `.webp` files are not shipped, regenerate them from the masters with `convert.cjs` / `seal-alpha.cjs`, then re-inline. Only `arrow-gilt.webp` is a separate file.
+
+## 鏡淵 E9 魔鏡羅盤（三道機關的橫幅與縮圖）
+
+- 檔案：`assets/puzzles/compass-{inner,outer,final}.webp`（960×411）與 `assets/puzzles/thumbs/compass-*.webp`（224×128）。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，每張 2 張候選目視挑選）。轉檔與縮圖參數同 E1–E8。PNG 母檔、落選候選、提示詞與 `run.sh` 在 `draft/lucas-lab/blood-mirror/source-art/puzzles/e9/`，不進版本控制。
+- 已知：橫幅只是氛圍，圖中羅盤的環數與刻字不代表謎題內容；謎題裡的環是 `puzzles/compass.js` 依資料畫的向量圖。

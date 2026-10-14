@@ -224,6 +224,27 @@ export const abyss={
    ],
    enter:'走進舞廳',
    reward:{name:'停擺的懷錶',mark:'時',caption:'錶蓋內側刻著的字'}
+  },
+  {
+   id:'e9',
+   puzzle:'compass',
+   number:'E9',
+   title:'魔鏡羅盤',
+   subtitle:'四個記號指向的地方',
+   stages:['compass-inner','compass-outer','compass-final'],
+   thumb:'compass-inner',
+   scene:[
+    {text:'帳冊的最後一頁夾著一只羅盤。四個同心的環，各刻著一個妳在這裡拿到的記號。'},
+    {speaker:'mirror',text:'「它不指北方。它只指向我最不想被找到的那一頁。」'},
+    {text:'環與環咬在一起，轉動其中一個，鄰近的環就會被拖著往反方向走。'}
+   ],
+   unlock:[
+    {text:'四個記號同時落在指針下。環與環停住了，像一群終於站定的人。'},
+    {speaker:'mirror',text:'「我把它藏得很深，是因為它指的不是我。」'},
+    {text:'羅盤背面刻著一個字：歸。'}
+   ],
+   enter:'翻開羅盤',
+   reward:{name:'魔鏡羅盤',mark:'歸',caption:'羅盤背面刻著的字'}
   }
  ]
 };
