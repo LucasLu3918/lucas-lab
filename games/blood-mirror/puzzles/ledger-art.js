@@ -4,7 +4,7 @@ export const ledgerPieces=['帳頁標題左側','帳頁標題中央','帳頁標�
 // (composited from locally generated parts). Torn into nine pieces it is the puzzle; restored it hangs between the two rollers of
 // assets/puzzles/ledger-scroll.webp, the same sheet mounted on a scroll. The rules and every word stay typeset SVG on top, so the key
 // number is real text and the tear lines still cut through the lettering. The type is meant to be LXGW WenKai TC (a kai hand) with the Latin
-// line in IM Fell English (SIL OFL 1.1); those font files are not committed yet, so the page serif shows instead.
+// line in IM Fell English (SIL OFL 1.1); the font files live in assets/fonts/.
 const text=`<text x="150" y="36" class="ledger-latin" text-anchor="middle">Liber Vitae Regni</text>
 <text x="150" y="62" class="ledger-title" text-anchor="middle">王室生命帳簿</text>
 <text x="150" y="83" class="ledger-small" text-anchor="middle">第十三冊 · 出生抵押</text>

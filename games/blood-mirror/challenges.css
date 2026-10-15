@@ -693,7 +693,10 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .ledger-tile:focus-visible{outline:2px solid var(--brass-hi);outline-offset:1px;z-index:3}
 .ledger-rule{stroke:#5a3a1c;opacity:.5}
 .ledger text{fill:#2a1a0c}
-/* The birth-record scroll is set in the page's own serif for now. The kai hand and old-style roman it was designed with are kept aside (draft/lucas-lab/blood-mirror/source-art/snow-parts/fonts/README.md); 'Scroll Kai' and 'Scroll Roman' take effect once their @font-face rules are added back. */
+/* Birth-record scroll type: LXGW WenKai TC (kai hand) and IM Fell English (old-style roman), both SIL OFL 1.1, subset to the characters the ledger uses. */
+@font-face{font-family:'Scroll Kai';font-weight:400;font-display:swap;src:url(assets/fonts/wenkai-400.woff2) format('woff2')}
+@font-face{font-family:'Scroll Kai';font-weight:700;font-display:swap;src:url(assets/fonts/wenkai-700.woff2) format('woff2')}
+@font-face{font-family:'Scroll Roman';font-weight:400;font-display:swap;src:url(assets/fonts/fell-400.woff2) format('woff2')}
 .ledger .ledger-latin{font-family:'Scroll Roman',Georgia,serif;font-size:11px;letter-spacing:3.4px;fill:#6b4a1f}
 .ledger .ledger-title{font-weight:700;font-size:25px;letter-spacing:4px}
 .ledger .ledger-small{font-size:11.5px;letter-spacing:1.4px;fill:#4a2f14}
