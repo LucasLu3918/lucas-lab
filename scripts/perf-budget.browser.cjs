@@ -16,8 +16,10 @@ const BUDGETS=[
  {route:'/',maxBytes:300*KB,maxRequests:13},
  // Raised on 2026-10-12 (story 85→95 KB, chapter 60→72 KB): the shared icon, gallery and music styles and scripts from
  // PR #30 grew style.css + app.js by about 9 KB, bringing these pages to 89 KB and 67 KB.
- {route:'/stories/dark-snow-white/',maxBytes:95*KB,maxRequests:8},
- {route:'/stories/dark-snow-white/chapters/00/',maxBytes:72*KB,maxRequests:7},
+ // Raised on 2026-10-15 (story 95→100 KB, chapter 72→78 KB): the brand mark is now a detailed compass, drawn inline in the header
+ // on every page and reused as the favicon (about 3 KB per page). The same favicon is fetched once, so it is not counted twice.
+ {route:'/stories/dark-snow-white/',maxBytes:100*KB,maxRequests:8},
+ {route:'/stories/dark-snow-white/chapters/00/',maxBytes:78*KB,maxRequests:7},
  {route:'/search/',maxBytes:350*KB,maxRequests:15},
  // The game ships as native ES modules (no bundler, plan §9.1). Puzzle stages and the credits load on demand, so the
  // first screen makes 43 requests (2026-10-13), with all modal markup in one module. The budget of 45 leaves room for one new eager module; a larger jump fails.

@@ -37,9 +37,7 @@ button,a,input,select {outline-offset:4px}
 .header {position:sticky;top:0;z-index:30;background:#080e16f2;border-bottom:1px solid #c1a77740;backdrop-filter:blur(14px)}
 .headerin {display:flex;align-items:center;gap:20px;min-height:82px}
 .brand {display:flex;align-items:center;gap:13px;flex-shrink:0;min-height:44px}
-.brand-mark {width:49px;height:49px;fill:none;stroke:var(--gold);stroke-width:1;overflow:visible}
-.brand-mark path {fill:#d9bf8a22}
-.brand-mark circle:last-child {fill:var(--bg);stroke:var(--gold-bright)}
+.brand-mark {width:49px;height:49px;overflow:visible}
 .brand-copy {display:flex;flex-direction:column;line-height:1.1}
 .brand-name {font:27px/1.1 var(--font-serif);letter-spacing:.12em}
 .brand-tagline {font-size:var(--fs-xs);letter-spacing:.14em;color:var(--gold);margin-top:6px}

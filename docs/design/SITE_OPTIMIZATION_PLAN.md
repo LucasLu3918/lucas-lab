@@ -79,7 +79,7 @@ LCP 全部低於 100 ms，CLS 為 0（遊戲頁 0.0003）。改善最明顯的�
     - 靜態資產與圖片：stale-while-revalidate。
     - `/games/` 完全略過，遊戲與音訊不受影響。
     - 快取名稱內含 commit 短碼，部署後自動清除舊快取。
-    - `manifest.webmanifest` 已宣告。**限制**：目前只有 SVG 圖示，Chrome 的安裝提示通常需要 192/512 PNG 圖示，這一點尚未完成。
+    - `manifest.webmanifest` 已宣告。**限制（已於 2026-10-15 解除）**：原先只有 SVG 圖示；現已補上 192/512 PNG 與 maskable 圖示。
 
 ## 四、驗證
 
@@ -103,7 +103,7 @@ LCP 全部低於 100 ms，CLS 為 0（遊戲頁 0.0003）。改善最明顯的�
 
 ## 六、後續工作
 
-- 為 PWA 補上 192/512 PNG 圖示，完成安裝條件。
+- ~~為 PWA 補上 192/512 PNG 圖示，完成安裝條件。~~ 已完成（2026-10-15）：icon-192、icon-512、maskable-512 與 apple-touch-icon 均由同一套星軌羅盤 SVG 渲染，`manifest.webmanifest` 已宣告。
 - 消除 `style-src 'unsafe-inline'`：把模板與遊戲的內嵌 `style` 屬性改為類別。
 - 搜尋頁的 275 KB 初始傳輸主要來自書籍封面（每張約 25–40 KB，已 lazy-load），可再評估縮小或延後載入。
 - 真機驗收（iOS Safari、Android Chrome）仍需人工完成，見 `docs/IMPLEMENTATION.md`。

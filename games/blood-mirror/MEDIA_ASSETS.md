@@ -89,7 +89,7 @@ node scripts/blood-mirror.browser.cjs
 - 目標與真相進度放在場景上方。場景線索清單與光點共用同一探索事件，手機預設展開；道具狀態顯示「已收取」／「已查看」。
 - 共用彈窗固定標題／關閉區，內容可獨立捲動；內容更新後保持鍵盤焦點。
 - 有存檔時首頁優先繼續旅程。閱讀文字提高至 14–15px，另提供較大文字。減少動畫與較大文字偏好保存在 `blood-mirror-ui-v1`；不修改故事存檔格式。
-- 全站 favicon 為 `assets/favicon.svg` 星軌羅盤；遊戲使用 `games/blood-mirror/favicon.svg` 加冕魔鏡。皆為本機 SVG，16／32／64px 已實際渲染確認。
+- 全站 favicon 為 `assets/favicon.png`（64px 圓角方形）、頁首標誌為 `assets/brand-mark.webp`，皆由 Z-Image Turbo 產生的星軌羅盤母稿縮製；遊戲使用 `games/blood-mirror/assets/icons/favicon-64.png` 與 `game-brand.webp`（加冕魔鏡）。母稿與候選保留於 scratchpad，不納入 repo。
 - 驗證：`scripts/blood-mirror-ui.browser.cjs` 涵蓋 360／390／768／1280／1440px，另重跑完整通關、藝廊及 MP3 驗證。設計與畫面證據見 `docs/design/BLOOD_MIRROR_VISUAL_PROFILE.json`、`BLOOD_MIRROR_VISUAL_AUDIT.json`。截圖為本機暫存證據，未聲稱已取得真實裝置／跨瀏覽器或完整 WCAG 認證。
 
 ## 銀骨蒸汽管：連通規則與操作
