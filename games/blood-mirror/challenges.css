@@ -68,7 +68,7 @@ footer>span:nth-child(2){color:#b9ada2}
 .ledger-frame{fill:none;stroke:#5b4128;stroke-width:2}
 .ledger-frame.thin{stroke-width:.8;opacity:.7}
 .ledger-rule{stroke:#5b4128;stroke-width:.8;opacity:.6}
-.ledger text{font-family:var(--serif);fill:#2e2016}
+.ledger text{font-family:'Scroll Kai','LL Serif TC','Noto Serif TC',serif;fill:#2e2016}
 .ledger-title{font-size:23px;font-weight:700;letter-spacing:3px}
 .ledger-small{font-size:12px;letter-spacing:1px}
 .ledger-line{font-size:17px;letter-spacing:2px}
@@ -109,20 +109,10 @@ footer>span:nth-child(2){color:#b9ada2}
 
 /* Second-stage mechanisms: watch gears, bed names, coffin rubbing, rabbit-ear stitches, mirror corridor */
 .watch-board{display:flex;justify-content:center;margin:16px auto 12px;padding:16px 24px 10px;width:fit-content;max-width:100%;border-radius:56px;border:2px solid #b99a62;background:radial-gradient(ellipse at 50% 20%,#2e2418,#130e0b 72%);box-shadow:inset 0 0 28px #000c,0 0 0 4px #17110c,0 0 0 5px #b99a6266,0 14px 36px #0008}
-.watch-gear{width:92px;min-height:44px;margin:0 -9px;padding:0;border:0;background:none;color:#e8d3a2;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;font-family:Georgia,serif;cursor:pointer}
+.watch-gear{width:92px;min-height:44px;margin:0 -7.35px;padding:0;border:0;background:none;color:#e8d3a2;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;font-family:Georgia,serif;cursor:pointer}
 .watch-gear:focus-visible{outline:2px solid #f0dca8;outline-offset:2px}
 .watch-gear:nth-child(2){z-index:1}
 .gear-spin{flex:none;display:block;width:92px;height:92px;transition:transform .42s cubic-bezier(.3,1.45,.5,1)}
-.gear-svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 3px #000a)}
-.gear-teeth{fill:#7d6236;stroke:#d9bd82;stroke-width:1.2;stroke-linejoin:round}
-.gear-rim{fill:#2a2015;stroke:#b99a62;stroke-width:2}
-.gear-spokes{stroke:#9a7d48;stroke-width:3.2;stroke-linecap:round}
-.gear-hub{fill:#5c4627;stroke:#d9bd82;stroke-width:1.5}
-.gear-pin{fill:#e8d3a2}
-.gear-ruby{fill:#6d2530;stroke:#c3ac80;stroke-width:1.4;transition:fill .2s,filter .2s}
-.watch-gear.aligned .gear-ruby{fill:#ff5c70;filter:drop-shadow(0 0 5px #ff5c70)}
-.watch-gear.aligned .gear-teeth{stroke:#f3e1ae}
-.watch-gear:active .gear-svg{filter:drop-shadow(0 2px 3px #000a) brightness(1.2)}
 .watch-name{font-size:12px;letter-spacing:2px;color:#f0dca8;pointer-events:none}
 .rub-board{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:min(100%,340px);margin:12px auto}
 .rub-cell{aspect-ratio:1;min-height:44px;background:#0d0b0e;border:1px solid #2b2430;color:#d8be8f;font:22px Georgia,'Noto Serif TC',serif;touch-action:none}
@@ -689,3 +679,135 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .cmp-turn{min-height:44px;border:1px solid var(--brass-mid);border-radius:4px;background:#17110c;color:var(--brass-hi);font-size:22px;cursor:pointer}
 #modal .cmp-turn:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
 #modal .cmp-name{text-align:center;color:var(--brass-hi);font-size:15px}
+
+/* Snow White mechanisms, painted parts (2026-10-15). The rules and click areas are unchanged; what you see is generated art
+   (assets/puzzles, local Z-Image Turbo) on top of the same markup. Motion comes from class changes the boards now patch in place
+   (puzzles/morph.js), so every move plays a transition instead of redrawing the board. */
+#modal{--plate:linear-gradient(rgba(10,6,3,.82),rgba(10,6,3,.9)),url(assets/puzzles/watch-plate.webp) center/cover}
+
+/* Birth record: torn pieces of one painted sheet. */
+#modal .ledger-board{gap:3px;padding:8px;background:#0a0705 url(assets/puzzles/mat-steel.webp) 0 0/72px 72px;background-blend-mode:multiply}
+#modal .ledger-tile{border:1px solid #2a1c0d;border-radius:1px;background:#d8c59c;box-shadow:inset 0 0 12px rgba(58,28,8,.5),0 1px 0 #000a;transition:transform .16s cubic-bezier(.3,1.4,.5,1),box-shadow .16s,border-color .16s}
+#modal .ledger-tile.placed{border-color:#c9ab6aaa;box-shadow:inset 0 0 10px rgba(58,28,8,.35),0 0 0 1px #c9ab6a55}
+#modal .ledger-tile.selected{transform:translateY(-3px) scale(1.04);border-color:#f0dca8;box-shadow:inset 0 0 0 1px #f0dca8,0 8px 16px #000b;filter:none;z-index:2}
+#modal .ledger-tile:focus-visible{outline:2px solid var(--brass-hi);outline-offset:1px;z-index:3}
+.ledger-rule{stroke:#5a3a1c;opacity:.5}
+.ledger text{fill:#2a1a0c}
+/* The birth-record scroll is set in the page's own serif for now. The kai hand and old-style roman it was designed with are kept aside (draft/lucas-lab/blood-mirror/source-art/snow-parts/fonts/README.md); 'Scroll Kai' and 'Scroll Roman' take effect once their @font-face rules are added back. */
+.ledger .ledger-latin{font-family:'Scroll Roman',Georgia,serif;font-size:11px;letter-spacing:3.4px;fill:#6b4a1f}
+.ledger .ledger-title{font-weight:700;font-size:25px;letter-spacing:4px}
+.ledger .ledger-small{font-size:11.5px;letter-spacing:1.4px;fill:#4a2f14}
+.ledger .ledger-line{font-size:17px;letter-spacing:2.5px}
+.ledger-page{height:auto}
+#modal .ledger-figure{width:min(100%,390px);border:0;border-radius:0;box-shadow:none;background:none}
+
+/* Pocket watch: a brass movement plate under three painted gears. */
+#modal .watch-board{background:linear-gradient(rgba(10,6,3,.58),rgba(10,6,3,.72)),url(assets/puzzles/watch-plate.webp) center/cover;border:2px solid var(--brass);box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 30px #000d,0 0 0 4px #17110c,0 0 0 5px #c9ab6a55,0 14px 36px #000a}
+/* Wheels are 92px wide for a 100-unit box: tip 42.3px, root 35px. Centres sit 77.3px apart (92 - 2 x 7.35), i.e. tip + root, so teeth meet grooves. */
+.gear-frame{position:relative;display:block;width:92px;height:92px;filter:none}
+.gear-svg{display:block;width:100%;height:100%;overflow:visible}
+.gear-body{fill:url(#bm-brass);stroke:url(#bm-edge-brass);stroke-width:.7;stroke-linejoin:round}
+.gear-hole{fill:url(#bm-hole);stroke:#e7c978;stroke-opacity:.5;stroke-width:.5}
+.gear-spokes{fill:url(#bm-brass);stroke:url(#bm-edge-brass);stroke-width:.5;stroke-linejoin:round}
+.gear-hub{fill:url(#bm-pin);stroke:#3a2508;stroke-width:.5}
+.gear-axle{fill:#1b1005}
+.gear-shade{position:absolute;left:4%;top:4%;width:92%;height:92%;border-radius:50%;background:radial-gradient(circle at 34% 30%,rgba(255,246,216,.3),rgba(255,255,255,0) 45%,rgba(26,12,2,.45));pointer-events:none}
+.gear-ruby{position:absolute;left:50%;top:21%;width:15%;height:15%;transform:translate(-50%,-50%);background:url(assets/puzzles/wheel-ruby.webp) center/contain no-repeat;border-radius:50%;opacity:.72;transition:opacity .25s,box-shadow .25s}
+.watch-gear.aligned .gear-ruby{opacity:1;box-shadow:0 0 8px 2px rgba(255,92,112,.85)}
+.watch-gear:focus-visible .gear-art{outline:2px solid #f0dca8;outline-offset:-4px;border-radius:50%}
+
+/* Steam pipes: copper tiles, each pipe drawn in its turn-0 pose and rotated by the board. */
+#modal .pipes-board{background:#0a0705 url(assets/puzzles/mat-steel.webp) 0 0/72px 72px;background-blend-mode:multiply}
+#modal :is(.pipe-piece,.pipe-terminal){background:radial-gradient(ellipse,#2c2019,#110d10)}
+#modal .pipe-piece.flowing,#modal .pipe-terminal.flowing{background:radial-gradient(circle at 50% 50%,rgba(105,212,208,.2),transparent 70%),radial-gradient(ellipse,#2c2019,#110d10)}
+#modal .pipe-piece:hover{background:radial-gradient(circle at 50% 50%,rgba(240,220,168,.14),transparent 72%),radial-gradient(ellipse,#3a2a20,#17110f)}
+#modal .pipe-glyph{background-position:center;background-size:100% 100%;background-repeat:no-repeat;transition:transform .2s cubic-bezier(.3,1.35,.5,1)}
+.pipe-straight{background-image:url(assets/puzzles/pipe-straight.webp)}
+.pipe-elbow{background-image:url(assets/puzzles/pipe-elbow.webp)}
+/* the open ends of a run reach past the tile edge so the edge is a straight cut */
+#modal :is(.pipe-straight,.pipe-elbow){background-size:110% 110%}
+.pipe-source{background-image:url(assets/puzzles/pipe-source.webp)}
+.pipe-city{background-image:url(assets/puzzles/pipe-city.webp)}
+.pipe-terminal .pipe-glyph{position:absolute;inset:0}
+#modal :is(.pipe-piece,.pipe-terminal).flowing{box-shadow:inset 0 0 22px rgba(105,212,208,.42),inset 0 0 0 1px rgba(105,212,208,.35)}
+
+/* Mirror corridor: silvered walls, marble floor, one gold reflection that slides. */
+#modal .maze-board{position:relative;gap:0;padding:6px}
+#modal .maze-cell{background:url(assets/puzzles/mirror-floor.webp) 0 0/200% 100%;border:1px solid #1d150d;border-radius:0}
+#modal .maze-cell:nth-child(even){background-position:100% 0}
+#modal .maze-cell.wall{background:linear-gradient(135deg,rgba(150,180,220,.22),rgba(14,24,40,.5)),url(assets/puzzles/mirror-glass.webp) center/cover;border-color:#5b6b80;box-shadow:inset 0 0 8px #0009}
+#modal .maze-cell.gate{background:radial-gradient(circle,rgba(255,200,120,.22),transparent 72%),url(assets/puzzles/mirror-floor.webp) 0 0/200% 100%;border-color:var(--brass)}
+#modal .maze-cell.gate::after,#modal .maze-cell.exit::after{content:'';position:absolute;inset:8%;background:center/contain no-repeat}
+#modal .maze-cell{position:relative}
+#modal .maze-cell.gate::after{background-image:url(assets/puzzles/maze-hourglass.webp)}
+#modal .maze-cell.exit{border-color:var(--ruby)}
+#modal .maze-cell.exit::after{background-image:url(assets/puzzles/maze-door.webp)}
+#modal .maze-cell.here{background:radial-gradient(circle,rgba(240,200,110,.28),transparent 72%),url(assets/puzzles/mirror-floor.webp) 0 0/200% 100%;box-shadow:none;border-color:#3a2c1a}
+.maze-token{position:absolute;left:6px;top:6px;width:calc((100% - 12px)/7);height:calc((100% - 12px)/5);z-index:2;pointer-events:none;background:url(assets/puzzles/maze-token.webp) center/78% no-repeat,radial-gradient(circle,rgba(240,200,110,.5),transparent 68%);transform:translate(calc(var(--c)*100%),calc(var(--r)*100%));transition:transform .2s cubic-bezier(.3,1.2,.5,1)}
+.maze-token.r0{--r:0}.maze-token.r1{--r:1}.maze-token.r2{--r:2}.maze-token.r3{--r:3}.maze-token.r4{--r:4}
+.maze-token.c0{--c:0}.maze-token.c1{--c:1}.maze-token.c2{--c:2}.maze-token.c3{--c:3}.maze-token.c4{--c:4}.maze-token.c5{--c:5}.maze-token.c6{--c:6}
+.maze-arrow{display:block;width:100%;height:100%;background:url(assets/ui/arrow-medal.webp) center/contain no-repeat;transition:transform .12s}
+.maze-U .maze-arrow{transform:rotate(-90deg)}.maze-D .maze-arrow{transform:rotate(90deg)}.maze-L .maze-arrow{transform:scaleX(-1)}
+#modal .maze-key{padding:6px;background:none;border:0;box-shadow:none;filter:drop-shadow(0 2px 5px #000a);transition:transform .08s,filter .12s}
+#modal .maze-key:hover{filter:drop-shadow(0 2px 5px #000a) brightness(1.18)}
+#modal .maze-key:active{transform:scale(.92);box-shadow:none}
+
+/* Rune ring: carved dark stones, a ring that lights up in ruby. */
+#modal .heart-node{background:url(assets/puzzles/rune-stone.webp) center/contain no-repeat;border:0;box-shadow:none;color:var(--brass-hi);font-family:var(--serif);font-size:22px;border-radius:50%;transition:box-shadow .22s,transform .12s}
+#modal .heart-node:active{transform:scale(.94)}
+#modal .heart-node.lit{background:radial-gradient(circle,rgba(255,115,133,.55),rgba(184,50,63,.25) 55%,transparent 72%),url(assets/puzzles/rune-stone.webp) center/contain no-repeat;color:#fff;border:0;box-shadow:0 0 16px rgba(255,115,133,.7);text-shadow:0 0 10px #ff9aa7,0 0 18px #ff7385}
+#modal .heart-node:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px;border-radius:50%}
+
+/* Coffin heartbeat: four brass plates; the one that flashes turns ruby. */
+#modal .rune-key{background:linear-gradient(rgba(20,12,6,.3),rgba(20,12,6,.55)),url(assets/puzzles/watch-plate.webp) center/cover;transition:background .12s,box-shadow .12s,transform .08s}
+#modal .rune-key.illuminated{background:radial-gradient(circle at 50% 38%,#ff9aa7,var(--ruby) 62%,#5a1220);transform:scale(1.04)}
+
+/* Memory cards: a painted back, an aged-paper face. */
+#modal .memory-card{background:url(assets/puzzles/card-back.webp) center/100% 100% no-repeat;border:0;border-radius:6px;color:transparent;text-shadow:none;box-shadow:0 3px 7px #000b;transition:transform .12s}
+#modal .memory-card:active{transform:scale(.96)}
+#modal .memory-card.turned{background:linear-gradient(rgba(70,40,18,.1),rgba(70,40,18,.28)),url(assets/puzzles/ledger-sheet.webp) center/260% auto;border:2px solid var(--brass-hi);color:#2a1a0c;box-shadow:inset 0 0 12px rgba(58,28,8,.55);animation:card-turn .26s cubic-bezier(.3,1.2,.5,1)}
+#modal .memory-card.turned .memory-text{color:#2a1a0c;font-weight:600}
+#modal .memory-card.turned .memory-symbol{color:#3a220e}
+@keyframes card-turn{from{transform:rotateY(80deg) scale(.96)}to{transform:none}}
+
+/* Mirror light path: framed mirrors that swing, a lit door. */
+#modal .light-mirror{position:relative;background:var(--plate);overflow:hidden;color:transparent;font-size:0}
+#modal .light-mirror::before{content:'';position:absolute;left:-6%;top:42%;width:112%;height:17%;background:url(assets/puzzles/mirror-strip.webp) center/100% 100% no-repeat;transform:rotate(-45deg);transition:transform .22s cubic-bezier(.3,1.35,.5,1)}
+#modal .light-mirror.o1::before{transform:rotate(45deg)}
+#modal .light-mirror.beam{background:linear-gradient(rgba(70,100,140,.4),rgba(30,44,60,.5)),var(--plate);box-shadow:inset 0 0 14px rgba(188,208,232,.55),0 0 8px rgba(188,208,232,.3)}
+#modal .light-door{position:relative;font-size:0;background:var(--plate)}
+#modal .light-door::after{content:'';position:absolute;inset:6%;background:url(assets/puzzles/maze-door.webp) center/contain no-repeat;filter:saturate(.55) brightness(.75);transition:filter .3s}
+#modal .light-door.open{background:radial-gradient(circle,rgba(255,138,150,.55),transparent 75%),var(--plate);box-shadow:0 0 20px #ff738599}
+#modal .light-door.open::after{filter:saturate(1.3) brightness(1.2) drop-shadow(0 0 8px #ff7385)}
+#modal .light-cell:not(.light-mirror):not(.light-door){background:var(--plate)}
+#modal .light-cell.beam:not(.light-mirror){background:linear-gradient(rgba(70,100,140,.35),rgba(30,44,60,.45)),var(--plate)}
+
+/* Cloth and plate cells: stitches, reflections and rubbing patches share one dark engraved plate. */
+#modal :is(.stitch-cell,.reflection-cell){background:var(--plate)}
+#modal .stitch-cell.on{background:radial-gradient(circle at 36% 30%,#d4485c,#8c2433 55%,#4a0f1a);box-shadow:inset 0 0 8px #0008,0 0 8px #a6536055;transition:background .2s}
+#modal .reflection-cell{transition:background .25s,color .25s,text-shadow .25s}
+#modal .reflection-cell.glow{background:radial-gradient(ellipse,rgba(234,164,197,.55),rgba(44,28,44,.2) 80%),var(--plate)}
+#modal .rub-cell{background:var(--plate);transition:background .3s,color .3s}
+#modal .rub-cell.clear{background:linear-gradient(rgba(70,40,18,.06),rgba(70,40,18,.3)),url(assets/puzzles/ledger-sheet.webp) center/340% auto;color:#2e2016}
+
+/* Music box: painted brass levers on a perlage plate. */
+#modal .musicbox-pins{background:linear-gradient(rgba(10,6,3,.55),rgba(10,6,3,.72)),url(assets/puzzles/watch-plate.webp) center/cover}
+#modal .music-pin{width:44px;height:104px;border:0;border-radius:0;background:url(assets/puzzles/pin.webp) center/contain no-repeat;box-shadow:none;font-size:0;color:transparent;transition:transform .18s cubic-bezier(.3,1.5,.5,1)}
+#modal .music-pin.raised{background:url(assets/puzzles/pin.webp) center/contain no-repeat,radial-gradient(ellipse at 50% 55%,rgba(255,115,133,.6),transparent 72%);box-shadow:none;transform:translateY(-16px)}
+@media (prefers-reduced-motion:reduce){
+ #modal :is(.ledger-tile,.pipe-glyph,.heart-node,.memory-card,.rune-key,.music-pin,.maze-key){transition:none}
+ #modal .light-door::after{transition:none}
+ .maze-token,#modal .memory-card.turned{transition:none;animation:none}
+ #modal .light-mirror::before{transition:none}
+}
+
+/* Guest masks and miners' beds: each select sits in a painted bronze nameplate (assets/puzzles/nameplate.webp, 560x138).
+   The plate is a 9-slice border image, so the rivets stay round at any width; a small brass chevron stands in for the native arrow. */
+#modal .mask-row{position:relative}
+#modal .mask-row select{appearance:none;-webkit-appearance:none;min-height:50px;padding:0 34px 0 16px;border:0;border-radius:0;background:none;box-shadow:none;
+ border-image:url(assets/puzzles/nameplate.webp) 38 60 fill/13px 20px stretch;color:var(--brass-hi);font-family:'Scroll Kai','LL Serif TC','Noto Serif TC',serif;font-size:15px;letter-spacing:1px;text-shadow:0 1px 0 #000a;cursor:pointer}
+#modal .mask-row::after{content:'';position:absolute;right:22px;top:50%;width:6px;height:6px;border:solid var(--brass-hi);border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none;opacity:.85}
+#modal .mask-row select:hover{filter:brightness(1.12)}
+#modal .mask-row select:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+/* Painted objects on the aged-paper face: a soft shadow keeps the white feather readable. The sprites never move, so a filter is fine here. */
+#modal .memory-card.turned .concept-sprite{filter:drop-shadow(0 2px 3px rgba(40,20,5,.55))}

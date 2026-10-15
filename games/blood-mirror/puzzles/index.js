@@ -1,7 +1,8 @@
 // Hands-on puzzles repair evidence. Every puzzle is { id, title, subtitle, stages:[{ id, label, mount(ctx) }] }
 // where ctx = { render(html), feedback(text), done(), playCue(kind), fresh, has(item) }.
 // Completions are stored in the save (engine/save.js); this module only keeps them in memory.
-import {preloadImages} from '../concept-art.js';
+import {preloadImages,placeConcepts,placeZooms} from '../concept-art.js';
+import {morph} from './morph.js';
 
 // A stage module is imported the first time its stage opens, so the first screen fetches no puzzle code.
 // Once loaded, mount runs synchronously, exactly as before. A failed import shows a notice in the modal.
@@ -24,13 +25,13 @@ const lazy=(file,mountName)=>{
 export const puzzles={
  // The prologue is not a chapter: its completion is stored beside the chapters (engine/save.js).
  prologue:{id:'prologue',title:'音樂盒的搖籃曲',subtitle:'PROLOGUE · 序章',stages:[{id:'musicbox',label:'音樂盒',mount:lazy('musicbox','mountMusicBox')}]},
- library:{id:'library',title:'撕碎的出生紀錄',subtitle:'EVIDENCE · 帳頁與懷錶',stages:[{id:'ledger',label:'拼回帳頁',mount:lazy('ledger','mountLedger')},{id:'watch',label:'懷錶齒輪',mount:lazy('watch','mountWatch')}]},
- ballroom:{id:'ballroom',title:'面具下的賓客',subtitle:'EVIDENCE · 面具與光路',stages:[{id:'masks',label:'面具賓客',mount:lazy('masks','mountMasks'),whisper:true},{id:'light',label:'鏡面光路',mount:lazy('light','mountLight'),whisper:true}]},
- hunter:{id:'hunter',title:'玻璃心臟法陣',subtitle:'EVIDENCE · 符文順序',stages:[{id:'runeheart',label:'玻璃心臟法陣',mount:lazy('runeheart','mountRuneHeart')}]},
+ library:{id:'library',title:'撕碎的出生紀錄',subtitle:'EVIDENCE · 帳頁與懷錶',stages:[{id:'ledger',morph:true,label:'拼回帳頁',mount:lazy('ledger','mountLedger')},{id:'watch',morph:true,label:'懷錶齒輪',mount:lazy('watch','mountWatch')}]},
+ ballroom:{id:'ballroom',title:'面具下的賓客',subtitle:'EVIDENCE · 面具與光路',stages:[{id:'masks',label:'面具賓客',mount:lazy('masks','mountMasks'),whisper:true},{id:'light',morph:true,label:'鏡面光路',mount:lazy('light','mountLight'),whisper:true}]},
+ hunter:{id:'hunter',title:'玻璃心臟法陣',subtitle:'EVIDENCE · 符文順序',stages:[{id:'runeheart',morph:true,label:'玻璃心臟法陣',mount:lazy('runeheart','mountRuneHeart')}]},
  mine:{id:'mine',title:'重接銀骨蒸汽管',subtitle:'EVIDENCE · 管網與七個名字',stages:[{id:'pipes',label:'蒸汽管網',mount:lazy('pipes','mountPipes'),whisper:true},{id:'names',label:'七個名字',mount:lazy('names','mountNames'),whisper:true}]},
- crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印與拓印',stages:[{id:'rune',label:'棺中的心跳',mount:lazy('rune','mountRune')},{id:'rubbing',label:'保護咒拓印',mount:lazy('rubbing','mountRubbing'),requires:'contract',missing:'拓印需要一張夠韌的紙。妳想起黑鐘書庫暗門後的那份王室契約——它的背面是空白的。回到第一幕，把王室契約收進隨身物品。'}]},
- queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',label:'記憶與物件',mount:lazy('memory','mountMemory')},{id:'stitch',label:'縫線紋樣',mount:lazy('stitch','mountStitch'),whisper:true}]},
- mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]},
+ crypt:{id:'crypt',title:'棺中的心跳',subtitle:'EVIDENCE · 符印與拓印',stages:[{id:'rune',morph:true,label:'棺中的心跳',mount:lazy('rune','mountRune')},{id:'rubbing',morph:true,label:'保護咒拓印',mount:lazy('rubbing','mountRubbing'),requires:'contract',missing:'拓印需要一張夠韌的紙。妳想起黑鐘書庫暗門後的那份王室契約——它的背面是空白的。回到第一幕，把王室契約收進隨身物品。'}]},
+ queen:{id:'queen',title:'王后遺落的記憶',subtitle:'EVIDENCE · 記憶與縫線',stages:[{id:'memory',morph:true,label:'記憶與物件',mount:lazy('memory','mountMemory')},{id:'stitch',morph:true,label:'縫線紋樣',mount:lazy('stitch','mountStitch'),whisper:true}]},
+ mirror:{id:'mirror',title:'反寫的見證者手稿',subtitle:'EVIDENCE · 映照與迷廊',stages:[{id:'reflection',morph:true,label:'反寫手稿',mount:lazy('reflection','mountReflection')},{id:'maze',morph:true,label:'鏡像迷廊',mount:lazy('maze','mountMaze'),requires:'watch',missing:'迷廊深處的鏡門停在關上的那一刻。妳需要能讓時間倒走的東西——黑鐘書庫裡那只黃金懷錶。'}]},
  // "帳本的背面" levels (data/abyss.js). `optional` puzzles stay out of the background preload and survive a new journey,
  // because they belong to no act: only the saved list says whether they are done.
  // Its three mechanisms run in the order gears, pendulum (either first), then the star wheel, which `after` keeps closed until both are done.
@@ -143,7 +144,10 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
   const selector=attr?'['+attr+'="'+focused.getAttribute(attr)+'"]':null;
   const others=current&&multi&&!fresh&&remaining().some(s=>s.id!==current.id);
   const subtitle=current&&multi?entry.subtitle.split(' · ')[0]+' · '+current.label:entry.subtitle;
-  modal(entry.title,subtitle,'<div class="challenge" data-challenge="'+id+'"'+(current?' data-step="'+current.id+'"':'')+'>'+stageArt(current)+html+(others?'<button class="text-button stage-switch" data-stage-switch>先做另一道機關 ⟶</button>':'')+'</div>'+(current&&extra?extra.html(current.id):''));
+  const markup='<div class="challenge" data-challenge="'+id+'"'+(current?' data-step="'+current.id+'"':'')+'>'+stageArt(current)+html+(others?'<button class="text-button stage-switch" data-stage-switch>先做另一道機關 ⟶</button>':'')+'</div>'+(current&&extra?extra.html(current.id):'');
+  // A stage that opts in (`morph`) patches its board in place while the player plays; opening or switching a stage still draws fresh.
+  const body=document.querySelector('#modal-body'),same=current?.morph&&body?.querySelector('.challenge[data-challenge="'+id+'"][data-step="'+current.id+'"]');
+  if(same){morph(body,markup);placeConcepts(body);placeZooms(body);}else modal(entry.title,subtitle,markup);
   document.querySelector('[data-stage-switch]')?.addEventListener('click',choose);
   if(current&&extra)extra.bind(current.id);
   if(selector)document.querySelector('.challenge '+selector)?.focus({preventScroll:true});

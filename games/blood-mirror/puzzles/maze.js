@@ -33,7 +33,8 @@ export function shortestWalk(gateOpen=true){
  return -1;
 }
 
-const LABEL={L:'向左',R:'向右',U:'向前',D:'向後'},ARROW=Object.fromEntries(Object.entries({L:-90,R:90,U:0,D:180}).map(([key,turn])=>[key,'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path transform="rotate('+turn+' 12 12)" d="M12 19V5 M6 11l6-6 6 6"/></svg>'])),KEY={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D'};
+// The direction keys carry a small painted arrowhead (assets/ui/arrow-head.webp); CSS turns it to face the key's direction.
+const LABEL={L:'向左',R:'向右',U:'向前',D:'向後'},ARROW=Object.fromEntries(Object.keys(LABEL).map(key=>[key,'<span class="maze-arrow" aria-hidden="true"></span>'])),KEY={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D'};
 const isGate=([r,c])=>r===gateCell[0]&&c===gateCell[1];
 export function mountMaze(ctx){
  let at=[...startCell],steps=0,message='',gateOpen=false;
@@ -48,8 +49,10 @@ export function mountMaze(ctx){
   let grid='';
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
    const here=r===at[0]&&c===at[1],gate=isGate([r,c])&&!gateOpen,wall=layout[r][c]==='#',exit=r===exitCell[0]&&c===exitCell[1];
-   grid+='<span class="maze-cell'+(wall?' wall':'')+(gate?' gate':'')+(exit?' exit':'')+(here?' here':'')+'" role="img" aria-label="第'+(r+1)+'列第'+(c+1)+'行：'+(here?'倒影在這裡':wall?'鏡牆':gate?'關上的鏡門':exit?'出口':'走道')+'">'+(here?'◈':exit?'⟐':gate?'⧖':wall?'':'·')+'</span>';
+   grid+='<span class="maze-cell'+(wall?' wall':'')+(gate?' gate':'')+(exit?' exit':'')+(here?' here':'')+'" role="img" aria-label="第'+(r+1)+'列第'+(c+1)+'行：'+(here?'倒影在這裡':wall?'鏡牆':gate?'關上的鏡門':exit?'出口':'走道')+'"></span>';
   }
+  // The reflection is one painted token that slides between cells (its row and column are classes, so it needs no inline style).
+  grid+='<span class="maze-token r'+at[0]+' c'+at[1]+'" aria-hidden="true"></span>';
   ctx.render('<p class="challenge-help">妳透過鏡面操縱自己的倒影：妳往左，倒影往右；妳往右，倒影往左。前後則不會顛倒。帶著倒影走出迷廊（也可以用鍵盤方向鍵）。</p>'
    +'<div class="maze-board" role="group" aria-label="鏡中迷廊，'+ROWS+'列'+COLS+'行；倒影從左上角出發，出口在最下一列">'+grid+'</div>'
    +'<div class="maze-pad" role="group" aria-label="操作方向（左右與倒影相反）">'
