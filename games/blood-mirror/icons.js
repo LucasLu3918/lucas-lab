@@ -69,6 +69,8 @@ const paths = {
   cradle: 'M4 12h16c0 4-3 6-8 6s-8-2-8-6z M7 12V7 M17 12V7 M5 21h14',
   portrait: 'M5 3h14v18H5z M12 9a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z M8 18c.5-2 2-3 4-3s3.5 1 4 3',
   rabbit: 'M9 3c-1.5 0-2 3-1 7 M15 3c1.5 0 2 3 1 7 M12 21c-4 0-6-2-6-5s2-6 6-6 6 3 6 6-2 5-6 5z',
+  // Lucide icon (ISC; the x is derived from Feather, MIT). Full notices: LUCIDE_LICENSE.txt. Only generic controls the hand-drawn set does not cover go here.
+  close: 'M18 6 6 18 M6 6l12 12',
   inspect: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'
 };
 
@@ -127,9 +129,8 @@ export function hydrateIcons(root = document) {
 const GLYPHS = { '⟶': 'arrowR', '→': 'arrowR', '↗': 'arrowUR', '↓': 'arrowD', '✧': 'memory', '←': 'arrowL', '↶': 'undo' };
 const GLYPH_END = /\s*([⟶→↗↓✧])\s*$/;
 const GLYPH_START = /^\s*([←↶])\s*/;
-// Left and right arrows are drawn by CSS as one short painted arrowhead (assets/ui/arrow-head.webp); the line icon stays inside as the fallback.
-const DIRECTION = { '⟶': 'r', '→': 'r', '←': 'l' };
-const arrowMarkup = (glyph) => `<span class="btn-arrow"${DIRECTION[glyph] ? ` data-dir="${DIRECTION[glyph]}"` : ''} aria-hidden="true">${icon(GLYPHS[glyph])}</span>`;
+// Every arrow is the same quill from the icon family, so it is drawn as an SVG and inherits the button's colour.
+const arrowMarkup = (glyph) => `<span class="btn-arrow" aria-hidden="true">${icon(GLYPHS[glyph])}</span>`;
 
 function convertButton(button) {
   if (button.querySelector('.btn-arrow')) return;

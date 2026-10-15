@@ -89,7 +89,7 @@ body.reduce-motion .hotspot::before{animation:none}
 .room-tabs::-webkit-scrollbar{display:none}
 .room-tabs button{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:4px 10px;letter-spacing:0;border:1px solid var(--stage-line);border-radius:4px;background:rgba(16,15,16,.78);font-size:12px;color:var(--stage-muted);cursor:pointer}
 .room-tabs button.active{color:var(--stage-gold-hi);border-color:var(--stage-gold-hi)}
-.room-tabs button:disabled{opacity:.4;cursor:default}
+.room-tabs button:disabled{opacity:.62;cursor:default}
 /* Act picker below 1024px: seven act tabs need about 830px, so a narrower strip would clip the last acts with no scrollbar.
    The select lists all seven acts in one 44px control. 16px text stops iOS zooming in. */
 .room-select{display:none;flex:1 1 auto;min-width:0;min-height:44px;padding:0 34px 0 14px;border:1px solid var(--stage-gold-hi);border-radius:4px;background:rgba(16,15,16,.82) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23e2cc9b' stroke-width='1.6'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E") no-repeat right 12px center/12px 12px;color:var(--stage-gold-hi);font:inherit;font-size:16px;letter-spacing:0;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
@@ -171,7 +171,7 @@ body.mode-story .journey-guide{display:grid}
 /* Inventory tray: label on the left, items scroll sideways. */
 .tray{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-width:0;padding:8px 12px;background:var(--stage-panel);border:1px solid var(--stage-line);border-radius:var(--stage-radius)}
 .tray .inventory-heading{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:0;flex:0 0 auto}
-.tray .inventory-heading h2{margin:0;font-size:11px;letter-spacing:2px;color:var(--stage-muted)}
+.tray .inventory-heading h2{margin:0;font-size:11px;letter-spacing:2px;color:var(--stage-muted);white-space:nowrap}
 .tray #inventory-count{font-size:11px;color:var(--stage-muted)}
 .tray .inventory{display:flex;flex:1 1 0;min-width:0;gap:8px;overflow-x:auto;padding:2px;scroll-snap-type:x proximity;scrollbar-width:thin}
 .tray .inventory button{flex:0 0 68px;width:68px;min-height:60px;padding:4px;scroll-snap-align:start;border:1px solid var(--stage-line);border-radius:var(--stage-radius-sm);background:rgba(0,0,0,.4);display:grid;place-items:center;gap:2px;color:var(--stage-gold-hi)}
@@ -269,6 +269,15 @@ body.mode-story .journey-guide{display:grid}
  .hud-tools{gap:3px}
  .hud-chapter h1{font-size:16px;letter-spacing:.5px}
 }
+/* Phones and portrait tablets: the six tools get their own full-width row with labels, so each action is named.
+   The chapter title then spans the whole width, and the offscreen hints lose their boxes so they read as plain text. */
+@media (max-width:899px) and (min-height:521px){
+ .hud{grid-template-columns:minmax(0,1fr);grid-template-areas:"chapter" "tools" "center"}
+ .hud-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;width:100%}
+ .hud .tool-button{flex-direction:column;gap:3px;width:100%;min-width:0;min-height:52px;padding:6px 2px;border-radius:4px}
+ .hud .tool-label{display:block;font-size:11px;letter-spacing:.5px;line-height:1}
+ .hud .offscreen-hint{padding:0 6px;border-color:transparent;background:transparent}
+}
 
 /* Hotspot rings from the site stylesheet are replaced by the glimmer dot. */
 #hotspots .hotspot{box-shadow:none}
@@ -335,12 +344,15 @@ body.reduce-motion .hud .tool-button.whisper{animation:none;box-shadow:0 0 0 2px
 .hero-buttons .text-button:hover:not(:disabled){border-color:var(--gold);background:rgba(195,172,128,.08)}
 .hero-buttons button{transition:none}
 
-/* Arrows inside buttons are icons too (see enableButtonArrows). */
-/* Inline arrows (outside flex parents) centre on the text line instead of sitting on the baseline. */
-.btn-arrow{display:inline-grid;place-items:center;width:1.25em;height:1.25em;flex:none;line-height:0;font-size:inherit;vertical-align:middle}
+/* Arrows inside buttons are icons too (see enableButtonArrows): the quill from icons.js, drawn in the button's own gold. */
+.btn-arrow{display:inline-grid;place-items:center;width:18px;height:18px;flex:none;line-height:0;font-size:inherit;vertical-align:middle;color:var(--stage-gold-hi)}
 .btn-arrow svg{width:100%;height:100%}
-.primary-button .btn-arrow,.text-button .btn-arrow,.secondary-button .btn-arrow{font-size:1.2em}
-.primary-button span.btn-arrow{font-size:1.2em;line-height:0}
+/* Burgundy actions keep one antique-gold hairline, so the arrow in them reads as part of the same metal. */
+.primary-button{border-color:var(--btn-gold-line);background:linear-gradient(180deg,var(--btn-red-top),var(--btn-red-bottom));color:#f6eee2;box-shadow:inset 0 1px 0 rgba(255,230,222,.14),0 6px 18px rgba(0,0,0,.35)}
+.primary-button:hover:not(:disabled){background:linear-gradient(180deg,var(--btn-red-hover-top),var(--btn-red-hover-bottom));border-color:var(--stage-gold-hi);box-shadow:inset 0 1px 0 rgba(255,230,222,.18),0 8px 22px rgba(0,0,0,.4)}
+.primary-button .btn-arrow{transition:transform .2s ease-out}
+.primary-button:hover:not(:disabled) .btn-arrow{transform:translateX(3px)}
+@media (prefers-reduced-motion:reduce){.primary-button .btn-arrow{transition:none}.primary-button:hover:not(:disabled) .btn-arrow{transform:none}}
 .modal-shell .primary-button,.dialogue-actions .primary-button,.journey-guide button{gap:10px}
 @media (max-width:600px){
  .hero-buttons{flex-direction:column;align-items:stretch;gap:10px}
@@ -479,6 +491,7 @@ dialog#modal::backdrop{background:radial-gradient(circle at 50% 40%,#2a0c1599,#0
  background:linear-gradient(90deg,transparent,#bc9f6788 18%,#bc9f6788 82%,transparent)}
 #modal .modal-heading::before{content:'';position:absolute;left:50%;bottom:1px;width:7px;height:7px;margin-left:-3px;transform:rotate(45deg);background:#d9bf8a;z-index:1}
 #modal .modal-close{right:20px;top:20px}
+#modal .modal-close .ui-icon{width:22px;height:22px;margin:auto}
 #modal .modal-shell::after{content:'';position:absolute;inset:11px;pointer-events:none;z-index:2;
  --g:#d9bf8aaa;
  background:
@@ -549,24 +562,6 @@ body.gamepad-nav .hotspot:focus svg,body.gamepad-nav .hotspot:focus span{opacity
 .chapter-card{border-radius:4px}
 .abyss-level{border-radius:4px}
 
-/* Generated art (assets/ui, local Z-Image Turbo): one small onyx stud with a thin gold arrow (arrow-medal.webp, pointing right) is every
-   left/right arrow in the game: the scene's view buttons, the arrows at the end of button labels and the corridor pad. The glyph stays
-   in the markup for assistive tech and as the fallback. */
-.view-arrow{width:44px;height:44px;opacity:.82;border:0;border-radius:50%;background:none;box-shadow:none;transition:transform .18s cubic-bezier(.3,1.4,.5,1)}
-.view-arrow svg{opacity:0;position:absolute}
-.view-arrow::after{content:'';position:absolute;inset:5px;background:url(../assets/ui/arrow-medal.webp) center/contain no-repeat;filter:drop-shadow(0 2px 5px rgba(0,0,0,.6));transition:filter .18s;pointer-events:none}
-#view-prev::after{transform:scaleX(-1)}
-.view-arrow:hover,.view-arrow:focus-visible{background:none;box-shadow:none;opacity:1}
-.view-arrow:hover::after,.view-arrow:focus-visible::after{filter:drop-shadow(0 2px 7px rgba(0,0,0,.6)) brightness(1.3)}
-#view-prev:hover,#view-prev:focus-visible{transform:translateX(-2px)}
-#view-next:hover,#view-next:focus-visible{transform:translateX(2px)}
-.view-arrow:active{transform:scale(.92)}
-.view-arrow:focus-visible{outline:2px solid var(--stage-gold-hi);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){.view-arrow,.view-arrow::after{transition:none}#view-prev:hover,#view-prev:focus-visible,#view-next:hover,#view-next:focus-visible{transform:none}}
-@media (max-width:600px){.view-arrow::after{inset:6px}}
-.btn-arrow[data-dir]{width:1.1em;height:1.1em;background:url(../assets/ui/arrow-medal.webp) center/contain no-repeat;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
-.btn-arrow[data-dir] svg{display:none}
-.btn-arrow[data-dir=l]{transform:scaleX(-1)}
 
 /* Velvet grain under every framed panel; the tint keeps it barely visible. */
 .dialogue,.tray,.journey-guide,.scene-clues .clue-panel{

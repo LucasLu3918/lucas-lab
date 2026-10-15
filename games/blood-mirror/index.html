@@ -32,7 +32,7 @@
 <div id="hotspots"></div>
 </div>
 </div>
-<button id="view-prev" class="view-arrow" aria-label="上一個視角" hidden><span data-icon="viewL" aria-hidden="true"></span></button><button id="view-next" class="view-arrow" aria-label="下一個視角" hidden><span data-icon="viewR" aria-hidden="true"></span></button>
+<button id="view-prev" class="view-arrow" aria-label="上一個視角" hidden><span data-icon="arrowL" aria-hidden="true"></span></button><button id="view-next" class="view-arrow" aria-label="下一個視角" hidden><span data-icon="arrowR" aria-hidden="true"></span></button>
 <div class="stage-top">
 <header class="hud">
 <div class="hud-chapter"><span id="room-chapter" class="hud-kicker"></span><h1 id="room-title"></h1><p id="scene-subtitle" class="hud-subtitle"></p></div>
@@ -65,7 +65,7 @@
 <section id="gallery" class="gallery-view hidden" aria-label="魔鏡藝廊"><button id="gallery-return" class="back-button">← 返回首頁</button><p class="eyebrow">THE MIRROR COLLECTION</p><h1>魔鏡藝廊</h1><p class="gallery-intro">在這裡重看角色、場景與旅程留下的畫作。結局插畫會在妳完成對應結局後解鎖；開始新旅程仍會保留收藏。</p><details id="gallery-listening" class="gallery-listening"><summary>配樂聆聽室 · 場景配樂與主題曲</summary><p>場景配樂為可循環的短版本；主題曲完整版約五分鐘。結局曲目隨對應結局解鎖。</p><label for="gallery-track">選擇曲目</label><select id="gallery-track"></select><audio id="gallery-audio" controls preload="none" aria-label="配樂試聽播放器"></audio><p id="gallery-audio-status" role="status"></p></details><div id="gallery-filters" class="gallery-filters" role="group" aria-label="作品分類"></div><p id="gallery-status" class="gallery-status" role="status"></p><div id="gallery-grid" class="gallery-grid"></div></section>
 </main>
 <section id="chapter-card" class="chapter-opening hidden" aria-live="polite" aria-label="章節開場"><p class="chapter-opening-number" id="chapter-card-number"></p><h2 id="chapter-card-title"></h2><p id="chapter-card-subtitle" class="chapter-opening-subtitle"></p><p id="chapter-card-quote" class="chapter-opening-quote"></p><button id="chapter-card-skip" class="text-button">點擊繼續 ⟶</button></section>
-<dialog id="modal" aria-labelledby="modal-title"><div class="modal-shell"><header class="modal-heading"><button id="modal-close" class="modal-close" aria-label="關閉視窗">×</button><p id="modal-eyebrow" class="eyebrow"></p><h2 id="modal-title" tabindex="-1"></h2></header><div id="modal-body"></div></div></dialog>
+<dialog id="modal" aria-labelledby="modal-title"><div class="modal-shell"><header class="modal-heading"><button id="modal-close" class="modal-close" aria-label="關閉視窗"><span data-icon="close" aria-hidden="true"></span></button><p id="modal-eyebrow" class="eyebrow"></p><h2 id="modal-title" tabindex="-1"></h2></header><div id="modal-body"></div></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script type="module" src="main.js"></script>
 </body></html>
