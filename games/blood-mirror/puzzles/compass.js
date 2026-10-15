@@ -6,6 +6,7 @@
 //   compass-final  all four rings     (needs both pairs: the 音 and 重 rings now touch)
 // The rules are pure and checked by a breadth-first search in scripts/blood-mirror-abyss.test.mjs; the mount only draws them.
 import {hintMarkup,bindHints} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 export const SLOTS=8;
 export const MARKS=['影','音','重','時'];
@@ -81,28 +82,48 @@ const SHAPES=[
  '<path d="M0-4.6L1.4-1.4 4.6 0 1.4 1.4 0 4.6-1.4 1.4-4.6 0-1.4-1.4z"/>',
  '<rect x="-1.6" y="-4.6" width="3.2" height="9.2"/>'
 ];
-const CX=150,CY=150,BAND=24;
+const CX=150,CY=150,BAND=24,STEP_DEG=360/SLOTS;
+const wrapDelta=d=>{const w=((d%SLOTS)+SLOTS)%SLOTS;return w>SLOTS/2?w-SLOTS:w;};
+// Each band is a textured plate (steel, copper, steel, brass for 影, 音, 重, 時) with a tint that keeps its old colour, so a ring is
+// still known by colour as well as by its mark. The dial is built once: a turn only changes the angle of a ring and of its glyphs,
+// and a CSS transition carries them there (the glyphs counter-turn by the same amount, so they stay upright all the way).
+const BAND_FILL=['bm-steel','bm-copper','bm-steel','bm-brass'];
+const BAND_TINT=['#4a3a86','#7a4020','#4a5560','#a07c24'];
 // ringIds: which of the four rings are drawn (outermost first); state: their offsets.
 export function dialSvg(ringIds,state){
- const outer=130,parts=[];
+ const outer=130,parts=[],shadows=[];
  ringIds.forEach((id,k)=>{
-  const rOut=outer-k*(BAND+2),rMid=rOut-BAND/2;
+  const rOut=outer-k*(BAND+2),rMid=rOut-BAND/2,rIn=rOut-BAND;
+  shadows.push('<circle class="cmp-band-shadow" cx="'+(CX+1.5)+'" cy="'+(CY+3)+'" r="'+rMid+'" stroke-width="'+BAND+'"/>');
   let slots='';
   for(let s=0;s<SLOTS;s++){
-   const angle=s*360/SLOTS,glyph=s===0
+   const angle=s*STEP_DEG,glyph=s===0
     ?'<circle class="cmp-mark-disc" r="10.5"/><text class="cmp-mark" text-anchor="middle" dy="5.6">'+MARKS[id]+'</text>'
     :'<g class="cmp-shape">'+SHAPES[s-1]+'</g>';
-   slots+='<g transform="rotate('+angle+' '+CX+' '+CY+') translate('+CX+' '+(CY-rMid)+')"><g transform="rotate('+-(angle+state[k]*360/SLOTS)+')">'+glyph+'</g></g>';
+   slots+='<g transform="rotate('+angle+' '+CX+' '+CY+') translate('+CX+' '+(CY-rMid)+')"><g class="cmp-glyph" data-angle="'+angle+'">'+glyph+'</g></g>';
   }
-  parts.push('<g class="cmp-ring cmp-ring-'+id+'" data-ring="'+id+'" transform="rotate('+state[k]*360/SLOTS+' '+CX+' '+CY+')"><circle class="cmp-band" cx="'+CX+'" cy="'+CY+'" r="'+rMid+'" stroke-width="'+BAND+'"/>'+slots+'</g>');
+  const texture='url(#'+BAND_FILL[id]+')';
+  const head=`<g class="cmp-ring cmp-ring-${id}" data-ring="${id}">`;
+  parts.push(head
+   +'<circle class="cmp-band" cx="'+CX+'" cy="'+CY+'" r="'+rMid+'" stroke-width="'+BAND+'" stroke="'+texture+'"/>'
+   +'<circle class="cmp-band-tint" cx="'+CX+'" cy="'+CY+'" r="'+rMid+'" stroke-width="'+BAND+'" stroke="'+BAND_TINT[id]+'"/>'
+   +'<circle class="cmp-band-lit" cx="'+CX+'" cy="'+CY+'" r="'+(rOut-.6)+'"/><circle class="cmp-band-dark" cx="'+CX+'" cy="'+CY+'" r="'+(rIn+.6)+'"/>'
+   +slots+'</g>');
  });
- return '<svg class="cmp-dial" viewBox="0 0 300 300" role="img" aria-label="'
-  +ringIds.map((id,k)=>MARKS[id]+'環'+(state[k]===0?'已對準指針':'還差 '+Math.min(state[k],SLOTS-state[k])+' 格')).join('，')
-  +'">'+parts.join('')+'<path class="cmp-needle" d="M150 6L158 32H142z"/><line class="cmp-needle-line" x1="150" y1="30" x2="150" y2="'+(CY-(outer-ringIds.length*(BAND+2))+BAND)+'"/></svg>';
+ const inner=outer-ringIds.length*(BAND+2)+2;
+ // Under the rings lies a painted bronze plate (assets/puzzles/compass-plate.webp), so what shows through the middle is its engraving.
+ return '<svg class="cmp-dial" viewBox="0 0 300 300" role="img" aria-label="">'
+  +'<circle class="cmp-rim-shadow" cx="'+(CX+1.5)+'" cy="'+(CY+3)+'" r="'+(outer+6)+'"/>'
+  +'<image href="assets/puzzles/compass-plate.webp" x="'+(CX-outer-8)+'" y="'+(CY-outer-8)+'" width="'+(outer+8)*2+'" height="'+(outer+8)*2+'" pointer-events="none"/>'
+  +shadows.join('')+parts.join('')
+  +'<circle class="cmp-pin" cx="'+CX+'" cy="'+CY+'" r="9"/>'
+  +'<path class="cmp-needle" d="M150 4L159 34H141z"/><line class="cmp-needle-line" x1="150" y1="34" x2="150" y2="'+(CY-inner)+'"/></svg>';
 }
+const dialLabel=(ringIds,state)=>ringIds.map((id,k)=>MARKS[id]+'環'+(state[k]===0?'已對準指針':'還差 '+Math.min(state[k],SLOTS-state[k])+' 格')).join('，');
 
 // ctx = { render(html), done(), playCue(kind) }
 function mountCompass(ctx,name,intro){
+ ensureMaterials();
  const stage=STAGES[name],still=document.body.classList.contains('reduce-motion'),limit=allowance(name);
  let state=stage.start.slice(),steps=0,finishing=false;
  const pad=stage.rings.map((id,k)=>'<div class="cmp-row"><button class="cmp-turn" data-ring="'+k+'" data-dir="-1" aria-label="把'+MARKS[id]+'環逆時針轉一格">↺</button><b class="cmp-name cmp-name-'+id+'">'+MARKS[id]+'環</b><button class="cmp-turn" data-ring="'+k+'" data-dir="1" aria-label="把'+MARKS[id]+'環順時針轉一格">↻</button></div>').join('');
@@ -116,8 +137,26 @@ function mountCompass(ctx,name,intro){
  const alive=()=>$('cmp-dial')?.isConnected;
  const say=(text,tone='')=>{const el=$('cmp-status');if(el){el.textContent=text;el.dataset.tone=tone;}};
  const hints=bindHints({hints:{[name]:hintsFor(name,()=>state).map(h=>typeof h==='function'?{toString:h}:h)},currentStep:()=>finishing?null:hintStep(name),alive});
+ // Builds the dial the first time; after that a draw only turns what changed.
+ let rings=null,seen=null,angles=null;
+ function pose(){
+  const dial=$('cmp-dial').firstChild;
+  if(!rings){
+   rings=[...dial.querySelectorAll('.cmp-ring')];
+   seen=state.slice();angles=state.map(v=>v*STEP_DEG);
+  }else state.forEach((v,k)=>{angles[k]+=wrapDelta(v-seen[k])*STEP_DEG;seen[k]=v;});
+  rings.forEach((ring,k)=>{
+   ring.style.transform='rotate('+angles[k]+'deg)';
+   for(const glyph of ring.querySelectorAll('.cmp-glyph'))glyph.style.transform='rotate('+(-(+glyph.dataset.angle+angles[k]))+'deg)';
+  });
+  dial.setAttribute('aria-label',dialLabel(stage.rings,state));
+ }
  function draw(){
-  $('cmp-dial').innerHTML=dialSvg(stage.rings,state);
+  if(!rings){
+   $('cmp-dial').innerHTML=dialSvg(stage.rings,state);
+   // First pose without a transition, so the dial does not spin into place when it opens.
+   const dial=$('cmp-dial').firstChild;dial.classList.add('cmp-still');pose();dial.getBoundingClientRect();dial.classList.remove('cmp-still');
+  }else pose();
   $('cmp-count').textContent='已轉 '+steps+' 格，上限 '+limit+' 格，超過齒輪會卡死、退回起點。';
  }
  function reset(text){state=stage.start.slice();steps=0;say(text||'','');draw();hints.changed();}

@@ -7,6 +7,7 @@
 //                 opens on which beat
 // The rules are pure and checked by search in scripts/blood-mirror-abyss.test.mjs; the mounts below only draw them.
 import {hintMarkup,bindHints} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 // --- choir-pipes ---------------------------------------------------------------------------------------------------
 export const PIPES=[6,8,9,10,12,15,20];       // lengths of the seven pipes
@@ -111,6 +112,7 @@ function finish(ctx,node,still){
 }
 
 export function mountChoirPipes(ctx){
+ ensureMaterials();
  const still=document.body.classList.contains('reduce-motion');
  let level='warm',selected=new Set(),finishing=false;
  const pipesOf=()=>level==='warm'?WARM_PIPES:PIPES;
@@ -134,7 +136,13 @@ export function mountChoirPipes(ctx){
     const on=selected.has(length),button=document.createElement('button');
     button.className='choir-pipe';button.setAttribute('aria-pressed',String(on));
     button.setAttribute('aria-label','管長 '+length+(on?'，已選，按下取消':'，按下選取'));
-    button.innerHTML='<svg viewBox="0 0 40 130" aria-hidden="true"><rect class="choir-bar" x="10" y="'+(128-length*6)+'" width="20" height="'+length*6+'" rx="3"/><circle class="choir-mouth" cx="20" cy="'+(128-length*6+6)+'" r="4"/></svg><b>'+lengthLabel(length)+'</b>';
+    // A brass organ pipe: the textured plate, a cylinder shade across it, a dark mouth with a lit lip, and a cap. The lit layer shows when it is chosen.
+    const top=128-length*6,height=length*6;
+    button.innerHTML='<svg viewBox="0 0 40 130" aria-hidden="true"><rect class="choir-cast" x="12.5" y="'+(top+2)+'" width="20" height="'+height+'" rx="3"/>'
+     +'<rect class="choir-bar" x="10" y="'+top+'" width="20" height="'+height+'" rx="3"/><rect class="choir-cyl" x="10" y="'+top+'" width="20" height="'+height+'" rx="3"/><rect class="choir-lit" x="10" y="'+top+'" width="20" height="'+height+'" rx="3"/>'
+     +'<rect class="choir-cap" x="9" y="'+(top-1.5)+'" width="22" height="4" rx="2"/>'
+     +'<rect class="choir-mouth" x="13" y="'+(top+9)+'" width="14" height="6.5" rx="1.5"/><rect class="choir-lip" x="13" y="'+(top+15.5)+'" width="14" height="1.6" rx=".8"/>'
+     +'<rect class="choir-foot" x="12" y="125" width="16" height="3.4" rx="1.4"/></svg><b>'+lengthLabel(length)+'</b>';
     button.onclick=()=>{
      if(finishing)return;
      if(on)selected.delete(length);else if(selected.size<need())selected.add(length);else{say('已經選了 '+need()+' 根。先取消一根。','bad');return;}

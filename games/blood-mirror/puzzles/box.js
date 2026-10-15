@@ -7,6 +7,7 @@
 import {abyss} from '../data/abyss.js';
 import {rooms} from '../engine/rules.js';
 import {bindHints,hintMarkup} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 // ---- The four keys. Each of E1-E4 gives one item and one zhuyin symbol (data/abyss.js, level reward).
 export const KEY_LEVELS=['e1','e2','e3','e4'].map(id=>{
@@ -112,6 +113,7 @@ const shell=face=>'<div class="belfry box" data-face="'+face+'"><p class="challe
 
 // Shared frame: the shell, the status line, the hints and the "face opened" step. `build(h)` draws one face and gives h.step.
 function mountFace(ctx,face,build){
+ ensureMaterials();
  ctx.render(shell(face));
  const $=id=>document.getElementById(id),body=$('box-body'),alive=()=>body.isConnected;
  let finished=false;
@@ -144,13 +146,13 @@ export const mountBoxTime=ctx=>mountFace(ctx,'time',h=>{
  let pos=1;
  const point=(i,r)=>{const a=(i-1)/TIME_SLOTS*2*Math.PI-Math.PI/2;return [100+r*Math.cos(a),100+r*Math.sin(a)];};
  const html=()=>{
-  let s='<svg class="box-dial" viewBox="0 0 200 200" role="group" aria-label="十三格撥盤"><circle class="box-dial-rim" cx="100" cy="100" r="94"/><circle class="box-dial-face" cx="100" cy="100" r="68"/>';
+  let s='<svg class="box-dial" viewBox="0 0 200 200" role="group" aria-label="十三格撥盤"><circle class="box-dial-shadow" cx="101.5" cy="103" r="94"/><circle class="box-dial-rim" cx="100" cy="100" r="94"/><circle class="box-dial-shine" cx="100" cy="100" r="92.4"/><circle class="box-dial-face" cx="100" cy="100" r="68"/><image href="assets/puzzles/compass-plate.webp" x="32" y="32" width="136" height="136" opacity=".75" pointer-events="none"/><circle class="box-dial-ring" cx="100" cy="100" r="71"/>';
   for(let i=1;i<=TIME_SLOTS;i++){
    const [x,y]=point(i,82),[tx,ty]=point(i,82);
    s+='<g class="box-notch'+(i===pos?' on':'')+'" data-n="'+i+'" role="button" tabindex="0" aria-label="第 '+i+' 格" aria-pressed="'+(i===pos)+'"><circle class="hit" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="11"/><text x="'+tx.toFixed(1)+'" y="'+(ty+3.5).toFixed(1)+'" text-anchor="middle">'+i+'</text></g>';
   }
   const [px,py]=point(pos,60);
-  s+='<line class="box-pointer" x1="100" y1="100" x2="'+px.toFixed(1)+'" y2="'+py.toFixed(1)+'"/><circle class="box-hub" cx="100" cy="100" r="6"/></svg>'
+  s+='<line class="box-pointer" x1="100" y1="100" x2="'+px.toFixed(1)+'" y2="'+py.toFixed(1)+'"/><line class="box-pointer-hi" x1="100" y1="100" x2="'+px.toFixed(1)+'" y2="'+py.toFixed(1)+'"/><circle class="box-hub" cx="100" cy="100" r="7"/></svg>'
    +'<div class="box-row"><button class="secondary-button" data-k="dec" aria-label="往前一格">−</button><span class="box-readout" aria-live="polite">指針在第 '+pos+' 格</span><button class="secondary-button" data-k="inc" aria-label="往後一格">＋</button></div>'
    +'<div class="box-row"><button class="primary-button" data-k="lock">扣上</button></div>';
   return s;

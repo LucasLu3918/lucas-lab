@@ -81,13 +81,10 @@ export const HINTS={
 export const hintStep=name=>name;
 
 // --- drawing -------------------------------------------------------------------------------------------------------
-const ICONS={
- apple:'<circle class="sym-apple" cx="12" cy="14" r="8"/><path class="sym-stem" d="M12 6v-3"/><path class="sym-leaf" d="M12 5c2-2 4-2 5-1-1 2-3 2-5 1z"/>',
- mirror:'<ellipse class="sym-mirror-frame" cx="12" cy="11" rx="7" ry="9"/><ellipse class="sym-mirror-glass" cx="12" cy="11" rx="4.6" ry="6.8"/><path class="sym-mirror-handle" d="M12 20v4"/>',
- rose:'<circle class="sym-rose" cx="12" cy="11" r="8"/><path class="sym-rose-line" d="M12 11c0-2 3-2 3 0s-4 3-5 0 2-6 6-4"/><path class="sym-stem" d="M12 19v5"/>',
- dagger:'<path class="sym-dagger" d="M12 1l3 13h-6z"/><path class="sym-hilt" d="M6 14h12M12 14v8"/>'
-};
-export const iconSvg=sym=>'<svg class="scale-sym" viewBox="0 0 24 25" aria-hidden="true">'+ICONS[sym]+'</svg>';
+// The four things on the scales are painted (assets/puzzles/scale-icons.webp, one 128 px cell each, in this order); the sym-* class is
+// only a name for the picture. The iron weights are a painted block with the number on it (scale-weight.webp, see .scale-lb).
+const ICON_ORDER=['apple','mirror','rose','dagger'],ICON_CELL=128,ICON_ATLAS='assets/puzzles/scale-icons.webp';
+export const iconSvg=sym=>'<svg class="scale-sym sym-'+sym+'" viewBox="'+ICON_ORDER.indexOf(sym)*ICON_CELL+' 0 '+ICON_CELL+' '+ICON_CELL+'" aria-hidden="true"><image href="'+ICON_ATLAS+'" width="'+ICON_ORDER.length*ICON_CELL+'" height="'+ICON_CELL+'"/></svg>';
 const itemHtml=it=>it.lb!==undefined
  ?'<span class="scale-lb" aria-label="'+it.lb+' 磅的鐵砝碼">'+it.lb+' 磅</span>'
  :Array.from({length:it.n},()=>iconSvg(it.sym)).join('');

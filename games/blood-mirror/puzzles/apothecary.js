@@ -3,6 +3,7 @@
 // are pure functions so scripts/blood-mirror-abyss.test.mjs can check them exhaustively; the mount* functions only draw.
 // The rules mirror plan-improve/prototypes/e3-apothecary.html, which e3-apothecary.solve.cjs checks the same way.
 import {bindHints,hintMarkup} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 // Seven original apprentices of the queen (when she was still the palace physician); names are herbs. The canon miners
 // are victims and companions of the heroine, never suspects. Cards: plan-improve/expert-dialogue-draft.md section 2.
@@ -116,7 +117,7 @@ export function mountApothecaryTestimony(ctx){
  let mirror=false,finished=false;const ruled=new Set();
  ctx.render(shell('apothecary-testimony','<div class="belfry-row"><button id="apo-mirror" class="secondary-button" aria-pressed="false">舉起手持鏡</button><span class="apo-note">證詞原本是反寫的鏡中字</span></div>'
   +'<div class="apo-cards" id="apo-cards">'+APPRENTICES.map((name,i)=>'<div class="apo-card" data-card="'+i+'">'
-   +'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7c-4-3-9 0-8 6 .8 5 4 8 8 8s7.2-3 8-8c1-6-4-9-8-6z" fill="#b3122b" stroke="#ff8a8a" stroke-width=".6"/><path d="M12 7c0-2 1-3 3-4" stroke="#6b8f3a" stroke-width="1.4" fill="none"/></svg>'
+   +'<svg viewBox="0 0 128 128" aria-hidden="true"><image href="assets/puzzles/scale-icons.webp" width="640" height="128"/></svg>'
    +'<b>'+(i+1)+'　'+name+'</b><span class="apo-card-line">'+CARD_LINES[i]+'</span>'
    +'<span class="apo-say" role="text" aria-label="'+name+'的證詞：'+say(TESTIMONY[i])+'">「'+say(TESTIMONY[i])+'」</span>'
    +'<span class="apo-acts"><button class="secondary-button" data-accuse="'+i+'" aria-label="指認'+name+'拿著毒蘋果">指認</button><button class="secondary-button" data-strike="'+i+'" aria-pressed="false" aria-label="劃掉'+name+'（記下他不是）">劃掉</button></span></div>').join('')+'</div>'));
@@ -152,6 +153,7 @@ export function mountApothecaryTestimony(ctx){
 }
 
 export function mountApothecaryVessels(ctx){
+ ensureMaterials();
  let vessels=[...START],history=[],finished=false;
  ctx.render(shell('apothecary-vessels','<div class="belfry-board apo-board"><svg id="apo-svg" class="belfry-svg" viewBox="0 -34 275 150" role="group" aria-label="三個杯子與單向管線"></svg></div>'
   +'<div class="belfry-row"><button id="apo-undo" class="secondary-button">復原</button><button id="apo-restart" class="secondary-button">重來</button><span id="apo-moves" class="apo-note"></span></div>'));
@@ -166,8 +168,13 @@ export function mountApothecaryVessels(ctx){
   let s='<defs><marker id="apo-arrow" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7z" fill="#e0b84f"/></marker></defs>';
   for(let i=0;i<3;i++){
    const h=CAP[i]*unit,level=vessels[i]*unit;
-   s+='<rect x="'+X[i]+'" y="'+top(i)+'" width="'+W+'" height="'+h+'" rx="3" fill="#101826" stroke="#9fb4d8" stroke-width="1.4"/>'
-    +'<rect x="'+(X[i]+1.5)+'" y="'+(BOT-level)+'" width="'+(W-3)+'" height="'+level+'" fill="#c9482f" fill-opacity=".85"/>'
+   s+='<rect class="apo-shadow" x="'+(X[i]+2.5)+'" y="'+(top(i)+2.5)+'" width="'+W+'" height="'+(h+2)+'" rx="4"/>'
+    +'<rect class="apo-glass-back" x="'+X[i]+'" y="'+top(i)+'" width="'+W+'" height="'+h+'" rx="4"/>'
+    +'<rect class="apo-liquid" x="'+(X[i]+1.6)+'" y="'+(BOT-level)+'" width="'+(W-3.2)+'" height="'+level+'"/>'
+    +(level>0?'<rect class="apo-surface" x="'+(X[i]+1.6)+'" y="'+(BOT-level)+'" width="'+(W-3.2)+'" height="1.6"/>':'')
+    +'<rect class="apo-glass" x="'+X[i]+'" y="'+top(i)+'" width="'+W+'" height="'+h+'" rx="4"/>'
+    +'<rect class="apo-glint" x="'+(X[i]+5)+'" y="'+(top(i)+5)+'" width="4" height="'+Math.max(h-10,4)+'" rx="2"/>'
+    +'<rect class="apo-base" x="'+(X[i]-3)+'" y="'+BOT+'" width="'+(W+6)+'" height="5" rx="2"/>'
     +'<text x="'+(X[i]+W/2)+'" y="'+(BOT+13)+'" text-anchor="middle" font-size="9.5" fill="#e9dcc3">'+VESSEL_NAMES[i]+' 杯（容量 '+CAP[i]+'）</text>'
     +'<text x="'+(X[i]+W/2)+'" y="'+Math.min(BOT-level-4,BOT-6)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">'+vessels[i]+'</text>';
   }

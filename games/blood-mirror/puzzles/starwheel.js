@@ -5,6 +5,7 @@
 // is prime, the hammer visits every notch once. Only one step size fits the engraving. The rules are pure and checked by search
 // in scripts/blood-mirror-abyss.test.mjs; the mount below only draws them.
 import {animate} from './clock.js';
+import {ensureMaterials} from './materials.js';
 import {hintMarkup,bindHints} from './belfry-hints.js';
 
 export const NOTCHES=13,RUBY=0,TRUE_STEP=5;
@@ -45,6 +46,7 @@ const numeralName=n=>n?NUMERALS[n-1]:'';
 
 // ctx = { render(html), done(), playCue(kind) }
 export function mountStarWheel(ctx){
+ ensureMaterials();
  const still=document.body.classList.contains('reduce-motion');
  let lit=false,everLit=false,step=1,running=false,solvedNow=false;
  ctx.render('<div class="belfry">'
@@ -62,19 +64,26 @@ export function mountStarWheel(ctx){
  const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
  const hints=bindHints({hints:HINTS,currentStep:()=>hintStep(solvedNow,everLit),alive});
 
- let body='<circle class="wheel-ring" cx="'+CENTER+'" cy="'+CENTER+'" r="'+RING+'"/><circle class="wheel-hub" cx="'+CENTER+'" cy="'+CENTER+'" r="26"/>';
+ // The ring is a brass band with a lit edge; the ruby is a painted gem. The hammer is one group that turns about the hub, so a toll
+ // is a CSS transition between two angles instead of a jump (see aimHammer).
+ let body='<circle class="wheel-ring-shadow" cx="'+(CENTER+1.5)+'" cy="'+(CENTER+3)+'" r="'+RING+'"/><circle class="wheel-ring" cx="'+CENTER+'" cy="'+CENTER+'" r="'+RING+'"/>'
+  +'<circle class="wheel-ring-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING+4.8)+'"/><circle class="wheel-ring-dark" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING-4.8)+'"/>'
+  +'<circle class="wheel-hub" cx="'+CENTER+'" cy="'+CENTER+'" r="26"/><circle class="wheel-hub-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="21"/>';
  for(let notch=0;notch<NOTCHES;notch++){
   const [x1,y1]=point(notch,RING-9),[x2,y2]=point(notch,RING+9),[tx,ty]=point(notch,RING-30);
   body+='<line class="wheel-notch" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';
-  body+=notch===RUBY?'<circle class="wheel-ruby" cx="'+x2.toFixed(1)+'" cy="'+(y2+4).toFixed(1)+'" r="10"/>'
+  body+=notch===RUBY?'<image class="wheel-ruby" href="assets/puzzles/wheel-ruby.webp" x="'+(x2-15).toFixed(1)+'" y="'+(y2+4-18.5).toFixed(1)+'" width="30" height="37" pointer-events="none"/>'
    :'<text class="wheel-glyph" x="'+tx.toFixed(1)+'" y="'+(ty+5).toFixed(1)+'" data-notch="'+notch+'">'+numeralName(numeralAt(notch))+'</text>';
  }
- body+='<line class="wheel-hammer" id="wheel-hammer" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><circle class="wheel-hammer-head" id="wheel-head" cx="'+CENTER+'" cy="'+(CENTER-RING+4)+'" r="6"/>'
+ body+='<g class="wheel-hammer-turn" id="wheel-hammer"><line class="wheel-hammer" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><line class="wheel-hammer-hi" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><circle class="wheel-hammer-head" cx="'+CENTER+'" cy="'+(CENTER-RING+4)+'" r="7"/></g>'
+  +'<circle class="wheel-pin" cx="'+CENTER+'" cy="'+CENTER+'" r="7"/>'
   +'<text class="wheel-toll" id="wheel-toll" x="'+CENTER+'" y="'+(CENTER+9)+'"></text>';
  svg.innerHTML=body;
+ // The hammer only ever turns forward (clockwise), so the angle keeps growing and the transition never spins back the long way round.
+ let hammerNotch=RUBY,hammerAngle=0;
  const aimHammer=notch=>{
-  const [x,y]=point(notch,RING-4),line=$('wheel-hammer'),head=$('wheel-head');
-  line.setAttribute('x2',x.toFixed(1));line.setAttribute('y2',y.toFixed(1));head.setAttribute('cx',x.toFixed(1));head.setAttribute('cy',y.toFixed(1));
+  hammerAngle+=((notch-hammerNotch+NOTCHES)%NOTCHES)*360/NOTCHES;hammerNotch=notch;
+  $('wheel-hammer').style.transform='rotate('+hammerAngle.toFixed(2)+'deg)';
  };
 
  function setLight(on){

@@ -4,6 +4,7 @@
 // Doubling the length (the obvious guess) gives a ratio of only 1.41. The rules are pure and checked by search in
 // scripts/blood-mirror-abyss.test.mjs; the mount below only draws them.
 import {animate} from './clock.js';
+import {ensureMaterials} from './materials.js';
 import {hintMarkup,bindHints} from './belfry-hints.js';
 
 export const BASE=1,TARGET=2,TOLERANCE=.04;
@@ -49,10 +50,16 @@ export function hintStep(attached){
 }
 
 const NS='http://www.w3.org/2000/svg';
-const UNIT=42,PIVOT_Y=26,OLD_X=105,NEW_X=290,SWING=.42,OLD_PERIOD=1.9; // OLD_PERIOD: seconds the old pendulum takes on screen
+const UNIT=42,PIVOT_Y=26,OLD_X=105,NEW_X=290,SWING=.42,OLD_PERIOD=1.9;
+// Painted parts (assets/puzzles/pend-*.webp). A bob hangs from its loop: its sphere sits at the end of the rod, so the picture is
+// placed with the sphere's centre (a sphere as wide as the picture, resting on its bottom edge) on the rod's end.
+const BOB={new:{src:'pend-bob.webp',w:32,h:40},old:{src:'pend-bob-old.webp',w:26,h:39.2}};
+const DISC_SIZE=23;
+const bobImage=kind=>{const {src,w,h}=BOB[kind];return '<circle cx="1.8" cy="2.6" r="'+w/2+'" fill="#000" fill-opacity=".32"/><image href="assets/puzzles/'+src+'" x="'+(-w/2)+'" y="'+(-(h-w/2))+'" width="'+w+'" height="'+h+'" pointer-events="none"/>';}; // OLD_PERIOD: seconds the old pendulum takes on screen
 
 // ctx = { render(html), done(), playCue(kind) }
 export function mountPendulum(ctx){
+ ensureMaterials();
  const still=document.body.classList.contains('reduce-motion');
  let attached=[],started=performance.now(),finishing=false;
  ctx.render('<div class="belfry">'
@@ -69,35 +76,43 @@ export function mountPendulum(ctx){
  const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
  const hints=bindHints({hints:HINTS,currentStep:()=>hintStep(attached),alive});
 
- // Static scene: ceiling beam, pivots, scale marks. The rods and bobs are moved on every frame.
- svg.innerHTML='<rect class="pend-beam" x="30" y="14" width="340" height="12" rx="3"/>'
+ // Static scene: a brass ceiling beam, the pivots and the scale. Everything that moves is built once here and only has its attributes
+ // set on each frame (the rods, the bobs, the three weights), so a swing never creates or removes an element.
+ svg.innerHTML='<rect class="pend-beam-shadow" x="30" y="26" width="340" height="9" rx="4"/><rect class="pend-beam" x="30" y="14" width="340" height="12" rx="3"/><rect class="pend-beam-shine" x="31" y="15" width="338" height="3" rx="1.5"/>'
+  +[46,115,200,285,354].map(x=>'<circle class="pend-rivet" cx="'+x+'" cy="20" r="1.9"/>').join('')
   +'<text class="pend-label" x="'+OLD_X+'" y="276">舊擺 · 1 格</text><text class="pend-label" id="pend-new-label" x="'+NEW_X+'" y="276"></text>'
   +Array.from({length:6},(_,i)=>'<line class="pend-tick" x1="380" y1="'+(PIVOT_Y+i*UNIT)+'" x2="392" y2="'+(PIVOT_Y+i*UNIT)+'"/><text class="pend-scale" x="378" y="'+(PIVOT_Y+i*UNIT+3)+'">'+i+'</text>').join('')
-  +'<line class="pend-rod old" id="pend-old-rod"/><circle class="pend-bob old" id="pend-old-bob" r="9"/>'
-  +'<g id="pend-new"><line class="pend-rod" id="pend-new-rod"/><g id="pend-discs"></g><circle class="pend-bob" id="pend-new-bob" r="11"/></g>'
-  +'<circle class="pend-pivot" cx="'+OLD_X+'" cy="'+PIVOT_Y+'" r="4"/><circle class="pend-pivot" cx="'+NEW_X+'" cy="'+PIVOT_Y+'" r="4"/>'
+  +'<g id="pend-old"><line class="pend-rod old"/><line class="pend-rod-hi"/><g class="pend-bobshape" id="pend-old-bob">'+bobImage('old')+'</g></g>'
+  +'<g id="pend-new"><line class="pend-rod"/><line class="pend-rod-hi"/>'
+  +WEIGHTS.map(w=>'<image class="pend-disc-img" id="pend-disc-'+w.id+'" href="assets/puzzles/pend-disc.webp" x="'+(-DISC_SIZE/2)+'" y="'+(-DISC_SIZE/2)+'" width="'+DISC_SIZE+'" height="'+DISC_SIZE+'" visibility="hidden" pointer-events="none"/>').join('')
+  +'<g class="pend-bobshape" id="pend-new-bob">'+bobImage('new')+'</g></g>'
+  +'<circle class="pend-pivot" cx="'+OLD_X+'" cy="'+PIVOT_Y+'" r="4.6"/><circle class="pend-pivot" cx="'+NEW_X+'" cy="'+PIVOT_Y+'" r="4.6"/>'
   +'<text class="pend-bell" id="pend-bell" x="200" y="62" visibility="hidden">鐘響</text>';
  const el=id=>svg.querySelector('#'+id);
+ const oldRods=[...svg.querySelectorAll('#pend-old line')],newRods=[...svg.querySelectorAll('#pend-new line')];
+ const discEls=Object.fromEntries(WEIGHTS.map(w=>[w.id,el('pend-disc-'+w.id)]));
+ const oldBob=el('pend-old-bob'),newBob=el('pend-new-bob'),counts=$('pend-counts');
+ let lastCounts='';
 
- function place(rodId,bobId,x,units,angle){
-  const bx=x+Math.sin(angle)*units*UNIT,by=PIVOT_Y+Math.cos(angle)*units*UNIT,rod=el(rodId);
-  rod.setAttribute('x1',x);rod.setAttribute('y1',PIVOT_Y);rod.setAttribute('x2',bx.toFixed(1));rod.setAttribute('y2',by.toFixed(1));
-  const bob=el(bobId);bob.setAttribute('cx',bx.toFixed(1));bob.setAttribute('cy',by.toFixed(1));
-  return [bx,by];
+ function place(rods,bob,x,units,angle){
+  const bx=x+Math.sin(angle)*units*UNIT,by=PIVOT_Y+Math.cos(angle)*units*UNIT;
+  for(const rod of rods){rod.setAttribute('x1',x);rod.setAttribute('y1',PIVOT_Y);rod.setAttribute('x2',bx.toFixed(1));rod.setAttribute('y2',by.toFixed(1));}
+  bob.setAttribute('transform','translate('+bx.toFixed(1)+' '+by.toFixed(1)+') rotate('+(-angle*180/Math.PI).toFixed(1)+')');
  }
- // Discs sit where each hung weight ends along the rod, so the length the player added can be seen.
+ // Each hung weight sits where it ends along the rod, so the length the player added can be seen.
  function pose(seconds){
   const units=length(attached),p=ratio(attached);
   const oldAngle=still?SWING:SWING*Math.sin(2*Math.PI*seconds/OLD_PERIOD);
   const newAngle=still?SWING:SWING*Math.sin(2*Math.PI*seconds/(OLD_PERIOD*p));
-  place('pend-old-rod','pend-old-bob',OLD_X,BASE,oldAngle);
-  place('pend-new-rod','pend-new-bob',NEW_X,units,newAngle);
+  place(oldRods,oldBob,OLD_X,BASE,oldAngle);
+  place(newRods,newBob,NEW_X,units,newAngle);
   let reach=BASE;
-  const discs=el('pend-discs');discs.textContent='';
-  for(const weight of WEIGHTS.filter(w=>attached.includes(w.id))){
+  for(const weight of WEIGHTS){
+   const disc=discEls[weight.id];
+   if(!attached.includes(weight.id)){disc.setAttribute('visibility','hidden');continue;}
    reach+=weight.len;
-   const cx=NEW_X+Math.sin(newAngle)*reach*UNIT,cy=PIVOT_Y+Math.cos(newAngle)*reach*UNIT;
-   discs.insertAdjacentHTML('beforeend','<circle class="pend-disc" cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="6"/>');
+   disc.setAttribute('visibility','visible');
+   disc.setAttribute('transform','translate('+(NEW_X+Math.sin(newAngle)*reach*UNIT).toFixed(1)+' '+(PIVOT_Y+Math.cos(newAngle)*reach*UNIT).toFixed(1)+')');
   }
   return {oldSwings:Math.floor(seconds/OLD_PERIOD),newSwings:Math.floor(seconds/(OLD_PERIOD*p))};
  }
@@ -108,7 +123,7 @@ export function mountPendulum(ctx){
    const on=attached.includes(weight.id),button=document.createElement('button');
    button.className='belfry-gear-button belfry-weight';button.setAttribute('aria-pressed',String(on));
    button.setAttribute('aria-label',weight.name+'配重，'+weight.len+' 格，'+(on?'已掛上，按下取下':'按下掛上'));
-   button.innerHTML='<svg viewBox="-14 -14 28 28" aria-hidden="true"><circle class="pend-disc big" r="'+(7+weight.len*2.4)+'"/></svg><b>'+weight.name+' · '+weight.len+' 格</b>';
+   button.innerHTML='<span class="pend-disc-slot" aria-hidden="true"><img src="assets/puzzles/pend-disc.webp" alt="" width="'+Math.round(24+weight.len*9)+'" height="'+Math.round(24+weight.len*9)+'" decoding="async" draggable="false"></span><b>'+weight.name+' · '+weight.len+' 格</b>';
    button.onclick=()=>{attached=on?attached.filter(id=>id!==weight.id):[...attached,weight.id];started=performance.now();ctx.playCue('click');refresh();};
    box.appendChild(button);
   }
@@ -149,7 +164,8 @@ export function mountPendulum(ctx){
    }
    lastNew=swings.newSwings;
    // The counters sit outside the live status line, so a screen reader is not read to on every frame.
-   $('pend-counts').textContent='舊擺 '+swings.oldSwings+' 趟 · 新擺 '+swings.newSwings+' 趟';
+   const text='舊擺 '+swings.oldSwings+' 趟 · 新擺 '+swings.newSwings+' 趟';
+   if(text!==lastCounts){lastCounts=text;counts.textContent=text;}
   });
  }
 }

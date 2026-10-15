@@ -4,6 +4,7 @@
 // A gear closer than that jams, farther away it spins free. Layer 0 (gold) and layer 1 (copper) never touch;
 // the two gears on one socket turn together. The rules are pure so scripts/blood-mirror-abyss.test.mjs can search them.
 import {animate} from './clock.js';
+import {ensureMaterials} from './materials.js';
 import {hintMarkup,bindHints} from './belfry-hints.js';
 const EPS=0.01;
 const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
@@ -156,6 +157,7 @@ const STATUS_WAIT={warm:'輸出軸還沒有被帶動。',main:'輸出軸還沒�
 // Mounts the board. The shell is drawn once and then updated in place, so spinning the crank does not rebuild the modal.
 // ctx = { render(html), feedback(text), done(), playCue(kind) }
 export function mountGears13(ctx){
+ ensureMaterials();
  const motion=()=>!document.body.classList.contains('reduce-motion');
  let level=LEVELS.warm,board=emptyBoard(level),picked=null,layer=0,turns=0,running=null,ruler=false,result=null;
  let hints=null;
@@ -188,12 +190,27 @@ export function mountGears13(ctx){
   update();
  }
 
+ // A gear is a textured plate (brass below, copper above) cut to the tooth outline, with its web recessed and lightened by holes.
+ // Only the rotating part is here; the light and the shadow stay put, so the light never turns with the gear.
  function gearGroup(teeth,gearLayer,bad){
   const group=document.createElementNS(NS,'g');
   group.setAttribute('class','belfry-gear layer'+gearLayer+(bad?' bad':''));
-  const radius=teeth/2;
-  group.innerHTML='<path class="gear-body" d="'+toothPath(teeth)+'"/><circle class="gear-web" r="'+Math.max(radius-2.6,1)+'"/><circle class="gear-axle" r="'+Math.min(1.6,radius/3)+'"/>';
+  const radius=teeth/2,web=Math.max(radius-2.9,1),hub=Math.min(2.1,radius/3);
+  let holes='';
+  if(teeth>=10){
+   const count=teeth>=14?6:5,ring=(web+hub+.8)/2,size=Math.max((web-hub-1.4)/2*.62,.7);
+   for(let k=0;k<count;k++){const a=k*Math.PI*2/count;holes+='<circle class="gear-hole" cx="'+(Math.cos(a)*ring).toFixed(2)+'" cy="'+(Math.sin(a)*ring).toFixed(2)+'" r="'+size.toFixed(2)+'"/>';}
+  }
+  group.innerHTML='<path class="gear-body" d="'+toothPath(teeth)+'"/><circle class="gear-web" r="'+web+'"/><circle class="gear-rimline" r="'+web+'"/>'+holes
+   +'<circle class="gear-hub" r="'+hub+'"/><circle class="gear-axle" r="'+(hub*.42).toFixed(2)+'"/>';
   return group;
+ }
+ // Not rotating: a soft cast shadow under the gear, and the highlight over it.
+ function disc(cls,radius,x,y,dx=0,dy=0){
+  const circle=document.createElementNS(NS,'circle');
+  circle.setAttribute('class',cls);circle.setAttribute('r',radius);circle.setAttribute('cx',x+dx);circle.setAttribute('cy',y+dy);
+  circle.setAttribute('pointer-events','none');
+  return circle;
  }
 
  function drawBoard(){
@@ -208,19 +225,23 @@ export function mountGears13(ctx){
     svg.insertAdjacentHTML('beforeend','<line class="belfry-ruler" x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/><text class="belfry-dist" x="'+(a[0]+b[0])/2+'" y="'+((a[1]+b[1])/2-.6)+'">'+apart.toFixed(1).replace('.0','')+'</text>');
    }
   }
+  // Each socket is a well in the plate with a brass lip; a gear on it covers the well.
+  for(const socket of Object.keys(level.sockets)){
+   const [x,y]=level.sockets[socket];
+   svg.appendChild(disc('belfry-socket'+(socket===level.out?' out':''),socket===CRANK_SOCKET?2.6:3.4,x,y));
+  }
   for(let gearLayer=0;gearLayer<level.layers;gearLayer++)result.nodes.forEach((node,i)=>{
    if(node.layer!==gearLayer)return;
    const bad=!!result.jam&&(result.jam.a===node.id||result.jam.b===node.id);
    const group=gearGroup(node.teeth,node.layer,bad),[x,y]=level.sockets[node.socket];
+   const pitch=node.teeth/2;
+   svg.appendChild(disc('gear-shadow',pitch+.3,x,y,.6,1));
    svg.appendChild(group);
+   svg.appendChild(disc('gear-roundness',pitch-.9,x,y));
    nodesEl.push({group,x,y,phase:phase[i],speed:result.speed[i]?result.speed[i][0]/result.speed[i][1]:0});
   });
   for(const socket of Object.keys(level.sockets)){
    const [x,y]=level.sockets[socket];
-   const dot=document.createElementNS(NS,'circle');
-   dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('r',socket===CRANK_SOCKET?1.6:2.2);
-   dot.setAttribute('class','belfry-socket'+(socket===level.out?' out':''));
-   svg.appendChild(dot);
    if(socket===CRANK_SOCKET)continue;
    const hit=document.createElementNS(NS,'circle');
    hit.setAttribute('cx',x);hit.setAttribute('cy',y);hit.setAttribute('r',level.reach);hit.setAttribute('class','belfry-hit');
@@ -232,10 +253,10 @@ export function mountGears13(ctx){
    if(socket===level.out){
     svg.insertAdjacentHTML('beforeend','<circle class="belfry-out-ring" cx="'+x+'" cy="'+y+'" r="4"/><text class="belfry-label out" x="'+x+'" y="'+(y+7.4)+'">輸出軸</text>');
     outMarker=document.createElementNS(NS,'circle');outMarker.setAttribute('r','.9');outMarker.setAttribute('class','belfry-out-mark');svg.appendChild(outMarker);
-   }else svg.insertAdjacentHTML('beforeend','<text class="belfry-label dim" x="'+x+'" y="'+(y-3.2)+'">軸座</text>');
+   }else if(!board[socket].some(Boolean))svg.insertAdjacentHTML('beforeend','<text class="belfry-label dim" x="'+x+'" y="'+(y-3.2)+'">軸座</text>');
   }
   crankHandle=document.createElementNS(NS,'g');
-  crankHandle.innerHTML='<line class="belfry-crank" x1="0" y1="0" x2="0" y2="0"/><circle class="belfry-knob" r="1"/>';
+  crankHandle.innerHTML='<line class="belfry-crank" x1="0" y1="0" x2="0" y2="0"/><line class="belfry-crank-hi" x1="0" y1="0" x2="0" y2="0"/><circle class="belfry-knob" r="1.35"/>';
   svg.appendChild(crankHandle);
   svg.insertAdjacentHTML('beforeend','<text class="belfry-label" x="0" y="-8.6">曲柄 12 齒</text>');
   pose();
@@ -250,8 +271,8 @@ export function mountGears13(ctx){
   for(const gear of nodesEl)gear.group.setAttribute('transform','translate('+gear.x+' '+gear.y+') rotate('+((gear.phase+turns*gear.speed*Math.PI*2)*180/Math.PI).toFixed(2)+')');
   const angle=turns*Math.PI*2-Math.PI/2;
   if(crankHandle){
-   const line=crankHandle.firstChild,knob=crankHandle.lastChild;
-   line.setAttribute('x2',(Math.cos(angle)*5).toFixed(2));line.setAttribute('y2',(Math.sin(angle)*5).toFixed(2));
+   const [line,shine]=crankHandle.children,knob=crankHandle.lastChild;
+   for(const l of [line,shine]){l.setAttribute('x2',(Math.cos(angle)*5).toFixed(2));l.setAttribute('y2',(Math.sin(angle)*5).toFixed(2));}
    knob.setAttribute('cx',(Math.cos(angle)*5).toFixed(2));knob.setAttribute('cy',(Math.sin(angle)*5).toFixed(2));
   }
   if(outMarker){
@@ -276,7 +297,7 @@ export function mountGears13(ctx){
    button.setAttribute('aria-label',teeth+' 齒齒輪'+(used?'（已放置）':''));
    const r=teeth/2+2,icon=document.createElementNS(NS,'svg');
    icon.setAttribute('viewBox',-r+' '+-r+' '+2*r+' '+2*r);icon.setAttribute('aria-hidden','true');
-   icon.appendChild(gearGroup(teeth,layer,false));button.appendChild(icon);
+   icon.appendChild(gearGroup(teeth,layer,false));icon.appendChild(disc('gear-roundness',teeth/2-.9,0,0));button.appendChild(icon);
    button.insertAdjacentHTML('beforeend','<b>'+teeth+' 齒</b>');
    button.onclick=()=>{
     picked=picked===i?null:i;drawTray();

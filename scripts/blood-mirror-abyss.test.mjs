@@ -863,7 +863,8 @@ test('E8 level data: lines match the draft, the stages are registered and ordere
  for(const id of e8.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
  const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/frozen.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
  assert.ok(!/requestAnimationFrame/.test(src));
- assert.ok(!/style="/.test(src)&&!/\.style\./.test(src),'the page CSP blocks inline styles');
+ // `style-src 'self'` blocks style attributes and cssText, not CSSOM property writes: the rings turn by setting el.style.transform (verified in the browser against the real headers).
+ assert.ok(!/style="/.test(src)&&!/\.style\.cssText/.test(src)&&!/setAttribute\(\s*['"]style/.test(src),'the page CSP blocks inline styles');
  setPuzzleCompletions(['frozen.frozen-faces','frozen.frozen-order']);
  assert.deepEqual(completedPuzzles().sort(),['frozen.frozen-faces','frozen.frozen-order']);
  resetPuzzles();
@@ -924,7 +925,8 @@ test('E9 level data: lines match the draft, needs the four marks, stages registe
  for(const id of e9.stages)for(const dir of ['','thumbs/'])assert.ok(fs.existsSync(new URL('../games/blood-mirror/assets/puzzles/'+dir+id+'.webp',import.meta.url)),dir+id);
  const src=fs.readFileSync(new URL('../games/blood-mirror/puzzles/compass.js',import.meta.url),'utf8').replace(/\/\/.*$/gm,'');
  assert.ok(!/requestAnimationFrame/.test(src));
- assert.ok(!/style="/.test(src)&&!/\.style\./.test(src),'the page CSP blocks inline styles');
+ // `style-src 'self'` blocks style attributes and cssText, not CSSOM property writes: the rings turn by setting el.style.transform.
+ assert.ok(!/style="/.test(src)&&!/\.style\.cssText/.test(src)&&!/setAttribute\(\s*['"]style/.test(src),'the page CSP blocks inline styles');
  assert.ok(compass.dialSvg([0,1,2,3],[0,0,0,0]).includes('cmp-needle'));
 });
 
