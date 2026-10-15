@@ -186,7 +186,7 @@
    assert.ok(fs.existsSync(target),'broken game asset/link '+href);
   }
   const gameSource=path.join(root,'games',g.slug);
-  for(const file of ['main.js','engine/index.js','engine/rules.js','engine/state.js','engine/save.js','data/chapters/index.js','data/chapters/library.js','data/items.js','data/endings.js','puzzles/index.js','puzzles/ledger.js','puzzles/pipes.js','journey.js','style.css','favicon.svg','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
+  for(const file of ['main.js','engine/index.js','engine/rules.js','engine/state.js','engine/save.js','data/chapters/index.js','data/chapters/library.js','data/items.js','data/endings.js','puzzles/index.js','puzzles/ledger.js','puzzles/pipes.js','journey.js','style.css','assets/icons/favicon-64.png','assets/icons/game-brand.webp','assets/snow-white.webp','assets/chamber.webp','assets/mine.webp','assets/crypt.webp','assets/queen.webp','assets/mirror.webp']){
    assert.ok(fs.readFileSync(path.join(gameSource,file)).equals(fs.readFileSync(path.join(dist,play,file))),'game source/output mismatch: '+file);
   }
   assert.ok(!fs.readFileSync(path.join(gameSource,'style.css'),'utf8').includes('fonts.googleapis'),'game must use local fonts');
@@ -244,7 +244,8 @@
  assert.ok(galleryHtml.includes('· 構思中')&&!galleryHtml.includes('· 概念</strong>'),'gallery placeholders not labelled as in progress');
  const publishedGame=path.join(dist,'games/blood-mirror/play/assets');
  const pngs=[];(function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,entry.name);if(entry.isDirectory())walk(full);else if(entry.name.endsWith('.png'))pngs.push(full)}})(publishedGame);
- assert.deepEqual(pngs,[],'PNG originals must not be published when a WebP derivative exists');
+ // The 64px tab favicon is a PNG the browser reads directly (Safari does not take WebP favicons); concept originals stay out.
+ assert.deepEqual(pngs.filter(p=>!p.endsWith(path.join('assets','icons','favicon-64.png'))),[],'PNG originals must not be published when a WebP derivative exists');
  for(const board of [1,3,4])assert.ok(fs.existsSync(path.join(publishedGame,'concepts/design-board-'+board+'.webp'))&&galleryHtml.includes('design-board-'+board+'.webp'),'concept board '+board+' not published or linked');
  const playDir=path.join(dist,'games/blood-mirror/play');
  for(const file of fs.readdirSync(playDir).filter(f=>f.endsWith('.js'))){
@@ -258,7 +259,7 @@
  const distFiles=listDist(dist).map(file=>({file,name:path.relative(dist,file).split(path.sep).join('/'),bytes:fs.statSync(file).size}));
  const MB=1024*1024;
  for(const {name,bytes} of distFiles){
-  if(name.endsWith('.png'))assert.ok(name.startsWith('assets/icons/'),'PNG may only be published as a PWA icon: '+name);
+  if(name.endsWith('.png'))assert.ok(name.startsWith('assets/icons/')||name.endsWith('/assets/icons/favicon-64.png'),'PNG may only be published as a PWA icon or tab favicon: '+name);
   if(/\.(webp|avif|jpe?g)$/.test(name))assert.ok(bytes<=500*1024,'bitmap exceeds the 500 KB budget: '+name+' ('+Math.round(bytes/1024)+' KB)');
   if(name.endsWith('.mp3'))assert.ok(bytes<=4*MB,'audio file exceeds the 4 MB budget (plan D1): '+name);
  }
