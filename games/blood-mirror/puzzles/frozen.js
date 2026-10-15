@@ -6,6 +6,7 @@
 //   frozen-final  needs both: name who held the goblet in each moment, in time order
 // A clue is {t, a, b?, attr?, val?} over guest ids. Everything here is pure data and search; the mount only draws it.
 import {hintMarkup,bindHints} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 export const NAMES={duke:'公爵',countess:'伯爵夫人',doctor:'醫師',musician:'樂師',maid:'侍女',hunter:'獵人'};
 export const MASK_NAME={tri:'三角',round:'圓形',beak:'鳥喙'};
@@ -126,30 +127,29 @@ HINTS.final=[
 export const hintStep=name=>name;
 
 // --- drawing -------------------------------------------------------------------------------------------------------
-const SLOT_W=64,SCENE_H=130;
-const maskPath={
- tri:'M-11 -7 L11 -7 L0 7 Z',
- round:'M-11 -4 a11 8 0 1 0 22 0 a11 8 0 1 0 -22 0 Z',
- beak:'M-10 -6 L10 -6 L11 3 L0 16 L-11 3 Z'
-};
-const GLASS='<path class="frz-glass" transform="translate(30 70) scale(1.5) translate(-30 -70)" d="M24 64 h12 l-2 11 q-4 4 -8 0 z M30 79 v6 M26 85 h8"/>';
+const SLOT_W=76,SCENE_H=148;
+// The guests are painted (assets/puzzles/frozen-guests.webp: 4 x 3 cells of 192 px). Cells 0-8 are the masked heads, three mask shapes
+// by three tones (shape*3+tone); cells 9 and 10 are the velvet coat with white or black cuffs. Which painting a guest gets is still
+// decided only by the data (mask, tone, cuff), so a clue and the picture cannot disagree.
+const ATLAS='assets/puzzles/frozen-guests.webp',CELL=192,COLS=4,ROWS=3;
+const SHAPE_AT={tri:0,round:1,beak:2},TONE_AT={red:0,gold:1,black:2},BODY_AT={white:9,black:10};
+const part=(index,x,y,w,h)=>'<svg x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" viewBox="'+(index%COLS)*CELL+' '+Math.floor(index/COLS)*CELL+' '+CELL+' '+CELL
+ +'" overflow="hidden" pointer-events="none"><image href="'+ATLAS+'" width="'+COLS*CELL+'" height="'+ROWS*CELL+'"/></svg>';
+const GLASS='<path class="frz-glass" transform="translate(34 94) scale(1.5) translate(-30 -70)" d="M24 64 h12 l-2 11 q-4 4 -8 0 z M30 79 v6 M26 85 h8"/><path class="frz-wine" transform="translate(34 94) scale(1.5) translate(-30 -70)" d="M25.4 66.4 h9.2 l-1.2 7.6 q-3.4 3 -6.8 0 z"/>';
 function figureSvg(fig,slot,glass){
  const x=slot*SLOT_W+SLOT_W/2;
  return '<g transform="translate('+x+' 0)">'
-  +'<path class="frz-robe" d="M-19 62 L19 62 L25 106 L-25 106 Z"/>'
-  +'<path class="frz-arm" d="M-17 66 L-22 96 M17 66 L22 96"/>'
-  +'<circle class="frz-cuff frz-cuff-'+fig.cuff+'" cx="-22" cy="98" r="6.5"/><circle class="frz-cuff frz-cuff-'+fig.cuff+'" cx="22" cy="98" r="6.5"/>'
+  +'<ellipse class="frz-cast" cx="1" cy="125" rx="25" ry="4"/>'
+  +part(BODY_AT[fig.cuff],-38,43,76,76)
   +(glass?GLASS:'')
-  +'<ellipse class="frz-head" cx="0" cy="38" rx="17" ry="22"/>'
-  +'<path class="frz-hair" d="M-18 34 Q0 8 18 34 Q9 20 0 20 Q-9 20 -18 34Z"/>'
-  +'<path class="frz-mask frz-tone-'+fig.tone+' frz-shape-'+fig.mask+'" transform="translate(0 36) scale(1.4)" d="'+maskPath[fig.mask]+'"/>'
-  +'<circle class="frz-plate'+(glass?' frz-held':'')+'" cx="0" cy="119" r="8"/><text class="frz-num" x="0" y="123">'+(slot+1)+'</text>'
+  +part(SHAPE_AT[fig.mask]*3+TONE_AT[fig.tone],-31,4,62,62)
+  +'<circle class="frz-plate'+(glass?' frz-held':'')+'" cx="0" cy="138" r="8"/><text class="frz-num" x="0" y="142">'+(slot+1)+'</text>'
   +'</g>';
 }
 const describe=(fig,slot,glass)=>(slot+1)+' 號：'+MASK_NAME[fig.mask]+'的'+TONE_NAME[fig.tone]+'色面具，'+CUFF_NAME[fig.cuff]+'袖口'+(glass?'，手裡握著高腳杯':'');
 // figures: the row to draw, left to right; holder: the slot that holds the goblet (or -1).
-export const rowSvg=(figures,holder=-1)=>'<svg class="frz-scene" viewBox="0 0 '+figures.length*SLOT_W+' '+SCENE_H+'" role="img" aria-label="'
- +figures.map((f,i)=>describe(f,i,i===holder)).join('；')+'"><rect class="frz-floor" x="0" y="106" width="'+figures.length*SLOT_W+'" height="24"/>'
+export const rowSvg=(figures,holder=-1)=>'<svg class="frz-scene" data-n="'+figures.length+'" viewBox="0 0 '+figures.length*SLOT_W+' '+SCENE_H+'" role="img" aria-label="'
+ +figures.map((f,i)=>describe(f,i,i===holder)).join('；')+'"><rect class="frz-wall" x="0" y="0" width="'+figures.length*SLOT_W+'" height="126"/><rect class="frz-glow" x="0" y="0" width="'+figures.length*SLOT_W+'" height="126"/><image href="assets/puzzles/prism-floor.webp" x="0" y="124" width="'+figures.length*SLOT_W+'" height="24" preserveAspectRatio="xMidYMid slice" pointer-events="none"/><rect class="frz-floor" x="0" y="124" width="'+figures.length*SLOT_W+'" height="24"/>'
  +figures.map((f,i)=>figureSvg(f,i,i===holder)).join('')+'</svg>';
 export const sceneSvg=stage=>rowSvg(stage.figures);
 const frameHtml=(frame,withGlass)=>{
@@ -162,6 +162,7 @@ const nameOptions=Object.keys(NAMES).map(g=>[g,NAMES[g]]);
 
 // Shared chrome of the three mounts: a status line, one confirm button and the candle hints.
 function frame(ctx,name,body,go){
+ ensureMaterials();
  ctx.render('<div class="belfry frozen">'+body+'<p id="frz-status" class="belfry-status" role="status"></p><button id="frz-go" class="primary-button">就是這樣</button>'+hintMarkup+'</div>');
  const $=id=>document.getElementById(id),root=$('frz-go');
  const alive=()=>root.isConnected;

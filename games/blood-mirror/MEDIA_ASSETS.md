@@ -141,7 +141,7 @@ node scripts/blood-mirror.browser.cjs
 - 三道機關各有一張特寫與縮圖（不算在前面 14 張之內，只在機關視窗、機關選擇與重玩選單載入）：`belfry-gears`（約 40 KB）、`belfry-pendulum`（約 26 KB）、`belfry-wheel`（約 20 KB），特寫 960×411、縮圖 224×128（共約 100 KB）。
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`、1344×576，種子 2101／2102、2201／2202、2301／2302，每個機關 2 張候選目視挑選；選用 gears-0、pendulum-1、wheel-0）。提示詞要求無文字、無人物；齒輪特寫指定灰兔右耳要有一排紅色縫線（候選 0 做到了），星輪的輪緣只有符文般的刻痕，沒有可讀文字。轉檔：`cwebp -q 72 -m 6 -resize 960 411`；縮圖取中央 1008×576 再 `-resize 224 128 -q 76`。PNG 母檔與全部候選在 `draft/lucas-lab/blood-mirror/`（`source-art/puzzles/belfry-*.png`、`candidates/belfry/`），不在版本控制內。**這不是使用者驗收。**
 - 先前暫用的概念圖裁切（`belfry.webp`）已移除；概念圖 `plan-improve/concepts-expert/` 仍只當方向稿。
-- 齒輪、軸座、擺錘、配重、星輪與提示面板都是程式繪製的 SVG／CSS（`puzzles/gears13.js`、`pendulum.js`、`starwheel.js`、`challenges.css`），沒有圖檔。
+- 齒輪、軸座、擺錘、配重、星輪與提示面板原本都是程式繪製的 SVG／CSS，沒有圖檔；2026-10-15 起改為材質與繪製零件，見下方「鏡淵機關盤改用繪製素材」。
 
 ## 新增場景視角與熱點稽核（2026-10-13）
 
@@ -265,3 +265,19 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`，零件 768×768 種子 1201／1202、地板 1024×768 種子 1101／1102；每項 2 張候選目視挑選）。零件畫在平塗洋紅背景上，以 `source-art/prism-sprites/key.cjs` 去背（取邊緣中位色、移除與邊界相連或大塊的背景色區域與紫色陰影，眼洞也會去掉；水晶與濾鏡用 `NO_HOLES=1`、舞者用 `KEEP_RED=1`），再由 `build-atlas.cjs` 合圖（水晶與濾鏡降飽和，好讓顏色疊層上色）。選用：面具 1201、鏡片 1202、鏡座 1202、舞者 1201、水晶 1202、濾鏡 1202、燈罩 1201；地板取 1102 右下角無燭火的區域（原圖中央有一根蠟燭，所以不用整張）。母檔與落選候選在 `draft/lucas-lab/blood-mirror/source-art/prism-sprites/`，不進版本控制。
 - 操作順暢：場景只建一次，之後每次點擊只更新變動的屬性（鏡片轉向、舞者位移、面具亮暗、光束），不重建 SVG、沒有模糊濾鏡，也沒有動畫迴圈；轉向與位移用 CSS 過場（尊重 `reduce-motion`）。實測單次點擊約 0.1–0.9 毫秒。
 - 已知：鏡片圖像偏短劍形，以拉高的方式畫成較寬的鏡片；水晶是八角形而非六角形（遊戲規則不受影響）。**這不是使用者驗收。**
+
+
+## 鏡淵機關盤改用繪製素材（2026-10-15）
+
+- 範圍：E1 齒輪、鐘擺、星輪；E3 量杯；E5 撥盤；E6 管風琴；E7 天秤；E8 賓客；E9 羅盤；EX 影子小屋。規則、提示、點擊範圍與無障礙標籤不變，只換畫面與操作手感。E2 稜鏡舞廳在 #70 已先改。
+- 兩種做法。**會依規則變形的零件**（齒輪齒數、環的寬度、管長、杯高）仍用向量輪廓，但填入照片材質：`puzzles/materials.js` 在頁面放一個隱藏的 `<svg>` 存放所有 `<pattern>` 與光影漸層，各機關用 `fill:url(#bm-brass)` 之類引用。材質圖 `mat-brass.webp`、`mat-copper.webp`、`mat-steel.webp`（256 px，共約 25 KB）。**固定外形的零件**（鐘擺球、配重、紅寶石、賓客、天秤圖示、油燈）是產圖後去背的 WebP，用 `<image>` 放上去。
+- 新檔（`assets/puzzles/`，合計約 300 KB）：`mat-*.webp`；`belfry-board.webp`（E1 三道機關共用的黃銅底板，30 KB）；`pend-bob.webp`、`pend-bob-old.webp`、`pend-disc.webp`、`wheel-ruby.webp`；`compass-plate.webp`（羅盤底盤，也用在 E5 撥盤面，78 KB）；`frozen-guests.webp`（768×576，4×3 格每格 192：九個面具頭像＝三種形狀×三種顏色，加上白色與黑色袖口的絲絨外套，109 KB）；`scale-icons.webp`（四個圖示）、`scale-weight.webp`；`shadow-lamp.webp`、`shadow-wall.webp`。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`；材質與底板 1024、零件 768×768），提示詞要求無文字。零件畫在平塗洋紅背景，以 `key.cjs` 去背；紅蘋果與黑玫瑰在洋紅底會被吃掉高光與花瓣，改畫在青綠底，用依色相去背的 `key2.cjs`。E8 面具第一輪的三角與圓形只是半面眼罩，形狀分不清，改用「倒三角板」「滿月圓盤」重產，紅色與黑色圓盤再各重產一次（第一次是月白底配紅眼罩）。瘦長的玫瑰、匕首、手鏡在 128 px 的格子裡太小，裁切並傾斜後才放進圖集。母檔與落選候選未進版控，放在 `draft/lucas-lab/blood-mirror/source-art/abyss-parts/`。**這不是使用者驗收。**
+- 操作順暢（原本會重建或瞬移的地方）：
+  - 鐘擺：場景與三塊配重只建一次，每幀只改屬性；原本每一幀都清空並重建配重圓、每一幀寫入計數文字，現在計數只在變動時寫。
+  - 星輪：撥爪改成一個繞軸心的群組，用 CSS 過場轉到下一格（只往前轉，角度累加，不會倒轉一圈）。
+  - 羅盤：撥盤只建一次，轉一格時只改環與符號的角度，由 CSS 過場帶過去，符號反向轉同樣角度而保持直立；原本每按一下就整個重建。
+  - 影子小屋：影子圓只建一次，拖動轉盤時改 `cx`／`cy`／`r`，不再每次重寫 innerHTML。
+  - 全部沒有模糊濾鏡；會動的元素不使用 `filter`。`reduce-motion` 時過場一律關閉。
+- 頁面 CSP 是 `style-src 'self'`：標記裡的 `style="..."` 與 `cssText` 會被擋，但 `el.style.transform = ...` 這種 CSSOM 寫入可以（已用實際標頭驗證）。`blood-mirror-abyss.test.mjs` 的守衛因此改成只禁前者。環的顏色等一律用 SVG 屬性或 CSS 類別。
+- 已知：E3 調色與證詞、E4 鏡廊的紅線、E5 其餘五面都是 DOM 按鈕或既有橫幅，沒有改；E8 酒杯仍是向量（玻璃杯去背不乾淨）。瀏覽器套件（`npm run test:game`）需要 4173 埠空著，這一輪因該埠被另一個 `serve.cjs` 佔用，沒有跑，改以預覽伺服器逐一開啟每道機關檢查。

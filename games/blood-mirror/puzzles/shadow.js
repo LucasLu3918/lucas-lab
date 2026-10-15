@@ -5,6 +5,7 @@
 // inverse of the solution pose, so the shadow is only right from one view. The rules are pure and checked by search in
 // scripts/blood-mirror-abyss.test.mjs (one pose on the control grid matches); the mount below only draws them.
 import {hintMarkup,bindHints} from './belfry-hints.js';
+import {ensureMaterials} from './materials.js';
 
 export const GRID=34,SPAN=1.3,MATCH=.9,STEP=5;
 export const YAW_RANGE=[0,355],PITCH_RANGE=[-60,60];
@@ -120,6 +121,7 @@ const circles=(discs,cls)=>discs.map(([x,y,r])=>{const [a,b]=px(x,y);return '<ci
 
 // ctx = { render(html), done(), playCue(kind) }
 function mountShadow(ctx,stageName,intro){
+ ensureMaterials();
  const stage=STAGES[stageName],still=document.body.classList.contains('reduce-motion');
  let yaw=stage.start.yaw,pitch=stage.start.pitch,finishing=false;
  ctx.render('<div class="belfry shadow-cabin">'
@@ -135,17 +137,26 @@ function mountShadow(ctx,stageName,intro){
  const alive=()=>svg.isConnected;
  const say=(text,tone='')=>{const el=$('sh-status');el.textContent=text;el.dataset.tone=tone;};
  const hints=bindHints({hints:HINTS[stageName],currentStep:()=>hintStep(stageName,yaw,pitch),alive});
- svg.innerHTML='<rect class="sh-wall" x="10" y="10" width="380" height="280" rx="4"/>'
+ // The wall is a painted plaster wall with a lamp on it. The shadow circles are made once and only moved (cx, cy, r) on each turn of a dial.
+ const shadeCount=shadowOf(stage,yaw,stage.pitch?pitch:0).length;
+ svg.innerHTML='<rect class="sh-wall-shadow" x="12" y="13" width="380" height="280" rx="4"/><image class="sh-plaster" href="assets/puzzles/shadow-wall.webp" x="10" y="10" width="380" height="280" preserveAspectRatio="xMidYMid slice"/>'
+  +'<rect class="sh-wall" x="10" y="10" width="380" height="280" rx="4"/>'
+  +'<radialGradient id="sh-pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd98a" stop-opacity=".5"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>'
+  +'<circle class="sh-pool" cx="30" cy="30" r="150"/>'
   +'<g id="sh-out">'+circles(stage.target.map(([x,y,,r])=>[x,y,r]),'sh-target')+'</g>'
-  +'<g id="sh-cast"></g>'
-  +'<circle class="sh-lamp-glow" cx="30" cy="30" r="22"/><circle class="sh-lamp" cx="30" cy="30" r="7"/>';
+  +'<g id="sh-cast">'+Array.from({length:shadeCount},()=>'<circle class="sh-shade" r="0"/>').join('')+'</g>'
+  +'<image class="sh-lamp-img" href="assets/puzzles/shadow-lamp.webp" x="10" y="2" width="40" height="62" pointer-events="none"/>';
+ const shades=[...svg.querySelectorAll('#sh-cast circle')];
+ function castShadow(){
+  shadowOf(stage,yaw,stage.pitch?pitch:0).forEach(([x,y,r],i)=>{const [a,b]=px(x,y),c=shades[i];c.setAttribute('cx',a);c.setAttribute('cy',b);c.setAttribute('r',(r*SCALE).toFixed(1));});
+ }
  function describe(o){
   if(o>=MATCH)return ['影子剛好嵌進輪廓。','ok'];
   if(o>=NEAR)return ['影子快要和輪廓重合了，再轉一點。',''];
   return ['影子還是一團。轉一轉，看輪廓怎麼變。',''];
  }
  function refresh(){
-  $('sh-cast').innerHTML=circles(shadowOf(stage,yaw,stage.pitch?pitch:0),'sh-shade');
+  castShadow();
   $('sh-yaw-out').textContent=yaw+'°';
   if(stage.pitch)$('sh-pitch-out').textContent=pitch+'°';
   const o=overlap(stage,yaw,stage.pitch?pitch:0),[text,tone]=describe(o);
