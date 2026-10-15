@@ -269,15 +269,6 @@ body.mode-story .journey-guide{display:grid}
  .hud-tools{gap:3px}
  .hud-chapter h1{font-size:16px;letter-spacing:.5px}
 }
-/* Phones and portrait tablets: the six tools get their own full-width row with labels, so each action is named.
-   The chapter title then spans the whole width, and the offscreen hints lose their boxes so they read as plain text. */
-@media (max-width:899px) and (min-height:521px){
- .hud{grid-template-columns:minmax(0,1fr);grid-template-areas:"chapter" "tools" "center"}
- .hud-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;width:100%}
- .hud .tool-button{flex-direction:column;gap:3px;width:100%;min-width:0;min-height:52px;padding:6px 2px;border-radius:4px}
- .hud .tool-label{display:block;font-size:11px;letter-spacing:.5px;line-height:1}
- .hud .offscreen-hint{padding:0 6px;border-color:transparent;background:transparent}
-}
 
 /* Hotspot rings from the site stylesheet are replaced by the glimmer dot. */
 #hotspots .hotspot{box-shadow:none}
