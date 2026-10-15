@@ -175,7 +175,8 @@ button,a,input,select {outline-offset:4px}
 .warning {display:flex;gap:11px;align-items:start;padding:16px 18px;border:1px solid #9a7451;background:#34271d;border-radius:var(--radius);color:#efd3af;font-size:13px;line-height:1.8}
 .warning .icon {margin-top:2px}
 .detail .warning {margin:22px 0 0}
-.detail .btnrow {margin:24px 0 8px}
+.detail .btnrow {margin:28px 0 0}
+.detail h2 {margin:44px 0 14px}
 .chapterlist {list-style:none;padding:0;margin:24px 0;border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;background:#101923}
 .chapterlist li+li {border-top:1px solid #4d493f80}
 .chapterlist a,.chapterlist li>span {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;min-height:54px}
