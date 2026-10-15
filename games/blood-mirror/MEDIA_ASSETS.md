@@ -223,7 +223,7 @@ Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, p
 
 | File | Use | Notes |
 |---|---|---|
-| `arrow-medal.webp` | Every left/right arrow: the scene's view buttons (`.view-arrow::after`, mirrored for the left one), the arrows at the end of button labels (`.btn-arrow[data-dir]`) and the corridor pad (`.maze-arrow`). Replaces `arrow-gilt.webp`. | seed 6805, 120×118, a small black enamel stud with a beaded gold rim and an engraved gold double chevron (no shaft, no fletching), rotated to point right; shown at 34 px with 82% opacity, hit area stays 44 px |
+| `arrow-medal.webp` | The maze corridor pad arrows (`.maze-arrow`) only. The scene view buttons and the arrows at the end of button labels now use the line quill from `icons.js`, so they no longer show this stud. Replaces `arrow-gilt.webp`. | seed 6805, 120×118, a small black enamel stud with a beaded gold rim and an engraved gold double chevron (no shaft, no fletching), rotated to point right; shown at 34 px with 82% opacity, hit area stays 44 px |
 | `seal-wax.webp` (inlined) | Sealed chapter cards (`.chapter-card.locked`) | seed 8201, circular alpha mask via sharp, 176×176 |
 | `velvet.webp` (inlined) | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
 
