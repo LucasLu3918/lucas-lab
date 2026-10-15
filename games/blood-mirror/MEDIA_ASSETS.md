@@ -223,7 +223,7 @@ Generated locally with mflux Z-Image Turbo (9 steps, `--quantize 8`); masters, p
 
 | File | Use | Notes |
 |---|---|---|
-| `arrow-gilt.webp` | Scene view arrows (`.view-arrow::after`, `mix-blend-mode:screen`, mirrored for the left one) | seed 8102, cropped to 480×70, black background |
+| `arrow-medal.webp` | Every left/right arrow: the scene's view buttons (`.view-arrow::after`, mirrored for the left one), the arrows at the end of button labels (`.btn-arrow[data-dir]`) and the corridor pad (`.maze-arrow`). Replaces `arrow-gilt.webp`. | seed 6805, 120×118, a small black enamel stud with a beaded gold rim and an engraved gold double chevron (no shaft, no fletching), rotated to point right; shown at 34 px with 82% opacity, hit area stays 44 px |
 | `seal-wax.webp` (inlined) | Sealed chapter cards (`.chapter-card.locked`) | seed 8201, circular alpha mask via sharp, 176×176 |
 | `velvet.webp` (inlined) | Grain under framed panels (`soft-light`) | seed 8301, 384×384, q55 |
 
@@ -281,3 +281,28 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
   - 全部沒有模糊濾鏡；會動的元素不使用 `filter`。`reduce-motion` 時過場一律關閉。
 - 頁面 CSP 是 `style-src 'self'`：標記裡的 `style="..."` 與 `cssText` 會被擋，但 `el.style.transform = ...` 這種 CSSOM 寫入可以（已用實際標頭驗證）。`blood-mirror-abyss.test.mjs` 的守衛因此改成只禁前者。環的顏色等一律用 SVG 屬性或 CSS 類別。
 - 已知：E3 調色與證詞、E4 鏡廊的紅線、E5 其餘五面都是 DOM 按鈕或既有橫幅，沒有改；E8 酒杯仍是向量（玻璃杯去背不乾淨）。瀏覽器套件（`npm run test:game`）需要 4173 埠空著，這一輪因該埠被另一個 `serve.cjs` 佔用，沒有跑，改以預覽伺服器逐一開啟每道機關檢查。
+
+## 白雪主線機關盤改用繪製素材（2026-10-15）
+
+- 範圍：序章音樂盒，第一幕拼回帳頁與懷錶齒輪，第二幕光路，第三幕玻璃心臟法陣，第四幕蒸汽管網，第五幕棺中的心跳與拓印，第六幕記憶卡與縫線，第七幕反寫手稿與鏡像迷廊。規則、提示、點擊範圍與無障礙標籤不變，只換畫面。面具賓客與七個名字是下拉選單，沒有圖，沒有改。
+- 原本是向量的四塊（帳頁、懷錶齒輪、蒸汽管、迷廊）全部改成圖：
+  - 帳頁：`ledger-sheet.webp`（560×560，約 19 KB）是魔法師羊皮紙（燒焦邊緣、符文邊框、金色星點，Z-Image Turbo 種子 6101，只去掉與邊緣相連的白底）加上墨漬與火漆章的合成圖，放在 SVG 最底層；拼好後的畫面用 `ledger-scroll.webp`（742×781，約 42 KB）：同一張紙掛在另一張生成捲軸（種子 6403，黃銅頭、紅絲帶）的上下兩根捲筒之間。字全部仍是 SVG 文字：中文用 LXGW WenKai TC（楷體，400／700），拉丁文標題「Liber Vitae Regni」用 IM Fell English，兩者都是 SIL OFL 1.1，自 Google Fonts 取得後只留下帳頁用到的字（共約 29 KB）。**這三個 woff2 與 `@font-face` 目前沒有進版控**：提交時 AIPS 安全檢查無法檢視 woff2，所以字體暫時退回頁面既有的宋體與 Georgia；原檔與加回的方法在 `draft/lucas-lab/blood-mirror/source-art/snow-parts/fonts/README.md`。魔法字符是紙上的符文邊框，沒有為此另外加字體。單元測試的 viewBox 裁切不變。
+  - 懷錶：三枚齒輪是 12 齒的精準輪廓（齒頂半徑 46、齒根 38，100 單位的框），填入 `materials.js` 的黃銅材質，光影層不隨齒輪轉；相鄰兩枚中心距 = 齒頂 + 齒根，且錯開半個齒距（15°），所以齒會落進對方的溝槽；每次轉 60° 剛好兩齒，不會漂移。紅寶石沿用 `wheel-ruby.webp`，固定在上方輪輻。底板 `watch-plate.webp`（420×420，約 12 KB，拉絲鍍金紋理，種子 6601）。原先整張生成的齒輪圖（`watch-gear.webp`）因齒形不均、無法咬合而移除。
+  - 蒸汽管：`pipe-straight.webp`、`pipe-elbow.webp`、`pipe-source.webp`、`pipe-city.webp`（各 256×256，共約 20 KB）。每張都畫在轉 0 次的姿勢，開口落在格子邊緣的中點，轉 90° 仍然接得上；彎管開口朝上與朝右，直管左右，與 `pipePorts()` 一致。直管是用彎管自己的銅管切片拼成的，所以管徑與質感相同。
+  - 迷廊：`mirror-glass.webp`、`mirror-floor.webp`（兩塊大理石輪流鋪）、`maze-token.webp`（金色倒影）、`maze-door.webp`、`maze-hourglass.webp`（鏡門）。倒影是一個獨立的圖，換格時滑過去。
+- 原本是 CSS 色塊的幾塊也換成圖：音樂盒音針 `pin.webp`、法陣符文石 `rune-stone.webp`、記憶卡背 `card-back.webp`（翻開後的面用 `ledger-sheet.webp` 當紙）、光路鏡片 `mirror-strip.webp`（轉 ±45° 當鏡面）。棺中的心跳、縫線、反寫手稿、拓印的格子用同一塊鍍金細紋底板（`--plate`）。
+- 左右箭頭：第一版是一支 480×70 的金色長矛，第二版是銅幣上的完整箭，都因為有箭桿太顯眼；第三版是黑瑪瑙上的單 V 形，仍嫌太素；現在是黑色琺瑯小圓釦、金色串珠邊與刻出的雙 V 形箭頭（`assets/ui/arrow-medal.webp`，約 6 KB）。場景左右的視角鈕、按鈕尾端的 ⟶ ← →、迷廊方向鍵都用它（向左是水平翻轉，方向鍵用旋轉）。舊檔已移除。
+- 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`），提示詞要求無文字。零件畫在平塗洋紅背景（紅色與黑色的零件畫在青綠背景），以 `key.cjs`／`key2.cjs` 去背；金屬上的洋紅反光用 `despill.cjs` 去掉。管子再用 `compose-pipes.cjs` 排進格子，帳頁用 `compose-ledger.cjs` 合成。PNG 母檔、落選候選（箭頭畫了六種，直到銅幣那一張）與全部腳本在 `draft/lucas-lab/blood-mirror/source-art/snow-parts/`，不進版本控制。
+- 操作順暢：
+  - 新增 `puzzles/morph.js`：棋盤不再整個重建，而是把新的標記與現有節點比對，只更新變動的屬性與文字。同一個按鈕留在原處，所以 CSS 過場會播、鍵盤焦點不會掉、圖片不會閃。各關以 `morph:true` 選用（帳頁、懷錶、光路、法陣、棺中的心跳、記憶、縫線、反寫手稿、拓印、迷廊）；下拉選單的兩關沒有選用，因為表單控制項的值不能靠標記還原。`style` 屬性與 `<details>` 的 `open` 不會被覆寫。
+  - 帳頁：交換的兩片會彈入新位置；懷錶：齒輪的轉動與紅寶石亮暗是過場；光路：鏡片翻轉是 0.22 秒的旋轉；法陣：符文石亮起是過場；記憶卡：翻開有半秒內的翻面動畫；迷廊：倒影滑到下一格（原本是瞬間換格）。
+  - 會動的元素不使用 `filter`（與鏡淵相同的規則）；`reduce-motion` 時過場與動畫一律關閉。
+- 已知：場景上的熱點圖示仍是線條 SVG（`icons.js`），結局的 `.svg` 備援圖也沒有動；箭頭銅幣是同一張圖，沒有分上下左右各畫一張。**這不是使用者驗收。**
+
+### 追加（2026-10-15）：橫幅調色、記憶卡物品、銅牌選單、細緻底板
+
+- 橫幅統一調色：量每張機關橫幅（與縮圖）的平均飽和度，往目標 0.52 靠攏，單張調幅限制在 ±25%（`modulate({saturation})`，從版控內的原檔重新編碼，重跑不會累積）。飽和度範圍由 0.36–0.78 收斂到 0.44–0.65，檔案普遍略小。仍受限制的幾張（調幅到上限 1.25）：`gallery-align`、`box-light`、`box-apple`、`box-thread`、`box-shards`、`choir-hymn` 仍偏淡。
+- 記憶卡物品：藥瓶、羽毛、蘋果、鑰匙改成自己的圖集 `assets/concepts/memory-objects.webp`（1280×320，每格 320，約 50 KB；照原本的深色油畫風重畫：圓肚深紅色藥水瓶配金冠瓶塞（種子 7001；標籤是「紅色藥瓶」，原本照舊圖畫成紫色，後來改紅）、金色筆尖的白羽毛（6902）、紅蘋果（6903）、葉形鏤空鑲紅寶石的銀鑰匙（種子 7101，以 1024 解析度生成以保留雕花細節），皆畫在青綠背景；藥瓶與蘋果的投影用範圍遮罩與暗部門檻清掉，`clean.cjs`）。取代原本從概念展板裁出的 125–165 px 小圖；`concept-art.js` 的 `vial`／`feather`／`apple`／`key` 指向新圖集，`item-sheet.webp` 只剩機關盤（`clock`）使用。測試 `blood-mirror-concept.test.mjs` 的量測範圍已改成新圖集座標。翻開的卡面有淡淡的投影，讓白色羽毛在米色紙上看得清楚。
+- 銅牌選單：面具賓客與七個名字的 `<select>` 外框是 `assets/puzzles/nameplate.webp`（560×138，約 14 KB，種子 6701，古銅牌＋金色倒角邊框＋兩端鉚釘），以 `border-image` 九宮格切割，鉚釘在任何寬度都是圓的；原生箭頭換成小黃銅 V 形。控制項仍是原生 `<select>`，鍵盤與讀屏行為不變。
+- 底板紋理：`watch-plate.webp` 換成拉絲鍍金（見上），取代原本像凹凸皮革的粗紋。
+- 這些仍是我的生成結果，**不是使用者驗收**。

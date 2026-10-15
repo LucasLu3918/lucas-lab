@@ -32,15 +32,16 @@ test('portrait tile edges represent only the selected portrait, and unknown asse
  assert.match(conceptMarkup('frost'),/role="img" aria-label="雪夜中的公主"/);
  assert.match(conceptMarkup('clock',{decorative:true}),/aria-hidden="true"/);
 });
-test('small clue objects come from the light item sheet and every region positions to a finite offset',()=>{
- for(const id of ['clock','vial','feather','apple','key'])assert.equal(conceptArt[id].src,'assets/concepts/item-sheet.webp');
+test('small clue objects come from their own light sheets and every region positions to a finite offset',()=>{
+ assert.equal(conceptArt.clock.src,'assets/concepts/item-sheet.webp');
+ for(const id of ['vial','feather','apple','key'])assert.equal(conceptArt[id].src,'assets/concepts/memory-objects.webp');
  for(const id of Object.keys(conceptArt))assert.doesNotMatch(conceptStyle(id),/NaN|Infinity/,id);
  // the dial crop starts a little inside the sheet, so its offset is small but not zero
  assert.match(conceptStyle('clock'),/background-position:4\.\d+% 50\.\d+%/);
 });
-// Measured object extents on the painted item sheet (sheet pixels: x0, y0, x1, y1). A crop that misses its object shows only
+// Measured object extents on the painted sheets (clock: item sheet; the four clue objects: memory-objects sheet) (sheet pixels: x0, y0, x1, y1). A crop that misses its object shows only
 // the stone or the frame, which is how the silver key went unrecognised; a crop that is too loose makes it tiny.
-const objectBounds={vial:[725,40,830,227],feather:[948,38,1078,221],apple:[437,41,580,207],key:[1241,37,1315,219],clock:[62,64,319,320]};
+const objectBounds={vial:[79,10,241,310],feather:[355,10,606,310],apple:[668,10,932,310],key:[1064,10,1177,310],clock:[62,64,319,320]};
 test('each memory object crop contains its object and is not loose around it',()=>{
  for(const [id,[x0,y0,x1,y1]] of Object.entries(objectBounds)){
   const [x,y,w,h]=conceptArt[id].rect;

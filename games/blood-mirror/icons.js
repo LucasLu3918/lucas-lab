@@ -127,7 +127,9 @@ export function hydrateIcons(root = document) {
 const GLYPHS = { '⟶': 'arrowR', '→': 'arrowR', '↗': 'arrowUR', '↓': 'arrowD', '✧': 'memory', '←': 'arrowL', '↶': 'undo' };
 const GLYPH_END = /\s*([⟶→↗↓✧])\s*$/;
 const GLYPH_START = /^\s*([←↶])\s*/;
-const arrowMarkup = (glyph) => `<span class="btn-arrow" aria-hidden="true">${icon(GLYPHS[glyph])}</span>`;
+// Left and right arrows are drawn by CSS as one short painted arrowhead (assets/ui/arrow-head.webp); the line icon stays inside as the fallback.
+const DIRECTION = { '⟶': 'r', '→': 'r', '←': 'l' };
+const arrowMarkup = (glyph) => `<span class="btn-arrow"${DIRECTION[glyph] ? ` data-dir="${DIRECTION[glyph]}"` : ''} aria-hidden="true">${icon(GLYPHS[glyph])}</span>`;
 
 function convertButton(button) {
   if (button.querySelector('.btn-arrow')) return;

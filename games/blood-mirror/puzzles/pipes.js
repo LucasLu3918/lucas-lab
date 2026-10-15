@@ -45,7 +45,7 @@ export function mountPipes(ctx){
  if(!attempt)attempt={rotations:[...initialPipeRotations],history:[],hint:0};
  const current=attempt;
  ctx.render('<p class="challenge-help">將左上「泉源」接到右下「城市」。每點一次，管件順時針轉 90°；只有相接的管口能傳送蒸汽，直管轉半圈也算接通。</p><div class="pipe-legend"><span>◆ 通汽管段</span><span>○ 尚未通汽</span></div><div class="pipes-board" aria-label="三乘三蒸汽管網">'+Array.from({length:9},(_,at)=>{
-  if(at===0||at===8)return '<div class="pipe-terminal '+(at===0?'pipe-source':'pipe-city')+'" data-pipe-cell="'+at+'" role="img" aria-label="'+(at===0?'泉源，出汽口向右':'城市，進汽口向左')+'">'+pipeSVG(at===0?'source':'city',{terminal:true})+'<strong>'+(at===0?'泉源 →':'→ 城市')+'</strong><small class="pipe-terminal-status">'+(at===0?'持續供汽':'等待供暖')+'</small></div>';
+  if(at===0||at===8)return '<div class="pipe-terminal '+(at===0?'pipe-source':'pipe-city')+'" data-pipe-cell="'+at+'" role="img" aria-label="'+(at===0?'泉源，出汽口向右':'城市，進汽口向左')+'">'+pipeSVG(at===0?'source':'city')+'<strong>'+(at===0?'泉源 →':'→ 城市')+'</strong><small class="pipe-terminal-status">'+(at===0?'持續供汽':'等待供暖')+'</small></div>';
   const i=pipeTiles.findIndex(tile=>tile.at===at);
   return i<0?'<div class="pipe-empty" aria-label="不可通行的岩壁">岩壁</div>':'<button class="pipe-piece" data-pipe="'+i+'" aria-label="旋轉管件" aria-describedby="pipes-keyboard">'+pipeSVG(pipeTiles[i].type)+'<small class="pipe-coordinate">'+(Math.floor(at/3)+1)+' · '+(at%3+1)+'</small><span class="pipe-connected" hidden>◆ 通汽</span></button>';
  }).join('')+'</div><div class="pipe-actions"><button id="pipes-undo" class="secondary-button" disabled>↶ 上一步</button><button id="pipes-reset" class="secondary-button">重新接管</button><button id="pipes-hint" class="secondary-button">查看提示</button></div><p id="pipes-status" class="challenge-feedback" role="status"></p><p id="pipes-break" class="pipe-explanation"></p><p id="pipes-keyboard" class="pipe-keyboard">鍵盤：Tab 選取，Enter 旋轉；方向鍵換格。</p><button id="pipes-confirm" class="primary-button" disabled>接通管線後才能確認</button><p id="pipes-hint-text" class="pipe-hint" role="status"></p>');
@@ -93,7 +93,8 @@ export function mountPipes(ctx){
  update();
 }
 
-export function pipeSVG(type,{terminal=false}={}){
- const path=type==='straight'?'M0 50H100':type==='elbow'?'M50 0V50H100':type==='source'?'M50 50H100':'M0 50H50';
- return `<svg class="pipe-glyph" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path class="pipe-shadow" d="${path}"/><path class="pipe-metal" d="${path}"/><path class="pipe-core" d="${path}"/>${terminal?'<circle cx="50" cy="50" r="13" class="pipe-terminal-mark"/>':''}</svg>`;
+// Painted copper pipe sections (assets/puzzles/pipe-*.webp). Every sprite is drawn in its turn-0 pose, which is what pipePorts()
+// assumes: the straight runs left to right, the elbow joins its top edge to its right edge, the spring points right, the city points left.
+export function pipeSVG(type){
+ return `<span class="pipe-glyph pipe-${type}" aria-hidden="true"></span>`;
 }

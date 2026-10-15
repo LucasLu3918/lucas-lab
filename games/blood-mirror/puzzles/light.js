@@ -35,8 +35,8 @@ export function mountLight(ctx){
   let grid='';
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
    const key=r+','+c,index=at.get(key),beam=lit.has(key)?' beam':'';
-   if(index!==undefined)grid+='<button class="light-cell light-mirror'+beam+'" data-mirror="'+index+'" aria-label="第'+(r+1)+'列第'+(c+1)+'行的鏡子，目前是「'+(state[index]?'＼':'／')+'」，按下翻轉'+(lit.has(key)?'，月光照在這裡':'')+'">'+(state[index]?'＼':'／')+'</button>';
-   else if(r===DOOR_ROW&&c===COLS-1)grid+='<span class="light-cell light-door'+(lightSolved(state)?' open':'')+'" role="img" aria-label="暗門，在第'+(DOOR_ROW+1)+'列的右端">'+'▮'+'</span>';
+   if(index!==undefined)grid+='<button class="light-cell light-mirror o'+state[index]+beam+'" data-mirror="'+index+'" aria-label="第'+(r+1)+'列第'+(c+1)+'行的鏡子，目前是「'+(state[index]?'＼':'／')+'」，按下翻轉'+(lit.has(key)?'，月光照在這裡':'')+'">'+(state[index]?'＼':'／')+'</button>';
+   else if(r===DOOR_ROW&&c===COLS-1)grid+='<span class="light-cell light-door'+(lightSolved(state)?' open':'')+'" role="img" aria-label="暗門，在第'+(DOOR_ROW+1)+'列的右端">'+'</span>';
    else grid+='<span class="light-cell'+beam+'" aria-hidden="true">'+(beam?'·':'')+'</span>';
   }
   ctx.render('<p class="challenge-help">伊萊指向鏡廳：「暗門只有月光能打開。月光從左邊第三列射入，要走到右邊第二列的暗門——翻轉四面鏡子，替它找一條路。」</p>'
