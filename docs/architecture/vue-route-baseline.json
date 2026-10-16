@@ -1,0 +1,911 @@
+{
+  "baselineCommit": "1ca7c77a1e2763d963200f7f080ba93216a8ae14",
+  "routes": [
+    {
+      "route": "/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/",
+      "title": "用程式實現想法，用 AI 創造世界｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/about/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/about/",
+      "title": "關於這個創作平台｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/gallery/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/gallery/",
+      "title": "AI 視覺藝廊｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/games/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/games/",
+      "title": "遊戲實驗室｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/games/blood-mirror/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/games/blood-mirror/",
+      "title": "白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/games/blood-mirror/play/",
+      "canonical": null,
+      "title": "白雪公主：血色魔鏡 — 暗黑童話密室逃脫",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/games/mist-trail/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/games/mist-trail/",
+      "title": "霧林迷途｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/games/rune-room/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/games/rune-room/",
+      "title": "符文密室｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/journal/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/",
+      "title": "開發日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/blood-mirror-playable/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/blood-mirror-playable/",
+      "title": "血色魔鏡：從故事到可遊玩的密室｜日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/blood-mirror-return/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/blood-mirror-return/",
+      "title": "血色魔鏡的回訪設計：旅程、證據與存檔｜日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/cloudflare-workers/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/cloudflare-workers/",
+      "title": "從 GitHub Pages 遷移到 Cloudflare Workers｜日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/five-novels/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/five-novels/",
+      "title": "六部完整長篇上架：原稿、分章與驗證｜日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/origin/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/origin/",
+      "title": "LUCAS LAB：從工具到創作宇宙｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/journal/shared-ui-and-covers/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/journal/shared-ui-and-covers/",
+      "title": "統一設計系統與故事封面｜日誌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/legal/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/legal/",
+      "title": "內容、隱私與授權｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/music/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/music/",
+      "title": "音樂館｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/offline/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/offline/",
+      "title": "離線閱讀｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/projects/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/projects/",
+      "title": "軟體作品集｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/projects/aips/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/projects/aips/",
+      "title": "AI Product System｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/projects/ecommerce-concept/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/projects/ecommerce-concept/",
+      "title": "電商網站概念｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/projects/lucas-tools/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/projects/lucas-tools/",
+      "title": "Lucas Tools｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/search/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/search/",
+      "title": "搜尋作品｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/stories/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/",
+      "title": "故事藏書館｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/",
+      "title": "阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/00/",
+      "title": "序章：一千零一個死人的願望 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/01/",
+      "title": "第一章：沒有魔法的人 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/02/",
+      "title": "第二章：穹砂學宮的第八扇門 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/03/",
+      "title": "第三章：王國用來餵養魔法的孩子 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/04/",
+      "title": "第四章：死人不會說謊，沙漠會 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/05/",
+      "title": "第五章：神不會實現願望，奴隸才會 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/06/",
+      "title": "第六章：用別人的悲傷裁成的王袍 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/07/",
+      "title": "第七章：王宮裡的情人與劊子手 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/08/",
+      "title": "第八章：第二個願望 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/09/",
+      "title": "第九章：國王的父愛 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/10/",
+      "title": "第十章：不合格者的戰爭 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/11/",
+      "title": "第十一章：賈方的真正願望 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/12/",
+      "title": "第十二章：一場沒有英雄的革命 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/13/",
+      "title": "第十三章：最後一個願望 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/14/",
+      "title": "第十四章：比奇蹟更困難的事 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-aladdin/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-aladdin/chapters/15/",
+      "title": "終章：如果我們從來沒有遇見 — 阿拉丁：願望的屍骨｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/",
+      "title": "灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/00/",
+      "title": "序幕：灰燼裡的女人 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/01/",
+      "title": "第一章：在壁爐裡長大的姑娘 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/02/",
+      "title": "第二章：七鐘學院的禁書 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/03/",
+      "title": "第三章：仙女教母的價碼 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/04/",
+      "title": "第四章：王子的第三支舞 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/05/",
+      "title": "第五章：削去腳跟的女人 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/06/",
+      "title": "第六章：白鐘裡的母親 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/07/",
+      "title": "第七章：繼母的祕密 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/08/",
+      "title": "第八章：死人不會原諒 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/09/",
+      "title": "第九章：第十三條契約 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/10/",
+      "title": "第十章：王冠與斷骨 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/11/",
+      "title": "第十一章：灰姑娘的審判 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/12/",
+      "title": "第十二章：午夜之後 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/13/",
+      "title": "第十三章：灰燼也會開花 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/14/",
+      "title": "終章：午夜以後的舞 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-cinderella/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-cinderella/chapters/15/",
+      "title": "尾聲：寫在灰燼上的名字 — 灰燼王冠：午夜之後，無人倖免｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/",
+      "title": "小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/00/",
+      "title": "序章：海底不會留下屍體 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/01/",
+      "title": "第一章：第七個女兒 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/02/",
+      "title": "第二章：暴風雨裡的王子 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/03/",
+      "title": "第三章：販賣奇蹟的女巫 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/04/",
+      "title": "第四章：穿鞋子的野獸 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/05/",
+      "title": "第五章：七鐘塔的學生 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/06/",
+      "title": "第六章：王子的房間 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/07/",
+      "title": "第七章：玻璃牆後的公主 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/08/",
+      "title": "第八章：夜鶯館的大火 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/09/",
+      "title": "第九章：海王的價格 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/10/",
+      "title": "第十章：沒有愛情的婚禮 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/11/",
+      "title": "第十一章：姊姊們的頭髮 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/12/",
+      "title": "第十二章：王子的最後一封信 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/13/",
+      "title": "第十三章：沉默者的審判 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/14/",
+      "title": "第十四章：海母的最後一首歌 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/15/",
+      "title": "第十五章：沒有名字的英雄 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/16/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/16/",
+      "title": "第十六章：王國沒有因此變好 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/17/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/17/",
+      "title": "第十七章：海泡沫 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/18/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/18/",
+      "title": "第十八章：當孩子問起童話 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mermaid/chapters/19/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mermaid/chapters/19/",
+      "title": "終章：獻給那些沒有名字的人 — 小美人魚：沉默者的王冠｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/",
+      "title": "花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/00/",
+      "title": "序章：死人也要服兵役 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/01/",
+      "title": "第一章：徵兵令 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/02/",
+      "title": "第二章：剪髮之夜 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/03/",
+      "title": "第三章：男人的世界 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/04/",
+      "title": "第四章：照骨院 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/05/",
+      "title": "第五章：第一個被殺的人 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/06/",
+      "title": "第六章：桃花營 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/07/",
+      "title": "第七章：苦燈會 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/08/",
+      "title": "第八章：吃掉記憶的學院 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/09/",
+      "title": "第九章：斷雲堡 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/10/",
+      "title": "第十章：卸甲 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/11/",
+      "title": "第十一章：父親的罪 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/12/",
+      "title": "第十二章：雪夜有情人 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/13/",
+      "title": "第十三章：敵人的孩子 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/14/",
+      "title": "第十四章：禁術的真相 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/15/",
+      "title": "第十五章：母親的懷抱 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/16/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/16/",
+      "title": "第十六章：天下人的選擇 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/17/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/17/",
+      "title": "第十七章：焚燒皇帝的名字 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/18/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/18/",
+      "title": "第十八章：花木蘭之死 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/19/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/19/",
+      "title": "第十九章：活下來的人 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/20/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/20/",
+      "title": "第二十章：不是英雄的生活 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/21/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/21/",
+      "title": "第二十一章：沒有被寫進史書的人 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-mulan/chapters/22/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-mulan/chapters/22/",
+      "title": "尾聲：春天仍然會來 — 花木蘭：葬名之歌｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/",
+      "title": "紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/00/",
+      "title": "序章：狼從來不吃好孩子 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/01/",
+      "title": "第一章：二十五歲的小紅帽 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/02/",
+      "title": "第二章：三條森林法則 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/03/",
+      "title": "第三章：獵人的價碼 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/04/",
+      "title": "第四章：外婆，妳的眼睛為什麼這麼大？ — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/05/",
+      "title": "第五章：魔法的價格 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/06/",
+      "title": "第六章：那些買不起魔法的人 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/07/",
+      "title": "第七章：午夜的人形 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/08/",
+      "title": "第八章：議長的收藏室 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/09/",
+      "title": "第九章：被出賣的女兒 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/10/",
+      "title": "第十章：你可以吻我，但不要拯救我 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/11/",
+      "title": "第十一章：我們都曾經想要被愛 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/12/",
+      "title": "第十二章：七座鐘塔的審判 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/13/",
+      "title": "第十三章：外婆最後的謊言 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/14/",
+      "title": "第十四章：門後的母親 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/15/",
+      "title": "第十五章：最後一個名字 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/16/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/16/",
+      "title": "第十六章：童話結束之後 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/17/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/17/",
+      "title": "終章：小紅帽與沒有名字的狼 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-red-hood/chapters/18/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-red-hood/chapters/18/",
+      "title": "尾聲：寫在故事之外 — 紅帽：噬月森林｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/",
+      "title": "白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/00/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/00/",
+      "title": "序章：當鏡子第一次說謊 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/01/",
+      "title": "第一章：黑鐘學院 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/02/",
+      "title": "第二章：世界上最美麗的女人 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/03/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/03/",
+      "title": "第三章：血色舞會 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/04/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/04/",
+      "title": "第四章：獵人的心臟 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/05/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/05/",
+      "title": "第五章：沒有名字的礦坑 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/06/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/06/",
+      "title": "第六章：魔法真正的價格 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/07/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/07/",
+      "title": "第七章：戴著黑手套的男人 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/08/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/08/",
+      "title": "第八章：愛情不是赦免 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/09/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/09/",
+      "title": "第九章：王子的求婚 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/10/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/10/",
+      "title": "第十章：第一個死人 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/11/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/11/",
+      "title": "第十一章：王后的三個問題 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/12/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/12/",
+      "title": "第十二章：玻璃棺材 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/13/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/13/",
+      "title": "第十三章：七十三個孩子 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/14/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/14/",
+      "title": "第十四章：王后的罪 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/15/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/15/",
+      "title": "第十五章：魔鏡真正想要的東西 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/16/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/16/",
+      "title": "第十六章：第八個見證人 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/17/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/17/",
+      "title": "第十七章：國王也會流血 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/18/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/18/",
+      "title": "第十八章：王后最後的謊言 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/19/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/19/",
+      "title": "第十九章：最後一面鏡子 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/20/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/20/",
+      "title": "第二十章：再見，白雪公主 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/dark-snow-white/chapters/21/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/dark-snow-white/chapters/21/",
+      "title": "尾聲：春天沒有記住她 — 白雪公主：血色魔鏡｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/mist-letters/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/mist-letters/",
+      "title": "霧林來信｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/mist-letters/chapters/01/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/mist-letters/chapters/01/",
+      "title": "第一章：最後一班車 — 霧林來信｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/stories/mist-letters/chapters/02/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/stories/mist-letters/chapters/02/",
+      "title": "第二章：借來的名字 — 霧林來信｜LUCAS LAB",
+      "robots": "index,follow"
+    },
+    {
+      "route": "/style-guide/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/style-guide/",
+      "title": "元件樣式｜LUCAS LAB",
+      "robots": "noindex,follow"
+    },
+    {
+      "route": "/tools/",
+      "canonical": "https://lucas-lab.owl3918.workers.dev/tools/",
+      "title": "小工具館｜LUCAS LAB",
+      "robots": "index,follow"
+    }
+  ]
+}
