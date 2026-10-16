@@ -26,6 +26,12 @@ function securityAndCacheHeaders(base){
   p+'/static/*',
   '  Cache-Control: public, max-age=31536000, immutable',
   '',
+  // Vite entry chunks are content-hashed; the manifest itself is revalidated separately.
+  p+'/_vue/assets/*',
+  '  Cache-Control: public, max-age=31536000, immutable',
+  p+'/_vue/manifest.json',
+  '  Cache-Control: public, max-age=0, must-revalidate',
+  '',
   // Unhashed entry points stay revalidated so a deploy is never masked by a stale copy.
   p+'/assets/style.css',
   '  Cache-Control: no-cache',

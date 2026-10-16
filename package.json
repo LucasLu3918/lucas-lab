@@ -4,8 +4,10 @@
   "private": true,
   "description": "Responsive AI creator portfolio and digital library, without external runtime dependencies.",
   "scripts": {
-    "build": "node scripts/build.cjs",
-    "check": "node --check scripts/components.cjs && node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node --check assets/music.js && node --check scripts/visual-audit.cjs && node --check games/blood-mirror/main.js && node --check games/blood-mirror/puzzles/index.js && node --check games/blood-mirror/engine/index.js && node --test scripts/blood-mirror*.test.mjs && node scripts/blood-mirror-density.mjs --strict > /dev/null && node scripts/build.cjs && node --test scripts/vue-migration-contracts.test.mjs && node scripts/check.cjs",
+    "build": "vite build && node scripts/build.cjs",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test:vue": "vitest run",
+    "check": "npm run typecheck && npm run test:vue && node --check scripts/components.cjs && node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node --check assets/music.js && node --check scripts/visual-audit.cjs && node --check games/blood-mirror/main.js && node --check games/blood-mirror/puzzles/index.js && node --check games/blood-mirror/engine/index.js && node --test scripts/blood-mirror*.test.mjs && node scripts/blood-mirror-density.mjs --strict > /dev/null && npm run build && node --test scripts/vue-scaffold-contracts.test.mjs scripts/vue-migration-contracts.test.mjs && node scripts/check.cjs",
     "check:all": "npm run check && npm run test:visual && npm run test:game && npm run test:site && npm run test:perf",
     "start": "node scripts/serve.cjs",
     "smoke:live": "node scripts/smoke-live.cjs",
@@ -16,9 +18,17 @@
     "test:game": "node scripts/blood-mirror.browser.cjs && node scripts/blood-mirror-deduction.browser.cjs && node scripts/blood-mirror-ending.browser.cjs && node scripts/blood-mirror-gallery.browser.cjs && node scripts/blood-mirror-media.browser.cjs && node scripts/blood-mirror-picker.browser.cjs && node scripts/blood-mirror-pipes.browser.cjs && node scripts/blood-mirror-replay.browser.cjs && node scripts/blood-mirror-replay-game.browser.cjs && node scripts/blood-mirror-replay-entry.browser.cjs && node scripts/blood-mirror-arrows.browser.cjs && node scripts/blood-mirror-solo.browser.cjs && node scripts/blood-mirror-stage.browser.cjs && node scripts/blood-mirror-ui.browser.cjs&& node scripts/blood-mirror-gamepad.browser.cjs&& node scripts/blood-mirror-edge.browser.cjs"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vue/test-utils": "2.5.1",
+    "happy-dom": "21.0.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.5",
+    "vue": "3.5.44",
+    "vue-tsc": "3.3.13",
     "wrangler": "4.129.1"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   }
 }
