@@ -116,4 +116,4 @@ Search 從 `/search/` 開始遷移；此頁仍由 SSG 產生，canonical、`noin
 
 Vue 元件責任：`SiteApp` 選擇 island；`SearchApp` 組合搜尋流程；`SearchControls` 管理輸入與分類事件；`SearchResults` 顯示分組、數量與空狀態；`SearchResultCard` 顯示單筆作品；`ChapterSearchResults` 顯示延遲取得的章節；`site/lazy.ts` 在互動時載入 feature。其他館藏頁與 `/style-guide/` 仍由 `assets/app.js` 控制；搜尋頁使用自己的 `data-search-filter`，不輸出舊控制器使用的搜尋標記，避免同一 DOM 子樹被兩套控制器管理。
 
-本切片驗證使用 `npm run check`、`npm run test:site`、`npm run test:visual` 與 `npm run test:perf`。加入搜尋專用縮圖後，Search 頁在本機為 166 KB／12 個請求，低於 350 KB／15 個上限；GitHub CI 初次量測原始縮圖為 352 KB／14 個請求，因此改為 180px 來源。`origin/main` 的遊戲頁也會觸發既有的效能檢查失敗（46 個請求，高於 45 個上限），本切片未更動遊戲資源。後續依序遷移 Catalog 館藏頁，再處理 Reader；不要在本切片擴大到 Gallery、Music 或遊戲。
+本切片驗證使用 `npm run check`、`npm run test:site`、`npm run test:visual` 與 `npm run test:perf`。Search 頁加入專用 180px、壓縮 360px／600px WebP 候選後，本機 390px 為 166 KB／12 個請求、1440px 為 281 KB／13 個請求，均低於 350 KB／15 個上限。GitHub CI 初次量測原始縮圖的桌面 Search 為 352 KB／14 個請求，故提供依 viewport 選擇的輕量候選。`origin/main` 的遊戲頁也會觸發既有的效能檢查失敗（46 個請求，高於 45 個上限），本切片未更動遊戲資源。後續依序遷移 Catalog 館藏頁，再處理 Reader；不要在本切片擴大到 Gallery、Music 或遊戲。

@@ -7,12 +7,14 @@ module.exports=function renderShowcaseAndSearch(ctx){
  const searchable=[...catalog.stories.map(x=>({...x,kind:'story'})),...catalog.games.map(x=>({...x,kind:'game'})),...catalog.projects.map(x=>({...x,kind:'project'})),...catalog.tools.map(x=>({...x,kind:'tool'}))].map(item=>({
   ...item,
   searchCoverSmall:item.coverSmall?.replace(/-small\.webp$/,'-search-180.webp')||null,
-  searchShotSmall:item.shotSmall?.replace(/-small\.webp$/,'-search-180.webp')||null
+  searchCoverMedium:item.coverSmall?.replace(/-small\.webp$/,'-search-360.webp')||null,
+  searchShotSmall:item.shotSmall?.replace(/-small\.webp$/,'-search-180.webp')||null,
+  searchShotMedium:item.shotSmall?.replace(/-small\.webp$/,'-search-600.webp')||null
  }));
  const searchCard=(item,kind)=>{
   let markup=card(item,kind);
-  if(item.searchCoverSmall)markup=markup.replace(`srcset="${url(item.coverSmall)} 360w,`,`srcset="${url(item.searchCoverSmall)} 180w, ${url(item.coverSmall)} 360w,`);
-  if(item.searchShotSmall)markup=markup.replace(`srcset="${url(item.shotSmall)} 600w,`,`srcset="${url(item.searchShotSmall)} 180w, ${url(item.shotSmall)} 600w,`);
+  if(item.searchCoverSmall)markup=markup.replace(`srcset="${url(item.coverSmall)} 360w, ${url(item.cover)} 900w"`,`srcset="${url(item.searchCoverSmall)} 180w, ${url(item.searchCoverMedium)} 360w, ${url(item.cover)} 900w"`);
+  if(item.searchShotSmall)markup=markup.replace(`srcset="${url(item.shotSmall)} 600w, ${url(item.shot)} 1200w"`,`srcset="${url(item.searchShotSmall)} 180w, ${url(item.searchShotMedium)} 600w, ${url(item.shot)} 1200w"`);
   return markup;
  };
  const groups=[
@@ -23,9 +25,7 @@ module.exports=function renderShowcaseAndSearch(ctx){
  ];
  const searchItems=searchable.map(item=>{
   const kind=item.kind,section={story:'stories',game:'games',project:'projects'}[kind];
-  const image=item.cover?{type:'cover',src:url(item.cover),small:item.coverSmall?url(item.coverSmall):null,alt:item.coverAlt||item.title+'原創封面插畫',title:item.coverTitle||item.title,subtitle:item.coverSubtitle||'',series:item.coverSeries||'DARK FANTASY'}:item.shot?{type:'shot',src:url(item.shot),small:item.shotSmall?url(item.shotSmall):null,alt:item.shotAlt||item.title+'畫面'}:null;
-  if(image?.type==='cover'&&item.searchCoverSmall)image.small=url(item.searchCoverSmall);
-  if(image?.type==='shot'&&item.searchShotSmall)image.small=url(item.searchShotSmall);
+  const image=item.cover?{type:'cover',src:url(item.cover),tiny:item.searchCoverSmall?url(item.searchCoverSmall):null,small:item.searchCoverMedium?url(item.searchCoverMedium):item.coverSmall?url(item.coverSmall):null,alt:item.coverAlt||item.title+'原創封面插畫',title:item.coverTitle||item.title,subtitle:item.coverSubtitle||'',series:item.coverSeries||'DARK FANTASY'}:item.shot?{type:'shot',src:url(item.shot),tiny:item.searchShotSmall?url(item.searchShotSmall):null,small:item.searchShotMedium?url(item.searchShotMedium):item.shotSmall?url(item.shotSmall):null,alt:item.shotAlt||item.title+'畫面'}:null;
   return {id:kind+':'+(item.slug||item.title),kind,title:item.title,description:item.description,category:item.category,searchText:[item.title,item.description,item.category,item.trait||''].join(' '),href:kind==='tool'?item.href:url(section+'/'+item.slug+'/'),external:kind==='tool',status:item.status||'',statusLabel:item.status?stateLabel(item.status):'',trait:item.trait||'',symbol:item.symbol||'✦',palette:item.palette||'blue',image};
  });
  const categoryButtons=[...new Set(searchable.map(item=>item.category))].map(category=>`<button class="filter" type="button" data-search-filter="${e(category)}" aria-pressed="false">${e(category)}</button>`).join('');

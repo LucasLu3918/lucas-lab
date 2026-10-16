@@ -3,6 +3,7 @@ export type SearchKind = 'story' | 'game' | 'project' | 'tool';
 export interface SearchImage {
   type: 'cover' | 'shot';
   src: string;
+  tiny?: string | null;
   small: string | null;
   alt: string;
   title?: string;

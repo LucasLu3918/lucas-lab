@@ -19,7 +19,7 @@ defineProps<{ item: SearchItem }>();
       <img
         class="book-cover"
         :src="item.image.src"
-        :srcset="item.image.small ? `${item.image.small} 360w, ${item.image.src} 900w` : undefined"
+        :srcset="item.image.small ? `${item.image.tiny ? `${item.image.tiny} 180w, ` : ''}${item.image.small} 360w, ${item.image.src} 900w` : undefined"
         sizes="(max-width:480px) 120px, (max-width:720px) 45vw, 360px"
         :alt="item.image.alt"
         loading="lazy"
@@ -37,7 +37,7 @@ defineProps<{ item: SearchItem }>();
     <div v-else-if="item.image?.type === 'shot'" class="visual shot-visual">
       <img
         :src="item.image.src"
-        :srcset="item.image.small ? `${item.image.small} 600w, ${item.image.src} 1200w` : undefined"
+        :srcset="item.image.small ? `${item.image.tiny ? `${item.image.tiny} 180w, ` : ''}${item.image.small} 600w, ${item.image.src} 1200w` : undefined"
         sizes="(max-width:480px) 34vw, (max-width:1100px) 45vw, 400px"
         :alt="item.image.alt"
         loading="lazy"
