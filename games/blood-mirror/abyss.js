@@ -44,7 +44,8 @@ export function openAbyss(api){
   document.getElementById('abyss-back').focus({preventScroll:true});
  };
  const stageNotes=item=>Object.fromEntries(Object.entries(item.stageLines||{}).map(([id,list])=>[id,lines(list)]));
- const play=(item,fresh)=>startPuzzle(item.puzzle,{...api.options(),fresh,stageLines:stageNotes(item),success:()=>{if(fresh)api.toast('重玩完成，進度不受影響。');if(fresh&&!item.reduced)list();else reward(item);}});
+ // `extra: null` drops the act's hint panel (main.js reads the hints of the room the player is in, which is not this level). Its candle hints sit inside each stage.
+ const play=(item,fresh)=>startPuzzle(item.puzzle,{...api.options(),extra:null,fresh,stageLines:stageNotes(item),success:()=>{if(fresh)api.toast('重玩完成，進度不受影響。');if(fresh&&!item.reduced)list();else reward(item);}});
  function level(item){
   const done=isPuzzleComplete(item.puzzle);
   modal(item.title,item.number+' · '+item.subtitle,lines(item.scene)

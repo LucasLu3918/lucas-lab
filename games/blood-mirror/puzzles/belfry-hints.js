@@ -22,7 +22,9 @@ export function bindHints({hints,currentStep,alive,idleMs=180000}){
   if(auto){if(tier>0)return;tier=1;}
   else{tier=Math.min(tier+1,list.length);used++;}
   box.hidden=false;
-  box.textContent=(auto?'魔鏡低語：':'燭光提示 '+tier+' / '+list.length+'：')+list[tier-1];
+  // A tier may be a function, so the text is read from the board at the moment it is shown.
+  const text=typeof list[tier-1]==='function'?list[tier-1]():list[tier-1];
+  box.textContent=(auto?'魔鏡低語：':'燭光提示 '+tier+' / '+list.length+'：')+text;
   note.textContent=tier<list.length?'再按一次，看更明確的':'這已經是最明確的提示';
  }
  button.onclick=()=>show(false);

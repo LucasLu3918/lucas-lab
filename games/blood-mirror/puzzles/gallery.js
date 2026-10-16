@@ -146,8 +146,8 @@ export const HINTS={
  ],
  order:[
   '三條紅線把四格接起來了。排序的線索就是紅線：排好以後，相鄰的兩格之間都要有一條線。',
-  '陽台和鏡廊之間是月亮的線，鏡廊和舞廳之間是門的線，舞廳和黑松林之間是燈的線。照這個接法排成一列。',
-  '順序是：陽台、鏡廊、舞廳、黑松林（反過來也可以）。'
+  '陽台和鏡廊之間是月亮的線，鏡廊和舞廳之間是門的線，舞廳和黑松林之間是燈的線。照這個接法排成一列；從另一端排也可以，紅線是同一條。',
+  '順序是：陽台、鏡廊、舞廳、黑松林。也可以反過來排成：黑松林、舞廳、鏡廊、陽台。這是同一條紅線從另一端讀，兩種都算對。'
  ]
 };
 
@@ -160,7 +160,7 @@ const CAPTIONS={
  stack:'把陽台的月亮拖到鏡廊鏡子裡的月亮上，讓兩個月亮重疊。放開時會自動吸附。',
  size:'黑松林的提燈比舞廳的吊燈小很多。點黑松林把整格放大，再把舞廳拖到放大的黑松林上，讓舞廳的大吊燈對準提燈。',
  flip:'鏡廊的門開向右，舞廳的門開向左（金色小三角是開口的方向）。把其中一格翻面，再把兩扇門重疊。',
- order:'三條紅線都接上了。把四格依紅線的順序排成一列。'
+ order:'三條紅線都接上了。把四格依紅線的順序排成一列。從左到右或從右到左都算對，紅線是同一條。'
 };
 const SLOT={A:[16,16],B:[376,16],C:[16,224],D:[376,224]};
 const BOARD_H=548,BORDER=6,TRAY=0.55,K=(PW-2*BORDER)/PW; // the content box inside the gold border is 340x188
@@ -424,7 +424,7 @@ function mountGallery(ctx,stage){
      ?'<button class="gal-slot" data-i="'+i+'" aria-label="第 '+(i+1)+' 格：'+PANELS[order[i]].name+'（點選取消）"><img src="'+art(order[i])+'" alt="" width="1664" height="944"><span>'+(i+1)+'｜'+PANELS[order[i]].name+'</span></button>'
      :'<div class="gal-slot empty"><span>第 '+(i+1)+' 格</span></div>').join('')+'</div>'
    +'<div class="gal-cards">'+Object.keys(PANELS).map(p=>'<button class="gal-card'+(order.includes(p)?' used':'')+'" data-card="'+p+'" aria-label="'+PANELS[p].name+(order.includes(p)?'（已放入）':'')+'"><img src="'+art(p)+'" alt="" width="1664" height="944"><span>'+PANELS[p].name+'</span></button>').join('')+'</div>'
-   +'<p class="gal-order-note">依序點選四格；點已放的格子可以取消。</p>';
+   +'<p class="gal-order-note">依序點選四格；點已放的格子可以取消。從哪一端開始都可以，紅線從兩端讀都是同一條。</p>';
   $('gal-caption').textContent=CAPTIONS.order;
   box.querySelectorAll('[data-i]').forEach(button=>button.onclick=()=>{if(finished)return;order.splice(+button.dataset.i);note('');renderOrder();hints.changed();});
   box.querySelectorAll('[data-card]').forEach(button=>button.onclick=()=>{
@@ -446,7 +446,7 @@ function mountGallery(ctx,stage){
    +'<line x1="30" y1="45" x2="510" y2="45" stroke="#c8172f" stroke-width="5" stroke-linecap="round"/>'
    +order.map((p,i)=>'<rect x="'+(xs[i]-28)+'" y="25" width="56" height="40" rx="4" fill="#150d1a" stroke="#8a6a2a" stroke-width="2"/><text x="'+xs[i]+'" y="50" text-anchor="middle" font-size="13" fill="#e9dcc3">'+PANELS[p].name+'</text>').join('')
    +'<circle cx="510" cy="45" r="7" fill="#c8172f" stroke="#fff" stroke-width="1.5"/></svg>'
-   +'<p class="gal-order-note">四格依序排好，紅線連成一條直線。</p>';
+   +'<p class="gal-order-note">四格依序排好，紅線連成一條直線。從另一端讀也是同一條紅線，所以兩種排法都算對。</p>';
   note('');say('紅線連成一條直線：妳把這截紅線收進手心。','ok');hints.changed();
   ctx.playCue('door');
   setTimeout(()=>{if(alive())ctx.done();},reduced()?0:1400);
