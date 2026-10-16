@@ -376,7 +376,13 @@ button,a,input,select {outline-offset:4px}
 .dialog-bar {display:flex;align-items:center;gap:12px}
 .dialog-count {font-size:13px;color:var(--gold);letter-spacing:.08em;font-variant-numeric:tabular-nums}
 .dialog-stage {position:relative}
-.gallery-dialog .visual.has-art {background-size:contain;background-position:center;background-repeat:no-repeat}
+.gallery-dialog .visual.has-art {position:relative;overflow:hidden;background-size:contain;background-position:center;background-repeat:no-repeat}
+.gallery-dialog .visual.has-art .gallery-preview-placeholder,.gallery-dialog .visual.has-art .gallery-preview-image {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity .2s ease}
+.gallery-dialog .visual.has-art .gallery-preview-placeholder {filter:blur(12px);transform:scale(1.04)}
+.gallery-dialog .visual.has-art .gallery-preview-image {opacity:0}
+.gallery-dialog .visual.has-art.is-loaded .gallery-preview-image {opacity:1}
+.gallery-dialog .visual.has-art.is-loaded .gallery-preview-placeholder,.gallery-dialog .visual.has-art.is-failed .gallery-preview-image {opacity:0}
+.gallery-image-status {position:absolute;z-index:1;right:12px;bottom:12px;padding:5px 9px;border:1px solid #d9bf8a55;border-radius:999px;background:#080e16d9;color:var(--gold-bright);font-size:12px}
 .gallery-dialog.is-wide .visual.has-art {height:auto;max-height:min(60vh,600px);aspect-ratio:16/9}
 /* The wide box takes its height from aspect-ratio, so the picture is pinned to it and letterboxed rather than cropped. */
 .gallery-dialog.is-wide .visual.has-art img {position:absolute;inset:0}

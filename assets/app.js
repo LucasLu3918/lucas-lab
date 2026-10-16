@@ -60,40 +60,28 @@
    window.setTimeout(loadReader,1200);
   }
  }
- // Gallery dialog: shows the tile's full image and steps through the tiles of the same section.
- const dialog=one('#gallery-dialog');
- if(dialog&&typeof dialog.showModal==='function'){
-  const art=one('[data-dialog-visual]',dialog),count=one('[data-dialog-count]',dialog),link=one('[data-dialog-link]',dialog);
-  let group=[],position=0;
-  const show=button=>{
-   art.replaceChildren();
-   const wide=Number(button.dataset.fullW)>Number(button.dataset.fullH);
-   art.className='visual has-art';dialog.classList.toggle('is-wide',wide);
-   // The tile's thumbnail fills in while the full-size file downloads.
-   const thumb=one('img',button);art.style.backgroundImage=thumb?'url("'+(thumb.currentSrc||thumb.src)+'")':'';
-   const image=document.createElement('img');image.src=button.dataset.fullSrc;image.alt=button.dataset.fullAlt||button.dataset.title;image.width=Number(button.dataset.fullW)||900;image.height=Number(button.dataset.fullH)||1350;image.decoding='async';art.append(image);
-   one('[data-dialog-title]',dialog).textContent=button.dataset.title;
-   one('[data-dialog-desc]',dialog).textContent=button.dataset.description||'';
-   if(link){link.hidden=!button.dataset.href;if(button.dataset.href){link.href=button.dataset.href;link.textContent=button.dataset.hrefLabel+' →'}}
-   count.textContent=group.length>1?(position+1)+' / '+group.length:'';
-   dialog.classList.toggle('is-single',group.length<2);
+ // Gallery interaction is a route-local Vue island. Load it on first focus/click so other pages pay no cost.
+ const galleryDialog=one('#gallery-dialog'),galleryEntry=galleryDialog?.dataset.vueGalleryEntry;
+ if(galleryDialog&&galleryEntry){
+  let galleryLoading=null,galleryMounted=false,pendingGalleryTile=null;
+  const loadGallery=()=>{
+   if(galleryMounted||galleryLoading)return galleryLoading;
+   galleryLoading=import(galleryEntry).then(()=>{
+    galleryMounted=true;
+    const pending=pendingGalleryTile;pendingGalleryTile=null;
+    if(pending?.isConnected)pending.click();
+   }).catch(error=>{galleryLoading=null;console.error('Unable to load the Gallery feature.',error)});
+   return galleryLoading;
   };
-  const step=dir=>{if(group.length<2)return;position=(position+dir+group.length)%group.length;show(group[position])};
-  many('[data-preview]').forEach(button=>button.addEventListener('click',()=>{
-   group=many('[data-preview][data-group="'+(button.dataset.group||'')+'"]');position=Math.max(0,group.indexOf(button));
-   show(button);if(!dialog.open)dialog.showModal();
-  }));
-  one('[data-dialog-prev]',dialog)?.addEventListener('click',()=>step(-1));
-  one('[data-dialog-next]',dialog)?.addEventListener('click',()=>step(1));
-  dialog.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'){event.preventDefault();step(-1)}else if(event.key==='ArrowRight'){event.preventDefault();step(1)}});
-  // Swipe left or right on the picture to change it on touch screens.
-  let touchX=null;
-  art.addEventListener('touchstart',event=>{touchX=event.touches[0].clientX},{passive:true});
-  art.addEventListener('touchend',event=>{if(touchX===null)return;const dx=event.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(dx)>45)step(dx<0?1:-1)},{passive:true});
-  // Focus returns to the tile that is showing when the dialog closes, so keyboard users keep their place.
-  dialog.addEventListener('close',()=>{group[position]?.focus()});
-  one('[data-dialog-close]',dialog)?.addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+  document.addEventListener('focusin',event=>{
+   const target=event.target,button=target instanceof Element?target.closest('[data-preview]'):null;
+   if(button)void loadGallery();
+  });
+  document.addEventListener('click',event=>{
+   const target=event.target,button=target instanceof Element?target.closest('[data-preview]'):null;
+   if(!button||galleryMounted)return;
+   event.preventDefault();pendingGalleryTile=button;void loadGallery();
+  },true);
  }
  // Device-local reading progress is optional.
  const progressKey='lucaslab.progress.v1';
