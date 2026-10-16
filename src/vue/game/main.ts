@@ -1,4 +1,6 @@
 import { createApp, type ComponentPublicInstance } from 'vue';
+import '../shared/tokens.css';
+import '../shared/base.css';
 import GameApp from './GameApp.vue';
 
 export function mountGameApp(target: Element): ComponentPublicInstance {

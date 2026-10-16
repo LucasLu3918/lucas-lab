@@ -89,3 +89,19 @@ Phase 1 在保留 SSG 為公開頁面來源的前提下，新增 Vue 3、Vite、
 同一基準 SHA `1ca7c77a1e2763d963200f7f080ba93216a8ae14` 的最新 GitHub `verify` 與 `visual-audit` workflow 均為 success。因此，Chromium 1248 本機的遊戲請求數超標與遊戲套件缺少 1194 headless shell 是本機量測／環境限制；合併依據以 PR 自身對精確 SHA 的 required checks 為準。
 
 真機 iOS Safari／Android Chrome 仍需人工驗收；CI 與正式部署狀態以本次 PR 精確 commit 的檢查結果為準。
+
+## Phase 2 — Vue Design System 與共用基礎元件
+
+Phase 2 新增 `src/vue/shared/tokens.css` 與 `base.css`，以 `assets/style.css` 現有的海軍藍黑底色、古金與酒紅、字體堆疊、6/10px 圓角、48px 主要控制項、44px 緊湊控制項、3px 金色鍵盤焦點框和 reduced-motion 偏好建立 Vue 共用樣式。兩個 Vue 入口載入相同 token 與元件樣式，仍由 Phase 1 的獨立 Vite entries 編譯。
+
+共用元件維持單一責任與明確 API：
+
+| 元件 | 職責與契約 |
+| --- | --- |
+| `BaseButton` | 原生按鈕；`variant`、`size`、`type`、`disabled`、`loading` props；預設 slot 作為可見與可存取名稱。 |
+| `BaseBadge` | 狀態標籤；`tone` prop；預設 slot 為標籤文字。 |
+| `BaseCard` | 語意容器；`as` 與 `elevation` props；預設 slot 為內容。 |
+| `BaseNotice` | 狀態訊息；`tone` prop；錯誤訊息採 assertive alert，其餘採 polite status。 |
+| `BaseTextField` | 有標籤的文字輸入；必填 `label`、`v-model`、說明與錯誤關聯、原生 required/disabled。 |
+
+本階段只把元件樣式納入 Vue build，尚未在 SSG 頁面輸出掛載點或切換既有控制器，因此公開 HTML、路由、使用者資料、Worker 與現有 DOM 所有權不變。`src/vue/shared/index.ts` 是 Vue 領域的共用公開入口；不加入 runtime 服務或新外部依賴。`BaseComponents.spec.ts` 覆蓋 loading/disabled、語意容器、live-region、label/error 關聯與 v-model。
