@@ -9,7 +9,7 @@ const manifestPath = path.join(dist, '_vue', 'manifest.json');
 
 test('SSG copies Vue entry bundles and loads only the matching route islands', () => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/game/main.ts'];
+  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
 
   for (const entry of entries) {
     assert.equal(manifest[entry]?.isEntry, true, `missing Vite entry: ${entry}`);
@@ -41,6 +41,12 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.match(searchHtml, /data-vue-site-island="search"/, 'search page contains the site island host');
   assert.match(searchHtml, /data-vue-site-island="search"[\s\S]*class="search-group"/, 'search page keeps its static catalog and controls before Vue activation');
   assert.match(searchHtml, /<meta name="robots" content="noindex,follow">/, 'search stays excluded from indexing');
+  const musicHtml = fs.readFileSync(path.join(dist, 'music', 'index.html'), 'utf8');
+  const musicPages = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-music-player'));
+  assert.equal((musicHtml.match(/<script type="module" src="\/_vue\/[^"]+"><\/script>/g) || []).length, 1, 'Music page loads exactly one Vue module');
+  assert.match(musicHtml, /data-vue-music-controller/, 'Music page contains its controller island host');
+  assert.match(musicHtml, /data-track="0"/, 'Music playlist remains server-rendered');
+  assert.doesNotMatch(musicHtml, /<script src="[^"]*assets\/music\.js"/, 'Music page loads the Vue adapter entry instead of the legacy controller');
   const readerPages = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-vue-reader-preferences'));
   const readerFeaturePages = htmlFiles.filter(file => /data-vue-(?:reader-entry|story-progress|offline-controls)/.test(fs.readFileSync(file, 'utf8')));
   assert.ok(readerPages.length > 0, 'SSG chapter pages contain the reader preferences island');
@@ -60,7 +66,7 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
   }
   for (const file of htmlFiles) {
-    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
+    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }

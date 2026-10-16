@@ -64,11 +64,11 @@ Phase 1 在保留 SSG 為公開頁面來源的前提下，新增 Vue 3、Vite、
 | 內容警示／隱私 | `[data-content-warning]`, `[data-warning-ack]`, `[data-clear-progress]` | 狀態留在本機 storage；清除操作更新提示文字。 |
 | 離線保存／章節搜尋 | `[data-offline-save]`, `[data-chapter-search]` | 綁定 CacheStorage、Service Worker 與 fetch，更新進度／錯誤訊息及結果列表。 |
 | 藝廊對話框 | `#gallery-dialog`, `[data-preview]`, `[data-dialog-*]` | 使用原生 `dialog`、動態建立圖片、方向鍵／觸控滑動、焦點返回與文字更新。 |
-| 音樂播放器 | `[data-music-player]`、`[data-audio]` | `assets/music.js` 管理 HTMLAudioElement、seek／volume／播放清單與鍵盤快捷鍵。 |
+| 音樂播放器 | `[data-music-player]`、`[data-audio]` | Music 頁由 `src/vue/site/music-main.ts` 啟動 Vue island；`AudioPlayerPort` 與瀏覽器 adapter 管理 `HTMLAudioElement`、seek／volume／播放清單與鍵盤快捷鍵，元件卸載時清除事件監聽器。 |
 | PWA 更新提示 | service worker 更新事件 | `assets/app.js` 動態建立 banner、更新文字並提供重新載入操作。 |
 | 遊戲 UI／Puzzle | `games/blood-mirror/main.js`, `ui.js`, `views/modals.js`, `puzzles/*.js` | 主流程建立頁面／modal；每個 Puzzle 直接查詢、建立與更新自己的 DOM/SVG，部分依賴 CSSOM 座標和 transform。需按 Puzzle／畫面群組分批交接 DOM 所有權。 |
 
-網站共用控制集中在 `assets/app.js` 與 `assets/music.js`；遊戲跨 33 個 Puzzle 模組直接操作 DOM。這是後續分割遷移的主要工作量來源。各模組來源可用 `rg -n 'querySelector|createElement|innerHTML|\.style\.' assets games/blood-mirror` 重現檢視。
+全站共用控制仍集中在 `assets/app.js`；Music 播放器由 Vue island 管理生命周期，遊戲跨 33 個 Puzzle 模組直接操作 DOM。這是後續分割遷移的主要工作量來源。各模組來源可用 `rg -n 'querySelector|createElement|innerHTML|\.style\.' assets games/blood-mirror` 重現檢視。
 
 遷移時以一個完整互動區域為邊界：Vue 接手該 DOM 子樹後，舊控制器不再讀寫該子樹。Audio、Canvas、Gamepad、WebAudio 與既有遊戲引擎可以經 adapter 保留，不要求改成 Vue 模板。CSP 不允許新增未審核的 inline script/style。
 

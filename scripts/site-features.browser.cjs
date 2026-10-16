@@ -228,6 +228,39 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   assert.match(await page.locator('[data-clear-status]').textContent(),/已清除/);
   console.log('✓ game bridge on chapters and clearing reading records from the privacy page');
 
+  // 16. Music island: track changes and range-backed seeking keep the requested progress.
+  const musicPage=await context.newPage();
+  musicPage.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+  musicPage.on('pageerror',e=>errors.push(e.message));
+  await musicPage.addInitScript(()=>{
+   const media=HTMLMediaElement.prototype;
+   Object.defineProperty(media,'duration',{configurable:true,get(){return 240}});
+   Object.defineProperty(media,'readyState',{configurable:true,get(){return 2}});
+   Object.defineProperty(media,'paused',{configurable:true,get(){return this.__paused??true}});
+   Object.defineProperty(media,'currentTime',{configurable:true,get(){return this.__currentTime??0},set(value){this.__currentTime=value}});
+   Object.defineProperty(media,'volume',{configurable:true,get(){return this.__volume??0.9},set(value){this.__volume=value}});
+   Object.defineProperty(media,'muted',{configurable:true,get(){return this.__muted??false},set(value){this.__muted=value}});
+   Object.defineProperty(media,'playbackRate',{configurable:true,get(){return 1}});
+   Object.defineProperty(media,'seekable',{configurable:true,get(){return {length:1,start:()=>0,end:()=>240}}});
+   Object.defineProperty(media,'buffered',{configurable:true,get(){return {length:0,start:()=>0,end:()=>0}}});
+   Object.defineProperty(media,'src',{configurable:true,get(){return this.getAttribute('src')||''},set(value){this.setAttribute('src',value);this.__currentTime=0;queueMicrotask(()=>this.dispatchEvent(new Event('loadedmetadata')))}});
+   media.load=function(){};
+   media.play=function(){this.__paused=false;this.dispatchEvent(new Event('play'));return Promise.resolve()};
+   media.pause=function(){this.__paused=true;this.dispatchEvent(new Event('pause'))};
+  });
+  await musicPage.goto(ORIGIN+'/music/',{waitUntil:'load'});
+  await musicPage.waitForFunction(()=>document.querySelector('[data-music-player]')?.dataset.vueMusicReady==='true');
+  await musicPage.locator('[data-seek]').fill('60');
+  await musicPage.locator('[data-seek]').dispatchEvent('change');
+  assert.equal(await musicPage.locator('[data-time-current]').textContent(),'1:00','seek progress snapped back to zero');
+  const secondTrack=musicPage.locator('[data-track="1"]');
+  const secondSource=await secondTrack.getAttribute('data-src');
+  await secondTrack.click();
+  await musicPage.waitForFunction(src=>document.querySelector('[data-audio]').getAttribute('src')===src,secondSource);
+  assert.equal(await musicPage.locator('[data-np-title]').textContent(),await secondTrack.getAttribute('data-title'),'track title did not switch');
+  await musicPage.close();
+  console.log('✓ Music Vue island switches tracks and preserves range-backed seek progress');
+
   const cspErrors=errors.filter(t=>/Content Security Policy|Refused to/.test(t));
   assert.deepEqual(cspErrors,[],'CSP violations in console');
   console.log('✓ journal and game play page load with no CSP violations');
