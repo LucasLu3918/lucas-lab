@@ -1,0 +1,56 @@
+:root {
+  color-scheme: dark;
+  --ll-color-background: #080e16;
+  --ll-color-surface: #121c26;
+  --ll-color-surface-raised: #1a2732;
+  --ll-color-border: #4d493f;
+  --ll-color-text: #f3eee5;
+  --ll-color-text-muted: #b7bebf;
+  --ll-color-gold: #d9bf8a;
+  --ll-color-gold-bright: #efdbad;
+  --ll-color-wine: #853a35;
+  --ll-color-wine-light: #a14c43;
+  --ll-color-focus: #e9ce91;
+  --ll-color-success-surface: #1b2b27;
+  --ll-color-success-border: #506758;
+  --ll-color-success-text: #bddbc8;
+  --ll-color-info-surface: #292738;
+  --ll-color-info-border: #646079;
+  --ll-color-info-text: #d4cee5;
+  --ll-color-warning-surface: #32251e;
+  --ll-color-warning-border: #7b5a43;
+  --ll-color-warning-text: #ebc6a5;
+  --ll-color-error-surface: #34271d;
+  --ll-color-error-border: #9a7451;
+  --ll-color-error-text: #efd3af;
+
+  --ll-font-body: system-ui, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --ll-font-display: Georgia, "LL Serif TC", "Noto Serif TC", "Songti TC", "Source Han Serif TC", "PMingLiU", serif;
+  --ll-font-serif: Georgia, "Noto Serif TC", "Songti TC", "Source Han Serif TC", "PMingLiU", serif;
+
+  --ll-font-size-xs: 0.75rem;
+  --ll-font-size-sm: 0.8125rem;
+  --ll-font-size-body: 0.9375rem;
+  --ll-font-size-lg: 1.0625rem;
+  --ll-font-size-xl: 1.1875rem;
+  --ll-font-size-2xl: 1.5rem;
+  --ll-font-size-3xl: 2rem;
+
+  --ll-space-1: 0.5rem;
+  --ll-space-2: 1rem;
+  --ll-space-3: 1.5rem;
+  --ll-space-4: 2rem;
+  --ll-space-5: 2.5rem;
+  --ll-space-6: 3rem;
+
+  --ll-radius-control: 6px;
+  --ll-radius-panel: 10px;
+  --ll-shadow-panel: 0 12px 32px rgb(0 0 0 / 0.32);
+  --ll-shadow-overlay: 0 28px 80px rgb(0 0 0 / 0.73);
+  --ll-focus-width: 3px;
+  --ll-focus-offset: 3px;
+  --ll-motion-fast: 120ms;
+  --ll-motion-standard: 200ms;
+  --ll-breakpoint-mobile: 40rem;
+  --ll-breakpoint-tablet: 56.25rem;
+}
