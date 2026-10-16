@@ -87,14 +87,6 @@ footer>span:nth-child(2){color:#b9ada2}
 .mask-row{display:grid;grid-template-columns:28px 64px 1fr;align-items:center;gap:10px;min-height:44px}
 .mask-slot{font:12px Georgia,serif;color:#a99876;text-align:center}.mask-name{color:#d8be8f;font-size:14px}
 .mask-row select{min-height:44px;width:100%;background:#201a22;color:#e8ddcc;border:1px solid #ad8e6570;padding:0 10px;font:inherit}
-.heart-ring{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,66px);justify-items:center;align-items:center;width:min(100%,330px);margin:12px auto 8px}
-.heart-node{width:56px;height:56px;min-height:44px;border-radius:50%;border:1px solid #ad8e6570;background:#201a22;color:#c1a982;font-size:22px;display:grid;place-items:center;transition:background .08s,box-shadow .08s}
-.heart-node.lit{background:#a65360;color:#fff;border-color:#ffc9d4;box-shadow:0 0 22px #cf758999}
-.heart-core{grid-column:2/5;grid-row:2/4;font:13px Georgia,serif;color:#d8be8f;opacity:.85;text-align:center}
-/* Seven runes laid out as a ring on a 5x4 grid, clockwise from the top. */
-.heart-node.n0{grid-column:3;grid-row:1}.heart-node.n1{grid-column:5;grid-row:2}.heart-node.n2{grid-column:5;grid-row:3}.heart-node.n3{grid-column:4;grid-row:4}
-.heart-node.n4{grid-column:2;grid-row:4}.heart-node.n5{grid-column:1;grid-row:3}.heart-node.n6{grid-column:1;grid-row:2}
-@media (prefers-reduced-motion:reduce){.heart-node{transition:none}}
 
 /* Mirror light path (second stage of the ballroom evidence) */
 .light-board{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;width:min(100%,360px);margin:12px auto 10px;padding:6px;background:#070709;border:1px solid #b49a6655}
@@ -145,7 +137,7 @@ footer>span:nth-child(2){color:#b9ada2}
 }
 
 /* Boards sit in a riveted brass plate. */
-#modal :is(.tile-board,.reflection-board,.light-board,.stitch-board,.maze-board,.rub-board,.rune-board,.memory-board,.heart-ring){
+#modal :is(.tile-board,.reflection-board,.light-board,.stitch-board,.maze-board,.rub-board,.rune-board,.memory-board){
  background:
   radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) 4px 4px/9px 9px no-repeat,
   radial-gradient(circle,#f3e1ae 0 1.5px,#8a6d3a 2px,transparent 3px) calc(100% - 4px) 4px/9px 9px no-repeat,
@@ -155,7 +147,7 @@ footer>span:nth-child(2){color:#b9ada2}
  border:2px solid var(--brass);border-radius:4px;
  box-shadow:inset 0 0 0 2px #0b0806,inset 0 0 0 3px #c9ab6a4d,inset 0 0 26px #000c,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a;
 }
-#modal :is(.rune-board,.memory-board,.heart-ring){padding:14px;box-sizing:border-box}
+#modal :is(.rune-board,.memory-board){padding:14px;box-sizing:border-box}
 #modal .pipes-board{border:2px solid var(--brass);border-radius:4px;box-shadow:inset 0 0 0 2px #0b0806,0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 #modal .ledger-figure{border:2px solid var(--brass);border-radius:3px;box-shadow:0 0 0 3px #17110c,0 0 0 4px #c9ab6a40,0 14px 36px #000a}
 
@@ -167,18 +159,80 @@ footer>span:nth-child(2){color:#b9ada2}
 }
 #modal :is(.rune-key,.seal-choice,.maze-key):active{transform:translateY(1px);box-shadow:inset 0 2px 5px #000b}
 #modal :is(.rune-key,.seal-choice,.maze-key):focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
-#modal .rune-key.illuminated,#modal .heart-node.lit{
+#modal .rune-key.illuminated{
  background:radial-gradient(circle at 50% 32%,#ff9aa7,var(--ruby) 58%,#5a1220);color:#fff;border-color:var(--brass-hi);
  box-shadow:0 0 26px #ff738599,inset 0 1px 0 #fff6,inset 0 -3px 6px #3a0a12;text-shadow:0 0 8px #fff8;
 }
 
-/* Rune ring: round medallions around a glass heart. */
-#modal .heart-ring{border-radius:18px}
-#modal .heart-node{
- background:radial-gradient(circle at 35% 28%,#6e5632,#241a0f 72%);border:2px solid var(--brass);color:var(--brass-hi);
- box-shadow:var(--bevel),0 0 0 3px #0c0806;text-shadow:0 1px 0 #000a;
+/* Glass-heart circle: three painted layers on one ring. ring.webp is the base dial, seven painted medallions sit at their
+   own --a (clockwise from the top), and a brass hand pivots at the hub. Each medallion has an unlit and a lit painting;
+   lighting cross-fades between them with opacity, so nothing moves and no filter is used (MEDIA_ASSETS). */
+#modal .heart-ring{
+ position:relative;box-sizing:border-box;width:min(100%,330px);aspect-ratio:1;margin:12px auto 8px;padding:0;border:0;border-radius:50%;
+ background:url(assets/puzzles/runeheart/ring.webp) center/100% 100% no-repeat;
+ box-shadow:0 14px 36px #000a;
 }
-#modal .heart-core{color:var(--brass);opacity:1;letter-spacing:2px;text-shadow:0 0 12px #c9ab6a66}
+/* The hub is the gem in the base dial, measured at 51.9% across and 50.1% down the square. Every rune sits 34.5% out. */
+#modal .heart-node{
+ position:absolute;z-index:2;isolation:isolate;box-sizing:border-box;
+ left:calc(51.9% + 34.5% * sin(var(--a)));top:calc(50.1% - 34.5% * cos(var(--a)));translate:-50% -50%;
+ width:18%;aspect-ratio:1;margin:0;padding:0;border:0;border-radius:50%;
+ background:var(--sym) center/118% 118% no-repeat;
+ box-shadow:inset 0 0 0 999px rgba(16,9,5,.3),0 0 0 1px #2a1a08,0 0 0 3px #0000,0 0 0 #0000,0 3px 6px #000b;
+ color:transparent;font-size:0;
+ transition:transform .14s ease-out,box-shadow .5s ease;
+}
+#modal .heart-node.n0{--a:0deg;--sym:url(assets/puzzles/runeheart/sym-01.webp);--lit:url(assets/puzzles/runeheart/sym-01-lit.webp)}
+#modal .heart-node.n1{--a:51.43deg;--sym:url(assets/puzzles/runeheart/sym-02.webp);--lit:url(assets/puzzles/runeheart/sym-02-lit.webp)}
+#modal .heart-node.n2{--a:102.86deg;--sym:url(assets/puzzles/runeheart/sym-03.webp);--lit:url(assets/puzzles/runeheart/sym-03-lit.webp)}
+#modal .heart-node.n3{--a:154.29deg;--sym:url(assets/puzzles/runeheart/sym-04.webp);--lit:url(assets/puzzles/runeheart/sym-04-lit.webp)}
+#modal .heart-node.n4{--a:205.71deg;--sym:url(assets/puzzles/runeheart/sym-05.webp);--lit:url(assets/puzzles/runeheart/sym-05-lit.webp)}
+#modal .heart-node.n5{--a:257.14deg;--sym:url(assets/puzzles/runeheart/sym-06.webp);--lit:url(assets/puzzles/runeheart/sym-06-lit.webp)}
+#modal .heart-node.n6{--a:308.57deg;--sym:url(assets/puzzles/runeheart/sym-07.webp);--lit:url(assets/puzzles/runeheart/sym-07-lit.webp)}
+/* The lit painting: ruby enamel, gold glyph. It sits over the unlit one and fades in. */
+#modal .heart-node::before{
+ content:'';position:absolute;inset:0;border-radius:50%;z-index:-2;
+ background:var(--lit) center/118% 118% no-repeat;opacity:0;transition:opacity .5s ease;
+}
+/* A gold ring ripples out once as the rune catches. */
+#modal .heart-node::after{
+ content:'';position:absolute;inset:4%;border-radius:50%;z-index:-1;border:2px solid #ffe2a0;opacity:0;pointer-events:none;
+}
+#modal .heart-node.lit::before{opacity:1}
+#modal .heart-node.lit::after{animation:rune-ripple .7s ease-out}
+@keyframes rune-ripple{from{opacity:.95;transform:scale(.9)}to{opacity:0;transform:scale(1.5)}}
+/* Lit: the dim overlay clears, a gold rim and a ruby halo appear. The shadow list keeps the same length so it interpolates. */
+#modal .heart-node.lit{box-shadow:inset 0 0 0 999px rgba(16,9,5,0),0 0 0 1px #ffe2a0,0 0 0 3px #c8394a99,0 0 24px 6px #ff738599,0 3px 6px #000b}
+#modal .heart-node:active{transform:scale(.94)}
+#modal .heart-node:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+/* The hand: a painted pointer that pivots at the hub and points at the next rune to touch. The angle is set on the ring as --turn. */
+#modal .heart-hand{
+ position:absolute;z-index:2;left:51.9%;top:50.1%;width:77%;aspect-ratio:1;margin:-38.5% 0 0 -38.5%;pointer-events:none;
+ background:url(assets/puzzles/runeheart/hand.webp) center/100% 100% no-repeat;mix-blend-mode:screen;
+ transform-origin:50% 50%;transform:rotate(var(--turn,0deg));
+ transition:transform .6s cubic-bezier(.3,1.25,.5,1);
+}
+/* The glass heart in the hub: a count on brass, with ruby glass that grows as runes light. */
+#modal .heart-core{
+ position:absolute;z-index:3;left:51.9%;top:50.1%;translate:-50% -50%;width:20%;aspect-ratio:1;box-sizing:border-box;border-radius:50%;
+ display:grid;place-items:center;pointer-events:none;
+ background:radial-gradient(circle at 40% 34%,#3a2226,#140b0e 70%);
+ box-shadow:0 0 0 2px #c9ab6a,0 0 0 3px #17110c,0 0 calc(var(--glow,0) * 28px) calc(var(--glow,0) * 2px) #ff7385cc;
+ color:var(--brass-hi);font:12px Georgia,serif;letter-spacing:1px;text-shadow:0 0 12px #c9ab6a66;
+ transition:box-shadow .6s ease;
+}
+#modal .heart-core::before{
+ content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 42% 36%,#ffb3bd,#b8323f 58%,#4a0c16);
+ opacity:var(--glow,0);transition:opacity .6s ease;
+}
+/* A wrong press shakes the dial once. */
+#modal .heart-ring.jolt{animation:heart-jolt .42s cubic-bezier(.3,.7,.4,1)}
+@keyframes heart-jolt{20%{transform:translateX(-5px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(1px)}to{transform:none}}
+#modal .heart-hint[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){
+ #modal .heart-hand,#modal .heart-node,#modal .heart-node::before,#modal .heart-core,#modal .heart-core::before{transition:none}
+ #modal .heart-node.lit::after,#modal .heart-ring.jolt{animation:none}
+}
 
 /* Mirror light path: silver beam through brass mirrors, ruby door. */
 #modal .light-cell{background:#120d09;border:1px solid #3a2c1a;color:var(--brass-mid);border-radius:2px}
@@ -270,7 +324,6 @@ footer>span:nth-child(2){color:#b9ada2}
 #modal .spot-zoom .ui-icon{position:absolute;left:10px;bottom:10px;z-index:1;width:36px;height:36px;padding:7px;box-sizing:border-box;border:1px solid var(--brass);border-radius:50%;background:#120d09e6;color:var(--brass-hi)}
 @media (max-width:560px){
  #modal .stage-art{width:calc(100% + 44px);margin:-20px -22px 14px;height:128px}
- #modal .heart-ring{width:min(100%,300px)}
 }
 @media (prefers-reduced-motion:reduce){
  #modal :is(.rune-key,.seal-choice,.maze-key){transition:none}
@@ -755,11 +808,6 @@ body:not(.reduce-motion) #modal .gal-panel.drag{transition:none}
 #modal .maze-key:hover{filter:drop-shadow(0 2px 5px #000a) brightness(1.18)}
 #modal .maze-key:active{transform:scale(.92);box-shadow:none}
 
-/* Rune ring: carved dark stones, a ring that lights up in ruby. */
-#modal .heart-node{background:url(assets/puzzles/rune-stone.webp) center/contain no-repeat;border:0;box-shadow:none;color:var(--brass-hi);font-family:var(--serif);font-size:22px;border-radius:50%;transition:box-shadow .22s,transform .12s}
-#modal .heart-node:active{transform:scale(.94)}
-#modal .heart-node.lit{background:radial-gradient(circle,rgba(255,115,133,.55),rgba(184,50,63,.25) 55%,transparent 72%),url(assets/puzzles/rune-stone.webp) center/contain no-repeat;color:#fff;border:0;box-shadow:0 0 16px rgba(255,115,133,.7);text-shadow:0 0 10px #ff9aa7,0 0 18px #ff7385}
-#modal .heart-node:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px;border-radius:50%}
 
 /* Coffin heartbeat: four brass plates; the one that flashes turns ruby. */
 #modal .rune-key{background:linear-gradient(rgba(20,12,6,.3),rgba(20,12,6,.55)),url(assets/puzzles/watch-plate.webp) center/cover;transition:background .12s,box-shadow .12s,transform .08s}
