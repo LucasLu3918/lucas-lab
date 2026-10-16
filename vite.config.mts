@@ -14,6 +14,7 @@ export default defineConfig({
         'site-lazy': 'src/vue/site/lazy.ts',
         reader: 'src/vue/site/reader-main.ts',
         gallery: 'src/vue/site/gallery-main.ts',
+        music: 'src/vue/site/music-main.ts',
         game: 'src/vue/game/main.ts',
       },
     },
