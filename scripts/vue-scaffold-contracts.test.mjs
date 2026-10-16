@@ -40,20 +40,32 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.match(searchHtml, /data-vue-site-island="search"[\s\S]*class="search-group"/, 'search page keeps its static catalog and controls before Vue activation');
   assert.match(searchHtml, /<meta name="robots" content="noindex,follow">/, 'search stays excluded from indexing');
   const readerPages = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-vue-reader-preferences'));
+  const readerFeaturePages = htmlFiles.filter(file => /data-vue-(?:reader-entry|story-progress|offline-controls)/.test(fs.readFileSync(file, 'utf8')));
   assert.ok(readerPages.length > 0, 'SSG chapter pages contain the reader preferences island');
   for (const file of readerPages) {
     const html = fs.readFileSync(file, 'utf8');
-    assert.equal((html.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 0, 'chapter page defers Vue until reader preferences are used');
+    assert.equal((html.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 0, 'chapter page defers the reader bundle to the existing app script');
     assert.match(html, /data-vue-reader-preferences data-vue-reader-entry="\/_vue\/assets\/reader-[^"]+\.js"/, 'chapter page provides the lazy reader module path');
+    assert.match(html, /data-vue-reading-progress data-vue-reader-entry="\/_vue\/assets\/reader-[^"]+\.js"/, 'chapter page provides its progress island entry');
     assert.match(html, /<article class="readerpage[^\"]*"[^>]*data-reader/, 'chapter body remains generated static HTML');
     assert.match(html, /data-chapter-select/, 'static chapter navigation remains available');
     assert.match(html, /data-reading-progress/, 'static reading progress remains available');
   }
+  for (const file of htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-vue-story-progress'))) {
+    const html = fs.readFileSync(file, 'utf8');
+    assert.match(html, /data-vue-story-progress[^>]+data-vue-reader-entry="\/_vue\/assets\/reader-[^"]+\.js"/, 'story detail exposes the Reader island entry');
+    assert.match(html, /data-vue-offline-controls/, 'story detail exposes the offline controls island');
+    assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
+  }
   for (const file of htmlFiles) {
-    if (file === path.join(dist, 'search', 'index.html') || readerPages.includes(file)) continue;
+    if (file === path.join(dist, 'search', 'index.html') || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }
+
+  const serviceWorker = fs.readFileSync(path.join(dist, 'sw.js'), 'utf8');
+  assert.match(serviceWorker, /_vue\/assets\/reader-[^" ]+\.js/, 'Reader entry is included in the offline shell precache');
+  assert.match(serviceWorker, /url\.pathname\.startsWith\(BASE\+'_vue\/'\)/, 'Reader chunks use the immutable cache-first route');
 
   const headers = fs.readFileSync(path.join(dist, '_headers'), 'utf8');
   assert.match(headers, /script-src 'self'/, 'CSP keeps scripts same-origin');

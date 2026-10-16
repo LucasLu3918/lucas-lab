@@ -42,21 +42,22 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   assert.match(await page.locator('.chaptermeta').textContent(),/約 \d+ 分鐘/,'reading time missing');
   console.log('✓ chapter JSON-LD, breadcrumb and reading time');
 
-  // Reader controls remain available in static HTML and load the Vue runtime only after the first preference change.
+  // Reader progress and preferences remain available in static HTML; the reader island loads to track chapter position.
   const readerPreferences=page.locator('[data-vue-reader-preferences]');
   assert.equal(await readerPreferences.count(),1,'reader preferences island missing');
-  assert.equal(readerModuleRequests.length,0,'reader Vue chunk loaded before a preference interaction');
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reading-progress]')?.dataset.vueReaderMounted==='true');
+  assert.ok(readerModuleRequests.some(url=>url.includes('/reader-')),'reader feature bundle did not load for reading progress');
   await page.locator('[data-theme="night"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-vue-reader-preferences]')?.dataset.vueReaderMounted==='true');
-  assert.ok(readerModuleRequests.some(url=>url.includes('/reader-')),'reader feature bundle did not load after interaction');
   assert.equal(await page.locator('[data-reader]').evaluate(element=>element.classList.contains('night')),true,'theme was not applied');
   await page.locator('[aria-label="放大字體"]').click();
   assert.equal(await page.locator('[data-reader]').evaluate(element=>element.style.getPropertyValue('--reader-size')),'19px','Vue font control did not update the static article');
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('lucaslab.reader.preferences'))),{theme:'night',font:19});
   await page.reload({waitUntil:'load'});
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reader-preferences]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-theme="night"]').getAttribute('aria-pressed'),'true','saved theme did not restore on reload');
   assert.equal(await page.locator('[data-size]').textContent(),'19px','saved font size did not restore on reload');
-  console.log('✓ reader preferences stay static until used, then Vue applies and restores settings');
+  console.log('✓ reader island tracks progress and restores preferences');
 
   // 3. Reading progress: scrolling to the end marks the chapter read and remembers it.
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
@@ -77,7 +78,7 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
   // 5. Story page: resume button points at the last chapter, read marks are shown.
   await page.goto(ORIGIN+STORY,{waitUntil:'load'});
-  await pause(200);
+  await page.waitForFunction(()=>document.querySelector('[data-vue-story-progress]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-story-continue]').isVisible(),true,'continue reading not shown');
   assert.match(await page.locator('[data-story-continue]').textContent(),/繼續閱讀：/);
   assert.equal(await page.locator('.chapterlist .read-flag').count(),1,'read flag missing on chapter list');
@@ -135,10 +136,11 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
   // 11. Resume: a chapter left halfway offers to return there, and only moves when the reader asks.
   await page.goto(ORIGIN+CHAPTER('03'),{waitUntil:'load'});
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reading-progress]')?.dataset.vueReaderMounted==='true');
   await page.evaluate(()=>{const el=document.querySelector('[data-reader]'),r=el.getBoundingClientRect(),span=r.height-innerHeight;window.scrollTo(0,r.top+scrollY+span*0.5)});
   await pause(1000);
   await page.goto(ORIGIN+CHAPTER('03'),{waitUntil:'load'});
-  await pause(300);
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reading-progress]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-resume]').isVisible(),true,'resume prompt missing');
   assert.equal(await page.evaluate(()=>window.scrollY),0,'reader jumped without being asked');
   await page.locator('[data-resume-action]').click();
@@ -150,18 +152,19 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
   // 12. Content warning: acknowledged once per work, collapsed afterwards; progress summary on the story page.
   await page.goto(ORIGIN+STORY,{waitUntil:'load'});
-  await pause(200);
+  await page.waitForFunction(()=>document.querySelector('[data-vue-story-progress]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isVisible(),true,'warning hidden before acknowledgement');
   await page.locator('[data-content-warning="dark-snow-white"] [data-warning-ack]').click();
   assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isHidden(),true,'acknowledged warning still shown');
   await page.reload({waitUntil:'load'});
+  await page.waitForFunction(()=>document.querySelector('[data-vue-story-progress]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-content-warning="dark-snow-white"] .warning-text').isHidden(),true,'acknowledgement not remembered');
   assert.match(await page.locator('[data-story-progress]').textContent(),/讀到：.+ · 已讀 \d+ \/ \d+ 章/,'progress summary missing');
   console.log('✓ content warning is acknowledged once and progress summary shows the last chapter');
 
   // 13. Offline saving: a whole book saved online stays readable offline; an unsaved page shows the offline page.
   await page.goto(ORIGIN+STORY,{waitUntil:'load'});
-  await pause(200);
+  await page.waitForFunction(()=>document.querySelector('[data-vue-offline-controls]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-offline-save="dark-snow-white"]').isVisible(),true,'offline saving control hidden');
   await page.locator('[data-offline-action]').click();
   await page.waitForFunction(()=>/已離線保存/.test(document.querySelector('[data-offline-status]')?.textContent||''),null,{timeout:90000});
@@ -169,6 +172,7 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   const savedChapter=await page.goto(ORIGIN+CHAPTER('10'),{waitUntil:'load'});
   assert.equal(savedChapter.status(),200,'saved chapter not served offline');
   assert.ok((await page.locator('.readerpage h1').first().textContent()).length>0,'saved chapter has no title');
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reading-progress]')?.dataset.vueReaderMounted==='true');
   await page.goto(ORIGIN+'/tools/',{waitUntil:'load'});
   assert.equal(await page.locator('[data-offline-list]').count(),1,'unsaved page did not fall back to the offline page');
   await startServer();
