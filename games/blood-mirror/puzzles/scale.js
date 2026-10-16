@@ -115,6 +115,8 @@ function mountScale(ctx,name,intro){
  function draw(){
   $('sc-right').innerHTML=ask.allowed.map(sym=>Array.from({length:counts[sym]},()=>iconSvg(sym)).join('')).join('');
   const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  // The steppers are rebuilt on every change, so the button that had focus is remembered and focused again (keyboard users keep their place).
+  const kept=box.contains(document.activeElement)?document.activeElement.dataset:null,keep=kept?.sym?[kept.sym,kept.dir]:null;
   box.textContent='';
   for(const sym of ask.allowed){
    const row=document.createElement('div');row.className='scale-stepper';
@@ -125,6 +127,7 @@ function mountScale(ctx,name,intro){
    box.appendChild(row);
   }
   box.insertAdjacentHTML('beforeend','<p class="belfry-note">'+(ask.total!==null?'右盤要放剛好 '+ask.total+' 件，現在 '+total+' 件。':'右盤現在放了 '+total+' 件。')+'</p>');
+  if(keep)box.querySelector('[data-sym="'+keep[0]+'"][data-dir="'+keep[1]+'"]')?.focus({preventScroll:true});
   box.querySelectorAll('.choir-step').forEach(button=>button.onclick=()=>{
    if(finishing)return;
    const sym=button.dataset.sym,next=counts[sym]+ +button.dataset.dir;

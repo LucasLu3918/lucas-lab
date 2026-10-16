@@ -136,7 +136,7 @@ function mountCompass(ctx,name,intro){
  const $=id=>document.getElementById(id);
  const alive=()=>$('cmp-dial')?.isConnected;
  const say=(text,tone='')=>{const el=$('cmp-status');if(el){el.textContent=text;el.dataset.tone=tone;}};
- const hints=bindHints({hints:{[name]:hintsFor(name,()=>state).map(h=>typeof h==='function'?{toString:h}:h)},currentStep:()=>finishing?null:hintStep(name),alive});
+ const hints=bindHints({hints:{[name]:hintsFor(name,()=>state)},currentStep:()=>finishing?null:hintStep(name),alive});
  // Builds the dial the first time; after that a draw only turns what changed.
  let rings=null,seen=null,angles=null;
  function pose(){
