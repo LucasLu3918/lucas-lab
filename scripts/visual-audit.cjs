@@ -85,9 +85,11 @@ async function audit(){
     assert.ok(await page.locator('#site-nav').isVisible(),'desktop links not visible at '+width);
    }
    await page.goto(origin+'/search/',{waitUntil:'domcontentloaded'});
-   await page.locator('[data-search]').fill('白雪');
-   assert.ok(await page.locator('[data-item]:visible').count()>0,'full story absent from search at '+width);
-   await page.locator('[data-search]').fill('翻譯');
+   await page.locator('.vue-search input[type="search"]').fill('白雪');
+   await page.waitForSelector('.vue-search .card-link[href*="/stories/dark-snow-white/"]');
+   assert.ok(await page.locator('.vue-search .card-link:visible').count()>0,'full story absent from search at '+width);
+   await page.locator('.vue-search input[type="search"]').fill('翻譯');
+   await page.waitForSelector('a[href^="https://lucas-tools.owl3918.workers.dev/"]');
    assert.ok(await page.locator('a[href^="https://lucas-tools.owl3918.workers.dev/"]:visible').count()>0,'Lucas Tools absent from search at '+width);
    await page.goto(origin+'/stories/dark-snow-white/chapters/00/',{waitUntil:'domcontentloaded'});
    const reader=page.locator('[data-reader]');

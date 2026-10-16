@@ -78,11 +78,11 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   await page.goto(ORIGIN+'/search/',{waitUntil:'load'});
   await pause(300);
   assert.equal(indexRequests.length,0,'search index downloaded before any query');
-  assert.equal(await page.locator('[data-chapter-search]').isHidden(),true,'chapter search visible before typing');
-  await page.locator('[data-region] [data-search]').fill('序章');
-  await page.waitForFunction(()=>document.querySelectorAll('[data-chapter-results] li').length>0,null,{timeout:5000});
+  assert.equal(await page.locator('.chapter-search').count(),0,'chapter search visible before typing');
+  await page.locator('.vue-search input[type="search"]').fill('序章');
+  await page.waitForFunction(()=>document.querySelectorAll('.chapter-results li').length>0,null,{timeout:5000});
   assert.ok(indexRequests.length>=1,'index not requested after typing');
-  const firstHref=await page.locator('[data-chapter-results] a').first().getAttribute('href');
+  const firstHref=await page.locator('.chapter-results a').first().getAttribute('href');
   assert.match(firstHref,/\/stories\/.+\/chapters\/\d+\/$/,'chapter result link invalid');
   console.log('✓ chapter search loads the index on first query and links to chapters');
 
@@ -162,12 +162,19 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
   // 14. Search: spacing and full-width differences are ignored, groups appear, and the query never enters the URL.
   await page.goto(ORIGIN+'/search/',{waitUntil:'load'});
-  await page.locator('[data-region] [data-search]').fill('白雪 公主');
+  await page.locator('.vue-search input[type="search"]').fill('白雪 公主');
   await pause(300);
   assert.equal(new URL(page.url()).search,'','search query leaked into the URL');
-  const groups=await page.locator('.search-group:not([hidden]) .group-title').allTextContents();
+  const groups=await page.locator('.search-group .group-title').allTextContents();
   assert.ok(groups.includes('故事'),'story group missing from results: '+groups.join('、'));
   console.log('✓ search groups results and never writes the query into the URL');
+
+  // Search preserves its static catalog when JavaScript is disabled.
+  const noScript=await browser.newPage({ javaScriptEnabled:false });
+  await noScript.goto(ORIGIN+'/search/',{waitUntil:'load'});
+  assert.ok(await noScript.locator('.search-group .card-link').count()>0,'static catalog fallback missing without JavaScript');
+  await noScript.close();
+  console.log('✓ static search catalog fallback without JavaScript');
 
   // 15. Chapter pages: the game bridge appears for the story with a playable game; clearing reading records works.
   await page.goto(ORIGIN+CHAPTER('00'),{waitUntil:'load'});
