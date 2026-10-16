@@ -45,6 +45,14 @@
 
 此 PR 新增 `scripts/vue-migration-contracts.test.mjs` 到 `npm run check`。它比對路由 golden manifest、存檔與閱讀鍵、404 模式，並直接測試 Worker 的 206／416 回應。
 
+## Phase 1 — Vue/Vite/TypeScript 基礎建置
+
+Phase 1 在保留 SSG 為公開頁面來源的前提下，新增 Vue 3、Vite、strict TypeScript、`vue-tsc` 與 Vitest。`src/vue/site/main.ts` 和 `src/vue/game/main.ts` 是彼此獨立的入口；它們只會在頁面含有對應的 `[data-vue-site-island]` 或 `[data-vue-game-app]` 掛載點時啟動。現有 SSG 沒有輸出這些掛載點，也沒有載入 bundles。
+
+`npm run build` 會先將兩個入口建置到 `.vue-build/`，再執行會清空 `dist/` 的 `scripts/build.cjs`。SSG 驗證 Vite manifest 與輸出檔案後，將結果複製到 `dist/_vue/`；公開 HTML 不載入這些 bundles。hashed bundle 使用 immutable cache，manifest 需重新驗證。CSP 維持 `script-src 'self'` 與 `style-src 'self'`，不允許 inline script/style。
+
+最低 Node 版本為 22.12，以符合目前 Vite 與 Vitest 的 runtime 要求。GitHub Actions 使用 `npm ci`，Cloudflare Workers Builds 透過提交的 `package-lock.json` 安裝建置相依。驗證入口為 `npm run typecheck`、`npm run test:vue`、`npm run build` 與 `npm run check`。
+
 ## DOM 責任盤點與遷移規則
 
 | DOM 區域 | 現有入口／控制 | 更新責任與風險 |

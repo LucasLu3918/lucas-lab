@@ -6,9 +6,10 @@
 
 ## 啟動
 
-需要 Node.js 22+；執行 `npm run check`、`npm start` **不需要 npm install**，網站執行時不依賴外部套件或 AI API Key。Cloudflare 部署 CLI `wrangler` 則明確固定在 `devDependencies`，需先 `npm install` 才能從本機執行 `npm run deploy`。
+需要 Node.js 22.12+。第一次使用先執行 `npm ci`；Vue、Vite、TypeScript 與測試工具供建置和驗證使用。公開頁面仍由 SSG 產生，Phase 1 的 Vue bundles 尚未掛載到任何頁面。本站不需要 AI API Key。
 
 ```bash
+npm ci
 npm run check
 npm start
 ```
@@ -42,7 +43,9 @@ npm start
 assets/              CSS 設計系統和無框架互動功能
 data/catalog.json    公開作品清單、狀態與原稿引用
 content/stories/     完整小說 Markdown 原稿（保留原文）
-scripts/build.cjs    建置協調器：依序執行 scripts/site/ 內各頁面模組，產生 dist/
+src/vue/             Vue Islands 與遊戲 App 的 TypeScript/SFC 入口（由 Vite 建置）
+vite.config.mts      雙入口 Vue/Vite 建置與 Vitest 設定
+scripts/build.cjs    先接收 Vite 輸出，再執行 SSG 產生 dist/
 scripts/site/        各頁面模組（catalog 驗證、資產指紋、版面、故事、遊戲、離線 SW 等）
 scripts/components.cjs  共用 SVG、封面、狀態與閱讀控制元件
 scripts/story-source.cjs  將完整原稿分章，不修改原文
@@ -68,7 +71,7 @@ docs/                內容與技術規範
 
 ## 目前的實作取捨
 
-先前曾規劃 Astro + Vue，但第一版選擇無依賴靜態生成，以優先完成高品質響應式體驗與可部署網站。日後有更複雜內容管理和互動需求時，再引入框架。
+公開路由繼續由 Node.js SSG 產生並部署到 Cloudflare Workers Static Assets。Vue Islands 以 Vite 雙入口漸進加入；Phase 1 只編譯和保存 hashed bundles，不改既有 HTML、互動或路由。
 
 ## 站點優化與瀏覽器驗收
 
