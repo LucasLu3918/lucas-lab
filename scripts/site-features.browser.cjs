@@ -21,8 +21,10 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'});
   const page=await context.newPage();
   const errors=[];
+  const readerModuleRequests=[];
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   page.on('pageerror',e=>errors.push(e.message));
+  page.on('request',request=>{if(/\/_vue\/assets\/(?:reader-|runtime-dom)/.test(request.url()))readerModuleRequests.push(request.url())});
 
   // 1. Security headers and CSP are served and enforced (no CSP violations in the console).
   const head=await page.request.get(ORIGIN+'/');
@@ -39,6 +41,22 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   assert.ok(parsed.some(x=>x['@type']==='BreadcrumbList'),'breadcrumb JSON-LD missing');
   assert.match(await page.locator('.chaptermeta').textContent(),/約 \d+ 分鐘/,'reading time missing');
   console.log('✓ chapter JSON-LD, breadcrumb and reading time');
+
+  // Reader controls remain available in static HTML and load the Vue runtime only after the first preference change.
+  const readerPreferences=page.locator('[data-vue-reader-preferences]');
+  assert.equal(await readerPreferences.count(),1,'reader preferences island missing');
+  assert.equal(readerModuleRequests.length,0,'reader Vue chunk loaded before a preference interaction');
+  await page.locator('[data-theme="night"]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-vue-reader-preferences]')?.dataset.vueReaderMounted==='true');
+  assert.ok(readerModuleRequests.some(url=>url.includes('/reader-')),'reader feature bundle did not load after interaction');
+  assert.equal(await page.locator('[data-reader]').evaluate(element=>element.classList.contains('night')),true,'theme was not applied');
+  await page.locator('[aria-label="放大字體"]').click();
+  assert.equal(await page.locator('[data-reader]').evaluate(element=>element.style.getPropertyValue('--reader-size')),'19px','Vue font control did not update the static article');
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('lucaslab.reader.preferences'))),{theme:'night',font:19});
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.locator('[data-theme="night"]').getAttribute('aria-pressed'),'true','saved theme did not restore on reload');
+  assert.equal(await page.locator('[data-size]').textContent(),'19px','saved font size did not restore on reload');
+  console.log('✓ reader preferences stay static until used, then Vue applies and restores settings');
 
   // 3. Reading progress: scrolling to the end marks the chapter read and remembers it.
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));

@@ -38,7 +38,9 @@ test('public storage keys remain stable for reader preferences and game saves',(
  assert.equal(BACKUP_SAVE_KEY,'blood-mirror-v2-backup');
  assert.equal(LEGACY_SAVE_KEY,'blood-mirror-v1');
  assert.equal(LEGACY_PUZZLE_KEY,'blood-mirror-challenges-v2');
- assert.match(read('assets/app.js'),/lucaslab\.reader\.preferences/);
+ assert.match(read('src/vue/site/features/reader/readerPreferences.ts'),/lucaslab\.reader\.preferences/);
+ assert.match(read('assets/app.js'),/lucaslab\.reader\.preferences/,'static fallback keeps controls usable until the Vue island is requested');
+ assert.match(read('assets/app.js'),/dataset\.vueReaderEntry/,'Vue preferences load after the first control interaction');
  assert.match(read('assets/app.js'),/lucaslab\.progress\.v1/);
 });
 

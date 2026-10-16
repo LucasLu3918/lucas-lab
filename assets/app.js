@@ -56,7 +56,10 @@
   many('[data-theme]').forEach(button=>button.addEventListener('click',()=>{settings.theme=button.dataset.theme;update()}));
   many('[data-font]').forEach(button=>button.addEventListener('click',()=>{settings.font=Math.max(16,Math.min(24,settings.font+Number(button.dataset.font)));update()}));
   one('[data-chapter-select]')?.addEventListener('change',event=>location.assign(event.target.value));
+  window.addEventListener('readerpreferenceschange',scheduleProgress);
   window.addEventListener('scroll',scheduleProgress,{passive:true});window.addEventListener('resize',scheduleProgress);
+  const readerHost=one('[data-vue-reader-preferences]');
+  readerHost?.addEventListener('click',()=>{if(!readerHost.dataset.vueReaderMounted)import(readerHost.dataset.vueReaderEntry).catch(()=>{})});
   update();
  }
  // Gallery dialog: shows the tile's full image and steps through the tiles of the same section.
@@ -94,15 +97,15 @@
   one('[data-dialog-close]',dialog)?.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  }
- // Reading progress: kept only in this browser under one versioned key. Every storage access is guarded so private windows and blocked storage just lose the feature.
+ // Device-local reading progress is optional.
  const progressKey='lucaslab.progress.v1';
  const readProgress=()=>{try{const data=JSON.parse(localStorage.getItem(progressKey)||'null');return data&&typeof data.stories==='object'&&data.stories?data:{stories:{}}}catch{return{stories:{}}}};
  const writeProgress=data=>{try{localStorage.setItem(progressKey,JSON.stringify(data))}catch{}};
- // Content warnings the reader has acknowledged, one flag per work.
+ // Acknowledgements are per work.
  const warningKey='lucaslab.warnings.v1';
  const readAcks=()=>{try{const data=JSON.parse(localStorage.getItem(warningKey)||'null');return data&&typeof data==='object'?data:{}}catch{return{}}};
  const writeAcks=data=>{try{localStorage.setItem(warningKey,JSON.stringify(data))}catch{}};
- // Offline books: the pages live in the service worker's books cache; this index only records which works were saved on this device.
+ // Offline pages are cached; this stores their local index.
  const offlineKey='lucaslab.offline.v1',booksCache='lucas-lab-books';
  const readOffline=()=>{try{const data=JSON.parse(localStorage.getItem(offlineKey)||'null');return data&&typeof data==='object'?data:{}}catch{return{}}};
  const writeOffline=data=>{try{localStorage.setItem(offlineKey,JSON.stringify(data))}catch{}};
