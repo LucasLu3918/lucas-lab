@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+  base: './',
   plugins: [vue()],
   build: {
     outDir: '.vue-build',
@@ -10,6 +11,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         site: 'src/vue/site/main.ts',
+        'site-lazy': 'src/vue/site/lazy.ts',
         game: 'src/vue/game/main.ts',
       },
     },

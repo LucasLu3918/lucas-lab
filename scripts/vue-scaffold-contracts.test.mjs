@@ -7,9 +7,9 @@ const root = path.resolve(import.meta.dirname, '..');
 const dist = path.join(root, 'dist');
 const manifestPath = path.join(dist, '_vue', 'manifest.json');
 
-test('SSG copies both Vue entry bundles from the Vite manifest without mounting them', () => {
+test('SSG copies both Vue entry bundles and loads only the matching route island', () => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const entries = ['src/vue/site/main.ts', 'src/vue/game/main.ts'];
+  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/game/main.ts'];
 
   for (const entry of entries) {
     assert.equal(manifest[entry]?.isEntry, true, `missing Vite entry: ${entry}`);
@@ -34,9 +34,15 @@ test('SSG copies both Vue entry bundles from the Vite manifest without mounting 
   };
   visit(dist);
   assert.ok(htmlFiles.length > 0, 'SSG emitted HTML pages');
+  const searchHtml = fs.readFileSync(path.join(dist, 'search', 'index.html'), 'utf8');
+  assert.equal((searchHtml.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 1, 'search page loads exactly one Vue module');
+  assert.match(searchHtml, /data-vue-site-island="search"/, 'search page contains the site island host');
+  assert.match(searchHtml, /data-vue-site-island="search"[\s\S]*class="search-group"/, 'search page keeps its static catalog and controls before Vue activation');
+  assert.match(searchHtml, /<meta name="robots" content="noindex,follow">/, 'search stays excluded from indexing');
   for (const file of htmlFiles) {
+    if (file === path.join(dist, 'search', 'index.html')) continue;
     const html = fs.readFileSync(file, 'utf8');
-    assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `scaffold bundles are not loaded by ${path.relative(dist, file)}`);
+    assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }
 
   const headers = fs.readFileSync(path.join(dist, '_headers'), 'utf8');

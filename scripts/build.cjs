@@ -9,7 +9,7 @@ const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.m
 let commit=process.env.SOURCE_COMMIT||process.env.GITHUB_SHA||process.env.CF_PAGES_COMMIT_SHA||'unknown';
 if(commit==='unknown'){try{commit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()}catch{}}
 const ctx={fs,path,root,out,catalog,commit};
-copyVueAssets(ctx);
+ctx.vueAssets=copyVueAssets(ctx);
 // Order matters: fingerprints before layout (pages reference them), layout before every page module.
 Object.assign(ctx,require('./site/assets.cjs')(ctx));
 Object.assign(ctx,require('./site/layout.cjs')(ctx));
