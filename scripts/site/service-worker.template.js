@@ -30,6 +30,8 @@ self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
  if(request.method!=='GET'||url.origin!==self.location.origin)return;
  if(!url.pathname.startsWith(BASE)||url.pathname.startsWith(BASE+'games/'))return;
+ // Reader entry chunks and their imports are fingerprinted and precached for saved offline chapters.
+ if(url.pathname.startsWith(BASE+'_vue/')){event.respondWith(cacheFirst(request));return}
  // Fingerprinted files never change, so the cached copy is authoritative.
  if(url.pathname.startsWith(BASE+'static/')){event.respondWith(cacheFirst(request));return}
  // Unhashed assets and images: answer from cache at once and refresh in the background.
