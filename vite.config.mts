@@ -13,6 +13,7 @@ export default defineConfig({
         site: 'src/vue/site/main.ts',
         'site-lazy': 'src/vue/site/lazy.ts',
         reader: 'src/vue/site/reader-main.ts',
+        gallery: 'src/vue/site/gallery-main.ts',
         game: 'src/vue/game/main.ts',
       },
     },

@@ -9,7 +9,7 @@ const manifestPath = path.join(dist, '_vue', 'manifest.json');
 
 test('SSG copies Vue entry bundles and loads only the matching route islands', () => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/game/main.ts'];
+  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/game/main.ts'];
 
   for (const entry of entries) {
     assert.equal(manifest[entry]?.isEntry, true, `missing Vite entry: ${entry}`);
@@ -35,6 +35,8 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   visit(dist);
   assert.ok(htmlFiles.length > 0, 'SSG emitted HTML pages');
   const searchHtml = fs.readFileSync(path.join(dist, 'search', 'index.html'), 'utf8');
+  const galleryHtml = fs.readFileSync(path.join(dist, 'gallery', 'index.html'), 'utf8');
+  assert.match(galleryHtml, /id="gallery-dialog" data-vue-gallery-entry="\/_vue\/assets\/gallery-[^"]+\.js"/, 'Gallery page carries only its route-local lazy entry URL');
   assert.equal((searchHtml.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 1, 'search page loads exactly one Vue module');
   assert.match(searchHtml, /data-vue-site-island="search"/, 'search page contains the site island host');
   assert.match(searchHtml, /data-vue-site-island="search"[\s\S]*class="search-group"/, 'search page keeps its static catalog and controls before Vue activation');
@@ -58,7 +60,7 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
   }
   for (const file of htmlFiles) {
-    if (file === path.join(dist, 'search', 'index.html') || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
+    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }

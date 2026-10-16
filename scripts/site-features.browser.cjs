@@ -22,9 +22,11 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   const page=await context.newPage();
   const errors=[];
   const readerModuleRequests=[];
+  const galleryModuleRequests=[];
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   page.on('pageerror',e=>errors.push(e.message));
   page.on('request',request=>{if(/\/_vue\/assets\/(?:reader-|runtime-dom)/.test(request.url()))readerModuleRequests.push(request.url())});
+  page.on('request',request=>{if(/\/_vue\/assets\/gallery-[^/]+\.js(?:\?|$)/.test(request.url()))galleryModuleRequests.push(request.url())});
 
   // 1. Security headers and CSP are served and enforced (no CSP violations in the console).
   const head=await page.request.get(ORIGIN+'/');
@@ -122,11 +124,30 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
 
   // 9. Gallery: placeholders are labelled as in progress; concept boards load.
   await page.goto(ORIGIN+'/gallery/',{waitUntil:'load'});
+  assert.equal(galleryModuleRequests.length,0,'Gallery Vue module loaded before gallery interaction');
   assert.ok((await page.locator('button[data-preview] strong').allTextContents()).some(t=>t.includes('構思中')),'placeholder concepts not labelled');
   const boards=page.locator('.concept-board img');
   assert.equal(await boards.count(),3,'concept boards missing');
   for(let i=0;i<3;i++){await boards.nth(i).scrollIntoViewIfNeeded();assert.ok(await boards.nth(i).evaluate(img=>img.decode().then(()=>img.naturalWidth>0,()=>false)),'concept board '+i+' failed to load')}
-  console.log('✓ gallery labels placeholders and loads concept boards');
+  const firstTile=page.locator('[data-preview]').first();
+  await firstTile.focus();
+  await page.waitForFunction(()=>document.querySelector('#gallery-dialog')?.dataset.vueGalleryReady==='true');
+  assert.ok(galleryModuleRequests.length>0,'Gallery Vue module did not load after focus');
+  await firstTile.click();
+  const dialog=page.locator('#gallery-dialog');
+  await page.waitForFunction(()=>document.querySelector('#gallery-dialog')?.open===true);
+  assert.equal(await dialog.locator('.close').evaluate(button=>button===document.activeElement),true,'dialog did not move focus to its close control');
+  const fullImage=dialog.locator('.gallery-preview-image');
+  assert.ok(await fullImage.evaluate(img=>img.decode().then(()=>img.naturalWidth>0,()=>false)),'full-size Gallery image did not load');
+  const imageCount=Number((await dialog.locator('.dialog-count').textContent()).split('/')[1]?.trim());
+  await page.keyboard.press('ArrowRight');
+  assert.match(await dialog.locator('.dialog-count').textContent(),/^2 \/ /,'Gallery keyboard navigation did not advance');
+  const activeTitle=await dialog.locator('#gallery-dialog-title').textContent();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.querySelector('#gallery-dialog')?.open===false);
+  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.title),activeTitle,'dialog did not restore focus to the active tile');
+  assert.ok(imageCount>1,'first Gallery group has no next image to test');
+  console.log('✓ gallery keeps static tiles, lazy-loads the Vue dialog, loads full images and restores focus after keyboard navigation');
 
   // 10. Journal article and the game page run with the CSP enforced.
   await page.goto(ORIGIN+'/journal/cloudflare-workers/',{waitUntil:'load'});
