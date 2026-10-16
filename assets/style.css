@@ -214,6 +214,7 @@ button,a,input,select {outline-offset:4px}
 /* Reader: paper is an intentional semantic exception. */
 .readerwrap {width:min(840px,calc(100% - 40px));margin:auto;padding:24px 0 80px}
 .readerbar {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-panel);margin:14px 0}
+.reader-preferences {display:contents}
 .control-group {display:flex;align-items:center;gap:8px}
 .readerbar button {min-width:44px}
 .reader-buttons>span {font-size:12px;min-width:40px;text-align:center;color:var(--muted)}

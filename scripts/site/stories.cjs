@@ -31,7 +31,10 @@ module.exports=function renderStories(ctx){
    s.chapters.forEach((c,i)=>{
      const prev=s.chapters[i-1],next=s.chapters[i+1];
      const back=url('stories/'+s.slug+'/');
-     const controls=readerControls(s,c);
+     const readerEntry=ctx.vueAssets?.manifest?.['src/vue/site/reader-main.ts'];
+     if(!readerEntry?.isEntry)throw new Error('Vue reader entry is missing from the Vite manifest');
+     const readerEntryUrl=url('_vue/'+readerEntry.file);
+     const controls=readerControls(s,c).replace('data-vue-reader-preferences',`data-vue-reader-preferences data-vue-reader-entry="${e(readerEntryUrl)}"`);
      const minutes=readingMinutes(c.paragraphs);
      const chapterUrl=ext+url('stories/'+s.slug+'/chapters/'+c.id+'/');
      const attrs=`data-reader data-story="${e(s.slug)}" data-story-title="${e(s.title)}" data-story-url="${e(url('stories/'+s.slug+'/'))}" data-chapter-id="${e(c.id)}" data-chapter-title="${e(c.title)}" data-chapter-url="${e(url('stories/'+s.slug+'/chapters/'+c.id+'/'))}"`;

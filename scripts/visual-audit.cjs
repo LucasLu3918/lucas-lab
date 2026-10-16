@@ -94,6 +94,7 @@ async function audit(){
    await page.goto(origin+'/stories/dark-snow-white/chapters/00/',{waitUntil:'domcontentloaded'});
    const reader=page.locator('[data-reader]');
    await page.locator('[data-theme="night"]').click();
+   await page.waitForFunction(()=>document.querySelector('[data-vue-reader-preferences]')?.dataset.vueReaderMounted==='true');
    assert.ok(await reader.evaluate(el=>el.classList.contains('night')),'night mode not applied at '+width);
    await page.locator('[data-font="1"]').click();
    assert.equal(await page.locator('[data-size]').textContent(),'19px','font-size control failed at '+width);

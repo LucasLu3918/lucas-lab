@@ -12,6 +12,7 @@ export default defineConfig({
       input: {
         site: 'src/vue/site/main.ts',
         'site-lazy': 'src/vue/site/lazy.ts',
+        reader: 'src/vue/site/reader-main.ts',
         game: 'src/vue/game/main.ts',
       },
     },
