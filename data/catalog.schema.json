@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lucas Lab content catalog",
+  "description": "Build-time contract for the public static-site catalog.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stories", "games", "projects", "tools", "gallery", "journal", "music"],
+  "properties": {
+    "stories": { "type": "array", "items": { "$ref": "#/definitions/story" } },
+    "games": { "type": "array", "items": { "$ref": "#/definitions/game" } },
+    "projects": { "type": "array", "items": { "$ref": "#/definitions/project" } },
+    "tools": { "type": "array", "items": { "$ref": "#/definitions/tool" } },
+    "gallery": { "type": "array", "items": { "$ref": "#/definitions/gallery" } },
+    "journal": { "type": "array", "items": { "$ref": "#/definitions/journal" } },
+    "music": { "type": "array", "items": { "$ref": "#/definitions/music" } }
+  },
+  "definitions": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringList": { "type": "array", "items": { "type": "string" } },
+    "base": {
+      "type": "object",
+      "required": ["title", "description", "category", "symbol"],
+      "properties": {
+        "slug": { "$ref": "#/definitions/slug" },
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "description": { "$ref": "#/definitions/nonEmptyString" },
+        "category": { "$ref": "#/definitions/nonEmptyString" },
+        "symbol": { "$ref": "#/definitions/nonEmptyString" },
+        "palette": { "$ref": "#/definitions/nonEmptyString" }
+      }
+    },
+    "chapter": {
+      "type": "object",
+      "required": ["id", "title", "paragraphs"],
+      "properties": {
+        "id": { "$ref": "#/definitions/nonEmptyString" },
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "paragraphs": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "story": {
+      "allOf": [
+        { "$ref": "#/definitions/base" },
+        {
+          "type": "object",
+          "required": ["slug", "title", "description", "category", "status", "palette", "symbol", "cover", "coverSmall", "coverAlt"],
+          "properties": {
+            "status": { "enum": ["demo", "pending", "complete"] },
+            "subtitle": { "type": "string" },
+            "warnings": { "$ref": "#/definitions/stringList" },
+            "chapters": { "type": "array", "items": { "$ref": "#/definitions/chapter" } },
+            "manuscript": { "type": "string", "minLength": 1 },
+            "expectedChapters": { "type": "integer", "minimum": 0 },
+            "expectedUnits": { "type": "integer", "minimum": 0 },
+            "cover": { "$ref": "#/definitions/nonEmptyString" },
+            "coverSmall": { "$ref": "#/definitions/nonEmptyString" },
+            "coverAlt": { "$ref": "#/definitions/nonEmptyString" },
+            "coverTitle": { "type": "string" },
+            "coverSubtitle": { "type": "string" },
+            "coverSeries": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "game": {
+      "allOf": [
+        { "$ref": "#/definitions/base" },
+        {
+          "type": "object",
+          "required": ["slug", "title", "description", "category", "status", "palette", "symbol"],
+          "properties": {
+            "status": { "enum": ["playable", "concept"] },
+            "storySlug": { "$ref": "#/definitions/slug" },
+            "duration": { "type": "string" },
+            "warnings": { "$ref": "#/definitions/stringList" },
+            "highlights": { "$ref": "#/definitions/stringList" },
+            "cover": { "type": "string" },
+            "coverSmall": { "type": "string" },
+            "coverAlt": { "type": "string" },
+            "coverTitle": { "type": "string" },
+            "coverSubtitle": { "type": "string" },
+            "coverSeries": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "project": {
+      "allOf": [
+        { "$ref": "#/definitions/base" },
+        {
+          "type": "object",
+          "required": ["slug", "title", "description", "category", "status", "palette", "symbol", "highlights"],
+          "properties": {
+            "status": { "enum": ["live", "repo", "concept"] },
+            "highlights": { "$ref": "#/definitions/stringList" },
+            "href": { "type": "string" },
+            "hrefLabel": { "type": "string" },
+            "repo": { "type": "string" },
+            "shot": { "type": "string" },
+            "shotSmall": { "type": "string" },
+            "shotAlt": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "tool": {
+      "type": "object",
+      "required": ["title", "description", "category", "trait", "href", "symbol"],
+      "properties": {
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "description": { "$ref": "#/definitions/nonEmptyString" },
+        "category": { "$ref": "#/definitions/nonEmptyString" },
+        "trait": { "$ref": "#/definitions/nonEmptyString" },
+        "href": { "type": "string", "pattern": "^https://" },
+        "symbol": { "$ref": "#/definitions/nonEmptyString" }
+      }
+    },
+    "gallery": {
+      "type": "object",
+      "required": ["title", "description", "palette", "symbol", "scene"],
+      "properties": {
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "description": { "$ref": "#/definitions/nonEmptyString" },
+        "palette": { "$ref": "#/definitions/nonEmptyString" },
+        "symbol": { "$ref": "#/definitions/nonEmptyString" },
+        "scene": { "$ref": "#/definitions/nonEmptyString" }
+      }
+    },
+    "journal": {
+      "type": "object",
+      "required": ["slug", "date", "title", "description"],
+      "properties": {
+        "slug": { "$ref": "#/definitions/slug" },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "description": { "$ref": "#/definitions/nonEmptyString" },
+        "paragraphs": { "$ref": "#/definitions/stringList" },
+        "symbol": { "type": "string" },
+        "palette": { "type": "string" }
+      }
+    },
+    "timelineStep": {
+      "type": "object",
+      "required": ["title", "desc", "start", "end"],
+      "properties": {
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "desc": { "$ref": "#/definitions/nonEmptyString" },
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "music": {
+      "type": "object",
+      "required": ["slug", "title", "english", "edition", "style", "bpm", "key", "meter", "vocal", "instruments", "mood", "palette", "description", "highlights", "bestFor", "timeline", "duration", "audio", "lyrics"],
+      "properties": {
+        "slug": { "$ref": "#/definitions/slug" },
+        "title": { "$ref": "#/definitions/nonEmptyString" },
+        "english": { "$ref": "#/definitions/nonEmptyString" },
+        "edition": { "$ref": "#/definitions/nonEmptyString" },
+        "style": { "$ref": "#/definitions/nonEmptyString" },
+        "bpm": { "type": "number", "exclusiveMinimum": 0 },
+        "key": { "$ref": "#/definitions/nonEmptyString" },
+        "meter": { "$ref": "#/definitions/nonEmptyString" },
+        "vocal": { "$ref": "#/definitions/nonEmptyString" },
+        "instruments": { "$ref": "#/definitions/stringList" },
+        "mood": { "$ref": "#/definitions/stringList" },
+        "palette": { "$ref": "#/definitions/nonEmptyString" },
+        "description": { "$ref": "#/definitions/nonEmptyString" },
+        "highlights": { "$ref": "#/definitions/stringList" },
+        "bestFor": { "$ref": "#/definitions/nonEmptyString" },
+        "timeline": { "type": "array", "items": { "$ref": "#/definitions/timelineStep" } },
+        "duration": { "type": "integer", "minimum": 1 },
+        "audio": { "type": "string", "pattern": "^music/audio/[a-z0-9-]+\\.m4a$" },
+        "lyrics": { "type": "string", "minLength": 1 },
+        "peak": { "type": "integer", "minimum": 0 },
+        "energy": { "type": "array", "items": { "type": "number" }, "minItems": 20 }
+      }
+    }
+  }
+}

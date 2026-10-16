@@ -1,8 +1,12 @@
 'use strict';
 // Loads data/catalog.json, parses full manuscripts into chapters, and validates the catalog before any page is rendered.
 const fs=require('node:fs'),path=require('node:path');
+const Ajv=require('ajv');
 const {loadMarkdownChapters}=require('../story-source.cjs');
 const {hasIcon}=require('../components.cjs');
+const catalogSchema=require('../../data/catalog.schema.json');
+
+const validateSchema=new Ajv({allErrors:true,strict:true,strictRequired:false}).compile(catalogSchema);
 
 const ENUMS={story:['demo','pending','complete'],game:['playable','concept'],project:['live','repo','concept']};
 const REQUIRED={
@@ -17,6 +21,13 @@ const REQUIRED={
 
 function validateCatalog(catalog,root){
  const fail=msg=>{throw new Error('catalog: '+msg)};
+ if(!validateSchema(catalog)){
+  const details=validateSchema.errors.map(error=>{
+   const field=error.instancePath||'/'
+   return field+' '+error.message
+  }).join('; ');
+  fail('schema validation failed: '+details);
+ }
  for(const [group,fields] of Object.entries(REQUIRED)){
   if(!Array.isArray(catalog[group]))fail(group+' must be an array');
   const seen=new Set();
