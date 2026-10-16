@@ -131,6 +131,7 @@ node scripts/blood-mirror.browser.cjs
 ## 機關特寫圖與黃銅介面（2026-10-13）
 
 - 機關特寫（`assets/puzzles/<機關 id>.webp`，960×411，各 ≤ 44 KB，共 14 張約 500 KB；PNG 母檔不在版本控制內，見下方「母檔存放」）：musicbox、ledger、watch、masks、light、runeheart、pipes、names、rune、rubbing、memory、stitch、reflection、maze。檔名即 `puzzles/index.js` 各階段的 `id`；只在機關視窗開啟時載入，不計入首屏。
+- 玻璃心臟法陣（`runeheart`，2026-10-16）改為三層疊合：底盤 `assets/puzzles/runeheart/ring.webp`（640×640，42 KB，本機 Z-Image Turbo 文字生圖 seed 9601，風格參考原始示意圖）、七個符號圓章 `sym-01`–`sym-07.webp`（256×256，各約 5–10 KB，同一風格模板與 seed；「鏡」為 seed 9631）、指針 `hand.webp`（384×384，亮度轉透明，約 2.5 KB）。機關特寫 `assets/puzzles/runeheart.webp`（960×411，33 KB）取自底盤中段，縮圖 `thumbs/runeheart.webp` 為 224×128（6.7 KB）。圓章位置以紅寶石中心（51.9%，50.1%）為軸、半徑 34.5%，直徑為環寬的 18%。點亮版 `sym-01-lit.webp`–`sym-07-lit.webp`（各約 8–12 KB）由未點亮版色調轉換產生（暗琺瑯轉暖紅、符號轉金），點亮時以 opacity 淡入，不使用 filter。母檔存於 `draft/lucas-lab/blood-mirror/source-art/puzzles/runeheart-v2/`；舊的 9102 母檔仍在 `runeheart-dial-9102.png` 作為紀錄。底盤與圓章只在機關視窗開啟時載入，不計入首屏。這不是使用者驗收。
 - 產生方式：本機 ComfyUI，沿用 `source-art/manifest.json` 的 Z-Image Turbo 流程（9 步、`res_multistep`、1344×576，再以 `cwebp -q 78 -m 6 -resize 960 411` 轉檔）。每個機關出 2 張候選，目視挑選；提示詞限制為無文字、無人物。這不是使用者驗收。
 - 黃銅質感：樣式在 `challenges.css` 結尾（`#modal` 下的設計語彙，漸層與 `box-shadow`，不使用圖檔）；視窗外框在 `styles/stage.css` 結尾。
 - 線索視窗的場景特寫（`concept-art.js` 的 `zoomStyle`）：直接放大熱點座標附近的場景圖，沒有新增素材。
@@ -290,7 +291,7 @@ Seal and velvet are base64 data URIs inside `styles/stage.css` (about 9 KB) to s
   - 懷錶：三枚齒輪是 12 齒的精準輪廓（齒頂半徑 46、齒根 38，100 單位的框），填入 `materials.js` 的黃銅材質，光影層不隨齒輪轉；相鄰兩枚中心距 = 齒頂 + 齒根，且錯開半個齒距（15°），所以齒會落進對方的溝槽；每次轉 60° 剛好兩齒，不會漂移。紅寶石沿用 `wheel-ruby.webp`，固定在上方輪輻。底板 `watch-plate.webp`（420×420，約 12 KB，拉絲鍍金紋理，種子 6601）。原先整張生成的齒輪圖（`watch-gear.webp`）因齒形不均、無法咬合而移除。
   - 蒸汽管：`pipe-straight.webp`、`pipe-elbow.webp`、`pipe-source.webp`、`pipe-city.webp`（各 256×256，共約 20 KB）。每張都畫在轉 0 次的姿勢，開口落在格子邊緣的中點，轉 90° 仍然接得上；彎管開口朝上與朝右，直管左右，與 `pipePorts()` 一致。直管是用彎管自己的銅管切片拼成的，所以管徑與質感相同。
   - 迷廊：`mirror-glass.webp`、`mirror-floor.webp`（兩塊大理石輪流鋪）、`maze-token.webp`（金色倒影）、`maze-door.webp`、`maze-hourglass.webp`（鏡門）。倒影是一個獨立的圖，換格時滑過去。
-- 原本是 CSS 色塊的幾塊也換成圖：音樂盒音針 `pin.webp`、法陣符文石 `rune-stone.webp`、記憶卡背 `card-back.webp`（翻開後的面用 `ledger-sheet.webp` 當紙）、光路鏡片 `mirror-strip.webp`（轉 ±45° 當鏡面）。棺中的心跳、縫線、反寫手稿、拓印的格子用同一塊鍍金細紋底板（`--plate`）。
+- 原本是 CSS 色塊的幾塊也換成圖：音樂盒音針 `pin.webp`、記憶卡背 `card-back.webp`（翻開後的面用 `ledger-sheet.webp` 當紙）、光路鏡片 `mirror-strip.webp`（轉 ±45° 當鏡面）。棺中的心跳、縫線、反寫手稿、拓印的格子用同一塊鍍金細紋底板（`--plate`）。
 - 左右箭頭：第一版是一支 480×70 的金色長矛，第二版是銅幣上的完整箭，都因為有箭桿太顯眼；第三版是黑瑪瑙上的單 V 形，仍嫌太素；現在是黑色琺瑯小圓釦、金色串珠邊與刻出的雙 V 形箭頭（`assets/ui/arrow-medal.webp`，約 6 KB）。場景左右的視角鈕、按鈕尾端的 ⟶ ← →、迷廊方向鍵都用它（向左是水平翻轉，方向鍵用旋轉）。舊檔已移除。
 - 產生方式：本機 mflux Z-Image Turbo（9 步、`--quantize 8`），提示詞要求無文字。零件畫在平塗洋紅背景（紅色與黑色的零件畫在青綠背景），以 `key.cjs`／`key2.cjs` 去背；金屬上的洋紅反光用 `despill.cjs` 去掉。管子再用 `compose-pipes.cjs` 排進格子，帳頁用 `compose-ledger.cjs` 合成。PNG 母檔、落選候選（箭頭畫了六種，直到銅幣那一張）與全部腳本在 `draft/lucas-lab/blood-mirror/source-art/snow-parts/`，不進版本控制。
 - 操作順暢：
