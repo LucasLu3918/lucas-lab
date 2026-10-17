@@ -142,7 +142,7 @@ export interface Facing {
 }
 
 // 九運的山星與向星數值與順逆，依技能檔 calculation-rules 的九運坐向表：四正向（子山午向、午山子向、卯山酉向、酉山卯向），
-// 以及斜向的艮山坤向（2026-10-18 經使用者選定此來源；技能檔非古籍，依據見 docs/plan/FORTUNE_HUB_PLAN.md §3.10）。
+// 以及斜向的艮山坤向（預設為技能檔，非古籍；另有網路來源可選，見 CHART_SOURCES。依據見 docs/plan/FORTUNE_HUB_PLAN.md §3.10）。
 export const FACINGS: readonly Facing[] = [
   { id: 'south', label: '坐北朝南', sitting: '子山午向', toward: '南', mountain: { star: 1, forward: false }, facing: { star: 9, forward: true } },
   { id: 'north', label: '坐南朝北', sitting: '午山子向', toward: '北', mountain: { star: 9, forward: true }, facing: { star: 1, forward: false } },
@@ -197,6 +197,9 @@ export interface FlyingPalace {
 
 export interface FlyingChart {
   facing: Facing;
+  source: { id: ChartSourceId; label: string };
+  /** 來源說明，只有艮山坤向會顯示；其餘坐向為 null。 */
+  sourceNote: string | null;
   palaces: FlyingPalace[];
   steps: string[];
 }
@@ -207,15 +210,38 @@ function verdictFor(score: number): Fortune {
   return '中';
 }
 
-// 玄空飛星盤：運盤以九紫入中宮順飛；山星與向星依坐向表飛布。每宮列出三星與同宮組合。
-export function flyingStarChart(facingId: FacingId, period: number = RUNNING_PERIOD): FlyingChart {
+// 艮山坤向的數值來源。技能檔為預設，依 FACINGS 飛布；紫微研究苑〈艮山坤向 下元九運〉的圖表數值與技能檔不一致，
+// 且頁面未標示飛布方向，因此以頁面的九宮數值呈現，不重新排布。兩次擷取該頁的數值一致（見 §3.10）。
+export type ChartSourceId = 'skill' | 'web-108s';
+
+export const CHART_SOURCES: Record<ChartSourceId, { id: ChartSourceId; label: string }> = {
+  skill: { id: 'skill', label: '技能檔（預設）' },
+  'web-108s': { id: 'web-108s', label: '紫微研究苑〈艮山坤向 下元九運〉' },
+};
+
+// 網路來源的九宮數值（宮號 → 星）。山盤與向盤各為 1 至 9 的排列。
+const WEB_108S_GEN_KUN: { mountain: Record<number, number>; facing: Record<number, number> } = {
+  mountain: { 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1, 8: 9, 9: 8 },
+  facing: { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 1 },
+};
+
+// 各坐向可選的來源：只有艮山坤向有第二個來源。
+export function sourcesFor(facingId: FacingId): ChartSourceId[] {
+  return facingId === 'gen-kun' ? ['skill', 'web-108s'] : ['skill'];
+}
+
+// 玄空飛星盤：運盤以九紫入中宮順飛；山星與向星依坐向表飛布（技能檔），或取網路來源的九宮數值。
+// 每宮列出三星與同宮組合。
+export function flyingStarChart(facingId: FacingId, period: number = RUNNING_PERIOD, source: ChartSourceId = 'skill'): FlyingChart {
   if (period !== RUNNING_PERIOD) throw new Error('目前收錄的玄空飛星僅限九運（2024–2043）');
   const facing = FACINGS.find(item => item.id === facingId);
   if (!facing) throw new Error('請選擇坐向');
+  if (!sourcesFor(facingId).includes(source)) throw new Error('此坐向沒有這個來源的數值');
 
+  const fromWeb = source === 'web-108s';
   const run = flyStars(period, true);
-  const mountain = flyStars(facing.mountain.star, facing.mountain.forward);
-  const toward = flyStars(facing.facing.star, facing.facing.forward);
+  const mountain = fromWeb ? WEB_108S_GEN_KUN.mountain : flyStars(facing.mountain.star, facing.mountain.forward);
+  const toward = fromWeb ? WEB_108S_GEN_KUN.facing : flyStars(facing.facing.star, facing.facing.forward);
 
   const palaces: FlyingPalace[] = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(palace => {
     const stars = [run[palace], mountain[palace], toward[palace]];
@@ -232,13 +258,24 @@ export function flyingStarChart(facingId: FacingId, period: number = RUNNING_PER
     return { palace, run: run[palace], mountain: mountain[palace], facing: toward[palace], matches, score, verdict: verdictFor(score) };
   });
 
+  const sourceSteps = fromWeb
+    ? [`山盤與向盤：取自${CHART_SOURCES[source].label}的九宮數值；該頁未標示飛布方向，未重新排布`]
+    : [
+      `山星：${facing.sitting}，山星 ${facing.mountain.star} 入中宮，${facing.mountain.forward ? '順' : '逆'}飛`,
+      `向星：${facing.sitting}的向首，向星 ${facing.facing.star} 入中宮，${facing.facing.forward ? '順' : '逆'}飛`,
+    ];
   const steps = [
     `運盤：九紫入中宮，順飛（${FLIGHT_PATH.map(p => (p === 5 ? '中' : String(p))).join('→')}）`,
-    `山星：${facing.sitting}，山星 ${facing.mountain.star} 入中宮，${facing.mountain.forward ? '順' : '逆'}飛`,
-    `向星：${facing.sitting}的向首，向星 ${facing.facing.star} 入中宮，${facing.facing.forward ? '順' : '逆'}飛`,
+    ...sourceSteps,
     '每宮取運星、山星、向星三星，兩兩同宮時依組合表加減分；總分 1 以上為吉，−1 以下為凶，其餘為中',
   ];
-  return { facing, palaces, steps };
+  // 只有有第二個來源的坐向才標示來源說明；四正向目前只有技能檔，不另加註。
+  const sourceNote = facingId === 'gen-kun'
+    ? (fromWeb
+      ? '依紫微研究苑的圖表數值，與技能檔不一致；該頁未標示飛布方向，數值以頁面為準，未重新排布。'
+      : '依技能檔，與部分網路來源不一致')
+    : null;
+  return { facing, source: CHART_SOURCES[source], sourceNote, palaces, steps };
 }
 
 export interface FengshuiData {
@@ -249,9 +286,9 @@ export interface FengshuiData {
 
 export type FengshuiReport = MethodResult<FengshuiData>;
 
-export function buildFengshuiReport(input: { year: number; gender: Gender; lunarYear?: number; facing?: FacingId }): FengshuiReport {
+export function buildFengshuiReport(input: { year: number; gender: Gender; lunarYear?: number; facing?: FacingId; chartSource?: ChartSourceId }): FengshuiReport {
   const natal = natalKua(input.year, input.gender, input.lunarYear);
-  const flying = input.facing ? flyingStarChart(input.facing) : null;
+  const flying = input.facing ? flyingStarChart(input.facing, RUNNING_PERIOD, input.chartSource ?? 'skill') : null;
   return createMethodResult({
     module: 'fengshui',
     methodVersion: FENGSHUI_METHOD_VERSION,
