@@ -161,32 +161,43 @@ export function mountGears13(ctx){
  const motion=()=>!document.body.classList.contains('reduce-motion');
  let level=LEVELS.warm,board=emptyBoard(level),picked=null,layer=0,turns=0,running=null,ruler=false,result=null;
  let hints=null;
+ const useIsland=typeof ctx.mountPuzzleIsland==='function';
+ let islandUpdate=null,statusText='',statusTone='';
  let nodesEl=[],crankHandle=null,outMarker=null;
 
- ctx.render('<div class="belfry">'
-  +'<p class="challenge-help" id="bf-goal"></p><ol class="belfry-rules" id="bf-rules"></ol>'
-  +'<p id="bf-status" class="belfry-status" role="status"></p>'
-  +'<div class="belfry-board"><svg id="bf-svg" class="belfry-svg" role="group" aria-label="齒輪盤"></svg></div>'
-  +'<div class="belfry-row"><span id="bf-layers"></span><button id="bf-ruler" class="secondary-button" aria-pressed="false">顯示軸座距離</button><button id="bf-reset" class="secondary-button">重來</button></div>'
-  +'<div id="bf-tray" class="belfry-tray" role="group" aria-label="齒輪托盤"></div>'
-  +'<button id="bf-run" class="primary-button" hidden></button>'
-  +hintMarkup+'</div>');
- const $=id=>document.getElementById(id),svg=$('bf-svg');
- const alive=()=>svg.isConnected;
- const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
+ ctx.render(useIsland
+  ?'<div class="belfry"><div data-vue-gears13><p class="challenge-help" role="status">齒輪盤載入中…</p></div>'+hintMarkup+'</div>'
+  :'<div class="belfry" id="bf-host">'
+   +'<p class="challenge-help" id="bf-goal"></p><ol class="belfry-rules" id="bf-rules"></ol>'
+   +'<p id="bf-status" class="belfry-status" role="status"></p>'
+   +'<div class="belfry-board"><svg id="bf-svg" class="belfry-svg" role="group" aria-label="齒輪盤"></svg></div>'
+   +'<div class="belfry-row"><span id="bf-layers"></span><button id="bf-ruler" class="secondary-button" aria-pressed="false">顯示軸座距離</button><button id="bf-reset" class="secondary-button">重來</button></div>'
+   +'<div id="bf-tray" class="belfry-tray" role="group" aria-label="齒輪托盤"></div>'
+   +'<button id="bf-run" class="primary-button" hidden></button>'+hintMarkup+'</div>');
+ const $=id=>document.getElementById(id),svg=useIsland?null:$('bf-svg');
+ const host=useIsland?document.querySelector('[data-vue-gears13]'):$('bf-host');
+ const alive=()=>!!host?.isConnected;
+ const publish=()=>{if(useIsland&&typeof islandUpdate==='function')islandUpdate(snapshot());};
+ const say=(text,tone='')=>{
+  statusText=text;statusTone=tone;
+  if(useIsland)publish();
+  else{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;}
+ };
 
  function setLevel(next){
   level=next;board=emptyBoard(level);picked=null;layer=0;turns=0;running=null;ruler=false;
-  $('bf-goal').innerHTML=GOAL[level.key];
-  $('bf-rules').innerHTML=RULES[level.key].map(text=>'<li>'+text+'</li>').join('');
-  $('bf-layers').innerHTML=level.layers>1?LAYER_NAME.map((name,i)=>'<button class="secondary-button belfry-layer" data-layer="'+i+'" aria-pressed="'+(i===layer)+'">'+name+'</button>').join(''):'';
-  $('bf-ruler').setAttribute('aria-pressed','false');
-  svg.setAttribute('viewBox',level.view.join(' '));
-  document.querySelectorAll('[data-layer]').forEach(button=>button.onclick=()=>{
-   layer=Number(button.dataset.layer);
-   document.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.layer)===layer)));
-   drawTray();
-  });
+  if(!useIsland){
+   $('bf-goal').innerHTML=GOAL[level.key];
+   $('bf-rules').innerHTML=RULES[level.key].map(text=>'<li>'+text+'</li>').join('');
+   $('bf-layers').innerHTML=level.layers>1?LAYER_NAME.map((name,i)=>'<button class="secondary-button belfry-layer" data-layer="'+i+'" aria-pressed="'+(i===layer)+'">'+name+'</button>').join(''):'';
+   $('bf-ruler').setAttribute('aria-pressed','false');
+   svg.setAttribute('viewBox',level.view.join(' '));
+   document.querySelectorAll('[data-layer]').forEach(button=>button.onclick=()=>{
+    layer=Number(button.dataset.layer);
+    document.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.layer)===layer)));
+    drawTray();
+   });
+  }
   update();
  }
 
@@ -215,6 +226,7 @@ export function mountGears13(ctx){
 
  function drawBoard(){
   result=evaluate(level,board);
+  if(useIsland)return;
   const phase=phases(level,result);
   svg.textContent='';nodesEl=[];
   if(ruler){
@@ -268,6 +280,7 @@ export function mountGears13(ctx){
  };
  // Turns every gear to the crank's current angle.
  function pose(){
+  if(useIsland){publish();return;}
   for(const gear of nodesEl)gear.group.setAttribute('transform','translate('+gear.x+' '+gear.y+') rotate('+((gear.phase+turns*gear.speed*Math.PI*2)*180/Math.PI).toFixed(2)+')');
   const angle=turns*Math.PI*2-Math.PI/2;
   if(crankHandle){
@@ -285,6 +298,7 @@ export function mountGears13(ctx){
  }
 
  function drawTray(){
+  if(useIsland)return;
   const tray=$('bf-tray');tray.textContent='';
   const placed={},taken={};
   for(const socket of Object.keys(board))board[socket].forEach(teeth=>{if(teeth)placed[teeth]=(placed[teeth]||0)+1;});
@@ -327,9 +341,71 @@ export function mountGears13(ctx){
  const name=socket=>socket===CRANK_SOCKET?'曲柄':socket===level.out?'輸出軸':'軸座 '+socket.slice(1);
  const label=id=>{const [socket,l]=id.split('.');return name(socket)+(level.layers>1&&socket!==CRANK_SOCKET?' '+LAYER_NAME[l].slice(0,2):'');};
 
+ function snapshot(){
+  const phase=phases(level,result),placed={},taken={},ids=Object.keys(level.sockets),rulerLines=[];
+  for(const socket of ids)board[socket].forEach(teeth=>{if(teeth)placed[teeth]=(placed[teeth]||0)+1;});
+  if(ruler)for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+   const [x1,y1]=level.sockets[ids[i]],[x2,y2]=level.sockets[ids[j]],apart=distance(level,ids[i],ids[j]);
+   if(apart>32)continue;
+   rulerLines.push({id:ids[i]+'-'+ids[j],x1,y1,x2,y2,labelX:(x1+x2)/2,labelY:(y1+y2)/2-.6,distance:apart.toFixed(1).replace('.0','')});
+  }
+  const gears=result.nodes.map((node,i)=>{
+   const [x,y]=level.sockets[node.socket];
+   return {id:node.id,socket:node.socket,layer:node.layer,teeth:node.teeth,x,y,phase:phase[i],
+    speed:result.speed[i]?result.speed[i][0]/result.speed[i][1]:0,
+    bad:!!result.jam&&(result.jam.a===node.id||result.jam.b===node.id)};
+  });
+  const tray=level.tray.map((teeth,index)=>{
+   const used=(placed[teeth]||0)>(taken[teeth]||0);
+   if(used)taken[teeth]=(taken[teeth]||0)+1;
+   return {index,teeth,used,selected:picked===index};
+  });
+  const out=result.out,[ox,oy]=level.sockets[level.out];
+  const angle=out?turns*out[0]/out[1]*Math.PI*2-Math.PI/2:0;
+  return {
+   level:level.key,goalHtml:GOAL[level.key],rules:RULES[level.key],viewBox:level.view.join(' '),reach:level.reach,
+   layers:level.layers,selectedLayer:layer,selectedGear:picked,ruler,
+   sockets:ids.map(socket=>{const [x,y]=level.sockets[socket];return {id:socket,x,y,crank:socket===CRANK_SOCKET,
+    output:socket===level.out,empty:!board[socket].some(Boolean),ariaLabel:name(socket)+'，'+socketText(socket)};}),
+   gears,tray,rulerLines,crankAngle:turns*Math.PI*2-Math.PI/2,crankX:Math.cos(turns*Math.PI*2-Math.PI/2)*5,
+   crankY:Math.sin(turns*Math.PI*2-Math.PI/2)*5,
+   outputMarker:{visible:!!out,x:ox+(out?Math.cos(angle)*3.2:0),y:oy+(out?Math.sin(angle)*3.2:0)},
+   turns,counter:'曲柄 '+turns.toFixed(2)+' 圈'+(out?' · 輸出 '+Math.abs(turns*out[0]/out[1]).toFixed(2)+' 圈':''),
+   status:statusText,tone:statusTone,canRun:result.solved&&!running,running:!!running,
+   runLabel:level.key==='warm'?'轉動曲柄，看它們同速同向 ⟶':'轉動曲柄 13 圈 ⟶',
+  };
+ }
+
+ function act(action){
+  if(!action||typeof action!=='object')return null;
+  if(action.type==='select-gear'){
+   if(action.index!==null&&(!Number.isInteger(action.index)||action.index<0||action.index>=level.tray.length))return null;
+   picked=action.index;drawTray();
+   say(picked!==null?'已選 '+level.tray[picked]+' 齒。點一個軸座放上去'+(level.layers>1?'（'+LAYER_NAME[layer]+'）':'')+'。':'');
+  }else if(action.type==='select-layer'){
+   if(!Number.isInteger(action.layer)||action.layer<0||action.layer>=level.layers)return null;
+   layer=action.layer;drawTray();publish();
+  }else if(action.type==='socket'){
+   if(typeof action.id!=='string'||!Object.hasOwn(level.sockets,action.id)||action.id===CRANK_SOCKET)return null;
+   tap(action.id);
+  }else if(action.type==='toggle-ruler'){
+   ruler=!ruler;
+   if(!useIsland)$('bf-ruler').setAttribute('aria-pressed',String(ruler));
+   if(useIsland)publish();else drawBoard();
+  }else if(action.type==='reset'){
+   if(running)return null;
+   board=emptyBoard(level);picked=null;turns=0;update();say('齒輪盤已清空。');
+  }else if(action.type==='run'){
+   if(!result?.solved||running)return null;
+   run(level.key==='warm'?2:13);
+  }else return null;
+  return snapshot();
+ }
+
  function update(){
   drawBoard();drawTray();
   const [text,tone]=describe();say(text,tone);
+  if(useIsland){hints?.changed();return;}
   const run=$('bf-run');
   run.hidden=!result.solved||!!running;
   run.textContent=level.key==='warm'?'轉動曲柄，看它們同速同向 ⟶':'轉動曲柄 13 圈 ⟶';
@@ -339,7 +415,8 @@ export function mountGears13(ctx){
  // The crank runs a fixed number of turns, then the stage ends (the warm-up goes on to the real train).
  function run(need){
   if(running)return;
-  running={need};$('bf-run').hidden=true;ctx.playCue('door');
+  running={need};if(!useIsland)$('bf-run').hidden=true;ctx.playCue('door');
+  if(useIsland)publish();
   if(!motion()){turns=need;pose();finish();return;}
   // Time-based (puzzles/clock.js): the run takes the same time on any frame rate, and goes on in a background tab.
   const rate=need>3?1.4:.7;
@@ -358,13 +435,20 @@ export function mountGears13(ctx){
   }
   ctx.done();
  }
- $('bf-run').onclick=()=>run(level.key==='warm'?2:13);
-
- $('bf-reset').onclick=()=>{if(running)return;board=emptyBoard(level);picked=null;turns=0;update();say('齒輪盤已清空。');};
- $('bf-ruler').onclick=()=>{ruler=!ruler;$('bf-ruler').setAttribute('aria-pressed',String(ruler));drawBoard();};
+ if(!useIsland){
+  $('bf-run').onclick=()=>run(level.key==='warm'?2:13);
+  $('bf-reset').onclick=()=>{if(running)return;board=emptyBoard(level);picked=null;turns=0;update();say('齒輪盤已清空。');};
+  $('bf-ruler').onclick=()=>{ruler=!ruler;$('bf-ruler').setAttribute('aria-pressed',String(ruler));drawBoard();};
+ }
  hints=bindHints({hints:HINTS,currentStep:()=>hintStep(level,board),alive});
 
- const counter=document.createElement('span');counter.id='bf-counter';counter.className='belfry-note';
- $('bf-layers').parentElement.appendChild(counter);
+ if(!useIsland){
+  const counter=document.createElement('span');counter.id='bf-counter';counter.className='belfry-note';
+  $('bf-layers').parentElement.appendChild(counter);
+ }
  setLevel(LEVELS.warm);
+ if(useIsland)ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act,connect:update=>{
+  islandUpdate=typeof update==='function'?update:null;
+  if(islandUpdate)islandUpdate(snapshot());
+ }});
 }
