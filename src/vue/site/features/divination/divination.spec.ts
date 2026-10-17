@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as Astronomy from 'astronomy-engine';
-import { angleDifference, calculateAstrology, createAstrologyForecast, geoEclipticLongitude } from './astrology';
+import { angleDifference, brentMinimum, calculateAstrology, createAstrologyForecast, geoEclipticLongitude } from './astrology';
 import { calculateBazi, createBaziForecast } from './bazi';
 import { BIRTH_PLACES } from './locations';
 import { parseCivilDateTime, resolveCivilDateTime } from '../fortune-core/civil-time';
@@ -144,6 +144,55 @@ describe('local divination calculations', () => {
         const exactMs = start.getTime() + hour * 3_600_000;
         const matched = moonEvents.some(event => event.natal === natal.name && event.aspect === aspect.name && Math.abs(new Date(event.exactAt).getTime() - exactMs) < 2 * 86_400_000);
         expect(matched, `${natal.name} ${aspect.name} at ${new Date(exactMs).toISOString()}`).toBe(true);
+      }
+    }
+  });
+});
+
+describe('transit minimum search', () => {
+  // 以 60 輪黃金分割作為基準；Brent 方法的收斂容許值為 5 秒，兩者差距應遠小於顯示的分鐘。
+  const goldenReference = (valueAt: (ms: number) => number, left: number, right: number) => {
+    const ratio = (Math.sqrt(5) - 1) / 2;
+    let lower = right - ratio * (right - left);
+    let upper = left + ratio * (right - left);
+    let lowerValue = valueAt(lower);
+    let upperValue = valueAt(upper);
+    for (let pass = 0; pass < 60; pass++) {
+      if (lowerValue <= upperValue) {
+        right = upper; upper = lower; upperValue = lowerValue;
+        lower = right - ratio * (right - left); lowerValue = valueAt(lower);
+      } else {
+        left = lower; lower = upper; lowerValue = upperValue;
+        upper = left + ratio * (right - left); upperValue = valueAt(upper);
+      }
+    }
+    return (left + right) / 2;
+  };
+
+  it('finds the minimum of a smooth bowl and of a V-shaped orb within the tolerance', () => {
+    const origin = Date.UTC(2026, 9, 17);
+    const bowl = (ms: number) => (ms - origin - 9.5 * 3_600_000) ** 2;
+    const vee = (ms: number) => Math.abs(ms - origin - 17.25 * 3_600_000);
+    expect(Math.abs(brentMinimum(bowl, origin, origin + 24 * 3_600_000) - (origin + 9.5 * 3_600_000))).toBeLessThan(5_000);
+    expect(Math.abs(brentMinimum(vee, origin, origin + 24 * 3_600_000) - (origin + 17.25 * 3_600_000))).toBeLessThan(5_000);
+  });
+
+  it('agrees with a 60-pass golden-section search on real Moon and Mars orb curves', () => {
+    const start = Date.UTC(2026, 9, 17, 4);
+    const cases = [
+      { body: Astronomy.Body.Moon, natal: 40, angle: 120 },
+      { body: Astronomy.Body.Moon, natal: 201, angle: 90 },
+      { body: Astronomy.Body.Mars, natal: 310, angle: 0 },
+      { body: Astronomy.Body.Mars, natal: 95, angle: 180 },
+    ];
+    for (const item of cases) {
+      const orbAt = (ms: number) => Math.abs(angleDifference(geoEclipticLongitude(item.body, new Date(ms)), item.natal) - item.angle);
+      for (let index = 0; index < 60; index++) {
+        const left = start + index * 12 * 3_600_000 * 2;
+        const right = left + 24 * 3_600_000;
+        const brent = brentMinimum(orbAt, left, right);
+        const reference = goldenReference(orbAt, left, right);
+        expect(Math.abs(brent - reference)).toBeLessThan(15_000);
       }
     }
   });

@@ -439,3 +439,6 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
    in the visual-audit run). Reserved for desktop only, because the phone layout already measured 0. This value is estimated from the form's
    layout, not measured; confirm it against the next perf-budget run. */
 @media (min-width:681px) {[data-vue-site-island="meihua"] {min-height:800px}}
+/* Liuyao: the mounted form and privacy note are about 950 px tall at 1440 px (measured in Chromium), against a short static intro,
+   so the footer jumped by CLS 0.147 in the perf-budget run. Reserved for desktop only; the phone layout measured 0 and is unchanged. */
+@media (min-width:681px) {[data-vue-site-island="liuyao"] {min-height:950px}}

@@ -74,6 +74,15 @@
       "meta": "不需個資，起卦即可",
       "inputNeeds": "none",
       "iconSvg": "<path d=\"M6 8h8M18 8h8M6 16h20M6 24h8M18 24h8\" />"
+    },
+    {
+      "id": "liuyao",
+      "title": "六爻易經",
+      "href": "../liuyao/",
+      "description": "以銅錢或報數起卦，依京房納甲、世應與用神旺衰，整理當下的傳統易學視角。",
+      "meta": "不需個資，起卦即可",
+      "inputNeeds": "none",
+      "iconSvg": "<path d=\"M6 7h9M19 7h7M6 16h20M6 25h9M19 25h7\" />"
     }
   ]
 }
