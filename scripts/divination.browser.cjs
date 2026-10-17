@@ -100,6 +100,25 @@ async function run(){
   await page.screenshot({path:path.join(CAPTURES,'meihua-reading-390.png'),fullPage:true,animations:'disabled'});
   console.log('✓ Meihua casts by number, time and text, follows the topic selector and reports unknown characters');
 
+  await page.goto(ORIGIN+'/liuyao/',{waitUntil:'load'});
+  await page.locator('input[name="liuyao-method"][value="numbers"]').check();
+  await page.locator('input[type="text"]').first().fill('7 3');
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.locator('.hexagram-table').waitFor({timeout:15000});
+  assert.match(await page.locator('.summary-line').textContent(),/山火賁/,'Liuyao numbers 7 3 should cast 山火賁');
+  assert.match(await page.locator('.summary-line').textContent(),/變卦 離為火/,'Liuyao numbers 7 3 should change to 離為火');
+  assert.equal(await page.locator('.hexagram-table tbody tr').count(),6,'Liuyao table should show six lines');
+  await page.locator('select').first().selectOption('wealth');
+  assert.match(await page.locator('.summary-line').textContent(),/用神：妻財/,'Liuyao topic selector did not change the 用神');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Liuyao reading overflows the mobile viewport');
+  await page.locator('input[name="liuyao-method"][value="coins"]').check();
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.hexagram-table tbody tr').length===6&&document.querySelector('.steps li')?.textContent.includes('正'),null,{timeout:15000});
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.waitForFunction(()=>window.scrollY===0);
+  await page.screenshot({path:path.join(CAPTURES,'liuyao-reading-390.png'),fullPage:true,animations:'disabled'});
+  console.log('✓ Liuyao casts by numbers and coins, follows the topic selector and stays inside the mobile viewport');
+
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
 
