@@ -4,7 +4,7 @@
 export type DivinationInputNeeds = 'none' | 'birthdate' | 'birth-datetime-place';
 
 export interface DivinationModule {
-  id: 'tarot' | 'bazi' | 'astrology' | 'numerology';
+  id: 'tarot' | 'bazi' | 'astrology' | 'numerology' | 'horoscope';
   title: string;
   href: string;
   description: string;
@@ -49,5 +49,14 @@ export const DIVINATION_MODULES: readonly DivinationModule[] = [
     meta: '需要出生日期，可選填英文全名',
     inputNeeds: 'birthdate',
     iconSvg: '<path d="M16 6l2.6 6.4L25 13l-5 4.4 1.6 6.6L16 21l-5.6 3 1.6-6.6L7 13l6.4-.6z" />',
+  },
+  {
+    id: 'horoscope',
+    title: '星座運勢',
+    href: '../horoscope/',
+    description: '選擇太陽星座，查看今日的整體、感情、事業、財務與健康五個面向與幸運指引。',
+    meta: '不需個資，選擇星座即可',
+    inputNeeds: 'none',
+    iconSvg: '<path d="M16 4l3.4 7.6 8.2 1-6.1 5.6 1.7 8.2L16 22.3 8.8 26.4l1.7-8.2-6.1-5.6 8.2-1z" />',
   },
 ];
