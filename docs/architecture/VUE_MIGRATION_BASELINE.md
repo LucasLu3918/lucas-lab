@@ -264,4 +264,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：`gallery-align` 完成前 `gallery-merge` 仍不可進入；合併階段開場仍帶有月亮與提燈兩條既有連線，門只接受一側翻面後的 `A.door`／`D.door` 對位；排序仍由 `isChain` 接受 `B-A-D-C` 或反向 `C-D-A-B`。stage id、Hints／音效／完成與可選關卡進度、存檔格式、路由、CSP、runtime dependencies 及無 island callback 時的 DOM fallback 維持原樣。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E4 rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、錯誤／正確門位、順序／反向排序、錯誤排序、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；本切片 caller／consumer 依核准範圍人工追查，全域 Impact Graph coverage 仍 incomplete。
 
-下一步建議：評估 E5 `box-thread` 四格排序 Vue island，確認它沿用 E4 畫格與紅線規則的程度、stage／物品前置條件和重玩行為，再決定是否重用 Gallery Merge 的呈現邊界。
+## Phase 25 — Blood Mirror Box Thread Vue island
+
+`BoxThreadPuzzle.vue` 接手 E5 `box-thread` 的四張場景卡、已穿過順序與整條紅線撤回操作；沿用 Gallery Merge 的卡片／序列呈現與既有 `.box-*` 樣式。`puzzles/box.js` 保留 `prefixOk` 正序／反序判定、錯序回饋、音效、三層提示、完成與 legacy DOM renderer；Vue 只呈現經 `parseBoxThreadSnapshot` 驗證的 transient snapshot，並將 typed choose／undo actions 交回 legacy controller。
+
+不變條件：E4 `gallery` 完成前 `box-thread` 仍鎖定；答案仍接受 `B-A-D-C` 與反向 `C-D-A-B`，錯序仍清空整條線；重開階段仍從空序列開始。stage id、Hints／音效／完成與可選關卡進度、存檔格式、路由、CSP、runtime dependencies 與無 island callback 時的 DOM fallback 維持原樣。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E5 規則測試，以及 360px／1280px 瀏覽器中的 lazy mount、撤回、錯序、正序／反序、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；本切片 callers／consumers 依核准範圍人工核對，全域 Impact Graph coverage 仍 incomplete。
+
+下一步建議：評估 E5 `box-shards` 碎片面 Vue island，確認缺少部分碎片與完全沒有碎片時的空槽／略過行為，以及重玩時碎片收集狀態的呈現邊界。
