@@ -156,4 +156,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：35 格位置與樣式、方向語意、閉鎖門與懷錶條件、重設位置／步數但保留已開啟的鏡門、鍵盤操作與按鈕焦點、stage id、modal shell、Hints、進度和存檔行為維持原樣。Vue adapter 驗證 snapshot；不新增入口、公開路由、存檔格式、執行期相依、network 或 storage 存取。驗證包含 component 行為、bundle export contract、真實遊戲情境中的鍵盤移動／懷錶／重設／通關，以及既有 game checks。
 
-下一個遷移切片：盤點剩餘 Puzzle UI，選擇一個互動邊界獨立且規則可留在 legacy 的 puzzle，先以現有行為與鍵盤情境限定範圍，再逐項遷移。
+## Phase 9 — Blood Mirror Pipes Puzzle Vue island
+
+`PipesPuzzle.vue` 接手 3×3 蒸汽管網、管件旋轉控制、連線狀態、提示與復原／重設／確認按鈕，沿用既有 lazy game bundle。`pipes.js` 保留 `analyzePipes`／`pipeIsSolved` 規則、旋轉與 undo history、提示進度、音效及完成回呼；Vue 只顯示經驗證的 snapshot，並把 typed action 交回 legacy controller。若 island 無法掛載，原有 DOM renderer 仍可使用。
+
+不變條件：管件位置與旋轉方向、連通／漏氣判定、50 筆復原歷史、提示順序、方向鍵移格、只有明確確認才完成、stage id、modal shell、進度與存檔行為維持原樣。CSS rotation classes 避免新增 inline style；不新增入口、公開路由、存檔欄位、執行期相依或額外載入腳本。驗證包含快照解析、元件互動、既有 Pipes browser journey 的觸控／鍵盤／提示／復原／通關，以及 game bundle contract。
+
+下一個遷移切片：再次盤點尚未接手的 Puzzle UI，挑一個互動邊界獨立、規則可留在 legacy 的項目，確認其鍵盤與瀏覽器情境後逐項遷移。

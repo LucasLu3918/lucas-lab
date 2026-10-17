@@ -7,10 +7,11 @@ for(const width of [360,390,768,1280]){
  const context=await browser.newContext({viewport:{width,height:850},isMobile:width<600,hasTouch:width<600,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>localStorage.setItem('blood-mirror-v1',JSON.stringify({version:1,started:true,room:1,solved:[0],inventory:['watch','valve'],seen:['valve','minebook','blueprintwall','furnace','cart'],endings:[]})));
  await page.goto(origin+'/games/blood-mirror/play/');await page.locator('#continue').click();await page.locator('#room-puzzle').click();await page.locator('#seal-evidence').click();await page.locator('#restore-evidence').click();await page.locator('[data-stage-pick="pipes"]').click();
+ await page.locator('[data-vue-pipes-ready="true"]').waitFor();assert.equal(await page.locator('[data-vue-pipes-puzzle]').count(),1);
  assert.equal(await page.locator('.pipe-piece').count(),5);assert.equal(await page.locator('#pipes-confirm').isDisabled(),true);
  await page.locator('#modal').screenshot({path:out+'/pipes-'+width+'-after.png'});
  const first=page.locator('[data-pipe="0"]'),box=await first.boundingBox();assert.ok(box.width>=44&&box.height>=44);
- if(width<600)await first.tap();else await first.click();assert.ok((await page.locator('#pipes-status').innerText()).includes('1 / 5'));assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-pipe')),'0');
+ if(width<600)await first.tap();else await first.click();assert.ok((await page.locator('#pipes-status').innerText()).includes('1 / 5'));assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-pipe')),'0');assert.ok((await first.getAttribute('class')).includes('rotation-2'));
  const after=await first.boundingBox();assert.equal(after.width,box.width);assert.equal(after.height,box.height);
  await page.keyboard.press('ArrowRight');assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-pipe')),'1');await page.keyboard.press('Enter');
  await page.locator('#pipes-hint').click();assert.ok((await page.locator('#pipes-hint-text').innerText()).includes('左右相通'));
