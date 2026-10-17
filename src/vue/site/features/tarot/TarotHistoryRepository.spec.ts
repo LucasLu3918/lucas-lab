@@ -42,4 +42,16 @@ describe('local tarot history', () => {
     clearTarotHistory(storage);
     expect(readTarotHistory(storage)).toEqual([]);
   });
+
+  it('reads a five-card deep spread from local history without storing questions', () => {
+    const storage = memoryStorage();
+    const deep: TarotHistoryEntry = {
+      ...entry(3),
+      spread: 'deep-five',
+      cards: Array.from({ length: 5 }, (_, index) => ({ cardId: `card-${index}`, orientation: 'upright' })),
+    };
+    saveTarotHistory(deep, storage);
+    expect(readTarotHistory(storage)[0]).toEqual(deep);
+    expect(JSON.stringify(readTarotHistory(storage))).not.toContain('question');
+  });
 });

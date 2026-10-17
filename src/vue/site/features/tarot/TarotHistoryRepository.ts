@@ -21,7 +21,7 @@ function isEntry(value: unknown): value is TarotHistoryEntry {
   if (!value || typeof value !== 'object') return false;
   const entry = value as Partial<TarotHistoryEntry>;
   if (typeof entry.id !== 'string' || typeof entry.createdAt !== 'string') return false;
-  if (!['single', 'daily', 'past-present-future', 'situation-challenge-advice', 'choice'].includes(String(entry.spread))) return false;
+  if (!['single', 'daily', 'past-present-future', 'situation-challenge-advice', 'choice', 'deep-five'].includes(String(entry.spread))) return false;
   if (!Array.isArray(entry.cards)) return false;
   return entry.cards.length === tarotSpreadCount(entry.spread as TarotSpreadId)
     && entry.cards.every(card => card && typeof card.cardId === 'string'

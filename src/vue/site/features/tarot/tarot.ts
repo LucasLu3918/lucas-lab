@@ -1,5 +1,6 @@
 export type TarotOrientation = 'upright' | 'reversed';
-export type TarotSpreadId = 'single' | 'daily' | 'past-present-future' | 'situation-challenge-advice' | 'choice';
+export type TarotSpreadId = 'single' | 'daily' | 'past-present-future' | 'situation-challenge-advice' | 'choice' | 'deep-five';
+export type TarotFocus = 'general' | 'self' | 'relationship' | 'work' | 'choice';
 export type TarotSuitId = 'wands' | 'cups' | 'swords' | 'pentacles';
 
 export interface TarotCard {
@@ -171,6 +172,15 @@ export const TAROT_SPREADS: Array<{ id: TarotSpreadId; title: string; descriptio
   { id: 'past-present-future', title: '過去・現在・方向', description: '整理脈絡、此刻狀態與可以前往的方向。' },
   { id: 'situation-challenge-advice', title: '情境・挑戰・建議', description: '看見目前情境、主要阻力與可採取的行動。' },
   { id: 'choice', title: '選擇之路', description: '比較兩種方向及選擇時值得留意的事。' },
+  { id: 'deep-five', title: '五張深入探索', description: '從核心、內在、外在、資源到下一步，整理較完整的脈絡。' },
+];
+
+export const TAROT_FOCI: Array<{ id: TarotFocus; title: string; prompt: string }> = [
+  { id: 'general', title: '整體', prompt: '先觀察最想留意的牌，再用自己的經驗連結牌陣。' },
+  { id: 'self', title: '自我成長', prompt: '留意內在需求、可運用的力量，以及能照顧自己的下一步。' },
+  { id: 'relationship', title: '關係互動', prompt: '聚焦溝通、互惠與界線；牌面不能代替對方表達意願。' },
+  { id: 'work', title: '工作與創作', prompt: '留意資源、合作和可執行的步驟；重要決定仍以事實評估。' },
+  { id: 'choice', title: '選擇方向', prompt: '比較各選項的條件與代價，不把牌面當成替你決定的答案。' },
 ];
 
 export const TAROT_POSITIONS: Record<TarotSpreadId, string[]> = {
@@ -179,6 +189,7 @@ export const TAROT_POSITIONS: Record<TarotSpreadId, string[]> = {
   'past-present-future': ['過去的影響', '此刻的狀態', '可以前往的方向'],
   'situation-challenge-advice': ['目前情境', '主要挑戰', '可採取的行動'],
   choice: ['方向 A', '方向 B', '選擇時的提醒'],
+  'deep-five': ['核心主題', '內在影響', '外在情境', '可運用的資源', '下一步方向'],
 };
 
 export function tarotSpreadCount(spread: TarotSpreadId): number {

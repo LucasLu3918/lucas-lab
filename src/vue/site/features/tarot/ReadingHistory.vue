@@ -11,6 +11,7 @@ const spreadTitles: Record<TarotHistoryEntry['spread'], string> = {
   'past-present-future': '過去・現在・方向',
   'situation-challenge-advice': '情境・挑戰・建議',
   choice: '選擇之路',
+  'deep-five': '五張深入探索',
 };
 
 function formatDate(value: string): string {

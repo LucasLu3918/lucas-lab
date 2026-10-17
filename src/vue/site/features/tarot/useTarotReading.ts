@@ -15,6 +15,7 @@ export interface DrawnTarotCard {
 
 export function useTarotReading() {
   const spread = shallowRef<TarotSpreadId>('single');
+  const readingSpread = shallowRef<TarotSpreadId>('single');
   const allowReversed = shallowRef(true);
   const drawnCards = shallowRef<DrawnTarotCard[]>([]);
   const revealedIndexes = shallowRef<number[]>([]);
@@ -32,9 +33,10 @@ export function useTarotReading() {
   function startReading(): void {
     try {
       const count = tarotSpreadCount(spread.value);
+      readingSpread.value = spread.value;
       journalNote.value = '';
       currentEntryId.value = '';
-      if (spread.value === 'daily') {
+      if (readingSpread.value === 'daily') {
         const now = new Date();
         const localDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const existing = history.value.find(entry => entry.spread === 'daily' && entry.localDay === localDay);
@@ -51,8 +53,8 @@ export function useTarotReading() {
       }
       drawnCards.value = drawCards(count, allowReversed.value);
       revealedIndexes.value = [];
-      status.value = count === 1 ? '牌已展開，揭開卡牌閱讀當下指引。' : '三張牌已展開，依序揭牌看見故事脈絡。';
-      if (spread.value === 'daily') {
+      status.value = count === 1 ? '牌已展開，揭開卡牌閱讀當下指引。' : `${count} 張牌已展開，依序揭牌看見故事脈絡。`;
+      if (readingSpread.value === 'daily') {
         const now = new Date();
         const entry: TarotHistoryEntry = {
           id: `${Date.now()}-${drawnCards.value[0].card.id}`,
@@ -78,14 +80,14 @@ export function useTarotReading() {
     if (index < 0 || index >= drawnCards.value.length || revealedIndexes.value.includes(index)) return;
     revealedIndexes.value = [...revealedIndexes.value, index];
     if (revealedIndexes.value.length === drawnCards.value.length) {
-      if (spread.value === 'daily') {
+      if (readingSpread.value === 'daily') {
         status.value = '今日牌卡已揭開，紀錄只保存在這個瀏覽器。';
         return;
       }
       const entry: TarotHistoryEntry = {
         id: `${Date.now()}-${drawnCards.value.map(({ card }) => card.id).join('-')}`,
         createdAt: new Date().toISOString(),
-        spread: spread.value,
+        spread: readingSpread.value,
         cards: drawnCards.value.map(({ card, orientation }) => ({ cardId: card.id, orientation })),
       };
       try {
@@ -123,6 +125,7 @@ export function useTarotReading() {
 
   return {
     spread,
+    readingSpread,
     allowReversed,
     drawnCards,
     revealedIndexes,

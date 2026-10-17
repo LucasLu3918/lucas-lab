@@ -27,6 +27,7 @@ export interface BaziInput {
   birthDate: string;
   birthTime: string;
   timeZone: string;
+  timeUnknown?: boolean;
   disambiguation?: Disambiguation;
 }
 
@@ -46,6 +47,7 @@ export interface BaziChart {
   methodVersion: string;
   methodSummary: string;
   birthInstant: string;
+  timeUnknown: boolean;
 }
 
 function elementRelation(dayStem: string, otherStem: string): string {
@@ -76,7 +78,8 @@ function makeLocalLunar(parts: { year: number; month: number; day: number; hour:
 }
 
 export function calculateBazi(input: BaziInput): BaziChart {
-  const birthCivil = parseCivilDateTime(input.birthDate, input.birthTime);
+  const timeUnknown = Boolean(input.timeUnknown);
+  const birthCivil = parseCivilDateTime(input.birthDate, timeUnknown ? '12:00' : input.birthTime);
   const instant = resolveCivilDateTime(birthCivil, input.timeZone, input.disambiguation);
   const solarTermTime = civilPartsAt(instant, CHINA_TIME_ZONE);
   const termChart = makeLocalLunar(solarTermTime);
@@ -86,7 +89,7 @@ export function calculateBazi(input: BaziInput): BaziChart {
     { label: '年柱', value: termChart.getYear(), stem: termChart.getYearGan(), branch: termChart.getYearZhi(), element: termChart.getYearWuXing(), hidden: termChart.getYearHideGan() },
     { label: '月柱', value: termChart.getMonth(), stem: termChart.getMonthGan(), branch: termChart.getMonthZhi(), element: termChart.getMonthWuXing(), hidden: termChart.getMonthHideGan() },
     { label: '日柱', value: civilChart.getDay(), stem: dayMaster, branch: civilChart.getDayZhi(), element: civilChart.getDayWuXing(), hidden: civilChart.getDayHideGan() },
-    { label: '時柱', value: civilChart.getTime(), stem: civilChart.getTimeGan(), branch: civilChart.getTimeZhi(), element: civilChart.getTimeWuXing(), hidden: civilChart.getTimeHideGan() },
+    ...(!timeUnknown ? [{ label: '時柱', value: civilChart.getTime(), stem: civilChart.getTimeGan(), branch: civilChart.getTimeZhi(), element: civilChart.getTimeWuXing(), hidden: civilChart.getTimeHideGan() }] : []),
   ];
   const pillars: BaziPillar[] = rows.map(row => ({
     label: row.label,
@@ -101,8 +104,9 @@ export function calculateBazi(input: BaziInput): BaziChart {
     dayMaster,
     elementCounts: countElements(rows),
     methodVersion: BAZI_METHOD_VERSION,
-    methodSummary: '年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間，日柱與時柱依出生地民用日期時間。晚子時日柱按當天，00:00 換日；不校正真太陽時。',
+    methodSummary: `年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間，日柱${timeUnknown ? '依出生地民用日期；出生時間未知，僅排三柱' : '與時柱依出生地民用日期時間'}。晚子時日柱按當天，00:00 換日；不校正真太陽時。`,
     birthInstant: instant.toISOString(),
+    timeUnknown,
   };
 }
 

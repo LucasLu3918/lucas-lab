@@ -6,11 +6,11 @@
       <p>三種古老象徵系統，陪你整理眼前的問題。所有計算都在你的瀏覽器完成。</p>
     </header>
     <section class="doors" aria-label="選擇占卜方式">
-      <a class="door" href="../tarot/"><span aria-hidden="true">☾</span><div><p class="eyebrow">TAROT</p><h2>暗黑童話塔羅</h2><p>單張指引、每日一抽與多種牌陣。翻開 78 張牌的正逆位牌義。</p></div><strong>走進占卜室 →</strong></a>
-      <a class="door" href="../bazi/"><span aria-hidden="true">四柱</span><div><p class="eyebrow">BA ZI</p><h2>生辰八字</h2><p>以出生地民用時間排四柱、十神與五行，查看固定規則的日月年提示。</p></div><strong>排一張命盤 →</strong></a>
-      <a class="door" href="../astrology/"><span aria-hidden="true">✧</span><div><p class="eyebrow">ASTROLOGY</p><h2>西洋占星</h2><p>查看十顆行星、整宮制本命宮位、主要相位與固定取樣行運提示。</p></div><strong>繪製本命盤 →</strong></a>
+      <a class="door" href="../tarot/"><span aria-hidden="true">☾</span><div><p class="eyebrow">TAROT</p><h2>暗黑童話塔羅</h2><p>隨機快抽、每日一抽或三／五張深入牌陣；問題與主題皆可略過。</p></div><strong>不需個資，立即抽牌 →</strong></a>
+      <a class="door" href="../bazi/"><span aria-hidden="true">四柱</span><div><p class="eyebrow">BA ZI</p><h2>生辰八字</h2><p>簡易模式不需出生時間，排三柱；提供可靠出生時間可查看四柱、十神與五行。</p></div><strong>選擇資料完整度 →</strong></a>
+      <a class="door" href="../astrology/"><span aria-hidden="true">✧</span><div><p class="eyebrow">ASTROLOGY</p><h2>西洋占星</h2><p>出生時間不詳可先查看近似行星落座；補上精確時間和地點才計算上升、天頂與宮位。</p></div><strong>選擇資料完整度 →</strong></a>
     </section>
-    <aside class="divination-note"><strong>閱讀前的小提醒</strong><p>內容依傳統象徵系統與固定規則整理，供娛樂和自我反思，不保證事件，也不取代醫療、法律或財務專業建議。出生資料只在本機記憶體中計算，不會儲存或上傳。</p></aside>
+    <aside class="divination-note"><strong>閱讀前的小提醒</strong><p>內容依固定規則和傳統象徵整理，供娛樂與自我反思，不保證事件，也不取代醫療、法律或財務專業建議。出生資料只在本機記憶體中計算，不會儲存或上傳；塔羅閱讀歷史若啟用，只保存在此瀏覽器。</p></aside>
   </div>
 </template>
 

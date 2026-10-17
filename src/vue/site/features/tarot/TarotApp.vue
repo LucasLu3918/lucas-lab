@@ -6,20 +6,30 @@ import ReadingResult from './ReadingResult.vue';
 import SpreadPicker from './SpreadPicker.vue';
 import TarotCardLibrary from './TarotCardLibrary.vue';
 import { useTarotReading } from './useTarotReading';
-import { TAROT_CARD_BY_ID, TAROT_POSITIONS } from './tarot';
+import { TAROT_CARD_BY_ID, TAROT_FOCI, TAROT_POSITIONS, type TarotFocus } from './tarot';
 
 const {
-  spread, allowReversed, drawnCards, revealedIndexes, history, status,
+  spread, readingSpread, allowReversed, drawnCards, revealedIndexes, history, status,
   readingComplete, journalNote, startReading, revealCard, saveJournalNote, clearHistory,
 } = useTarotReading();
 const shareText = computed(() => {
   const cards = drawnCards.value.map(({ card, orientation }, index) => {
-    const position = TAROT_POSITIONS[spread.value][index];
+    const position = TAROT_POSITIONS[readingSpread.value][index];
     return `${position}｜${card.name}（${orientation === 'upright' ? '正位' : '逆位'}）\n${card.meanings[orientation]}`;
   });
   return `LUCAS LAB 暗黑童話塔羅\n${cards.join('\n\n')}\n\n牌卡提供象徵性的自我反思，不代表必然結果。`;
 });
 const shareStatus = shallowRef('');
+const focus = shallowRef<TarotFocus>('general');
+const question = shallowRef('');
+const readingFocus = shallowRef<TarotFocus>('general');
+const readingQuestion = shallowRef('');
+
+function beginReading(): void {
+  readingFocus.value = focus.value;
+  readingQuestion.value = question.value.trim();
+  startReading();
+}
 
 async function shareReading(): Promise<void> {
   shareStatus.value = '';
@@ -49,10 +59,16 @@ async function shareReading(): Promise<void> {
     </header>
 
     <section class="tarot-workbench" aria-label="塔羅抽牌工具">
-      <SpreadPicker :spread="spread" :allow-reversed="allowReversed" @select-spread="spread = $event" @toggle-reversed="allowReversed = $event" @draw="startReading" />
+      <section class="question-panel" aria-labelledby="question-title">
+        <div><p class="eyebrow">OPTIONAL CONTEXT</p><h2 id="question-title">設定本次閱讀焦點</h2><p>可以只選主題，也可以寫下問題；不需要提供姓名或他人資料。</p></div>
+        <label>閱讀主題<select v-model="focus"><option v-for="item in TAROT_FOCI" :key="item.id" :value="item.id">{{ item.title }}</option></select></label>
+        <label>想整理的問題（選填，最多 160 字）<textarea v-model="question" maxlength="160" rows="3" placeholder="例如：我可以怎麼為這個計畫踏出下一步？"></textarea></label>
+        <small>問題只暫存在目前頁面，不會保存到閱讀紀錄或分享文字。避免輸入醫療、法律、財務等需要專業判斷的敏感資料。</small>
+      </section>
+      <SpreadPicker :spread="spread" :allow-reversed="allowReversed" @select-spread="spread = $event" @toggle-reversed="allowReversed = $event" @draw="beginReading" />
       <p class="tarot-status" role="status" aria-live="polite">{{ status }}</p>
-      <CardTable :cards="drawnCards" :spread="spread" :revealed-indexes="revealedIndexes" @reveal="revealCard" />
-      <ReadingResult :cards="drawnCards" :spread="spread" :revealed-indexes="revealedIndexes" />
+      <CardTable :cards="drawnCards" :spread="readingSpread" :revealed-indexes="revealedIndexes" @reveal="revealCard" />
+      <ReadingResult :cards="drawnCards" :spread="readingSpread" :revealed-indexes="revealedIndexes" :focus="readingFocus" :question="readingQuestion" />
 
       <section v-if="readingComplete" class="journal-panel" aria-labelledby="journal-title">
         <div><p class="eyebrow">PRIVATE REFLECTION</p><h2 id="journal-title">留下自己的觀察</h2></div>
@@ -93,6 +109,16 @@ async function shareReading(): Promise<void> {
 .tarot-hero__stars { margin-top:21px; color:#cfb271; letter-spacing:.6em; }
 .tarot-workbench { display:grid; gap:20px; }
 .tarot-status { min-height:1.5em; margin:0; color:#c7b98f; text-align:center; }
+.question-panel { display:grid; grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr); gap:14px 20px; padding:21px; border:1px solid #64707a55; border-radius:16px; background:#111922; }
+.question-panel>div { grid-row:span 2; }
+.question-panel h2 { margin:.25em 0 6px; color:#ead9b5; font-size:1.25rem; }
+.question-panel p:not(.eyebrow) { margin:0; color:#b8b5aa; font-size:.86rem; line-height:1.6; }
+.question-panel label { display:grid; gap:7px; color:#d4c69f; font-size:.86rem; }
+.question-panel select,.question-panel textarea { width:100%; padding:10px 12px; border:1px solid #53606a; border-radius:10px; color:#e2ddcf; background:#0a1016; font:inherit; }
+.question-panel select { min-height:44px; }
+.question-panel textarea { resize:vertical; line-height:1.6; }
+.question-panel select:focus-visible,.question-panel textarea:focus-visible { outline:3px solid #f0d59a; outline-offset:2px; }
+.question-panel>small { grid-column:2; color:#a6a69f; line-height:1.6; }
 .share-panel { display:grid; justify-items:start; gap:12px; padding:21px; border:1px solid #8b794c42; border-radius:16px; background:#111922; }
 .share-button { min-height:46px; padding:0 18px; border:1px solid #bda66e; border-radius:999px; color:#f0e5cd; background:#2a302d; cursor:pointer; }
 .share-button:hover { border-color:#f0d69b; background:#343a35; }
@@ -112,4 +138,5 @@ async function shareReading(): Promise<void> {
 .tarot-footnote h2 { margin:0 0 8px; color:#d9c491; font-size:1rem; }
 .tarot-footnote p { margin:8px 0 0; line-height:1.75; }
 @media (max-width:480px) { .tarot-app { width:min(100% - 22px,1020px); } .tarot-hero { min-height:285px; } }
+@media (max-width:620px) { .question-panel { grid-template-columns:1fr; } .question-panel>div { grid-row:auto; } .question-panel>small { grid-column:1; } }
 </style>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawCards, TAROT_DECK } from './tarot';
+import { drawCards, TAROT_DECK, TAROT_POSITIONS, tarotSpreadCount } from './tarot';
 
 describe('tarot deck and drawing', () => {
   it('contains the 22 major and 56 minor cards in one unique 78-card deck', () => {
@@ -23,5 +23,13 @@ describe('tarot deck and drawing', () => {
 
     expect(() => drawCards(0, false, random)).toThrow(RangeError);
     expect(() => drawCards(79, false, random)).toThrow(RangeError);
+  });
+
+  it('offers quick, daily, and five-card deep paths with matching positions', () => {
+    expect(tarotSpreadCount('single')).toBe(1);
+    expect(tarotSpreadCount('daily')).toBe(1);
+    expect(tarotSpreadCount('deep-five')).toBe(5);
+    expect(TAROT_POSITIONS['deep-five']).toEqual(['核心主題', '內在影響', '外在情境', '可運用的資源', '下一步方向']);
+    expect(drawCards(tarotSpreadCount('deep-five'), true, () => 0)).toHaveLength(5);
   });
 });
