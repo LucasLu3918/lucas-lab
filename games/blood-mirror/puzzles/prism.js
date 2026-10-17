@@ -340,6 +340,44 @@ function mountPrism(stageId,ctx){
   }});
   return;
  }
+ if(stageId==='prism-ballroom'&&ctx.mountPuzzleIsland){
+  ctx.render('<div class="belfry prism">'
+   +'<p class="challenge-help"><b>'+stage.title+'。</b>'+stage.goal+'</p>'
+   +LEGEND.replace('</ol>',RULES[stageId]+'</ol>')
+   +'<div data-vue-prism-ballroom><p class="challenge-feedback" role="status">舞廳光路載入中…</p></div>'
+   +hintMarkup+'</div>');
+  const islandRoot=document.querySelector('[data-vue-prism-ballroom]');
+  const alive=()=>!!islandRoot?.isConnected;
+  const tiers=new Proxy({},{get:()=>[1,2,3].map(tier=>hint(L,S,sol,tier))});
+  const hints=bindHints({hints:tiers,currentStep:()=>finished?null:hintStep(L,S,sol),alive});
+  const snapshot=()=>{
+   const result=trace(L,S),received=result.crystalIn[0]||0;
+   return {
+    mirrors:L.mirrors.map((mirror,index)=>({index,x:mirror.x,y:mirror.y,orientation:S.m[index]})),
+    beamSegments:result.beams.flatMap(beam=>beam.segs.map(segment=>({mask:segment.mask,points:segment.pts.map(([x,y])=>({x,y}))}))),
+    emitters:L.emitters.map(emitter=>({x:emitter.x,color:COLORS[emitter.c]})),
+    filter:{x:L.filters[0].x,y:L.filters[0].y,color:L.filters[0].c},
+    crystal:{x:L.crystals[0].x,y:L.crystals[0].y,direction:'down',received,emitted:bits(received)>=2?received:0},
+    dancers:L.blockers.map((blocker,index)=>({index,a:{x:blocker.a[0],y:blocker.a[1]},b:{x:blocker.b[0],y:blocker.b[1]},position:S.k[index]})),
+    targets:L.targets.map((target,index)=>({index,x:target.x,y:target.y,need:target.need,got:result.got[index]})),
+    status:finished?DONE[stageId]:'已亮起 '+litCount(L,S)+' / '+L.targets.length+' 個面具。'+(litCount(L,S)?'':'還沒有面具亮起。'),
+    solved:finished,
+   };
+  };
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action=>{
+   if(finished||!action||!Number.isInteger(action.index))return null;
+   if(action.type==='flip'&&action.index>=0&&action.index<L.mirrors.length)S.m[action.index]=S.m[action.index]==='/'?'\\':'/';
+   else if(action.type==='move-dancer'&&action.index>=0&&action.index<L.blockers.length)S.k[action.index]^=1;
+   else return null;
+   ctx.playCue('click');
+   if(solved(L,S)){
+    finished=true;hints.changed();ctx.playCue(last?'choir':'door');
+    setTimeout(()=>{if(alive())ctx.done();},document.body.classList.contains('reduce-motion')?0:last?1600:800);
+   }else hints.changed();
+   return snapshot();
+  }});
+  return;
+ }
  ctx.render('<div class="belfry prism">'
   +'<p class="challenge-help"><b>'+stage.title+'。</b>'+stage.goal+'</p>'
   +LEGEND.replace('</ol>',RULES[stageId]+'</ol>')
