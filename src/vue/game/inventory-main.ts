@@ -12,9 +12,11 @@ import WatchPuzzle from './WatchPuzzle.vue';
 import Gears13Puzzle from './Gears13Puzzle.vue';
 import PendulumPuzzle from './PendulumPuzzle.vue';
 import PrismRaysPuzzle from './PrismRaysPuzzle.vue';
+import PrismBlendPuzzle from './PrismBlendPuzzle.vue';
 import StarwheelPuzzle from './StarwheelPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
+import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
 import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } from './starwheel';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
@@ -315,6 +317,36 @@ export function mountPrismRaysPuzzleIsland(
   }));
   app.mount(root);
   root.setAttribute('data-vue-prism-rays-ready', 'true');
+  return () => app.unmount();
+}
+
+type PrismBlendPuzzleProps = InstanceType<typeof PrismBlendPuzzle>['$props'];
+
+export function mountPrismBlendPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: PrismBlendAction) => PrismBlendSnapshot | null,
+): (() => void) | null {
+  const snapshot = parsePrismBlendSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const dispatch = (action: PrismBlendAction) => {
+    const next = parsePrismBlendSnapshot(onAction(action));
+    if (next) current.value = next;
+    return next;
+  };
+  const app = createApp(defineComponent({
+    name: 'PrismBlendPuzzleIsland',
+    setup() {
+      return () => h(PrismBlendPuzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies PrismBlendPuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-prism-blend-ready', 'true');
   return () => app.unmount();
 }
 

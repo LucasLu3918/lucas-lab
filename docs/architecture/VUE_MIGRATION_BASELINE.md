@@ -215,3 +215,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：白光經紅色濾鏡後只留下紅光、單一目標須精確收到紅光、解法仍由原 puzzle engine 判定、stage id `prism-rays`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 reset、route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、鍵盤翻鏡、通關與 legacy fallback；全域 Impact Graph 仍不完整，本切片消費者僅依手動追查。
 
 下一步建議：評估 `prism-blend` 合光水晶 Vue island 的 snapshot 邊界，特別確認水晶收光／再發射是否能由單一靜態場景加上既有 beam trace 呈現。
+
+## Phase 18 — Blood Mirror Prism Blend Vue island
+
+`PrismBlendPuzzle.vue` 接手 `prism-blend` 的 7×5 光路盤、紅／綠兩個 emitter、合光水晶、黃色面具、四面鏡與光束呈現，沿用既有 lazy game bundle、stage id、modal、稜鏡素材與 CSS。單一 snapshot 同時呈現水晶收到的色彩、是否合光，以及 legacy `trace` 產生的所有 beam segments；水晶不在 Vue 內自行模擬或推進。`prism.js` 保留 `trace`／`solved`／`litCount` 規則、鏡面狀態、提示、音效、完成判定、進度 callback 與 legacy renderer，Vue 只呈現 parser 驗證的 transient snapshot，並將鏡面 flip typed action 交回 legacy controller。
+
+不變條件：紅光與綠光須同時進入水晶才會合成黃色光、唯一目標仍須精確收到黃光、stage id `prism-blend`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、兩色收光與再發射、鏡面解謎、進度連續性、fallback 與水平溢位；全域 Impact Graph 仍不完整，本切片消費者依手動追查。
+
+下一步建議：評估 `prism-ballroom` 舞廳階段的 Vue island 邊界，先確認多目標、合光水晶與可移動舞者 blocker 能否以同一份靜態場景與 legacy beam trace snapshot 呈現。

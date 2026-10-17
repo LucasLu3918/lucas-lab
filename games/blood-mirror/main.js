@@ -166,6 +166,15 @@ function mountPrismRaysPuzzleIsland(puzzle){
   if(!gameModalIslandUnmount)root.textContent='濾鏡光路內容無法載入，請重新整理頁面。';
  }).catch(error=>{console.error('Prism Rays Vue island failed to load.',error);if(root.isConnected)root.textContent='濾鏡光路載入失敗，請重新整理頁面。';});
 }
+function mountPrismBlendPuzzleIsland(puzzle){
+ const root=$('[data-vue-prism-blend]');
+ if(!root)return;
+ loadGameIslands().then(module=>{
+  if(!root.isConnected||!$('#modal').open||!root.closest('.challenge[data-step="prism-blend"]'))return;
+  gameModalIslandUnmount=module.mountPrismBlendPuzzleIsland(root,puzzle.snapshot,puzzle.onAction);
+  if(!gameModalIslandUnmount)root.textContent='合光水晶內容無法載入，請重新整理頁面。';
+ }).catch(error=>{console.error('Prism Blend Vue island failed to load.',error);if(root.isConnected)root.textContent='合光水晶載入失敗，請重新整理頁面。';});
+}
 function mountWatchPuzzleIsland(puzzle){
  const root=$('[data-vue-watch-puzzle]');
  if(!root)return;
@@ -434,7 +443,7 @@ function stageHintMarkup(step){const r=rooms[state.room];return stageHintHtml({l
 function bindStageHints(step){const panel=$('#modal .stage-hints');if(!panel)return;panel.ontoggle=()=>{hintPanelOpen=panel.open;};panel.querySelector('[data-stage-hint]').onclick=()=>{raiseHint(state.room,step,hintLevel(state.room,step)+1);hintPanelOpen=true;panel.outerHTML=stageHintMarkup(step);bindStageHints(step);$('#modal [data-stage-hint]')?.focus({preventScroll:true});};}
 // A known bottleneck (stage.whisper): after three quiet minutes on it, the mirror lights the first hint itself.
 function stageWhisper(step){clearTimeout(stageWhisperTimer);const r=rooms[state.room],stage=challengeRegistry[r.id]?.stages.find(s=>s.id===step);if(!stage?.whisper)return;const room=state.room;stageWhisperTimer=setTimeout(()=>{if(state.room!==room||isStageComplete(r.id,step)||!$('#modal [data-challenge="'+r.id+'"][data-step="'+step+'"]'))return;if(hintLevel(room,step)<1)raiseHint(room,step,1);hintPanelOpen=true;const panel=$('#modal .stage-hints');if(panel){panel.outerHTML=stageHintMarkup(step);bindStageHints(step);}log('whisper',{step});toast('魔鏡低語：「妳在這裡停了很久。」第一道燭光提示已經亮起。');},180000);}
-function challengeOptions(){mixer.setFocus(true);return {modal,playCue,has:item=>state.inventory.includes(item)||(state.shards||[]).includes(item),onStage:step=>{markProgress();log('stage-start',{step});stageWhisper(step);},onStageDone:step=>{log('stage-done',{step});},mountPuzzleIsland:(step,snapshot)=>{if(step==='reflection')mountReflectionPuzzleIsland(snapshot);if(step==='maze')mountMazePuzzleIsland(snapshot);if(step==='pipes')mountPipesPuzzleIsland(snapshot.snapshot,snapshot.onAction);if(step==='ledger')mountLedgerPuzzleIsland(snapshot);if(step==='masks')mountMasksPuzzleIsland(snapshot);if(step==='light')mountLightPuzzleIsland(snapshot);if(step==='prism-rays')mountPrismRaysPuzzleIsland(snapshot);if(step==='watch')mountWatchPuzzleIsland(snapshot);if(step==='belfry-gears')mountGears13PuzzleIsland(snapshot);if(step==='belfry-pendulum')mountPendulumPuzzleIsland(snapshot);if(step==='belfry-wheel')mountStarwheelPuzzleIsland(snapshot);},extra:{html:stageHintMarkup,bind:bindStageHints}};}
+function challengeOptions(){mixer.setFocus(true);return {modal,playCue,has:item=>state.inventory.includes(item)||(state.shards||[]).includes(item),onStage:step=>{markProgress();log('stage-start',{step});stageWhisper(step);},onStageDone:step=>{log('stage-done',{step});},mountPuzzleIsland:(step,snapshot)=>{if(step==='reflection')mountReflectionPuzzleIsland(snapshot);if(step==='maze')mountMazePuzzleIsland(snapshot);if(step==='pipes')mountPipesPuzzleIsland(snapshot.snapshot,snapshot.onAction);if(step==='ledger')mountLedgerPuzzleIsland(snapshot);if(step==='masks')mountMasksPuzzleIsland(snapshot);if(step==='light')mountLightPuzzleIsland(snapshot);if(step==='prism-rays')mountPrismRaysPuzzleIsland(snapshot);if(step==='prism-blend')mountPrismBlendPuzzleIsland(snapshot);if(step==='watch')mountWatchPuzzleIsland(snapshot);if(step==='belfry-gears')mountGears13PuzzleIsland(snapshot);if(step==='belfry-pendulum')mountPendulumPuzzleIsland(snapshot);if(step==='belfry-wheel')mountStarwheelPuzzleIsland(snapshot);},extra:{html:stageHintMarkup,bind:bindStageHints}};}
 function openStory(){modal('當鏡子第一次說謊','PROLOGUE · 故事序章',storyBody+'<button id="story-play" class="primary-button">開始妳的故事 ⟶</button>');$('#story-play').onclick=()=>{closeModal();if(state.started){state.ending?showView('ending'):showView('game')}else begin();};}
 function openGuide(){modal('如何走出魔鏡','HOW TO PLAY · 遊玩指南',guideBody);}
 function begin(){resetChallenges();playlog.record('journey');loggedRoom=null;state={...initialState(),muted:state.muted,endings:state.endings,memories:state.memories||[],shards:state.shards||[],achievements:state.achievements||[]};state.started=true;save();showView('game');openPrologue();}
