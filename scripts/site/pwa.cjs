@@ -55,6 +55,12 @@ module.exports=function writePwa(ctx){
   visit(entryKey);
   if(!seen.has(entryKey))throw new Error('Vue divination entry is missing from the Vite manifest: '+entryKey);
  }
+ // The astrology forecast worker is referenced by URL from the astrology bundle, so the Vite manifest does not list it; precache that exact file.
+ const astrologyBundle=ctx.vueAssets?.manifest?.['src/vue/site/astrology-main.ts']?.file;
+ const astrologyText=astrologyBundle?fs.readFileSync(path.join(out,'_vue',astrologyBundle),'utf8'):'';
+ const astrologyWorker=astrologyText.match(/astrology\.worker-[A-Za-z0-9_-]+\.js/)?.[0];
+ if(!astrologyWorker||!fs.existsSync(path.join(out,'_vue','assets',astrologyWorker)))throw new Error('Astrology forecast worker is missing from the astrology bundle');
+ divinationFiles.add('assets/'+astrologyWorker);
  // Module pages are precached as HTML too, so a first visit made offline still opens each module from the hub.
  const moduleRoutes=['divination/','tarot/','bazi/','astrology/','numerology/','ziwei/','horoscope/'];
  for(const route of moduleRoutes)if(!fs.existsSync(path.join(out,route,'index.html')))throw new Error('Module page is missing from the build: '+route);

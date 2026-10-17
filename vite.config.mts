@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   base: './',
   plugins: [vue()],
+  // Module workers (astrology forecasts) are emitted as ES modules so they can be loaded with { type: 'module' }.
+  worker: { format: 'es' },
   build: {
     outDir: '.vue-build',
     emptyOutDir: true,
@@ -12,8 +14,11 @@ export default defineConfig({
       output: {
         // Keep the CommonJS calendar library in its own chunk. Otherwise the bundler places shared runtime helpers inside it,
         // so every chunk that uses a helper (tarot, the divination hub) downloads the 300 KB library too.
+        // The astrology page and its forecast worker share the ephemeris library, so it is cached once for both.
         manualChunks(id) {
-          return id.includes('lunar-javascript') ? 'lunar-javascript' : undefined;
+          if (id.includes('lunar-javascript')) return 'lunar-javascript';
+          if (id.includes('astronomy-engine')) return 'astronomy-engine';
+          return undefined;
         },
       },
       input: {

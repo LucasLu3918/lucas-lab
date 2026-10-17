@@ -62,6 +62,7 @@ async function run(){
   await page.locator('input[type="time"]').fill('08:30');
   await page.getByRole('button',{name:/繪製深入星盤/}).click();
   assert.equal(await page.locator('.planet').count(),10,'Astrology chart should show ten placements');
+  await page.locator('.forecast-grid .forecast').nth(2).waitFor({timeout:15000});
   assert.equal(await page.locator('.forecast-grid .forecast').count(),3,'Astrology forecast periods missing');
   const natalMethod=page.locator('details.method').filter({hasText:'本命星盤計算方法與限制'});
   assert.match(await natalMethod.textContent(),/每日步進/,'daily transit method is not disclosed');
@@ -90,9 +91,14 @@ async function run(){
   await offlinePage.locator('.today-card__tip').waitFor({timeout:10000});
   await offlinePage.goto(ORIGIN+'/ziwei/',{waitUntil:'load'});
   assert.match(await offlinePage.locator('h1').first().textContent(),/紫微斗數/,'ziwei page did not open offline');
+  await offlinePage.goto(ORIGIN+'/astrology/',{waitUntil:'load'});
+  await offlinePage.locator('input[type="date"]').fill('1990-06-15');
+  await offlinePage.getByRole('button',{name:/查看簡易星盤/}).click();
+  await offlinePage.locator('.forecast-grid .forecast').nth(2).waitFor({timeout:15000});
+  assert.equal(await offlinePage.locator('.forecast-grid .forecast').count(),3,'astrology forecast worker did not load offline');
   assert.deepEqual(offlineErrors,[],'offline module visit emitted JavaScript errors');
   await offlineContext.close();
-  console.log('✓ Offline: a visitor who never opened a module still gets the hub, its lazy horoscope reading and the ziwei page');
+  console.log('✓ Offline: a visitor who never opened a module still gets the hub, its lazy horoscope reading, the ziwei page and astrology forecasts (worker)');
   console.log('PASS: divination browser acceptance');
  }finally{
   if(browser)await browser.close();

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import { calculateAstrology, createAstrologyForecast, signDescription, type AstrologyChart, type AstrologyForecast, type AstrologyForecastPeriod } from './astrology';
-import { createAnnualAstrologyForecast, type AnnualAstrologyForecast } from './astrology-annual';
+import { calculateAstrology, signDescription, type AstrologyChart, type AstrologyForecast } from './astrology';
+import type { AnnualAstrologyForecast } from './astrology-annual';
+import { computeAstrologyForecasts, type AstrologyForecastRequest, type AstrologyForecastResult } from './astrology-forecasts';
+import type { AstrologyWorkerResponse } from './astrology.worker';
 import { BIRTH_PLACES } from './locations';
 import type { Disambiguation } from '../fortune-core/civil-time';
 import PrecisionBadge from '../fortune-core/ui/PrecisionBadge.vue';
@@ -19,6 +21,7 @@ const chart = ref<AstrologyChart | null>(null);
 const forecasts = ref<AstrologyForecast[]>([]);
 const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
+const forecastPending = ref(false);
 // 行運清單（年度可達上千筆）只在展開後才渲染，記住各期間的展開狀態以便重新計算時保留。
 const transitListOpen = reactive<Record<string, boolean>>({});
 function setTransitListOpen(periodLabel: string, event: Event): void {
@@ -43,18 +46,79 @@ function formatAt(instant: string, timeZone: string): string {
   return formatter.format(new Date(instant));
 }
 
-function calculate(): void {
+// 行運與年度天象在 Worker 中計算；本命星盤仍同步繪製。Worker 無法使用時改在主執行緒計算。
+let forecastWorker: Worker | null = null;
+let forecastRequestId = 0;
+let latestCalculation = 0;
+
+function getForecastWorker(): Worker | null {
+  if (typeof Worker === 'undefined') return null;
+  if (!forecastWorker) {
+    try {
+      forecastWorker = new Worker(new URL('./astrology.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      return null;
+    }
+  }
+  return forecastWorker;
+}
+
+function computeForecasts(request: AstrologyForecastRequest): Promise<AstrologyForecastResult> {
+  const worker = getForecastWorker();
+  if (!worker) return Promise.resolve(computeAstrologyForecasts(request));
+  const id = ++forecastRequestId;
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      worker.removeEventListener('message', onMessage);
+      worker.removeEventListener('error', onError);
+    };
+    const onMessage = (event: MessageEvent<AstrologyWorkerResponse>) => {
+      if (event.data.id !== id) return;
+      cleanup();
+      if ('error' in event.data) reject(new Error(event.data.error));
+      else resolve(event.data.result);
+    };
+    const onError = () => {
+      cleanup();
+      worker.terminate();
+      if (forecastWorker === worker) forecastWorker = null;
+      reject(new Error('行運計算工作無法完成，請重新繪製。'));
+    };
+    worker.addEventListener('message', onMessage);
+    worker.addEventListener('error', onError);
+    worker.postMessage({ id, ...request });
+  });
+}
+
+async function calculate(): Promise<void> {
   error.value = '';
+  const calculation = ++latestCalculation;
+  let result: AstrologyChart;
   try {
-    const result = calculateAstrology({ birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value });
-    chart.value = result;
-    forecasts.value = (['day', 'month', 'year'] as AstrologyForecastPeriod[]).map(period => createAstrologyForecast(result, period));
-    annual.value = createAnnualAstrologyForecast(result, returnPlace.value);
+    result = calculateAstrology({ birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value });
   } catch (cause) {
     chart.value = null;
     forecasts.value = [];
     annual.value = null;
+    forecastPending.value = false;
     error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
+    return;
+  }
+  chart.value = result;
+  forecasts.value = [];
+  annual.value = null;
+  forecastPending.value = true;
+  try {
+    const computed = await computeForecasts({ chart: result, returnPlace: returnPlace.value, startMs: Date.now() });
+    if (calculation !== latestCalculation) return;
+    forecasts.value = computed.forecasts;
+    annual.value = computed.annual;
+  } catch (cause) {
+    if (calculation !== latestCalculation) return;
+    chart.value = null;
+    error.value = cause instanceof Error ? cause.message : '無法計算行運與年度天象。';
+  } finally {
+    if (calculation === latestCalculation) forecastPending.value = false;
   }
 }
 </script>
@@ -81,6 +145,7 @@ function calculate(): void {
 
     <section v-if="chart" class="results" aria-live="polite">
       <nav class="result-nav" aria-label="結果章節"><a href="#natal">本命星盤</a><a href="#transits">近期行運</a><a href="#annual">年度天象</a></nav>
+      <p v-if="forecastPending" class="form-help">正在計算行運與年度天象…</p>
       <section id="natal" class="result-block">
       <div class="section-title"><div><h2>行星落點</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
       <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，隱藏上升點與宮位' : '已提供出生時間，計算上升點與宮位'" />
