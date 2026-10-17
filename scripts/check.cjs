@@ -3,7 +3,7 @@
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const {publishedBytes}=require('./site/assets.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','divination/index.html','tarot/index.html','bazi/index.html','astrology/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','divination/index.html','tarot/index.html','bazi/index.html','astrology/index.html','horoscope/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -42,7 +42,7 @@
  assert.ok(tarotPage.includes('星夜塔羅')&&tarotPage.includes('data-vue-site-island="tarot"'),'Tarot route or Vue island missing');
  assert.ok(tarotPage.includes('/_vue/'),'Tarot Vue bundle missing from page');
  assert.ok(fs.readFileSync(path.join(dist,'sw.js'),'utf8').includes('/_vue/'),'Tarot route dependencies missing from offline cache manifest');
- for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology'],['numerology','numerology']]){
+ for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology'],['horoscope','horoscope'],['numerology','numerology']]){
   const html=fs.readFileSync(path.join(dist,route,'index.html'),'utf8');
   assert.ok(html.includes(`data-vue-site-island="${island}"`)&&html.includes('/_vue/'),`${route} route or Vue island missing`);
   assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes('/'+route+'/'),`${route} route missing from sitemap`);
