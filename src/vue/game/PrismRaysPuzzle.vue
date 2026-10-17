@@ -115,6 +115,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         v-for="cell in cells"
         :key="`floor-${cell.x}-${cell.y}`"
         class="prism-cell"
+        pointer-events="none"
         :x="cell.x * CELL"
         :y="cell.y * CELL"
         width="10"

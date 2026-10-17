@@ -24,6 +24,7 @@ describe('PrismRaysPuzzle', () => {
     const wrapper = mount(PrismRaysPuzzle, { props: { snapshot: initial, onAction: vi.fn(() => initial) } });
 
     expect(wrapper.findAll('.prism-cell')).toHaveLength(35);
+    expect(wrapper.get('.prism-cell').attributes('pointer-events')).toBe('none');
     expect(wrapper.findAll('[data-mirror]')).toHaveLength(3);
     expect(wrapper.get('#bf-svg rect[fill="url(#prism-pool)"]').attributes('pointer-events')).toBe('none');
     expect(wrapper.get('[data-mirror="0"]').attributes('role')).toBe('button');
