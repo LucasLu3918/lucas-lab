@@ -108,6 +108,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         </radialGradient>
       </defs>
 
+      <g class="prism-art" pointer-events="none">
       <rect x="-1.8" y="-1.8" width="73.6" height="53.6" rx="1.4" fill="#0c0712" stroke="url(#prism-brass)" stroke-width=".8" />
       <image :href="puzzleAsset('prism-floor.webp')" x="-1" y="-1" width="72" height="52" preserveAspectRatio="xMidYMid slice" />
       <rect x="-1" y="-1" width="72" height="52" fill="#0a0610" fill-opacity=".2" />
@@ -183,6 +184,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
             <rect v-else :x="symbol.x - symbol.radius * .8" :y="symbol.y - symbol.radius * .8" :width="symbol.radius * 1.6" :height="symbol.radius * 1.6" :fill="symbol.fill" />
           </template>
         </template>
+      </g>
       </g>
 
       <g
