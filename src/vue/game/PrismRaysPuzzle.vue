@@ -88,6 +88,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
       id="bf-svg"
       class="belfry-svg prism-svg"
       viewBox="-3 -14.2 76 68.2"
+      pointer-events="none"
       role="group"
       aria-label="濾鏡階段光路盤，七欄五列"
     >
@@ -195,10 +196,10 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         :aria-pressed="mirror.orientation === '\\'"
         :aria-disabled="snapshot.solved"
         :transform="`translate(${px(mirror.x)} ${px(mirror.y)})`"
-        pointer-events="all"
         @click="flip(mirror.index)"
         @keydown.enter.prevent="flip(mirror.index)"
         @keydown.space.prevent="flip(mirror.index)"
+        pointer-events="all"
       >
         <circle r="5" fill="none" stroke="transparent" stroke-width=".6" />
         <ellipse cx=".5" cy="1" rx="4" ry="3.6" fill="#000" fill-opacity=".4" />

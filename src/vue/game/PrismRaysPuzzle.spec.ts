@@ -25,7 +25,9 @@ describe('PrismRaysPuzzle', () => {
 
     expect(wrapper.findAll('.prism-cell')).toHaveLength(35);
     expect(wrapper.findAll('[data-mirror]')).toHaveLength(3);
+    expect(wrapper.get('#bf-svg').attributes('pointer-events')).toBe('none');
     expect(wrapper.get('[data-mirror="0"]').attributes('role')).toBe('button');
+    expect(wrapper.get('[data-mirror="0"]').attributes('pointer-events')).toBe('all');
     expect(wrapper.get('[data-mirror="0"]').attributes('aria-pressed')).toBe('true');
     expect(wrapper.get('[data-mirror="0"] rect').attributes('pointer-events')).toBe('all');
     expect(wrapper.find('.prism-tint').exists()).toBe(true);
