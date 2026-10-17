@@ -2,6 +2,7 @@ import { createApp, defineComponent, h, ref } from 'vue';
 import HintPanel from './HintPanel.vue';
 import InventoryPanel from './InventoryPanel.vue';
 import JournalPanel from './JournalPanel.vue';
+import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import { parseHintSnapshot } from './hints';
 import { parseJournalSnapshot } from './journal';
 import { useInventory } from './useInventory';
@@ -61,6 +62,20 @@ export function mountHintIsland(
       });
     },
   }));
+  app.mount(root);
+  return () => app.unmount();
+}
+
+export function mountReflectionIsland(
+  root: Element,
+  snapshot: { left: boolean[]; right: boolean[]; onChange: (right: boolean[]) => void },
+): (() => void) | null {
+  if (snapshot.left.length !== 8 || snapshot.right.length !== 8
+    || !snapshot.left.every(value => typeof value === 'boolean')
+    || !snapshot.right.every(value => typeof value === 'boolean')
+    || typeof snapshot.onChange !== 'function') return null;
+
+  const app = createApp(ReflectionPuzzle, snapshot);
   app.mount(root);
   return () => app.unmount();
 }
