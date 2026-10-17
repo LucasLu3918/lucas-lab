@@ -101,6 +101,15 @@
       "meta": "需要出生年份與性別，坐向可選",
       "inputNeeds": "birthdate",
       "iconSvg": "<path d=\"M16 4v24M6 12h20M9 20l7-4 7 4\" />"
+    },
+    {
+      "id": "vedic",
+      "title": "印度占星",
+      "href": "../vedic/",
+      "description": "以恆星黃道排出月宿（Nakshatra）、維姆歐塔里大運與九曜落座，說明目前的大運主題與次限節奏。",
+      "meta": "需要出生日期、時間與地點",
+      "inputNeeds": "birth-datetime-place",
+      "iconSvg": "<path d=\"M16 6l3 7h7l-5.5 4.2 2 7L16 20l-6.5 4.2 2-7L6 13h7z\" />"
     }
   ]
 }

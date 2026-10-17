@@ -42,7 +42,7 @@
  assert.ok(tarotPage.includes('星夜塔羅')&&tarotPage.includes('data-vue-site-island="tarot"'),'Tarot route or Vue island missing');
  assert.ok(tarotPage.includes('/_vue/'),'Tarot Vue bundle missing from page');
  assert.ok(fs.readFileSync(path.join(dist,'sw.js'),'utf8').includes('/_vue/'),'Tarot route dependencies missing from offline cache manifest');
- for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology'],['horoscope','horoscope'],['numerology','numerology'],['meihua','meihua'],['liuyao','liuyao'],['qimen','qimen'],['fengshui','fengshui'],['ziwei','ziwei']]){
+ for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology'],['horoscope','horoscope'],['numerology','numerology'],['meihua','meihua'],['liuyao','liuyao'],['qimen','qimen'],['fengshui','fengshui'],['vedic','vedic'],['ziwei','ziwei']]){
   const html=fs.readFileSync(path.join(dist,route,'index.html'),'utf8');
   assert.ok(html.includes(`data-vue-site-island="${island}"`)&&html.includes('/_vue/'),`${route} route or Vue island missing`);
   assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes('/'+route+'/'),`${route} route missing from sitemap`);

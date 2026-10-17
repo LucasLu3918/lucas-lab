@@ -158,6 +158,20 @@ async function run(){
   await page.screenshot({path:path.join(CAPTURES,'fengshui-reading-390.png'),fullPage:true,animations:'disabled'});
   console.log('✓ Fengshui calculates the natal gua, shows the eight-direction table and the 玄空 grid for a chosen sitting, and stays inside the mobile viewport');
 
+  await page.goto(ORIGIN+'/vedic/',{waitUntil:'load'});
+  await page.locator('input[type="date"]').first().fill('1990-06-15');
+  await page.locator('input[type="time"]').first().fill('08:00');
+  await page.getByRole('button',{name:'排出吠陀星盤'}).click();
+  await page.locator('#dasha').waitFor({timeout:15000});
+  assert.match(await page.locator('#nakshatra').textContent(),/Shatabhisha/,'Vedic 1990-06-15 08:00 Taipei should have a Shatabhisha Moon');
+  assert.match(await page.locator('#dasha').textContent(),/目前大運/,'Vedic reading should show the current mahadasha');
+  assert.equal(await page.locator('#grahas .planet').count(),9,'Vedic reading should list nine grahas');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Vedic reading overflows the mobile viewport');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.waitForFunction(()=>window.scrollY===0);
+  await page.screenshot({path:path.join(CAPTURES,'vedic-reading-390.png'),fullPage:true,animations:'disabled'});
+  console.log('✓ Vedic casts the Moon nakshatra and dasha periods, lists nine grahas, and stays inside the mobile viewport');
+
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
 
