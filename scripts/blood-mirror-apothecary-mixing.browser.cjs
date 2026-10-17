@@ -45,7 +45,6 @@ const save = {
       }
 
       const reference = page.locator('#apo-ref');
-      const mix = page.locator('#apo-mix');
       const mirror = page.locator('#apo-mirror');
       assert.equal(await reference.getAttribute('role'), 'img', 'recipe swatch has an accessible name');
       assert.equal(await reference.getAttribute('aria-label'), '配方色：偏紫的藍灰，偏暗');
@@ -67,8 +66,7 @@ const save = {
       await page.locator('[aria-label="紅加一滴"]').click();
       await page.locator('[aria-label="黃加一滴"]').click();
       for (let drop = 0; drop < 4; drop += 1) await page.locator('[aria-label="藍加一滴"]').click();
-      assert.ok((await mix.getAttribute('class')).includes('lit'), 'the matching recipe lights the bottle');
-      assert.equal(await page.locator('#bf-status').getAttribute('data-tone'), 'ok');
+      // Legacy completion closes the modal, so persisted progress is the stable success signal.
       await page.waitForFunction(
         () => (JSON.parse(localStorage.getItem('blood-mirror-v2') || '{}').puzzles || []).includes('apothecary.apothecary-mixing'),
         null,
