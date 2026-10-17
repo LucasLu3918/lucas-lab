@@ -242,4 +242,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：容量仍為 A=8、B=5、C=3，初始狀態 `[8,0,0]`，管線方向 A→C→B→A，倒液直到來源空或目的杯滿，目標為 B=4；stage id、Hints／音效／可選關卡進度與存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 vessel rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、倒液／復原／重來、通關、fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 依核准範圍手動追查。
 
-下一步建議：評估 E3「調色」（`games/blood-mirror/puzzles/apothecary.js`、stage `apothecary-mixing`）的混色盤與手持鏡操作能否形成獨立 Vue island，並保留 legacy 混色規則、提示、音效與完成流程。
+## Phase 22 — Blood Mirror Apothecary Mixing Vue island
+
+`ApothecaryMixingPuzzle.vue` 接手 `apothecary-mixing` 的配方色／混色 swatches、手持鏡切換、紅黃藍色精滴數與回饋呈現，沿用既有 lazy game bundle、stage id、modal 與 `.apo-*` 樣式。`apothecary.js` 保留 `BASE`／`TARGET`／`mixColor`／`colorOk` 色彩規則、提示、音效、完成判定、進度 callback 與 legacy renderer；Vue 只呈現 parser 驗證的 transient snapshot，並將滴數變更與手持鏡切換 typed actions 交回 legacy controller。
+
+不變條件：每種色精仍可調整 0–4 滴；配方、混色與容差判定完全沿用既有規則；stage id `apothecary-mixing`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 apothecary rule tests，以及 360px／1280px 瀏覽器中的 lazy mount、鏡子切換、滴數界限、通關、fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 依核准範圍手動追查。
+
+下一步建議：評估 E4 `gallery-align` 的拖曳疊圖 stage，先盤點 legacy 互動狀態、鍵盤替代操作與拖曳座標模型，再決定 Vue island 邊界。

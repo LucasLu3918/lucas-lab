@@ -269,16 +269,27 @@ export function mountApothecaryVessels(ctx){
 export function mountApothecaryMixing(ctx){
  const drops=[0,0,0];let mirror=false,finished=false;
  const rows=[['紅','R'],['黃','Y'],['藍','B']];
- ctx.render(shell('apothecary-mixing','<div class="apo-mixer"><div class="apo-swatch glass" id="apo-ref"><span></span></div><div class="apo-swatch" id="apo-mix"><span>你的瓶子</span></div></div>'
+ let islandRoot=null;
+ const snapshot=()=>{
+  const want=mixColor(...TARGET),cur=mixColor(...drops),dist=colorDist(want,cur),ok=colorOk(drops),any=drops.some(Boolean);
+  return {drops:[...drops],mirror,recipeColor:want,mixedColor:cur,recipeLabel:mirror?'配方色（手持鏡裡的真色）：'+TARGET_WORDS:'配方色（隔著綠玻璃）',recipeAriaLabel:'配方色：'+TARGET_WORDS,mixLabel:'你的瓶子',closeMessage:!any?'還沒有加色精。':ok?'顏色吻合！':closeWord(dist),directionMessage:ok||!any?'':dirWord(drops),finished,message:finished?'顏色吻合：回魂藥調好了。':'調色中……',tone:finished?'ok':''};
+ };
+ if(typeof ctx.mountPuzzleIsland==='function'){
+  ctx.render(shell('apothecary-mixing','<div data-vue-apothecary-mixing><p class="challenge-feedback" role="status">調色盤載入中…</p></div>',false));
+  islandRoot=document.querySelector('[data-vue-apothecary-mixing]');
+ }else{
+  ctx.render(shell('apothecary-mixing','<div class="apo-mixer"><div class="apo-swatch glass" id="apo-ref"><span></span></div><div class="apo-swatch" id="apo-mix"><span>你的瓶子</span></div></div>'
   +'<div class="belfry-row"><button id="apo-mirror" class="secondary-button" aria-pressed="false">舉起手持鏡</button><span class="apo-note">看配方真正的顏色</span></div>'
   +'<div class="apo-drops">'+rows.map(([name,key],i)=>'<div class="apo-drop"><b class="apo-pigment-'+key+'">'+MARKS[key]+name+'色精</b><button class="secondary-button" data-drop="'+i+'" data-step="-1" aria-label="'+name+'減一滴">−</button><span id="apo-dv'+i+'" class="apo-count" role="status"></span><button class="secondary-button" data-drop="'+i+'" data-step="1" aria-label="'+name+'加一滴">＋</button></div>').join('')+'</div>'
   +'<p id="apo-close" class="apo-note"></p><p id="apo-dir" class="apo-note"></p>'));
- const $=id=>document.getElementById(id),ref=$('apo-ref'),alive=()=>ref.isConnected;
- const say2=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
+ }
+ const $=id=>document.getElementById(id),ref=$('apo-ref'),alive=()=>islandRoot?.isConnected||ref?.isConnected||false;
+ const say2=(text,tone='')=>{const el=$('bf-status');if(!el)return;el.textContent=text;el.dataset.tone=tone;};
  const tiers=new Proxy({},{get:()=>HINTS.C(drops)});
  const hints=bindHints({hints:tiers,currentStep:()=>finished?null:'mix',alive});
  function draw(){
   const want=mixColor(...TARGET),cur=mixColor(...drops),dist=colorDist(want,cur),ok=colorOk(drops),any=drops.some(Boolean);
+  if(islandRoot?.isConnected)return;
   // The recipe seen through the green glass is skewed; the hand mirror shows the true colour and says it in words too.
   ref.style.background='rgb('+want.map(Math.round)+')';ref.classList.toggle('glass',!mirror);
   ref.querySelector('span').textContent=mirror?'配方色（手持鏡裡的真色）：'+TARGET_WORDS:'配方色（隔著綠玻璃）';
@@ -299,12 +310,22 @@ export function mountApothecaryMixing(ctx){
   }
   say2('調色中……');hints.changed();
  }
- $('apo-mirror').onclick=e=>{mirror=!mirror;e.currentTarget.setAttribute('aria-pressed',String(mirror));ctx.playCue('click');draw();};
- document.querySelectorAll('[data-drop]').forEach(button=>button.onclick=()=>{
-  if(finished)return;
-  const i=+button.dataset.drop;
-  drops[i]=Math.max(0,Math.min(MAXDROP,drops[i]+(+button.dataset.step)));
-  ctx.playCue('click');update();
- });
- update();
+ const onAction=change=>{
+  if(finished||!change||typeof change!=='object')return snapshot();
+  if(change.type==='toggle-mirror'){
+   mirror=!mirror;ctx.playCue('click');draw();
+  }else if(change.type==='change-drops'&&Number.isInteger(change.pigment)&&change.pigment>=0&&change.pigment<drops.length&&(change.step===-1||change.step===1)){
+   const i=change.pigment;drops[i]=Math.max(0,Math.min(MAXDROP,drops[i]+change.step));
+   ctx.playCue('click');update();
+  }
+  return snapshot();
+ };
+ if(islandRoot){
+  update();
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction});
+ }else{
+  $('apo-mirror').onclick=()=>onAction({type:'toggle-mirror'});
+  document.querySelectorAll('[data-drop]').forEach(button=>button.onclick=()=>onAction({type:'change-drops',pigment:+button.dataset.drop,step:+button.dataset.step}));
+  update();
+ }
 }
