@@ -1,6 +1,6 @@
 # 占卜中心 Fortune Hub 規劃
 
-- 狀態：規劃草案；P0 基礎層已實作（未提交），P1 以後尚未開始
+- 狀態：P0（#103）、P1（#105）已合併；P2 紫微斗數已實作（路線 B，見 §3.5）；P3、P4 尚未開始
 - 日期：2026-10-17
 - 範圍：以既有「月夜占卜室」為基礎，整合六個占卜模組、共用計算引擎與資料層，並導入本機 Claude Code 占卜技能作為規格與內容來源。
 - 原則：所有計算在瀏覽器本機完成；不需要付費 API 或 AI API Key；計算可重現；出生資料不儲存、不上傳。
@@ -14,10 +14,10 @@
 | 塔羅 | `/tarot/` | 已完成：78 張牌、六種牌陣、單張與每日一抽；使用 `crypto.getRandomValues` 抽牌；閱讀歷史存於本機 | `src/vue/site/features/tarot/` |
 | 八字 | `/bazi/` | 已完成：三柱（時辰未知）與四柱、十神、五行、大運；使用 `lunar-javascript` | `src/vue/site/features/divination/bazi.ts`（`bazi-local-v2`） |
 | 西洋占星 | `/astrology/` | 已完成：行星落座、相位、年度流年；使用 `astronomy-engine`；時間未知時隱藏上升與宮位 | `src/vue/site/features/divination/astrology.ts`、`astrology-annual.ts`（`tropical-whole-sign-v3`） |
-| 占卜總覽 | `/divination/` | 三個入口卡片（月夜占卜室） | `DivinationHub.vue` |
-| 星座運勢 | — | 未開始 | — |
-| 紫微斗數 | — | 未開始 | — |
-| 生命靈數 | — | 未開始 | — |
+| 占卜總覽 | `/divination/` | 入口卡片（月夜占卜室） | `DivinationHub.vue` |
+| 星座運勢 | `/horoscope/` | 已完成（P1）：五個面向與幸運指引，原創文案依 `dailySeed` 選取 | `src/vue/site/features/horoscope/` |
+| 紫微斗數 | `/ziwei/` | 已完成（P2）：十二宮、十四主星、四化與大限；標準安星法，與 iztro 差異測試一致 | `src/vue/site/features/ziwei/`（`ziwei-standard-v1`） |
+| 生命靈數 | `/numerology/` | 已完成（P1）：生命路徑、表達數、靈魂數、人格數、生日數與個人循環 | `src/vue/site/features/numerology/`（`numerology-pythagorean-v1`） |
 
 既有可沿用的設計：
 
@@ -109,6 +109,16 @@ Hub 依 `inputNeeds` 顯示「不需個資，立即抽牌」或「選擇資料�
 | B. 自行實作 | 依規則文件實作純函式引擎；以 `iztro` 作為 devDependency 的對照表做差異測試 | 體積小、可控、可重現 | 開發成本較高，需大量 fixture |
 
 建議：先做 spike，比較兩條路線的 gzip 體積與 10 組以上命盤的差異；若 B 的差異可收斂，採用 B，並以 A 作為測試對照。無論哪條路線，都要統一使用 `lunar-javascript` 的曆法來源，避免同時引入兩套農曆庫。
+
+### 3.5.1 Spike 結果（P2，已決定路線 B）
+
+- **體積**：`iztro` 2.6.3 以 esbuild 打包（含 `lunar-typescript`、`i18next`、`dayjs`）約 503 KB（未壓縮），gzip 約 147 KB。路線 B 的 `/ziwei/` 島嶼 gzip 約 8 KB，曆法沿用既有的 `lunar-javascript` 共用層。
+- **差異**：標準引擎與 iztro 在 12 組陽曆命盤、1 組農曆換算命盤，以及 5 個五行局 × 30 日的紫微落宮表上完全一致。差異測試位於 `ziwei.iztro.spec.ts` 與 `ziwei.spec.ts`。
+- **規格文件偏差**：`ziwei-fortune` 技能的 `calculation-rules.md` 與 iztro 有三處不一致，因此計算不採用其規則，只作規格參考。
+  1. 五行局的命宮天干誤用農曆月份。例如庚午年五月初八亥時，命宮在未，命宮干支應為癸未（楊柳木，木三局），不是壬未。
+  2. 紫微落宮的奇偶進退與起算方式不同。例如木三局初八，iztro 與標準引擎為卯，技能規則算出子。
+  3. 紫微與天府的對稱軸是寅申，不是子午。例如紫微在卯，天府在丑。
+- **決定**：採路線 B，以標準安星法實作，iztro 只作為 devDependency 的對照表（`iztro` 2.6.3，MIT）。執行期程式碼不載入 iztro。
 
 ### 3.6 生命靈數 Numerology（新增）
 

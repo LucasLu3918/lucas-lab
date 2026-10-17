@@ -19,6 +19,7 @@ export default defineConfig({
         astrology: 'src/vue/site/astrology-main.ts',
         horoscope: 'src/vue/site/horoscope-main.ts',
         numerology: 'src/vue/site/numerology-main.ts',
+        ziwei: 'src/vue/site/ziwei-main.ts',
         reader: 'src/vue/site/reader-main.ts',
         gallery: 'src/vue/site/gallery-main.ts',
         music: 'src/vue/site/music-main.ts',

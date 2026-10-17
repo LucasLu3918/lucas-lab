@@ -4,7 +4,7 @@
 export type DivinationInputNeeds = 'none' | 'birthdate' | 'birth-datetime-place';
 
 export interface DivinationModule {
-  id: 'tarot' | 'bazi' | 'astrology' | 'numerology' | 'horoscope';
+  id: 'tarot' | 'bazi' | 'astrology' | 'ziwei' | 'numerology' | 'horoscope';
   title: string;
   href: string;
   description: string;
@@ -40,6 +40,15 @@ export const DIVINATION_MODULES: readonly DivinationModule[] = [
     meta: '選擇資料完整度',
     inputNeeds: 'birthdate',
     iconSvg: '<circle cx="16" cy="16" r="5" /><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(-24 16 16)" />',
+  },
+  {
+    id: 'ziwei',
+    title: '紫微斗數',
+    href: '../ziwei/',
+    description: '依農曆換算排出十二宮、十四主星與四化，並列出大限走勢；每一步推導都可核對。',
+    meta: '需要出生日期與時辰',
+    inputNeeds: 'birth-datetime-place',
+    iconSvg: '<path d="M16 5l9 5v12l-9 5-9-5V10z" />',
   },
   {
     id: 'numerology',

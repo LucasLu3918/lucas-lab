@@ -31,7 +31,7 @@ test('generated HTML route inventory and metadata match the pre-migration baseli
  visit(output);
  actual.sort((a,b)=>a.route.localeCompare(b.route));
  const siteOrigin=(process.env.SITE_URL||'https://lucas-lab.owl3918.workers.dev').replace(/\/+$/,'');
- const approvedAdditions=['/divination/','/tarot/','/tarot/deck/','/bazi/','/astrology/','/horoscope/','/numerology/'].map((route,index)=>({route,canonical:siteOrigin+route,title:['月夜占卜室','星夜塔羅','塔羅牌庫','生辰八字','西洋占星','星座運勢','生命靈數'][index]+'｜LUCAS LAB',robots:'index,follow'}));
+ const approvedAdditions=['/divination/','/tarot/','/tarot/deck/','/bazi/','/astrology/','/horoscope/','/numerology/','/ziwei/'].map((route,index)=>({route,canonical:siteOrigin+route,title:['月夜占卜室','星夜塔羅','塔羅牌庫','生辰八字','西洋占星','星座運勢','生命靈數','紫微斗數'][index]+'｜LUCAS LAB',robots:'index,follow'}));
  assert.deepEqual(actual,[...manifest.routes,...approvedAdditions].sort((a,b)=>a.route.localeCompare(b.route)));
 });
 
