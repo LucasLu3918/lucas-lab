@@ -118,8 +118,8 @@ export function calculatePlacements(instant: Date, ascendantSignIndex: number | 
   return BODY_LIST.map(item => {
     const longitude = geoEclipticLongitude(item.body, instant);
     const sign = signInfo(longitude);
-    const previous = geoEclipticLongitude(item.body, new Date(instant.getTime() - 86_400_000));
-    const next = geoEclipticLongitude(item.body, new Date(instant.getTime() + 86_400_000));
+    const previous = geoEclipticLongitude(item.body, new Date(instant.getTime() - DAY_MS));
+    const next = geoEclipticLongitude(item.body, new Date(instant.getTime() + DAY_MS));
     return {
       id: item.id,
       name: item.name,
@@ -220,7 +220,7 @@ function goldenSectionMinimum(valueAt: (milliseconds: number) => number, left: n
   return (left + right) / 2;
 }
 
-/** 行運掃描的一組配對（行星 × 本命點 × 相位）；逐日容許度存在陣列中，避免為每個樣本建立物件。 */
+/** 行運掃描的一組配對（行星 × 本命點 × 相位）；取樣容許度存在陣列中，避免為每個樣本建立物件。 */
 interface TransitCombo {
   bodyIndex: number;
   natal: { name: string; longitude: number };
@@ -231,8 +231,13 @@ interface TransitCombo {
 
 /** 精確時刻距離期間起訖不到此值，視為落在期間之外（黃金分割搜尋會收斂到邊界）。 */
 const BOUNDARY_TOLERANCE_MS = 60_000;
+/**
+ * 行運取樣間距。月亮約每日行進 13°（最快約 15°），半日約 7.5°，小於最窄的六合容許帶（±5°，共 10°），
+ * 因此每個相位窗口至少會落在一個取樣點內；若逐日取樣，月亮的六合、四分等窗口會被跳過。
+ */
+const SAMPLE_MS = DAY_MS / 2;
 
-/** 每日容許度陣列中的局部極小值索引；單日掃描只看起點。 */
+/** 容許度取樣陣列中的局部極小值索引；單日掃描只看起點。 */
 function sampledMinima(orbs: Float64Array, limit: number): number[] {
   const last = orbs.length - 1;
   if (last === 0) return orbs[0] <= limit ? [0] : [];
@@ -254,13 +259,13 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
   if (chart.ascendant) natalTargets.push({ name: '上升點', longitude: chart.ascendant.longitude });
   if (chart.midheaven) natalTargets.push({ name: '天頂', longitude: chart.midheaven.longitude });
 
-  const sampleCount = spanDays + 1;
+  const sampleCount = spanDays * (DAY_MS / SAMPLE_MS) + 1;
   const combos: TransitCombo[] = [];
   for (let bodyIndex = 0; bodyIndex < BODY_LIST.length; bodyIndex++) for (const natal of natalTargets) for (const aspect of ASPECTS) {
     combos.push({ bodyIndex, natal, aspect, orbs: new Float64Array(sampleCount), exactTimes: [] });
   }
   for (let index = 0; index < sampleCount; index++) {
-    const instant = new Date(startMs + index * DAY_MS);
+    const instant = new Date(startMs + index * SAMPLE_MS);
     const longitudes = BODY_LIST.map(body => geoEclipticLongitude(body.body, instant));
     for (const combo of combos) {
       combo.orbs[index] = Math.abs(angleDifference(longitudes[combo.bodyIndex], combo.natal.longitude) - combo.aspect.angle);
@@ -274,11 +279,11 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
     const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(body.body, new Date(milliseconds)), natal.longitude) - aspect.angle);
     const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
     for (const index of sampledMinima(combo.orbs, aspect.orb)) {
-      let exactMs = startMs + index * DAY_MS;
+      let exactMs = startMs + index * SAMPLE_MS;
       let orb = combo.orbs[index];
       if (period !== 'day') {
-        const left = Math.max(startMs, exactMs - DAY_MS);
-        const right = Math.min(windowEndMs, exactMs + DAY_MS);
+        const left = Math.max(startMs, exactMs - SAMPLE_MS);
+        const right = Math.min(windowEndMs, exactMs + SAMPLE_MS);
         exactMs = new Date(goldenSectionMinimum(orbAt, left, right)).getTime();
         if (exactMs - startMs < BOUNDARY_TOLERANCE_MS || windowEndMs - exactMs < BOUNDARY_TOLERANCE_MS) continue;
         orb = orbAt(exactMs);
@@ -294,7 +299,7 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
   const orderedEvents = events.sort((left, right) => left.exactAt.localeCompare(right.exactAt) || left.orb - right.orb);
   const label = period === 'day' ? '今日' : period === 'month' ? '未來一個月' : '未來一年';
   const text = orderedEvents.length
-    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到 ${orderedEvents.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
+    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天每 12 小時掃描並細化`}找到 ${orderedEvents.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
     : '這段期間未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。';
   return { periodLabel: label, text, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
