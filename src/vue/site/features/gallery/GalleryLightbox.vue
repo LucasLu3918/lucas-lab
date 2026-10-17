@@ -42,7 +42,11 @@ function closeDialog(): void {
 function handleClose(): void {
   const trigger = current.value?.trigger;
   preview.close();
-  void nextTick(() => trigger?.focus());
+  void nextTick(() => {
+    requestAnimationFrame(() => {
+      if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+    });
+  });
 }
 
 function handleKeydown(event: KeyboardEvent): void {
