@@ -1,24 +1,17 @@
 import * as Astronomy from 'astronomy-engine';
 import { civilPartsAt } from '../fortune-core/civil-time';
 import type { BirthPlace } from './locations';
-import type { AstrologyChart, PlanetPlacement } from './astrology';
+import {
+  ASTROLOGY_ASPECTS, ASTROLOGY_SIGNS, BODY_LIST, calculateAscendantAndMidheaven, calculatePlacements, geoEclipticLongitude, normalize,
+  type AstrologyChart, type PlanetPlacement,
+} from './astrology';
 
 const DAY_MS = 86_400_000;
 const TROPICAL_YEAR_DAYS = 365.2422;
-const SIGNS = ['牡羊座', '金牛座', '雙子座', '巨蟹座', '獅子座', '處女座', '天秤座', '天蠍座', '射手座', '摩羯座', '水瓶座', '雙魚座'];
-const BODIES: Array<{ id: string; name: string; body: Astronomy.Body }> = [
-  { id: 'sun', name: '太陽', body: Astronomy.Body.Sun }, { id: 'moon', name: '月亮', body: Astronomy.Body.Moon },
-  { id: 'mercury', name: '水星', body: Astronomy.Body.Mercury }, { id: 'venus', name: '金星', body: Astronomy.Body.Venus },
-  { id: 'mars', name: '火星', body: Astronomy.Body.Mars }, { id: 'jupiter', name: '木星', body: Astronomy.Body.Jupiter },
-  { id: 'saturn', name: '土星', body: Astronomy.Body.Saturn }, { id: 'uranus', name: '天王星', body: Astronomy.Body.Uranus },
-  { id: 'neptune', name: '海王星', body: Astronomy.Body.Neptune }, { id: 'pluto', name: '冥王星', body: Astronomy.Body.Pluto },
-];
+const SIGNS = ASTROLOGY_SIGNS;
+const BODIES = BODY_LIST;
 const STATION_BODIES = BODIES.filter(item => !['sun', 'moon'].includes(item.id));
-const ASPECTS = [
-  { name: '合相', angle: 0, orb: 2 }, { name: '六合', angle: 60, orb: 2 },
-  { name: '四分相', angle: 90, orb: 2 }, { name: '三分相', angle: 120, orb: 2 },
-  { name: '對分相', angle: 180, orb: 2 },
-];
+const ASPECTS = ASTROLOGY_ASPECTS.map(aspect => ({ name: aspect.name, angle: aspect.angle, orb: 2 }));
 const RULERS = ['火星', '金星', '水星', '月亮', '太陽', '水星', '金星', '火星', '木星', '土星', '土星', '木星'];
 const HOUSE_THEMES = [
   '自我定位、身體感受與主動選擇', '資源、收入與個人價值', '學習、溝通與日常往來', '居所、家庭與內在根基',
@@ -67,11 +60,7 @@ export interface AnnualAstrologyForecast {
   limits: string[];
 }
 
-function normalize(value: number): number { return (value % 360 + 360) % 360; }
 function signedDelta(a: number, b: number): number { return ((a - b + 540) % 360) - 180; }
-function eclipticLongitude(body: Astronomy.Body, date: Date): number {
-  return normalize(Astronomy.Ecliptic(Astronomy.GeoVector(body, date, true)).elon);
-}
 function signAt(longitude: number): string { return SIGNS[Math.floor(normalize(longitude) / 30)]; }
 function anglePoint(longitude: number) {
   return { longitude: normalize(longitude), sign: signAt(longitude), degree: normalize(longitude) % 30 };
@@ -82,32 +71,11 @@ function placementsAt(instant: Date, latitude: number, longitude: number, withHo
   ascendant: ReturnType<typeof anglePoint> | null;
   midheaven: ReturnType<typeof anglePoint> | null;
 } {
-  const angles = withHouses ? calculateAngles(instant, latitude, longitude) : null;
+  const angles = withHouses ? calculateAscendantAndMidheaven(instant, latitude, longitude) : null;
   const ascendant = angles ? anglePoint(angles.ascendant) : null;
   const midheaven = angles ? anglePoint(angles.midheaven) : null;
   const ascSign = ascendant ? Math.floor(ascendant.longitude / 30) : null;
-  const planets = BODIES.map(item => {
-    const longitudeValue = eclipticLongitude(item.body, instant);
-    const signIndex = Math.floor(longitudeValue / 30);
-    const previous = eclipticLongitude(item.body, new Date(instant.getTime() - DAY_MS));
-    const next = eclipticLongitude(item.body, new Date(instant.getTime() + DAY_MS));
-    return {
-      id: item.id, name: item.name, longitude: longitudeValue, sign: SIGNS[signIndex], signIndex,
-      degree: longitudeValue - signIndex * 30, element: ['火', '土', '風', '水'][signIndex % 4],
-      house: ascSign === null ? null : (signIndex - ascSign + 12) % 12 + 1,
-      retrograde: normalize(next - previous) > 180,
-    };
-  });
-  return { planets, ascendant, midheaven };
-}
-
-function calculateAngles(instant: Date, latitude: number, longitude: number): { ascendant: number; midheaven: number } {
-  const sidereal = normalize((Astronomy.SiderealTime(instant) + longitude / 15) * 15) * Math.PI / 180;
-  const obliquity = Astronomy.e_tilt(new Astronomy.AstroTime(instant)).tobl * Math.PI / 180;
-  const lat = latitude * Math.PI / 180;
-  const ascendant = normalize(Math.atan2(-Math.cos(sidereal), Math.sin(sidereal) * Math.cos(obliquity) + Math.tan(lat) * Math.sin(obliquity)) * 180 / Math.PI + 180);
-  const midheaven = normalize(Math.atan2(Math.sin(sidereal), Math.cos(sidereal) * Math.cos(obliquity)) * 180 / Math.PI);
-  return { ascendant, midheaven };
+  return { planets: calculatePlacements(instant, ascSign), ascendant, midheaven };
 }
 
 function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
@@ -116,7 +84,7 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
   while (quarter.time.date <= end) {
     const labels = ['新月', '上弦月', '滿月', '下弦月'];
     const phaseLongitude = [0, 90, 180, 270][quarter.quarter];
-    const sign = signAt(eclipticLongitude(Astronomy.Body.Moon, quarter.time.date));
+    const sign = signAt(geoEclipticLongitude(Astronomy.Body.Moon, quarter.time.date));
     events.push({ kind: 'moon-phase', title: labels[quarter.quarter], exactAt: quarter.time.date.toISOString(), sign, detail: `月相黃經差 ${phaseLongitude}°；象徵週期節點，並非事件保證。` });
     quarter = Astronomy.NextMoonQuarter(quarter);
   }
@@ -125,7 +93,7 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
   for (let count = 0; count < 4; count++) {
     const eclipse = Astronomy.SearchGlobalSolarEclipse(solarCursor);
     if (eclipse.peak.date > end) break;
-    const sign = signAt(eclipticLongitude(Astronomy.Body.Sun, eclipse.peak.date));
+    const sign = signAt(geoEclipticLongitude(Astronomy.Body.Sun, eclipse.peak.date));
     events.push({ kind: 'eclipse', title: `日食（${eclipse.kind}）`, exactAt: eclipse.peak.date.toISOString(), sign, detail: eclipse.obscuration === undefined ? '全球日食事件；此處不推算特定地點是否可見。' : `全球最大遮蔽比例約 ${(eclipse.obscuration * 100).toFixed(0)}%；實際可見範圍依地點而異。` });
     solarCursor = new Date(eclipse.peak.date.getTime() + 2 * DAY_MS);
   }
@@ -134,14 +102,14 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
   for (let count = 0; count < 4; count++) {
     const eclipse = Astronomy.SearchLunarEclipse(lunarCursor);
     if (eclipse.peak.date > end) break;
-    const sign = signAt(eclipticLongitude(Astronomy.Body.Moon, eclipse.peak.date));
+    const sign = signAt(geoEclipticLongitude(Astronomy.Body.Moon, eclipse.peak.date));
     events.push({ kind: 'eclipse', title: `月食（${eclipse.kind}）`, exactAt: eclipse.peak.date.toISOString(), sign, detail: `全球月食，月面遮蔽指標 ${(eclipse.obscuration * 100).toFixed(0)}%；占星象徵不代表必然事件。` });
     lunarCursor = new Date(eclipse.peak.date.getTime() + 2 * DAY_MS);
   }
 
   const speed = (body: Astronomy.Body, time: number) => {
     const halfDay = DAY_MS / 4;
-    return signedDelta(eclipticLongitude(body, new Date(time + halfDay)), eclipticLongitude(body, new Date(time - halfDay))) * 2;
+    return signedDelta(geoEclipticLongitude(body, new Date(time + halfDay)), geoEclipticLongitude(body, new Date(time - halfDay))) * 2;
   };
   for (const item of STATION_BODIES) {
     let leftTime = start.getTime();
@@ -160,7 +128,7 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
         }
         const time = (low + high) / 2;
         const direction = leftSpeed > 0 ? '開始逆行' : '恢復順行';
-        events.push({ kind: 'station', title: `${item.name}${direction}`, exactAt: new Date(time).toISOString(), sign: signAt(eclipticLongitude(item.body, new Date(time))), detail: '行星視運動速度轉向附近；逆行是地心視運動現象。' });
+        events.push({ kind: 'station', title: `${item.name}${direction}`, exactAt: new Date(time).toISOString(), sign: signAt(geoEclipticLongitude(item.body, new Date(time))), detail: '行星視運動速度轉向附近；逆行是地心視運動現象。' });
       }
       leftTime = rightTime;
       leftSpeed = rightSpeed;
