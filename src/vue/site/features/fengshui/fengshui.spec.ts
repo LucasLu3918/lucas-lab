@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DIRECTIONS, FACINGS, FENGSHUI_METHOD_VERSION, GUA_INFO, STAR_ORDER, buildFengshuiReport, eightMansions, flyStars, flyingStarChart, natalKua,
+  parseBirthDate, DIRECTIONS, FACINGS, FENGSHUI_METHOD_VERSION, GUA_INFO, STAR_ORDER, buildFengshuiReport, eightMansions, flyStars, flyingStarChart, natalKua,
 } from './fengshui';
 import { interpretFengshui } from './interpretation';
+import { lunarYearOf } from './lunar';
 import { lintCopy } from '../fortune-core/ethics';
 
 // 本命卦：依技能檔的公式與示例。2000 年（含）以前與以後的公式不同；餘數 5 時男為坤、女為艮。
@@ -21,6 +22,20 @@ describe('natalKua', () => {
     expect(result.gua).toBe(gua);
     expect(result.name).toBe(name);
     expect(result.steps.length).toBeGreaterThanOrEqual(3);
+  });
+
+  // 農曆新年前出生者歸入前一個農曆年：2005 年 2 月 9 日為春節，1985 年 2 月 20 日為春節。
+  it('uses the lunar year when a lunar year is given', async () => {
+    expect(natalKua(2005, 'male', await lunarYearOf('2005-01-20', 2005))).toMatchObject({ gua: 2 });
+    expect(natalKua(2005, 'male', await lunarYearOf('2005-02-20', 2005))).toMatchObject({ gua: 4 });
+    expect(natalKua(1985, 'male', await lunarYearOf('1985-02-10', 1985))).toMatchObject({ gua: 7 });
+    expect(natalKua(1985, 'male', 1984).steps[0]).toContain('農曆 1984 年');
+  });
+
+  it('rejects malformed or mismatched birth dates', async () => {
+    expect(() => parseBirthDate('2005-02-30')).toThrow('不存在');
+    expect(() => parseBirthDate('2005/05/01')).toThrow('格式');
+    await expect(lunarYearOf('2004-05-01', 2005)).rejects.toThrow('年份');
   });
 
   it('classifies 東四命 and 西四命 by gua', () => {

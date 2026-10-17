@@ -143,6 +143,11 @@ async function run(){
   assert.match(await page.locator('.summary-line').textContent(),/乾卦（6）/,'Fengshui 1985 male should be 乾卦（6）');
   assert.equal(await page.locator('.direction-table tbody tr').count(),8,'Fengshui should list eight directions');
   assert.equal(await page.locator('.flying-grid').count(),0,'Fengshui should hide the flying grid without a sitting');
+  await page.locator('input[type="date"]').first().fill('1985-02-10');
+  await page.getByRole('button',{name:'計算'}).click();
+  await page.waitForFunction(()=>document.querySelector('.summary-line')?.textContent.includes('兌卦（7）'),null,{timeout:15000});
+  assert.match(await page.locator('.steps').textContent(),/農曆新年前/,'Fengshui birth date before lunar new year should use the lunar year');
+  await page.locator('input[type="date"]').first().fill('');
   await page.locator('select').nth(1).selectOption('south');
   await page.getByRole('button',{name:'計算'}).click();
   await page.locator('.flying-grid .palace-cell').first().waitFor({timeout:15000});

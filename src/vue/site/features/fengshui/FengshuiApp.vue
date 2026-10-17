@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { BIRTH_YEAR_RANGE, FACINGS, PALACE_DIRECTION, buildFengshuiReport, type FacingId, type FengshuiReport, type Fortune, type Gender } from './fengshui';
 import { interpretFengshui } from './interpretation';
+import { lunarYearOf } from './lunar';
 
 const FACING_OPTIONS: Array<{ value: FacingId | ''; label: string }> = [
   { value: '', label: '不填寫，只看八宅' },
@@ -12,11 +13,12 @@ const GRID_ROWS = [[4, 9, 2], [3, 5, 7], [8, 1, 6]];
 const VERDICT_CLASS: Record<Fortune, string> = { 吉: 'verdict-good', 中: 'verdict-mid', 凶: 'verdict-caution' };
 
 const yearInput = ref<number | string>(1990);
+const birthDateInput = ref('');
 const genderInput = ref<Gender>('male');
 const facingInput = ref<FacingId | ''>('');
 // 只有成功計算後才保存結果；改動表單不會自動重算，避免結果與目前輸入不一致。
 const result = ref<FengshuiReport | null>(null);
-const calculatedFor = ref<{ year: number; gender: Gender; facing: FacingId | '' } | null>(null);
+const calculatedFor = ref<{ year: number; gender: Gender; birthDate: string; facing: FacingId | '' } | null>(null);
 const error = ref('');
 
 const copy = computed(() => (result.value ? interpretFengshui(result.value) : null));
@@ -24,22 +26,30 @@ const flying = computed(() => result.value?.data.flying ?? null);
 const stale = computed(() => {
   const last = calculatedFor.value;
   if (!last) return false;
-  return last.year !== yearInput.value || last.gender !== genderInput.value || last.facing !== facingInput.value;
+  return last.year !== Number(yearInput.value) || last.gender !== genderInput.value || last.birthDate !== birthDateInput.value || last.facing !== facingInput.value;
 });
 
 function palaceAt(palace: number) {
   return flying.value?.palaces.find(p => p.palace === palace);
 }
 
-function calculate(): void {
+// 後一次送出的計算才會寫入結果，避免較慢的農曆換算晚於新的計算完成。
+let latestCalculation = 0;
+
+async function calculate(): Promise<void> {
   error.value = '';
+  const calculation = ++latestCalculation;
   try {
     // 年份範圍與格式由 natalKua 檢查，錯誤訊息會直接顯示在表單下方。
     const year = Number(yearInput.value);
     const facing = facingInput.value || undefined;
-    result.value = buildFengshuiReport({ year, gender: genderInput.value, facing });
-    calculatedFor.value = { year, gender: genderInput.value, facing: facingInput.value };
+    const birthDate = birthDateInput.value || '';
+    const lunarYear = birthDate ? await lunarYearOf(birthDate, year) : undefined;
+    if (calculation !== latestCalculation) return;
+    result.value = buildFengshuiReport({ year, gender: genderInput.value, lunarYear, facing });
+    calculatedFor.value = { year, gender: genderInput.value, birthDate, facing: facingInput.value };
   } catch (cause) {
+    if (calculation !== latestCalculation) return;
     result.value = null;
     calculatedFor.value = null;
     error.value = cause instanceof Error ? cause.message : '無法計算，請檢查出生年份後再試一次。';
@@ -58,6 +68,10 @@ function calculate(): void {
       <label>出生年份
         <input v-model.number="yearInput" type="number" inputmode="numeric" :min="BIRTH_YEAR_RANGE.min" :max="BIRTH_YEAR_RANGE.max" required>
         <small>以出生年份計算。若出生在農曆新年前，命卦會不同，請留意。</small>
+      </label>
+      <label>出生日期（選填）
+        <input v-model="birthDateInput" type="date" autocomplete="bday">
+        <small>填入後以農曆新年換算命年；只填年份時以國曆年計算。</small>
       </label>
       <label>性別
         <select v-model="genderInput">

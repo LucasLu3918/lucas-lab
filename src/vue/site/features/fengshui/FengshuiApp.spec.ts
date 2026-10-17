@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import FengshuiApp from './FengshuiApp.vue';
 
@@ -9,6 +9,7 @@ describe('FengshuiApp', () => {
     await wrapper.find('input[type="number"]').setValue(1985);
     await wrapper.find('select').setValue('male');
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     expect(wrapper.find('.summary-line').text()).toContain('乾卦（6）');
     expect(wrapper.findAll('.direction-table tbody tr')).toHaveLength(8);
@@ -20,10 +21,12 @@ describe('FengshuiApp', () => {
     const wrapper = mount(FengshuiApp);
     await wrapper.find('input[type="number"]').setValue(1985);
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.find('.flying-grid').exists()).toBe(false);
     const selects = wrapper.findAll('select');
     await selects[1].setValue('south');
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.findAll('.palace-cell')).toHaveLength(9);
     expect(wrapper.find('#fengshui-flying').text()).toContain('子山午向');
   });
@@ -32,6 +35,7 @@ describe('FengshuiApp', () => {
     const wrapper = mount(FengshuiApp);
     await wrapper.find('input[type="number"]').setValue(1800);
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.find('[role="alert"]').text()).toContain('1900');
     expect(wrapper.find('.results').exists()).toBe(false);
   });
@@ -40,11 +44,13 @@ describe('FengshuiApp', () => {
     const wrapper = mount(FengshuiApp);
     await wrapper.find('input[type="number"]').setValue(1985);
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.find('.stale-notice').exists()).toBe(false);
     await wrapper.find('select').setValue('female');
     expect(wrapper.find('.stale-notice').exists()).toBe(true);
     expect(wrapper.find('.summary-line').text()).toContain('乾卦（6）');
     await wrapper.find('form').trigger('submit');
+    await flushPromises();
     expect(wrapper.find('.summary-line').text()).toContain('離卦（9）');
     expect(wrapper.find('.stale-notice').exists()).toBe(false);
   });

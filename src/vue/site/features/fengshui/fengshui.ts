@@ -74,18 +74,33 @@ export interface NatalKua {
 
 export const BIRTH_YEAR_RANGE = { min: 1900, max: 2100 } as const;
 
+// 出生日期（YYYY-MM-DD）的格式與日期是否存在。農曆換算在 lunar.ts 進行，因此這裡不載入曆法套件。
+export function parseBirthDate(birthDate: string): { year: number; month: number; day: number } {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
+  if (!match) throw new Error('出生日期格式應為 YYYY-MM-DD');
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const check = new Date(Date.UTC(year, month - 1, day));
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) {
+    throw new Error('出生日期不存在，請重新確認');
+  }
+  return { year, month, day };
+}
+
 // 本命卦：2000 年（含）以前與以後的公式不同，男女各一組。餘數 5 時，男為坤、女為艮。
-export function natalKua(year: number, gender: Gender): NatalKua {
+// 只給年份時以國曆年換算；給了農曆年（lunarYear，由 lunarYearOf 換算）時以農曆年計算。
+export function natalKua(year: number, gender: Gender, lunarYear?: number): NatalKua {
   if (!Number.isInteger(year) || year < BIRTH_YEAR_RANGE.min || year > BIRTH_YEAR_RANGE.max) {
     throw new Error(`請輸入 ${BIRTH_YEAR_RANGE.min} 至 ${BIRTH_YEAR_RANGE.max} 之間的出生年份`);
   }
   if (gender !== 'male' && gender !== 'female') throw new Error('請選擇性別');
 
-  const last2 = year % 100;
+  const lunar = lunarYear ?? year;
+  const last2 = lunar % 100;
   const root = digitRoot(last2);
-  const early = year <= 2000;
+  const early = lunar <= 2000;
   const genderLabel = gender === 'male' ? '男' : '女';
-  const steps = [`${year} 年：後兩位 ${String(last2).padStart(2, '0')}，數字根 ${root}`];
+  const steps = [`${lunar} 年：後兩位 ${String(last2).padStart(2, '0')}，數字根 ${root}`];
+  if (lunar !== year) steps.unshift(`生於農曆新年前，依農曆 ${lunar} 年換算`);
   let raw: number;
   if (early) {
     raw = gender === 'male' ? 10 - root : root + 5;
@@ -231,15 +246,15 @@ export interface FengshuiData {
 
 export type FengshuiReport = MethodResult<FengshuiData>;
 
-export function buildFengshuiReport(input: { year: number; gender: Gender; facing?: FacingId }): FengshuiReport {
-  const natal = natalKua(input.year, input.gender);
+export function buildFengshuiReport(input: { year: number; gender: Gender; lunarYear?: number; facing?: FacingId }): FengshuiReport {
+  const natal = natalKua(input.year, input.gender, input.lunarYear);
   const flying = input.facing ? flyingStarChart(input.facing) : null;
   return createMethodResult({
     module: 'fengshui',
     methodVersion: FENGSHUI_METHOD_VERSION,
     contentVersion: 'fengshui-copy-v1',
-    // 只有年份與性別時，農曆新年前後出生的命卦無法判斷，因此標為近似。
-    inputPrecision: 'approximate',
+    // 只有年份與性別時，農曆新年前後出生的命卦無法判斷，因此標為近似；給出生日期後才依農曆新年換算。
+    inputPrecision: input.lunarYear === undefined ? 'approximate' : 'full',
     data: { natal, mansions: eightMansions(natal.gua), flying },
   });
 }
