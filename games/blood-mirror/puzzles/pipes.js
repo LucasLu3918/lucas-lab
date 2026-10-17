@@ -44,6 +44,33 @@ export function mountPipes(ctx){
  if(ctx.fresh)attempt=null;
  if(!attempt)attempt={rotations:[...initialPipeRotations],history:[],hint:0};
  const current=attempt;
+ const snapshot=()=>{
+  const network=analyzePipes(current.rotations),leak=network.leaks[0];
+  return {
+   tiles:pipeTiles.map((tile,i)=>({at:tile.at,type:tile.type,rotation:current.rotations[i],directions:pipePorts(tile.type,current.rotations[i]).map(port=>pipeDirectionNames[port]),flowing:network.flowing.includes(tile.at)})),
+   flowingCells:network.flowing,connectedPipes:network.connectedPipes,solved:network.solved,
+   leak:leak?{at:leak.at,direction:pipeDirectionNames[leak.direction]}:null,
+   status:network.solved?'五段管件已接通，城市可以開始供暖。':'蒸汽已通過 '+network.connectedPipes+' / 5 段管件，城市尚未接通。',
+   explanation:network.solved?'按下「確認管網接通」完成修復。':leak?'第'+(Math.floor(leak.at/3)+1)+'排第'+(leak.at%3+1)+'格的'+pipeDirectionNames[leak.direction]+'側管口尚未接好。沿通汽管段檢查下一格。':'',
+   hintText:current.hint?hints.slice(0,current.hint).join(' '):'',hintCount:current.hint,hintLimit:hints.length,canUndo:current.history.length>0
+  };
+ };
+ const act=action=>{
+  if(!action||typeof action!=='object')return snapshot();
+  if(action.type==='rotate'&&Number.isInteger(action.index)&&action.index>=0&&action.index<pipeTiles.length){
+   current.history.push([...current.rotations]);if(current.history.length>50)current.history.shift();
+   current.rotations[action.index]++;ctx.playCue('click');
+  }else if(action.type==='undo'&&current.history.length)current.rotations=current.history.pop();
+  else if(action.type==='reset'){current.rotations=[...initialPipeRotations];current.history=[];}
+  else if(action.type==='hint')current.hint=Math.min(hints.length,current.hint+1);
+  else if(action.type==='confirm'&&pipeIsSolved(current.rotations))ctx.done();
+  return snapshot();
+ };
+ if(ctx.mountPuzzleIsland){
+  ctx.render('<p class="challenge-help">將左上「泉源」接到右下「城市」。每點一次，管件順時針轉 90°；只有相接的管口能傳送蒸汽，直管轉半圈也算接通。</p><div data-vue-pipes-puzzle><p role="status">管網正在映照…</p></div>');
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act});
+  return;
+ }
  ctx.render('<p class="challenge-help">將左上「泉源」接到右下「城市」。每點一次，管件順時針轉 90°；只有相接的管口能傳送蒸汽，直管轉半圈也算接通。</p><div class="pipe-legend"><span>◆ 通汽管段</span><span>○ 尚未通汽</span></div><div class="pipes-board" aria-label="三乘三蒸汽管網">'+Array.from({length:9},(_,at)=>{
   if(at===0||at===8)return '<div class="pipe-terminal '+(at===0?'pipe-source':'pipe-city')+'" data-pipe-cell="'+at+'" role="img" aria-label="'+(at===0?'泉源，出汽口向右':'城市，進汽口向左')+'">'+pipeSVG(at===0?'source':'city')+'<strong>'+(at===0?'泉源 →':'→ 城市')+'</strong><small class="pipe-terminal-status">'+(at===0?'持續供汽':'等待供暖')+'</small></div>';
   const i=pipeTiles.findIndex(tile=>tile.at===at);
@@ -71,9 +98,7 @@ export function mountPipes(ctx){
  };
  board.addEventListener('click',event=>{
   const button=event.target.closest('[data-pipe]');if(!button)return;
-  current.history.push([...current.rotations]);if(current.history.length>50)current.history.shift();
-  current.rotations[Number(button.dataset.pipe)]++;
-  ctx.playCue('click');update();
+  act({type:'rotate',index:Number(button.dataset.pipe)});update();
  });
  board.addEventListener('keydown',event=>{
   const button=event.target.closest('[data-pipe]');const step={ArrowUp:-3,ArrowDown:3,ArrowLeft:-1,ArrowRight:1}[event.key];
@@ -86,10 +111,10 @@ export function mountPipes(ctx){
    if(next>=0){board.querySelector('[data-pipe="'+next+'"]').focus();break;}
   }
  });
- document.querySelector('#pipes-undo').onclick=()=>{if(current.history.length){current.rotations=current.history.pop();update();}};
- document.querySelector('#pipes-reset').onclick=()=>{current.rotations=[...initialPipeRotations];current.history=[];update();};
- document.querySelector('#pipes-hint').onclick=()=>{current.hint=Math.min(hints.length,current.hint+1);update();};
- document.querySelector('#pipes-confirm').onclick=()=>{if(pipeIsSolved(current.rotations))ctx.done();};
+ document.querySelector('#pipes-undo').onclick=()=>{act({type:'undo'});update();};
+ document.querySelector('#pipes-reset').onclick=()=>{act({type:'reset'});update();};
+ document.querySelector('#pipes-hint').onclick=()=>{act({type:'hint'});update();};
+ document.querySelector('#pipes-confirm').onclick=()=>act({type:'confirm'});
  update();
 }
 

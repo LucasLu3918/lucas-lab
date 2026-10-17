@@ -3,9 +3,12 @@ import HintPanel from './HintPanel.vue';
 import InventoryPanel from './InventoryPanel.vue';
 import JournalPanel from './JournalPanel.vue';
 import MazePuzzle from './MazePuzzle.vue';
+import PipesPuzzle from './PipesPuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import { parseHintSnapshot } from './hints';
 import { parseJournalSnapshot } from './journal';
+import { parsePipesSnapshot, type PipesAction } from './pipes';
+import type { PipesSnapshot } from './pipes';
 import { useInventory } from './useInventory';
 
 const inventoryRoot = document.querySelector('[data-vue-game-inventory]');
@@ -100,6 +103,22 @@ export function mountMazePuzzleIsland(
   const app = createApp(MazePuzzle, { snapshot: value, onAction });
   app.mount(root);
   root.setAttribute('data-vue-maze-ready', 'true');
+  return () => app.unmount();
+}
+
+type PipesPuzzleProps = InstanceType<typeof PipesPuzzle>['$props'];
+
+export function mountPipesPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: PipesAction) => PipesSnapshot,
+): (() => void) | null {
+  const snapshot = parsePipesSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(PipesPuzzle, { snapshot, onAction } satisfies PipesPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-pipes-ready', 'true');
   return () => app.unmount();
 }
 
