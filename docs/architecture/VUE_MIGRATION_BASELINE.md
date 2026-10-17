@@ -174,4 +174,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：六組面具與選項順序、五則證詞、stage id、modal shell、下一道鏡面光路、進度與存檔行為維持原樣。Vue 只呈現 repository-authored 字串並使用原生 `<select>`，不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含快照解析、元件行為、game bundle export contract，以及瀏覽器中的鍵盤選擇、重設、未填／重複／錯誤回饋、通關與進度連續性。
 
-下一步：盤點尚未遷移的獨立 Puzzle UI，優先選擇規則可留在 legacy、互動 DOM 邊界明確且可加入既有 lazy game bundle 的項目。
+## Phase 12 — Blood Mirror Light Puzzle Vue island
+
+`LightPuzzle.vue` 接手 ballroom「鏡面光路」的 5×6 光格、四面鏡子的翻轉按鈕、光線路徑、暗門狀態與重設控制，沿用既有 lazy game bundle、challenge modal 與 puzzle CSS。`light.js` 保留 `traceBeam`／`lightSolved`、方向狀態、翻轉與重設動作、點擊音效及 stage 完成回呼；Vue 收到經驗證的鏡面／光線快照，再將 typed flip/reset action 交回 legacy controller。沒有 island callback 時，既有 DOM renderer 繼續使用。
+
+不變條件：光線入口、暗門位置、四面鏡子的座標／起始方向／解答、stage id、modal shell、內嵌提示、進度與存檔行為維持原樣。Vue 只管理光路 UI 子樹，不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含快照 parser、元件的鍵盤翻轉／重設／即時狀態、既有 game bundle contract，以及 360px／1280px 遊戲瀏覽器中的 lazy mount、解謎、legacy stage 進度和水平溢位。
+
+下一步：評估「懷錶齒輪」Vue island；Vue 接手三枚齒輪控制與狀態呈現，legacy 保留暖身階段、聯動規則、角度動畫、音效和通關判定。

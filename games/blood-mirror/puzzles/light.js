@@ -30,6 +30,27 @@ const describe=exit=>!exit?'光線在鏡廳裡不停繞圈。':exit.side==='righ
 
 export function mountLight(ctx){
  let state=[...startState],moves=0,message='';
+ const snapshot=()=>{
+  const {cells,exit}=traceBeam(state);
+  return {
+   mirrors:mirrors.map(([row,column],index)=>({index,row,column,orientation:state[index]})),
+   beamCells:cells.map(([row,column])=>({row,column})),
+   status:message||describe(exit),doorOpen:lightSolved(state)
+  };
+ };
+ const action=change=>{
+  if(change?.type==='flip'&&Number.isInteger(change.index)&&change.index>=0&&change.index<state.length){
+   const index=change.index;state[index]=state[index]?0:1;moves++;ctx.playCue('click');message='';
+   if(lightSolved(state))ctx.done();
+  }
+  if(change?.type==='reset'){state=[...startState];message='';}
+  return snapshot();
+ };
+ if(ctx.mountPuzzleIsland){
+  ctx.render('<div data-vue-light-puzzle><p class="challenge-feedback" role="status">鏡廳光路載入中…</p></div>');
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action});
+  return;
+ }
  const draw=()=>{
   const {cells,exit}=traceBeam(state),lit=new Set(cells.map(([r,c])=>r+','+c)),at=new Map(mirrors.map(([r,c],i)=>[r+','+c,i]));
   let grid='';
