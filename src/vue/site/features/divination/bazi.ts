@@ -1,5 +1,5 @@
 import { Solar, type EightChar } from 'lunar-javascript';
-import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from './timezone';
+import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 
 export const BAZI_METHOD_VERSION = 'bazi-local-v2';
 const CHINA_TIME_ZONE = 'Asia/Shanghai';

@@ -1,5 +1,5 @@
 import * as Astronomy from 'astronomy-engine';
-import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from './timezone';
+import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 
 export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
 const SIGNS = [

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { calculateAstrology, createAstrologyForecast } from './astrology';
 import { calculateBazi, createBaziForecast } from './bazi';
 import { BIRTH_PLACES } from './locations';
-import { parseCivilDateTime, resolveCivilDateTime } from './timezone';
+import { parseCivilDateTime, resolveCivilDateTime } from '../fortune-core/civil-time';
 
 describe('local divination calculations', () => {
   it('keeps the curated location list usable with unique IANA zones', () => {

@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { DIVINATION_MODULES } from './modules';
+</script>
+
 <template>
   <div class="divination-hub">
     <header class="divination-hero">
@@ -5,28 +9,12 @@
       <p>三種古老象徵系統，陪你整理眼前的問題。所有計算都在你的瀏覽器完成。</p>
     </header>
     <section class="doors" aria-label="選擇占卜方式">
-      <a class="door" href="../tarot/">
-        <span class="door__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M18 7a9 9 0 1 0 7 14.5A7.5 7.5 0 0 1 18 7z" /></svg></span>
+      <a v-for="door in DIVINATION_MODULES" :key="door.id" class="door" :href="door.href">
+        <span class="door__icon" aria-hidden="true"><svg viewBox="0 0 32 32" v-html="door.iconSvg" /></span>
         <span class="door__body">
-          <h2>星夜塔羅</h2>
-          <span>隨機快抽、每日一抽或三／五張深入牌陣；問題與主題皆可略過。</span>
-          <span class="door__meta">不需個資，立即抽牌</span>
-        </span>
-      </a>
-      <a class="door" href="../bazi/">
-        <span class="door__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 10h4v12H5zM11 10h4v12h-4zM17 10h4v12h-4zM23 10h4v12h-4z" /></svg></span>
-        <span class="door__body">
-          <h2>生辰八字</h2>
-          <span>簡易模式不需出生時間，排三柱；提供可靠出生時間可查看四柱、十神與五行。</span>
-          <span class="door__meta">選擇資料完整度</span>
-        </span>
-      </a>
-      <a class="door" href="../astrology/">
-        <span class="door__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="5" /><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(-24 16 16)" /></svg></span>
-        <span class="door__body">
-          <h2>西洋占星</h2>
-          <span>出生時間不詳可先查看近似行星落座；補上精確時間和地點才計算上升、天頂與宮位。</span>
-          <span class="door__meta">選擇資料完整度</span>
+          <h2>{{ door.title }}</h2>
+          <span>{{ door.description }}</span>
+          <span class="door__meta">{{ door.meta }}</span>
         </span>
       </a>
     </section>
