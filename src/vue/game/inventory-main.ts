@@ -17,6 +17,7 @@ import PrismBallroomPuzzle from './PrismBallroomPuzzle.vue';
 import StarwheelPuzzle from './StarwheelPuzzle.vue';
 import ApothecaryTestimonyPuzzle from './ApothecaryTestimonyPuzzle.vue';
 import ApothecaryVesselsPuzzle from './ApothecaryVesselsPuzzle.vue';
+import ApothecaryMixingPuzzle from './ApothecaryMixingPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
@@ -24,6 +25,7 @@ import { parsePrismBallroomSnapshot, type PrismBallroomAction, type PrismBallroo
 import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } from './starwheel';
 import { parseApothecaryTestimonySnapshot, type ApothecaryTestimonyAction, type ApothecaryTestimonySnapshot } from './apothecary-testimony';
 import { parseApothecaryVesselsSnapshot, type ApothecaryVesselsAction, type ApothecaryVesselsSnapshot } from './apothecary-vessels';
+import { parseApothecaryMixingSnapshot, type ApothecaryMixingAction, type ApothecaryMixingSnapshot } from './apothecary-mixing';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -443,6 +445,36 @@ export function mountApothecaryVesselsPuzzleIsland(
   }));
   app.mount(root);
   root.setAttribute('data-vue-apothecary-vessels-ready', 'true');
+  return () => app.unmount();
+}
+
+type ApothecaryMixingPuzzleProps = InstanceType<typeof ApothecaryMixingPuzzle>['$props'];
+
+export function mountApothecaryMixingPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: ApothecaryMixingAction) => ApothecaryMixingSnapshot,
+): (() => void) | null {
+  const snapshot = parseApothecaryMixingSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const dispatch = (action: ApothecaryMixingAction) => {
+    const next = parseApothecaryMixingSnapshot(onAction(action));
+    if (next) current.value = next;
+    return next || current.value;
+  };
+  const app = createApp(defineComponent({
+    name: 'ApothecaryMixingPuzzleIsland',
+    setup() {
+      return () => h(ApothecaryMixingPuzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies ApothecaryMixingPuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-apothecary-mixing-ready', 'true');
   return () => app.unmount();
 }
 
