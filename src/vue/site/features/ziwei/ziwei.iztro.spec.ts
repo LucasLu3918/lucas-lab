@@ -33,6 +33,9 @@ const SOLAR_CASES: Case[] = [
   { label: '2025 閏六月初四 亥時 男', solar: '2025-07-28', birthBranch: 11, gender: 'male' },
   { label: '2025 閏六月十七 亥時 男', solar: '2025-08-10', birthBranch: 11, gender: 'male' },
   { label: '2025 閏六月廿七 寅時 女', solar: '2025-08-20', birthBranch: 2, gender: 'female' },
+  { label: '1990 晚子 男', solar: '1990-06-14', birthBranch: 12, gender: 'male' },
+  { label: '1990 五月初八 晚子 女', solar: '1990-05-31', birthBranch: 12, gender: 'female' },
+  { label: '2025 閏六月十七 晚子 男', solar: '2025-08-10', birthBranch: 12, gender: 'male' },
   { label: '1979 卯時 男', solar: '1979-11-02', birthBranch: 3, gender: 'male' },
   { label: '1996 午時 女', solar: '1996-05-27', birthBranch: 6, gender: 'female' },
   { label: '2010 申時 男', solar: '2010-04-18', birthBranch: 8, gender: 'male' },
@@ -79,6 +82,15 @@ describe('ziwei standard engine against iztro 2.6.3', () => {
   it.each(SOLAR_CASES)('agrees on solar birth chart: $label', ({ solar, birthBranch, gender }) => {
     const result = calculateZiwei({ birthDate: solar, birthBranch, gender });
     compareChart(iztroSolar(solar, birthBranch, gender), result.data);
+  });
+
+  it('agrees on 晚子時 (iztro timeIndex 12) for every day of 2024, including lunar day 30', () => {
+    // 晚子時 uses the same 命宮 as 子 but places 紫微 by the next lunar day. Sweep the whole year to reach lunar day 29–30 too.
+    for (let day = new Date('2024-01-01T00:00:00Z'); day.getUTCFullYear() === 2024; day = new Date(day.getTime() + 86_400_000)) {
+      const solar = day.toISOString().slice(0, 10);
+      const result = calculateZiwei({ birthDate: solar, birthBranch: 12, gender: 'male' });
+      compareChart(iztroSolar(solar, 12, 'male'), result.data);
+    }
   });
 
   it('agrees on a chart given as a lunar date (1990 五月初八 亥時 男)', () => {
