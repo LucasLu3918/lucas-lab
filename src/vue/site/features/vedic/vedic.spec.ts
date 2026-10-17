@@ -101,6 +101,17 @@ describe('calculateVedicReport', () => {
     expect(chart.lagna).not.toBeNull();
   });
 
+  it('lists the nakshatras the Moon crosses on the birth day when the time is unknown', () => {
+    const known = calculateVedicReport({ birthDate: '1990-06-15', birthTime: '08:00', ...TAIPEI }, AS_OF).data;
+    expect(known.moon.possibleNakshatras).toEqual([known.moon.nakshatra]);
+    const unknown = calculateVedicReport({ birthDate: '1990-06-15', birthTime: '08:00', ...TAIPEI, timeUnknown: true }, AS_OF).data;
+    const names = unknown.moon.possibleNakshatras.map(item => item.name);
+    expect(names).toContain(unknown.moon.nakshatra.name);
+    // The Moon moves at most about 15.5° a day; crossing two boundaries in one day needs more than 13°20′, so up to three nakshatras.
+    expect(names.length).toBeGreaterThanOrEqual(1);
+    expect(names.length).toBeLessThanOrEqual(3);
+  });
+
   it('places Rahu and Ketu exactly opposite and keeps every graha within the twelve houses', () => {
     const chart = calculateVedicReport({ birthDate: '1990-06-15', birthTime: '08:00', ...TAIPEI }, AS_OF).data;
     const rahu = chart.grahas.find(item => item.id === 'rahu')!;

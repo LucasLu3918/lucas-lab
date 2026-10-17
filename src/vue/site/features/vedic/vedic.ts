@@ -1,7 +1,7 @@
 // 吠陀占星（Jyotish）排盤：Lahiri 恆星黃道、月宿與宿內分段、維姆歐塔里大運、九曜與整宮制上升。
 // 規則依 docs/plan/FORTUNE_HUB_PLAN.md §3.11；天體位置沿用 fortune-core/ephemeris 的地心視黃道經度。
 import * as Astronomy from 'astronomy-engine';
-import { parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
+import { parseCivilDateTime, resolveCivilDateTime, type CivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 import { calculateAscendantAndMidheaven, geoEclipticLongitude, normalize } from '../fortune-core/ephemeris';
 import { createMethodResult, type InputPrecision, type MethodResult } from '../fortune-core/result';
 import { DASHA_ORDER, DASHA_TOTAL_YEARS, GRAHAS, NAKSHATRAS, RASHIS, type GrahaId, type NakshatraInfo } from './vedic-data';
@@ -71,6 +71,8 @@ export interface VedicChart {
     sign: string;
     degree: number;
     nakshatra: NakshatraInfo;
+    // 時間不確定時，出生當天（當地午夜至次日午夜）月亮經過的所有宿；時間已知時只有一個。
+    possibleNakshatras: NakshatraInfo[];
     pada: number;
     degreeInNakshatra: number;
     nearBoundary: boolean;
@@ -193,6 +195,18 @@ function validate(input: VedicInput, unknownTime: boolean): void {
   }
 }
 
+/** 出生當天（當地午夜至次日午夜，每小時取樣）月亮經過的宿，依經過的先後排列。 */
+function nakshatrasOnBirthDay(civil: CivilDateTime, timeZone: string, ayanamsa: number): NakshatraInfo[] {
+  const midnight = resolveCivilDateTime({ ...civil, hour: 0, minute: 0, second: 0 }, timeZone).getTime();
+  const indices: number[] = [];
+  for (let hour = 0; hour <= 24; hour++) {
+    const longitude = normalize(geoEclipticLongitude(Astronomy.Body.Moon, new Date(midnight + hour * 3_600_000)) - ayanamsa);
+    const { index } = nakshatraAt(longitude);
+    if (!indices.includes(index)) indices.push(index);
+  }
+  return indices.map(index => NAKSHATRAS[index]);
+}
+
 /** 排出吠陀星盤。`asOf` 決定目前的大運，測試時可固定。 */
 export function calculateVedicReport(input: VedicInput, asOf: Date = new Date()): VedicReport {
   const unknownTime = Boolean(input.timeUnknown);
@@ -205,6 +219,7 @@ export function calculateVedicReport(input: VedicInput, asOf: Date = new Date())
   const moonSidereal = longitudes.moon.longitude;
   const moonNakshatra = nakshatraAt(moonSidereal);
   const moonSign = signOf(moonSidereal);
+  const possibleNakshatras = unknownTime ? nakshatrasOnBirthDay(civil, input.timeZone, ayanamsa) : [moonNakshatra.info];
 
   const lagnaSidereal = unknownTime ? null : normalize(calculateAscendantAndMidheaven(birth, input.latitude, input.longitude).ascendant - ayanamsa);
   const lagnaSign = lagnaSidereal === null ? null : signOf(lagnaSidereal);
@@ -242,6 +257,7 @@ export function calculateVedicReport(input: VedicInput, asOf: Date = new Date())
       sign: moonSign.sign,
       degree: moonSign.degree,
       nakshatra: moonNakshatra.info,
+      possibleNakshatras,
       pada: moonNakshatra.pada,
       degreeInNakshatra: moonNakshatra.degreeInNakshatra,
       nearBoundary: moonNakshatra.nearBoundary,

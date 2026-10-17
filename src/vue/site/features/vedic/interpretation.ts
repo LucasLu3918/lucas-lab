@@ -13,7 +13,11 @@ export function nakshatraParagraph(chart: VedicChart): string {
   const { nakshatra, pada, nearBoundary } = chart.moon;
   const lord = GRAHAS[nakshatra.lord];
   const boundary = nearBoundary ? '月亮接近宿界，若出生時間有誤差，月宿也可能落在相鄰的宿。' : '';
-  return `${nakshatra.name}（${nakshatra.meaning}）是月亮所在的宿，${nakshatra.essence} 主星為${lord.name}，帶有${lord.keywords}的色彩。月亮位於第 ${pada} 段。${boundary}`;
+  const candidates = chart.moon.possibleNakshatras;
+  const day = candidates.length > 1
+    ? `出生時間不確定，出生當天月亮經過 ${candidates.map(item => item.name).join('、')} 等宿，此處以當地中午的位置估算。`
+    : '';
+  return `${nakshatra.name}（${nakshatra.meaning}）是月亮所在的宿，${nakshatra.essence} 主星為${lord.name}，帶有${lord.keywords}的色彩。月亮位於第 ${pada} 段。${boundary}${day}`;
 }
 
 export function dashaParagraph(chart: VedicChart): string {
