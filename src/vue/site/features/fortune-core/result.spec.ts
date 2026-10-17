@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_DISCLAIMER, createMethodResult } from './result';
+import { DEFAULT_DISCLAIMER, createMethodResult, precisionLabel } from './result';
 
 describe('method result envelope', () => {
   it('stamps method, content version, precision and the default disclaimer', () => {
@@ -26,5 +26,11 @@ describe('method result envelope', () => {
       inputPrecision: 'minimal', disclaimer: '自訂提醒', data: null,
     });
     expect(result.disclaimer).toBe('自訂提醒');
+  });
+
+  it('labels every precision level with the same shared wording', () => {
+    expect(precisionLabel('full')).toBe('完整資料');
+    expect(precisionLabel('approximate')).toBe('近似結果');
+    expect(precisionLabel('minimal')).toBe('最少資料');
   });
 });

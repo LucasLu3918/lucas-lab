@@ -1,6 +1,6 @@
 # 占卜中心 Fortune Hub 規劃
 
-- 狀態：P0（#103）、P1（#105）已合併；P2 紫微斗數已實作（路線 B，見 §3.5）；P3、P4 尚未開始
+- 狀態：P0（#103）、P1（#105）、P2（#107）已合併；P3 整合已實作（見 §9.1，分支 `claude/fortune-hub-p3`）；P4 尚未開始
 - 日期：2026-10-17
 - 範圍：以既有「月夜占卜室」為基礎，整合六個占卜模組、共用計算引擎與資料層，並導入本機 Claude Code 占卜技能作為規格與內容來源。
 - 原則：所有計算在瀏覽器本機完成；不需要付費 API 或 AI API Key；計算可重現；出生資料不儲存、不上傳。
@@ -11,10 +11,10 @@
 
 | 模組 | 路由 | 目前狀態 | 主要檔案 |
 | --- | --- | --- | --- |
-| 塔羅 | `/tarot/` | 已完成：78 張牌、六種牌陣、單張與每日一抽；使用 `crypto.getRandomValues` 抽牌；閱讀歷史存於本機 | `src/vue/site/features/tarot/` |
-| 八字 | `/bazi/` | 已完成：三柱（時辰未知）與四柱、十神、五行、大運；使用 `lunar-javascript` | `src/vue/site/features/divination/bazi.ts`（`bazi-local-v2`） |
-| 西洋占星 | `/astrology/` | 已完成：行星落座、相位、年度流年；使用 `astronomy-engine`；時間未知時隱藏上升與宮位 | `src/vue/site/features/divination/astrology.ts`、`astrology-annual.ts`（`tropical-whole-sign-v3`） |
-| 占卜總覽 | `/divination/` | 入口卡片（月夜占卜室） | `DivinationHub.vue` |
+| 塔羅 | `/tarot/` | 已完成：78 張牌、六種牌陣、單張與每日一抽；使用 `crypto.getRandomValues` 抽牌；閱讀歷史存於本機，P3 起經 `fortune-core/local-history` 匯出 | `src/vue/site/features/tarot/` |
+| 八字 | `/bazi/` | 已完成：三柱（時辰未知）與四柱、十神、五行、大運；使用 `lunar-javascript`；P3 起標示 `inputPrecision` | `src/vue/site/features/divination/bazi.ts`（`bazi-local-v2`） |
+| 西洋占星 | `/astrology/` | 已完成：行星落座、相位、年度流年；使用 `astronomy-engine`；時間未知時隱藏上升與宮位；P3 起標示 `inputPrecision` | `src/vue/site/features/divination/astrology.ts`、`astrology-annual.ts`（`tropical-whole-sign-v3`） |
+| 占卜總覽 | `/divination/` | 入口卡片（月夜占卜室）；P3 起加入零輸入的今日總覽（今日一抽、今日星座） | `DivinationHub.vue`、`TodayOverview.vue` |
 | 星座運勢 | `/horoscope/` | 已完成（P1）：五個面向與幸運指引，原創文案依 `dailySeed` 選取 | `src/vue/site/features/horoscope/` |
 | 紫微斗數 | `/ziwei/` | 已完成（P2）：十二宮、十四主星、四化與大限；標準安星法，與 iztro 差異測試一致 | `src/vue/site/features/ziwei/`（`ziwei-standard-v1`） |
 | 生命靈數 | `/numerology/` | 已完成（P1）：生命路徑、表達數、靈魂數、人格數、生日數與個人循環 | `src/vue/site/features/numerology/`（`numerology-pythagorean-v1`） |
@@ -233,6 +233,15 @@ interface MethodResult<T> {
 | P4 體驗與維運 | Hub 視覺改版（暗黑童話主題）、離線快取、perf budget、visual audit、文件更新 | `npm run check:all` 通過 |
 
 P1 的兩個軌道與 P2 的 spike 彼此獨立，只依賴 P0 的共用層，檔案範圍互不重疊，可各自在獨立工作區進行。
+
+### 9.1 P3 實作結果
+
+- **共用層**：塔羅閱讀歷史改由 `fortune-core/local-history` 提供；storage key 維持 `lucas-lab:tarot-history:v1`，既有紀錄不需遷移。`local-history` 新增保留順序的 `update`；寫入失敗改為往上拋，讓 UI 能正確告知「未保存」，讀取與清除仍不拋錯。
+- **精確度**：八字與占星結果新增 `inputPrecision`，共用 `InputPrecision` 型別；時間未知為 `approximate`，時間齊全為 `full`。結果頁以 `fortune-core/ui/PrecisionBadge.vue` 顯示同一套標示。
+- **歷史匯出與刪除**：塔羅紀錄可匯出為 JSON（只含牌卡、時間與筆記）；清除紀錄維持原有行為。
+- **日期一致**：`localDayKey` 移至 `fortune-core/civil-time`，星座運勢與塔羅每日一抽共用同一個本機日期。
+- **今日總覽**：占卜中心首頁新增「今日總覽」，今日一抽（已抽則顯示牌名）與今日星座（記住上次選擇的星座，只存於本機）。塔羅歷史與星座運勢引擎都以動態匯入載入。量測（gzip）：`/divination/` 入口 chunk 約 3.5 KB；總覽掛載時就會載入塔羅歷史與牌卡資料約 10.8 KB（每次進入首頁都會）；選擇星座後才載入星座引擎約 4.8 KB。這些數字留給 P4 設定 perf budget 時參考，目前尚未設定預算。
+- **範圍外**：八字與占星仍不保存閱讀紀錄，因為出生資料不儲存（§5）；因此統一歷史目前只包含塔羅。單筆刪除未實作，清除紀錄涵蓋刪除需求。
 
 ## 10. 待決定事項
 

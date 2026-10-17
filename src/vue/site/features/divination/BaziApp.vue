@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { calculateBazi, createBaziForecast, type BaziChart, type BaziForecast, type ForecastPeriod } from './bazi';
 import { BIRTH_PLACES } from './locations';
+import PrecisionBadge from '../fortune-core/ui/PrecisionBadge.vue';
 
 const birthDate = ref('');
 const birthTime = ref('12:00');
@@ -54,6 +55,7 @@ function calculate(): void {
 
     <section v-if="chart" class="results" aria-live="polite">
       <div class="section-title"><div><h2>{{ chart.timeUnknown ? '簡易三柱命盤' : '完整四柱命盤' }}</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
+      <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，僅排三柱' : '已提供出生時間，排完整四柱'" />
       <div class="pillars"><article v-for="pillar in chart.pillars" :key="pillar.label" class="pillar"><p>{{ pillar.label }}</p><strong>{{ pillar.value }}</strong><span>{{ pillar.element }}</span><small>{{ pillar.tenGod }}</small><small>藏干：{{ pillar.hiddenStems.join('、') || '—' }}</small></article></div>
       <div class="result-grid"><div class="result-col"><div class="summary"><h3>日主與五行分布</h3><p>日主為 <strong>{{ chart.dayMaster }}</strong>。五行以天干、地支各計一項作簡要統計：{{ Object.entries(chart.elementCounts).map(([element,count]) => `${element}${count}`).join('・') }}。</p></div>
       <article class="summary strength"><h3>日主支援線索：{{ chart.strengthSignals.label }}</h3><ul><li v-for="item in chart.strengthSignals.evidence" :key="item">{{ item }}</li></ul><p>這是可查核的簡化觀察，不等同傳統格局、完整旺衰或喜用神判斷。</p></article></div>

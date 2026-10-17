@@ -4,6 +4,7 @@ import { calculateAstrology, createAstrologyForecast, signDescription, type Astr
 import { createAnnualAstrologyForecast, type AnnualAstrologyForecast } from './astrology-annual';
 import { BIRTH_PLACES } from './locations';
 import type { Disambiguation } from '../fortune-core/civil-time';
+import PrecisionBadge from '../fortune-core/ui/PrecisionBadge.vue';
 
 const birthDate = ref('');
 const birthTime = ref('12:00');
@@ -70,6 +71,7 @@ function calculate(): void {
       <nav class="result-nav" aria-label="結果章節"><a href="#natal">本命星盤</a><a href="#transits">近期行運</a><a href="#annual">年度天象</a></nav>
       <section id="natal" class="result-block">
       <div class="section-title"><div><h2>行星落點</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
+      <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，隱藏上升點與宮位' : '已提供出生時間，計算上升點與宮位'" />
       <div class="chart-points"><article v-if="chart.ascendant" class="point"><small>上升點</small><strong>{{ chart.ascendant.sign }}</strong><span>{{ chart.ascendant.degree.toFixed(1) }}°</span></article><article v-if="chart.midheaven" class="point"><small>天頂</small><strong>{{ chart.midheaven.sign }}</strong><span>{{ chart.midheaven.degree.toFixed(1) }}°</span></article><article v-if="!chart.ascendant" class="point unknown"><small>出生時間未知</small><strong>不計算時角與宮位</strong><span>行星位置以當地中午估算，月亮可能跨星座</span></article></div>
       <div class="planet-grid"><article v-for="planet in chart.planets" :key="planet.id" class="planet"><div><strong>{{ planet.name }}</strong><small>{{ planet.id === 'sun' ? '核心動機' : planet.id === 'moon' ? '情緒需求' : '行星象徵' }}</small></div><span class="sign">{{ planet.sign }}</span><strong class="degree">{{ planet.degree.toFixed(1) }}°</strong><span class="house">{{ planet.house ? `${planet.house} 宮` : '宮位未知' }}</span><span v-if="planet.retrograde" class="retrograde">逆行</span></article></div>
       <div class="summary-grid"><article class="summary"><h3>太陽</h3><p>{{ signDescription(chart.planets.find(planet => planet.id === 'sun')!.sign, 'sun') }}</p></article><article class="summary"><h3>月亮</h3><p>{{ signDescription(chart.planets.find(planet => planet.id === 'moon')!.sign, 'moon') }}</p></article><article v-if="chart.ascendant" class="summary"><h3>上升</h3><p>{{ signDescription(chart.ascendant.sign, 'rising') }}</p></article></div>

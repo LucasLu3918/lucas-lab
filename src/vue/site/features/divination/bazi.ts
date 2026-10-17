@@ -1,5 +1,6 @@
 import { Solar, type EightChar } from 'lunar-javascript';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
+import type { InputPrecision } from '../fortune-core/result';
 
 export const BAZI_METHOD_VERSION = 'bazi-local-v2';
 const CHINA_TIME_ZONE = 'Asia/Shanghai';
@@ -50,6 +51,7 @@ export interface BaziChart {
   elementCounts: Record<string, number>;
   methodVersion: string;
   methodSummary: string;
+  inputPrecision: InputPrecision;
   birthInstant: string;
   timeUnknown: boolean;
   solarTime: 'civil' | 'true';
@@ -176,6 +178,8 @@ export function calculateBazi(input: BaziInput): BaziChart {
     elementCounts: countElements(rows),
     methodVersion: BAZI_METHOD_VERSION,
     methodSummary: `年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間；${timeUnknown ? '出生時間未知，僅排三柱' : solarNote}晚子時日柱按當天，00:00 換日。大運與起運依 lunar-javascript ${daYun ? `流派${daYun.school}、${daYun.gender === 1 ? '男命' : '女命'}順逆規則` : '未計算（需提供出生時間並選擇傳統排盤參數）'}。`,
+    // Without a birth hour the hour pillar is missing, so the chart is an approximation of the full four pillars.
+    inputPrecision: timeUnknown ? 'approximate' : 'full',
     birthInstant: instant.toISOString(),
     timeUnknown,
     solarTime: input.trueSolarTime ? 'true' : 'civil',

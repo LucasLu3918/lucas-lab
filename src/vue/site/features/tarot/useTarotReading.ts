@@ -1,11 +1,13 @@
 import { computed, onMounted, shallowRef } from 'vue';
 import {
   clearTarotHistory,
+  exportTarotHistory,
   readTarotHistory,
   saveTarotHistory,
   updateTarotNote,
   type TarotHistoryEntry,
 } from './TarotHistoryRepository';
+import { localDayKey } from '../fortune-core/civil-time';
 import { drawCards, findTarotCard, tarotSpreadCount, type TarotCard, type TarotOrientation, type TarotSpreadId } from './tarot';
 
 export interface DrawnTarotCard {
@@ -37,8 +39,7 @@ export function useTarotReading() {
       journalNote.value = '';
       currentEntryId.value = '';
       if (readingSpread.value === 'daily') {
-        const now = new Date();
-        const localDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const localDay = localDayKey();
         const existing = history.value.find(entry => entry.spread === 'daily' && entry.localDay === localDay);
         if (existing) {
           const card = findTarotCard(existing.cards[0]?.cardId ?? '');
@@ -59,7 +60,7 @@ export function useTarotReading() {
         const entry: TarotHistoryEntry = {
           id: `${Date.now()}-${drawnCards.value[0].card.id}`,
           createdAt: now.toISOString(),
-          localDay: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+          localDay: localDayKey(now),
           spread: 'daily',
           cards: drawnCards.value.map(({ card, orientation }) => ({ cardId: card.id, orientation })),
         };
@@ -123,6 +124,24 @@ export function useTarotReading() {
     }
   }
 
+  function exportHistory(): void {
+    if (history.value.length === 0) {
+      status.value = '目前沒有可匯出的塔羅紀錄。';
+      return;
+    }
+    try {
+      const url = URL.createObjectURL(new Blob([exportTarotHistory()], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tarot-history.json';
+      link.click();
+      URL.revokeObjectURL(url);
+      status.value = '已匯出塔羅紀錄（JSON）；檔案只包含牌卡、時間與筆記。';
+    } catch {
+      status.value = '目前無法匯出紀錄，請稍後再試。';
+    }
+  }
+
   return {
     spread,
     readingSpread,
@@ -137,5 +156,6 @@ export function useTarotReading() {
     revealCard,
     saveJournalNote,
     clearHistory,
+    exportHistory,
   };
 }

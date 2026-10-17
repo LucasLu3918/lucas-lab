@@ -1,3 +1,4 @@
+import { createLocalHistory, type LocalHistory } from '../fortune-core/local-history';
 import { tarotSpreadCount, type TarotOrientation, type TarotSpreadId } from './tarot';
 
 export interface TarotHistoryCard {
@@ -14,7 +15,9 @@ export interface TarotHistoryEntry {
   note?: string;
 }
 
-const STORAGE_KEY = 'lucas-lab:tarot-history:v1';
+// Same storage key as before the shared layer (`lucas-lab:tarot-history:v1`), so existing local readings still load.
+const HISTORY_KEY = 'tarot-history';
+const HISTORY_VERSION = 1;
 const HISTORY_LIMIT = 20;
 
 function isEntry(value: unknown): value is TarotHistoryEntry {
@@ -38,33 +41,33 @@ function browserStorage(): Storage | null {
   }
 }
 
+function historyIn(storage: Storage | null): LocalHistory<TarotHistoryEntry> {
+  return createLocalHistory<TarotHistoryEntry>({
+    key: HISTORY_KEY,
+    version: HISTORY_VERSION,
+    limit: HISTORY_LIMIT,
+    isEntry,
+    storage: () => storage,
+  });
+}
+
 export function readTarotHistory(storage = browserStorage()): TarotHistoryEntry[] {
-  if (!storage) return [];
-  try {
-    const parsed: unknown = JSON.parse(storage.getItem(STORAGE_KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed.filter(isEntry).slice(0, HISTORY_LIMIT) : [];
-  } catch {
-    return [];
-  }
+  return historyIn(storage).read();
 }
 
 export function saveTarotHistory(entry: TarotHistoryEntry, storage = browserStorage()): TarotHistoryEntry[] {
-  if (!storage) return [];
-  const history = [entry, ...readTarotHistory(storage)].slice(0, HISTORY_LIMIT);
-  storage.setItem(STORAGE_KEY, JSON.stringify(history));
-  return history;
+  return historyIn(storage).save(entry);
 }
 
 export function clearTarotHistory(storage = browserStorage()): void {
-  storage?.removeItem(STORAGE_KEY);
+  historyIn(storage).clear();
+}
+
+export function exportTarotHistory(storage = browserStorage()): string {
+  return historyIn(storage).exportJson();
 }
 
 export function updateTarotNote(id: string, note: string, storage = browserStorage()): TarotHistoryEntry[] {
-  if (!storage) return [];
   const normalized = note.trim().slice(0, 500);
-  const history = readTarotHistory(storage).map(entry => entry.id === id
-    ? { ...entry, note: normalized || undefined }
-    : entry);
-  storage.setItem(STORAGE_KEY, JSON.stringify(history));
-  return history;
+  return historyIn(storage).update(id, entry => ({ ...entry, note: normalized || undefined }));
 }

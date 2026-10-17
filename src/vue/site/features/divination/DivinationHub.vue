@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TodayOverview from './TodayOverview.vue';
 import { DIVINATION_MODULES } from './modules';
 </script>
 
@@ -8,6 +9,7 @@ import { DIVINATION_MODULES } from './modules';
       <h1>月夜占卜室</h1>
       <p>三種古老象徵系統，陪你整理眼前的問題。所有計算都在你的瀏覽器完成。</p>
     </header>
+    <TodayOverview />
     <section class="doors" aria-label="選擇占卜方式">
       <a v-for="door in DIVINATION_MODULES" :key="door.id" class="door" :href="door.href">
         <span class="door__icon" aria-hidden="true"><svg viewBox="0 0 32 32" v-html="door.iconSvg" /></span>

@@ -47,12 +47,7 @@ function loadContentPack(): ContentPack<HoroscopeEntries> {
 
 export const HOROSCOPE_PACK: ContentPack<HoroscopeEntries> = loadContentPack();
 
-/** Local calendar day as YYYY-MM-DD, using the reader's own clock. */
-export function localDayKey(date: Date = new Date()): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
-}
+export { localDayKey } from '../fortune-core/civil-time';
 
 export function createDailyHoroscope(
   localDay: string,

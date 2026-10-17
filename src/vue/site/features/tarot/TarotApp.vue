@@ -10,7 +10,7 @@ import { TAROT_CARD_BY_ID, TAROT_FOCI, TAROT_POSITIONS, type TarotFocus } from '
 
 const {
   spread, readingSpread, allowReversed, drawnCards, revealedIndexes, history, status,
-  readingComplete, journalNote, startReading, revealCard, saveJournalNote, clearHistory,
+  readingComplete, journalNote, startReading, revealCard, saveJournalNote, clearHistory, exportHistory,
 } = useTarotReading();
 const shareText = computed(() => {
   const cards = drawnCards.value.map(({ card, orientation }, index) => {
@@ -83,7 +83,7 @@ async function shareReading(): Promise<void> {
         <label class="share-copy"><span>可複製的牌面摘要（不含問題）</span><textarea :value="shareText" readonly rows="5" aria-label="可複製的牌面摘要"></textarea></label>
       </section>
 
-      <ReadingHistory :items="history" :card-by-id="TAROT_CARD_BY_ID" @clear="clearHistory" />
+      <ReadingHistory :items="history" :card-by-id="TAROT_CARD_BY_ID" @clear="clearHistory" @export="exportHistory" />
     </section>
 
     <TarotCardLibrary />
