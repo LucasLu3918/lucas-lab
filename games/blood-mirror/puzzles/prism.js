@@ -272,6 +272,40 @@ const DONE={
 function mountPrism(stageId,ctx){
  const stage=STAGES[stageId],L=stage.L,sol=solutionOf(stageId),last=stageId==='prism-ballroom';
  let S={m:[...stage.init.m],k:[...stage.init.k]},finished=false;
+ if(stageId==='prism-rays'&&ctx.mountPuzzleIsland){
+  ctx.render('<div class="belfry prism">'
+   +'<p class="challenge-help"><b>'+stage.title+'。</b>'+stage.goal+'</p>'
+   +LEGEND.replace('</ol>',RULES[stageId]+'</ol>')
+   +'<div data-vue-prism-rays><p class="challenge-feedback" role="status">濾鏡光路載入中…</p></div>'
+   +hintMarkup+'</div>');
+  const islandRoot=document.querySelector('[data-vue-prism-rays]');
+  const alive=()=>!!islandRoot?.isConnected;
+  const tiers=new Proxy({},{get:()=>[1,2,3].map(tier=>hint(L,S,sol,tier))});
+  const hints=bindHints({hints:tiers,currentStep:()=>finished?null:hintStep(L,S,sol),alive});
+  const snapshot=()=>{
+   const result=trace(L,S);
+   return {
+    mirrors:L.mirrors.map((mirror,index)=>({index,x:mirror.x,y:mirror.y,orientation:S.m[index]})),
+    beamSegments:result.beams.flatMap(beam=>beam.segs.map(segment=>({mask:segment.mask,points:segment.pts.map(([x,y])=>({x,y}))}))),
+    filter:{x:L.filters[0].x,y:L.filters[0].y,color:L.filters[0].c},
+    emitter:{x:L.emitters[0].x,color:COLORS[L.emitters[0].c]},
+    target:{x:L.targets[0].x,y:L.targets[0].y,need:L.targets[0].need,got:result.got[0]},
+    status:finished?DONE[stageId]:'已亮起 '+litCount(L,S)+' / '+L.targets.length+' 個面具。'+(litCount(L,S)?'':'還沒有面具亮起。'),
+    solved:finished,
+   };
+  };
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action=>{
+   if(finished||!action||action.type!=='flip'||!Number.isInteger(action.index)||action.index<0||action.index>=L.mirrors.length)return null;
+   S.m[action.index]=S.m[action.index]==='/'?'\\':'/';
+   ctx.playCue('click');
+   if(solved(L,S)){
+    finished=true;hints.changed();ctx.playCue('door');
+    setTimeout(()=>{if(alive())ctx.done();},document.body.classList.contains('reduce-motion')?0:800);
+   }else hints.changed();
+   return snapshot();
+  }});
+  return;
+ }
  ctx.render('<div class="belfry prism">'
   +'<p class="challenge-help"><b>'+stage.title+'。</b>'+stage.goal+'</p>'
   +LEGEND.replace('</ol>',RULES[stageId]+'</ol>')
