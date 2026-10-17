@@ -60,7 +60,7 @@ const save = {
         const name = { A: '鏡廊', B: '陽台', C: '黑松林', D: '舞廳' }[panel];
         await page.locator(`.gal-cards [aria-label^="${name}"]`).click();
       }
-      await page.locator('[role="img"][aria-label*="一條直線"]').waitFor();
+      // Completion closes the modal after its legacy timer; persisted progress is the stable completion signal.
       await page.waitForFunction(
         () => (JSON.parse(localStorage.getItem('blood-mirror-v2') || '{}').puzzles || []).includes('gallery.gallery-merge'),
         null,
