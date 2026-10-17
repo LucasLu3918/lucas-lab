@@ -150,4 +150,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 驗證包含元件行為、game bundle export 契約與完整瀏覽器解謎流程；原本的 reflection domain test 繼續保護 `glassIsSolved` 規則。這一切片只交接反寫手稿格盤，其他 Puzzle 的 DOM／SVG／Canvas 操作仍由各自 legacy stage 管理。
 
-下一個遷移切片：鏡像迷廊 Maze Puzzle UI。先保留既有路徑、懷錶門檻與存檔行為，將 35 格迷廊的互動面交由 Vue island 管理。
+## Phase 8 — Blood Mirror Maze Puzzle Vue island
+
+`MazePuzzle.vue` 接手既有鏡像迷廊的 5×7 board、方向按鈕、方向鍵、懷錶按鈕、重設按鈕與狀態訊息，並沿用現有 lazy game bundle 和 challenge modal。`maze.js` 保留迷宮 layout、移動／碰牆規則、左右鏡像、懷錶物品門檻、步數、提示訊息、音效與 stage 完成回呼；Vue 收到唯讀 snapshot，操作後將 typed action 交回 legacy 規則並呈現回傳 snapshot。無法掛載 Vue island 時保留原有 DOM renderer。
+
+不變條件：35 格位置與樣式、方向語意、閉鎖門與懷錶條件、重設位置／步數但保留已開啟的鏡門、鍵盤操作與按鈕焦點、stage id、modal shell、Hints、進度和存檔行為維持原樣。Vue adapter 驗證 snapshot；不新增入口、公開路由、存檔格式、執行期相依、network 或 storage 存取。驗證包含 component 行為、bundle export contract、真實遊戲情境中的鍵盤移動／懷錶／重設／通關，以及既有 game checks。
+
+下一個遷移切片：盤點剩餘 Puzzle UI，選擇一個互動邊界獨立且規則可留在 legacy 的 puzzle，先以現有行為與鍵盤情境限定範圍，再逐項遷移。

@@ -2,6 +2,7 @@ import { createApp, defineComponent, h, ref } from 'vue';
 import HintPanel from './HintPanel.vue';
 import InventoryPanel from './InventoryPanel.vue';
 import JournalPanel from './JournalPanel.vue';
+import MazePuzzle from './MazePuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import { parseHintSnapshot } from './hints';
 import { parseJournalSnapshot } from './journal';
@@ -63,6 +64,42 @@ export function mountHintIsland(
     },
   }));
   app.mount(root);
+  return () => app.unmount();
+}
+
+type MazePuzzleProps = InstanceType<typeof MazePuzzle>['$props'];
+type MazeSnapshot = MazePuzzleProps['snapshot'];
+type MazeCellKind = MazeSnapshot['cells'][number];
+
+function isMazeSnapshot(value: unknown): value is MazeSnapshot {
+  if (!value || typeof value !== 'object') return false;
+  const snapshot = value as Partial<MazeSnapshot>;
+  return snapshot.rows === 5
+    && snapshot.columns === 7
+    && Array.isArray(snapshot.cells)
+    && snapshot.cells.length === snapshot.rows * snapshot.columns
+    && snapshot.cells.every((cell: unknown): cell is MazeCellKind =>
+      cell === 'wall' || cell === 'floor' || cell === 'gate' || cell === 'exit')
+    && Array.isArray(snapshot.position)
+    && snapshot.position.length === 2
+    && snapshot.position.every(Number.isInteger)
+    && snapshot.position[0] >= 0 && snapshot.position[0] < snapshot.rows
+    && snapshot.position[1] >= 0 && snapshot.position[1] < snapshot.columns
+    && typeof snapshot.steps === 'number' && Number.isInteger(snapshot.steps) && snapshot.steps >= 0
+    && typeof snapshot.message === 'string'
+    && typeof snapshot.gateOpen === 'boolean';
+}
+
+export function mountMazePuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: MazePuzzleProps['onAction'],
+): (() => void) | null {
+  if (!isMazeSnapshot(value) || typeof onAction !== 'function') return null;
+
+  const app = createApp(MazePuzzle, { snapshot: value, onAction });
+  app.mount(root);
+  root.setAttribute('data-vue-maze-ready', 'true');
   return () => app.unmount();
 }
 

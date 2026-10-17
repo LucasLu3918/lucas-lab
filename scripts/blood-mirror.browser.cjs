@@ -235,11 +235,19 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    for(const k of [1,4,5,6,7])await page.locator('[data-reflection="'+k+'"]').click();
    // Stage two, the mirror corridor: left and right are swapped for the reflection.
    // The corridor's gate stays shut until the golden pocket watch from act one turns time back (r7, r10).
+   await page.locator('[data-vue-maze-puzzle][data-vue-maze-ready="true"] .maze-cell').first().waitFor();
    assert.equal(await page.locator('.maze-cell').count(),35);
-   for(const input of ['L','L','D','D','L'])await page.locator('[data-walk="'+input+'"]').click();
+   await page.locator('[data-walk="L"]').focus();
+   await page.keyboard.press('ArrowLeft');
+   for(const input of ['L','D','D','L'])await page.locator('[data-walk="'+input+'"]').click();
    assert.match(await page.locator('#maze-status').innerText(),/鏡門停在關上的那一刻/);
    await page.locator('#maze-watch').click();
-   for(const input of ['L','L','D','L','D'])await page.locator('[data-walk="'+input+'"]').click();
+   assert.equal(await page.locator('#maze-watch').isDisabled(),true,'using the golden watch opens the gate once');
+   await page.locator('#maze-reset').click();
+   assert.equal(await page.locator('#maze-status').innerText(),'已走 0 步','reset returns the reflection to its start');
+   assert.equal(await page.locator('.maze-token').evaluate(token=>token.classList.contains('c0')&&token.classList.contains('r0')),true,'reset returns the token to the upper-left cell');
+   assert.equal(await page.locator('#maze-watch').isDisabled(),true,'reset keeps the gate open');
+   for(const input of ['L','L','D','D','L','L','D','L','D'])await page.locator('[data-walk="'+input+'"]').click();
    assert.match(await page.locator('#modal-body').innerText(),/失蹤的公主/);
    await page.locator('#take-item').click();
    // The mirror interrogation: gather the clue words from the scene, answer wrongly once, then fix two blanks.
