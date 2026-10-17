@@ -276,6 +276,27 @@ export const mountBoxThread=ctx=>mountFace(ctx,'thread',h=>{
 export const mountBoxShards=ctx=>mountFace(ctx,'shards',h=>{
  const mine=ACT_SHARDS.filter(shard=>ctx.has(shard.id));
  let sel=null;const placed=new Set();
+ const island=typeof h.ctx.mountPuzzleIsland==='function';
+ const snapshot=()=>({shards:mine.map(shard=>({...shard})),placed:[...placed],selected:sel,finished:h.finished});
+ const onAction=action=>{
+  if(!island||h.finished||!action||typeof action!=='object')return snapshot();
+  if(action.type==='select-shard'&&mine.some(shard=>shard.id===action.id)&&!placed.has(action.id)){
+   sel=sel===action.id?null:action.id;h.ctx.playCue('click');h.note('');
+  }else if(action.type==='place-shard'&&ACT_SHARDS.some(shard=>shard.id===action.slotId)){
+   if(!sel){h.note('先選一片碎片。');return snapshot();}
+   if(sel!==action.slotId){
+    const shard=ACT_SHARDS.find(item=>item.id===sel),slot=ACT_SHARDS.find(item=>item.id===action.slotId);
+    h.note('「'+shard.title+'」放不進第'+NUMERAL[slot.act]+'幕的位置。');h.ctx.playCue('wrong');return snapshot();
+   }
+   placed.add(action.slotId);sel=null;h.ctx.playCue('click');h.note('');
+   if(placed.size===mine.length){
+    h.win(mine.length===ACT_SHARDS.length?'七片碎片都嵌進去了，碎片面鬆開了。':'碎片都嵌進去了，碎片面鬆開了，只是還有位置空著。');
+   }
+  }else if(action.type==='skip-empty'&&mine.length===0){
+   h.win('一片碎片也沒有。這一面空著，其餘的先鬆開了。');
+  }
+  return snapshot();
+ };
  const html=()=>{
   const tray=mine.filter(shard=>!placed.has(shard.id));
   return (mine.length<ACT_SHARDS.length?'<p class="box-line">妳收集了 <b>'+mine.length+'</b> / '+ACT_SHARDS.length+' 片。沒收集到的位置會留空。</p>':'')
@@ -287,6 +308,11 @@ export const mountBoxShards=ctx=>mountFace(ctx,'shards',h=>{
    +(mine.length===0?'<div class="box-row"><button class="primary-button" data-k="empty">這一面先空著</button></div>':'');
  };
  function draw(focus){
+  if(island){
+   h.redraw('<div data-vue-box-shards><p class="challenge-help" role="status">碎片面載入中…</p></div>',focus);
+   h.ctx.mountPuzzleIsland({snapshot:snapshot(),onAction});
+   return;
+  }
   h.redraw(html(),focus);
   buttons(h.body,'data-s',id=>{sel=sel===id?null:id;h.ctx.playCue('click');h.note('');draw('[data-s="'+id+'"]');});
   buttons(h.body,'data-p',id=>{

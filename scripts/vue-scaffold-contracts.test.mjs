@@ -67,6 +67,8 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.match(gameEntry, /data-vue-gallery-merge-ready/, 'the lazy game module marks a successfully mounted Gallery Merge island');
   assert.ok(gameEntry.includes('mountBoxThreadPuzzleIsland'), 'the lazy game module exposes its Box Thread island mount');
   assert.match(gameEntry, /data-vue-box-thread-ready/, 'the lazy game module marks a successfully mounted Box Thread island');
+  assert.ok(gameEntry.includes('mountBoxShardsPuzzleIsland'), 'the lazy game module exposes its Box Shards island mount');
+  assert.match(gameEntry, /data-vue-box-shards-ready/, 'the lazy game module marks a successfully mounted Box Shards island');
   assert.doesNotMatch(gameEntry, /process\.env\.NODE_ENV/, 'the browser bundle has no Node process dependency');
 
   const htmlFiles = [];
