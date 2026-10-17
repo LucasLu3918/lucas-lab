@@ -249,3 +249,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：每種色精仍可調整 0–4 滴；配方、混色與容差判定完全沿用既有規則；stage id `apothecary-mixing`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 apothecary rule tests，以及 360px／1280px 瀏覽器中的 lazy mount、鏡子切換、滴數界限、通關、fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 依核准範圍手動追查。
 
 下一步建議：評估 E4 `gallery-align` 的拖曳疊圖 stage，先盤點 legacy 互動狀態、鍵盤替代操作與拖曳座標模型，再決定 Vue island 邊界。
+
+## Phase 23 — Blood Mirror Gallery Align Vue island
+
+`GalleryAlignPuzzle.vue` 接手 E4 `gallery-align` 的四格疊圖盤面、物件標記／紅線、放大／翻面工具、指標拖曳、方向鍵移動與免拖曳清單放置。沿用現有 lazy game bundle、stage id、modal 和 `.gal-*` 樣式。`puzzles/gallery.js` 仍負責候選物件搜尋、座標吸附、`judgeMove` 判定、提示、音效、完成與進度 callback；Vue 只呈現經 `parseGalleryAlignSnapshot` 驗證的 transient snapshot，並將 typed actions 回交 legacy controller。沒有 island callback 時使用原 DOM renderer。
+
+不變條件：月亮與提燈的兩條線仍由既有規則決定；放大、翻面、方向鍵步進、tray 拖出、標記及清單放置維持原有語意；`gallery-merge` 維持 legacy renderer。stage id、Hints／音效／進度、存檔格式、路由、CSP 與 runtime dependencies 不變。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E4 rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、拖曳／清單／鍵盤操作、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；caller／consumer 依本次核准範圍人工核對，全域 Impact Graph coverage 仍 incomplete。
+
+下一步建議：評估 E4 `gallery-merge` 階段的翻面門對位與四格紅線排序，盤點排序規則、鍵盤操作與 stage 間既有連線狀態，再決定 Vue island 邊界。
