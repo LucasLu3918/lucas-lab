@@ -38,6 +38,27 @@ const LABEL={L:'向左',R:'向右',U:'向前',D:'向後'},ARROW=Object.fromEntri
 const isGate=([r,c])=>r===gateCell[0]&&c===gateCell[1];
 export function mountMaze(ctx){
  let at=[...startCell],steps=0,message='',gateOpen=false;
+ const cells=layout.join('').split('').map(cell=>cell==='#'?'wall':cell==='G'?'gate':cell==='E'?'exit':'floor');
+ const snapshot=()=>({rows:ROWS,columns:COLS,cells,position:[...at],steps,message,gateOpen});
+ const action=({type,direction})=>{
+  if(type==='move'){
+   const [dr,dc]=mirrored[direction],next=step(at,direction,gateOpen);
+   if(next[0]===at[0]&&next[1]===at[1]){message=!gateOpen&&isGate([at[0]+dr,at[1]+dc])?'鏡門停在關上的那一刻，推也推不動。也許有東西能讓時間倒走。':'倒影撞上了冰冷的鏡牆。';ctx.playCue('wrong');}
+   else{at=next;steps++;message='';ctx.playCue('click');}
+  }else if(type==='watch'){
+   if(!ctx.has('watch'))message='妳身上沒有能讓時間倒走的東西。';
+   else if(!gateOpen){gateOpen=true;message='懷錶的指針倒轉了一圈。鏡門退回到還沒關上的那一刻。';ctx.playCue('door');}
+  }else if(type==='reset'){
+   at=[...startCell];steps=0;message='';
+  }
+  if(mazeSolved(at))ctx.done();
+  return snapshot();
+ };
+ if(ctx.mountPuzzleIsland){
+  ctx.render('<p class="challenge-help">妳透過鏡面操縱自己的倒影：妳往左，倒影往右；妳往右，倒影往左。前後則不會顛倒。帶著倒影走出迷廊（也可以用鍵盤方向鍵）。</p><div class="maze-vue-host" data-vue-maze-puzzle><p role="status">迷廊正在映照…</p></div>');
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action});
+  return;
+ }
  const move=input=>{
   const [dr,dc]=mirrored[input],next=step(at,input,gateOpen);
   if(next[0]===at[0]&&next[1]===at[1]){message=!gateOpen&&isGate([at[0]+dr,at[1]+dc])?'鏡門停在關上的那一刻，推也推不動。也許有東西能讓時間倒走。':'倒影撞上了冰冷的鏡牆。';ctx.playCue('wrong');}
