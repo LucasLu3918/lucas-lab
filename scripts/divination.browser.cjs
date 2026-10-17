@@ -119,6 +119,22 @@ async function run(){
   await page.screenshot({path:path.join(CAPTURES,'liuyao-reading-390.png'),fullPage:true,animations:'disabled'});
   console.log('✓ Liuyao casts by numbers and coins, follows the topic selector and stays inside the mobile viewport');
 
+  await page.goto(ORIGIN+'/qimen/',{waitUntil:'load'});
+  await page.locator('input[type="date"]').fill('2026-10-18');
+  await page.locator('input[type="time"]').fill('10:00');
+  await page.getByRole('button',{name:'排盤'}).click();
+  await page.locator('.qimen-grid').waitFor({timeout:15000});
+  assert.equal(await page.locator('.palace-cell').count(),9,'Qimen grid should show nine palaces');
+  assert.match(await page.locator('.steps').textContent(),/陰遁6局/,'Qimen 2026-10-18 10:00 should be 陰遁6局');
+  assert.match(await page.locator('.summary-line').textContent(),/天任/,'Qimen 2026-10-18 10:00 should place 值符天任');
+  await page.locator('select').first().selectOption('travel');
+  assert.match(await page.locator('.results').textContent(),/出行宜選開、休、景門/,'Qimen topic selector did not change the copy');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Qimen reading overflows the mobile viewport');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.waitForFunction(()=>window.scrollY===0);
+  await page.screenshot({path:path.join(CAPTURES,'qimen-reading-390.png'),fullPage:true,animations:'disabled'});
+  console.log('✓ Qimen casts a fixed time, shows the nine-palace grid, follows the topic selector and stays inside the mobile viewport');
+
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
 
