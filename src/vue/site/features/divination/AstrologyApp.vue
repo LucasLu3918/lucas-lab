@@ -24,6 +24,17 @@ const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
 // 計算期間顯示狀態並停用按鈕；結果區只在計算完成後才出現，因此狀態列不能放在結果區內。
 const calculating = ref(false);
+// 狀態列同時負責完成通知：結果區很大，不能整塊設為 aria-live，否則螢幕閱讀器會逐筆唸完行運清單。
+const status = ref('');
+// 結果對應的表單內容。表單改動後結果仍保留，但會提示重新計算，避免星盤與表單內容不一致。
+const calculatedKey = ref('');
+const formKey = computed(() => JSON.stringify([
+  birthDate.value, birthTime.value, unknownTime.value, placeId.value, customTimeZone.value,
+  customLatitude.value, customLongitude.value, returnPlaceId.value, disambiguation.value,
+]));
+const stale = computed(() => chart.value !== null && calculatedKey.value !== formKey.value);
+const sunPlanet = computed(() => chart.value?.planets.find(planet => planet.id === 'sun'));
+const moonPlanet = computed(() => chart.value?.planets.find(planet => planet.id === 'moon'));
 // 行運與年度清單（行運年度可達上千筆）只在展開後才渲染；記住展開狀態，重新計算後 <details> 會依此還原。
 const detailsOpen = reactive<Record<string, boolean>>({});
 function setDetailsOpen(key: string, event: Event): void {
@@ -134,10 +145,13 @@ async function calculate(): Promise<void> {
   // 先取消仍在執行的舊計算（會終止其 Worker），再開始新計算；舊計算的結果即使回來也會被下方的檢查丟棄。
   cancelInFlightCalculation();
   error.value = '';
+  status.value = '正在計算本命盤、行運與年度天象，請稍候。';
   chart.value = null;
   forecasts.value = [];
   annual.value = null;
+  calculatedKey.value = '';
   const calculation = ++latestCalculation;
+  const key = formKey.value;
   calculating.value = true;
   const request: AstrologyComputeRequest = {
     input: { birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value },
@@ -150,8 +164,11 @@ async function calculate(): Promise<void> {
     chart.value = computed.chart;
     forecasts.value = computed.forecasts;
     annual.value = computed.annual;
+    calculatedKey.value = key;
+    status.value = '星盤已完成計算，可依上方導覽查看本命、行運與年度天象。';
   } catch (cause) {
     if (calculation !== latestCalculation || cause instanceof CalculationCancelledError) return;
+    status.value = '';
     error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
   } finally {
     if (calculation === latestCalculation) calculating.value = false;
@@ -176,22 +193,23 @@ async function calculate(): Promise<void> {
       <label v-if="!unknownTime">若出生地當時有夏令時間重複時刻<select v-model="disambiguation"><option value="earlier">採較早的一次</option><option value="later">採較晚的一次</option></select></label>
       <p v-if="!unknownTime" class="form-help">若所填時刻因夏令時間切換而不存在，系統會提示重新核對；它不會自動改成其他時間。</p>
       <button class="primary-button" type="submit" :disabled="calculating">{{ calculating ? '計算中…' : unknownTime ? '查看簡易星盤' : '繪製深入星盤' }}</button>
-      <p v-if="calculating" class="form-help" role="status">正在計算本命盤、行運與年度天象，請稍候。</p>
+      <p v-show="status" class="form-help" role="status">{{ status }}</p>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
     </form>
 
-    <section v-if="chart" class="results" aria-live="polite">
+    <section v-if="chart" class="results">
+      <p v-if="stale" class="stale-note">表單已修改，下方仍是上次計算的結果；請重新計算以更新。</p>
       <nav class="result-nav" aria-label="結果章節"><a href="#natal">本命星盤</a><a href="#transits">近期行運</a><a href="#annual">年度天象</a></nav>
       <section id="natal" class="result-block">
       <div class="section-title"><div><h2>行星落點</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
       <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，隱藏上升點與宮位' : '已提供出生時間，計算上升點與宮位'" />
       <div class="chart-points"><article v-if="chart.ascendant" class="point"><small>上升點</small><strong>{{ chart.ascendant.sign }}</strong><span>{{ chart.ascendant.degree.toFixed(1) }}°</span></article><article v-if="chart.midheaven" class="point"><small>天頂</small><strong>{{ chart.midheaven.sign }}</strong><span>{{ chart.midheaven.degree.toFixed(1) }}°</span></article><article v-if="!chart.ascendant" class="point unknown"><small>出生時間未知</small><strong>不計算時角與宮位</strong><span>行星位置以當地中午估算，月亮可能跨星座</span></article></div>
       <div class="planet-grid"><article v-for="planet in chart.planets" :key="planet.id" class="planet"><div><strong>{{ planet.name }}</strong><small>{{ planet.id === 'sun' ? '核心動機' : planet.id === 'moon' ? '情緒需求' : '行星象徵' }}</small></div><span class="sign">{{ planet.sign }}</span><strong class="degree">{{ planet.degree.toFixed(1) }}°</strong><span class="house">{{ planet.house ? `${planet.house} 宮` : '宮位未知' }}</span><span v-if="planet.retrograde" class="retrograde">逆行</span></article></div>
-      <div class="summary-grid"><article class="summary"><h3>太陽</h3><p>{{ signDescription(chart.planets.find(planet => planet.id === 'sun')!.sign, 'sun') }}</p></article><article class="summary"><h3>月亮</h3><p>{{ signDescription(chart.planets.find(planet => planet.id === 'moon')!.sign, 'moon') }}</p></article><article v-if="chart.ascendant" class="summary"><h3>上升</h3><p>{{ signDescription(chart.ascendant.sign, 'rising') }}</p></article></div>
+      <div class="summary-grid"><article v-if="sunPlanet" class="summary"><h3>太陽</h3><p>{{ signDescription(sunPlanet.sign, 'sun') }}</p></article><article v-if="moonPlanet" class="summary"><h3>月亮</h3><p>{{ signDescription(moonPlanet.sign, 'moon') }}</p></article><article v-if="chart.ascendant" class="summary"><h3>上升</h3><p>{{ signDescription(chart.ascendant.sign, 'rising') }}</p></article></div>
       <section class="aspects"><h3>主要相位</h3><p v-if="chart.aspects.length === 0" class="muted">本命行星間未找到設定容許度內的主要相位。</p><ul v-else><li v-for="aspect in chart.aspects" :key="`${aspect.first}-${aspect.aspect}-${aspect.second}`"><strong>{{ aspect.first }} × {{ aspect.second }}</strong><span>{{ aspect.aspect }}，容許度 {{ aspect.orb.toFixed(1) }}°</span><small>{{ aspect.meaning }}</small></li></ul></section>
       </section>
       <section id="transits" class="result-block">
-      <div class="section-title"><div><h2>近期行運提示</h2></div></div>
+      <div class="section-title"><div><h2>近期行運提示</h2><p class="time-note">相位時刻以出生地時區 {{ chart.timeZone }} 顯示。</p></div></div>
 
       <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" :open="detailsOpen[forecast.periodLabel]" class="transit-details" @toggle="setDetailsOpen(forecast.periodLabel, $event)"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul v-if="detailsOpen[forecast.periodLabel]" class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
       </section>
@@ -221,5 +239,6 @@ async function calculate(): Promise<void> {
 .transit-details{margin-top:12px}.transit-details summary{color:#dec98f;cursor:pointer}.transit-events{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}.transit-events li{display:grid;gap:4px;padding:10px;border-radius:9px;background:#0d141a}.transit-events strong{color:#e8d8b3}.transit-events span,.transit-events small{color:#bdb9ae;line-height:1.6}
 .annual-outlook{display:grid;gap:14px}.annual-heading{display:flex;align-items:end;justify-content:space-between;gap:16px}.annual-heading h2{margin:0;color:#f0e4c6;font-size:1.65rem}.annual-heading>span{color:#c7b477;font-size:.88rem}.annual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.annual-card{min-width:0;padding:18px 20px;border:1px solid #64707a55;border-radius:var(--ll-radius-panel);background:#121a21}.annual-card-wide{grid-column:1/-1}.annual-card h3{margin:0 0 8px;color:#e8d8b3}.annual-card h4{margin:16px 0 6px;color:#d8c78e}.annual-card p,.annual-card small{color:#bdb9ae;line-height:1.7}.annual-details summary{color:#dec98f;cursor:pointer}.annual-events,.placement-list,.aspect-list{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}.annual-events li{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:11px;border-radius:9px;background:#0d141a}.annual-events li strong{color:#e8d8b3}.annual-events time,.annual-events small{color:#aaa99f;font-size:.82rem}.annual-events small{grid-column:1/-1;line-height:1.6}.placement-list{grid-template-columns:repeat(2,minmax(0,1fr))}.placement-list li{display:grid;gap:3px;padding:9px;border-radius:8px;background:#0d141a}.placement-list strong{color:#e8d8b3}.placement-list span,.aspect-list li{color:#bdb9ae;font-size:.83rem;line-height:1.5}.annual-method{margin-top:12px}
 @media(max-width:680px){.annual-grid,.placement-list{grid-template-columns:1fr}.annual-card-wide{grid-column:auto}.annual-heading{align-items:start;flex-direction:column}.annual-events li{grid-template-columns:1fr}}
+.stale-note{margin:0;padding:12px 16px;border-left:2px solid #d9a99b;color:#ecd3c9;background:#2a1f1f;line-height:1.6}.time-note{margin:4px 0 0;color:#aaa99f;font-size:.8125rem}
 .result-nav{display:flex;flex-wrap:wrap;gap:8px}.result-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--ll-color-control-border);border-radius:999px;color:var(--ll-color-text);text-decoration:none;font-size:var(--ll-font-size-sm)}.result-nav a:hover{border-color:var(--ll-color-gold);color:var(--ll-color-gold-bright)}.result-nav a:focus-visible{outline:var(--ll-focus-width) solid var(--ll-color-focus);outline-offset:var(--ll-focus-offset)}.result-block{display:grid;gap:18px;scroll-margin-top:24px}
 </style>

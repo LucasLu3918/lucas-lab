@@ -83,6 +83,15 @@
       "meta": "不需個資，起卦即可",
       "inputNeeds": "none",
       "iconSvg": "<path d=\"M6 7h9M19 7h7M6 16h20M6 25h9M19 25h7\" />"
+    },
+    {
+      "id": "qimen",
+      "title": "奇門遁甲",
+      "href": "../qimen/",
+      "description": "依節氣、旬首與時辰排出九宮盤，整理天盤九星、人盤八門、地盤三奇六儀與神盤八神，看當下的時空格局。",
+      "meta": "不需個資，排盤即可",
+      "inputNeeds": "none",
+      "iconSvg": "<path d=\"M4 6h24M4 16h10M18 16h10M4 26h24\" />"
     }
   ]
 }

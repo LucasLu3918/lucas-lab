@@ -20,6 +20,7 @@
 | 生命靈數 | `/numerology/` | 已完成（P1）：生命路徑、表達數、靈魂數、人格數、生日數與個人循環 | `src/vue/site/features/numerology/`（`numerology-pythagorean-v1`） |
 | 梅花易數 | `/meihua/` | 已完成（§3.7）：時間、數字與文字起卦；本卦、互卦、變卦、體用、旺衰與應期 | `src/vue/site/features/meihua/`（`meihua-shaoyong-v1`） |
 | 六爻易經 | `/liuyao/` | 已完成（§3.8）：銅錢與報數起卦；納甲裝卦、世應、六親六神、用神旺衰、動變與應期 | `src/vue/site/features/liuyao/`（`liuyao-jingfang-najia-v1`） |
+| 奇門遁甲 | `/qimen/` | 已完成（§3.9）：時家拆補法排盤；陰陽遁與局數、九宮地盤、天盤九星、人盤八門、神盤八神、格局與方位評分 | `src/vue/site/features/qimen/`（`qimen-chaibu-shijia-v1`） |
 
 既有可沿用的設計：
 
@@ -147,6 +148,16 @@ Hub 依 `inputNeeds` 顯示「不需個資，立即抽牌」或「選擇資料�
 - 來源與差異：規則整理自本機的六爻技能文件。該文件的艮宮納支、月建旺衰的休與死、以及六親以世爻為基準三處，與傳統京房體系不一致，本模組依傳統體系實作，並在說明中列出計算方法。
 - 驗證：`liuyao.spec.ts` 檢查六十四卦名與三爻一致、八宮世應、納甲納支、六親、旺相休囚死與示例卦；`interpretation` 的文案通過 `ethics` 檢查；`LiuyaoApp.spec.ts` 掛載島嶼並驗證起卦、用神切換與輸入錯誤。
 
+### 3.9 奇門遁甲 Qimen（新增）
+
+- 輸入：日期與時間（以台北時間換算節氣與時辰，預設為目前時間）與問題方向（一般、出行、合約洽談、事業、財運）；不需要出生資料。問題方向只改變評分與斷語，不重新排盤。
+- 節氣與局數：以 lunar-javascript 取得最近一個已過的節氣（精確到分）。冬至至芒種為陽遁，夏至至大雪為陰遁。局數依拆補法的二十四節氣表，分上、中、下三元。
+- 符頭與元：節氣日起第一個甲或己日為符頭。符頭地支為子午卯酉定上元、寅申巳亥定中元、辰戌丑未定下元，之後每五日輪轉一元。
+- 排盤：地盤以戊起於局數宮，陽遁順布、陰遁逆布，九個符號（戊己庚辛壬癸丁丙乙）含中五。旬首（時辰所屬甲子旬）的六儀所落宮，其本宮星與本宮門分別為值符與值使；值符星轉至時干所在宮，值使門轉至時支所在宮（子一、丑寅八、卯三、辰巳四、午九、未申二、酉七、戌亥六）；八神自值符宮起，陽順陰逆。中五無星門，天禽寄陽遁坤二、陰遁艮八，轉動時以寄宮代中五的環位。
+- 斷卦：每宮分數為九星、八門與八神的分數，加上三奇（乙丙丁）與三奇遇吉門（休、生、景、開）的加分，再加上問題方向的加分；分數 3 以上為吉，−1 以下為凶，其餘為中。格局列出三奇得使、伏吟（值符移位 0）、反吟（值符移位 4）與門伏吟。
+- 來源與差異：規則整理自本機的奇門技能文件與拆補法的公開資料（《奇門遁甲統宗》局數表）。技能文件的簡化用局表（例如冬至上旬一局、雨水上旬二局）與拆補表不一致，本模組依拆補表實作；「符頭定元」與「旬首定元」兩種流派有出入，本模組採符頭定元。陰遁小雪依多數來源採 5-8-2。
+- 驗證：`qimen.spec.ts` 以公開的排盤例（2002 年 4 月 7 日庚辰時：己落兌七、值符天柱、值使驚門，轉至艮八與巽四）驗算排布，該例的局數依另一流派，因此測試直接以陽遁六局排布；另以手算的 2026-10-18 10:00 盤驗算陰遁六局、值符天任與值使生門；符頭日干支與 lunar-javascript 比對 120 個日期。`QimenApp.spec.ts` 掛載島嶼並驗證排盤、問題方向切換與錯誤輸入，斷語通過 `ethics` 檢查；`divination.browser.cjs` 於 390 px 驗證，`perf-budget` 設定 `/qimen/` 預算，桌面保留高度以量測值為準。
+
 ## 4. 共用計算引擎與資料層（`fortune-core`）
 
 建議放在 `src/vue/site/features/fortune-core/`，各模組只能依賴它，不得互相依賴。
@@ -198,7 +209,8 @@ interface MethodResult<T> {
 | `numerology-fortune` | fortune-telling-skills | 生命靈數計算規則與數字意義參考 |
 | `ziwei-fortune` | fortune-telling-skills | 紫微斗數計算規則（路線 B 的規格來源） |
 | `bazi-fortune` | fortune-telling-skills | 八字規則交叉比對 |
-| `vedic-astrology`、`meihua-yishu`、`liuyao-yijing`、`qimen-dunjia`、`fengshui-advisor` | fortune-telling-skills | 本計畫範圍外，保留為未來擴充模組 |
+| `vedic-astrology`、`fengshui-advisor` | fortune-telling-skills | 本計畫範圍外，保留為未來擴充模組 |
+| `meihua-yishu`、`liuyao-yijing`、`qimen-dunjia` | fortune-telling-skills | 已實作為 §3.7、§3.8、§3.9 的模組，技能文件只作規則參考 |
 
 這些技能是給 Claude Code 使用的提示與規則文件，**不是網站的執行期程式庫**。網站執行時不載入它們。
 

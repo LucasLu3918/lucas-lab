@@ -11,7 +11,7 @@ module.exports=function createLayout(ctx){
  // Fingerprinted copies (e.g. style.<hash>.css) are set by assets.cjs; unhashed paths are the fallback.
  const asset=p=>url((ctx.fingerprint&&ctx.fingerprint[p])||p);
  const vueIsland=(name)=>{
-   const entryKey={'site':'src/vue/site/main.ts','site-lazy':'src/vue/site/lazy.ts','tarot':'src/vue/site/tarot-main.ts','tarot-deck':'src/vue/site/tarot-deck-main.ts','divination':'src/vue/site/divination-main.ts','bazi':'src/vue/site/bazi-main.ts','astrology':'src/vue/site/astrology-main.ts','horoscope':'src/vue/site/horoscope-main.ts','numerology':'src/vue/site/numerology-main.ts','meihua':'src/vue/site/meihua-main.ts','liuyao':'src/vue/site/liuyao-main.ts','ziwei':'src/vue/site/ziwei-main.ts','music':'src/vue/site/music-main.ts'}[name];
+   const entryKey={'site':'src/vue/site/main.ts','site-lazy':'src/vue/site/lazy.ts','tarot':'src/vue/site/tarot-main.ts','tarot-deck':'src/vue/site/tarot-deck-main.ts','divination':'src/vue/site/divination-main.ts','bazi':'src/vue/site/bazi-main.ts','astrology':'src/vue/site/astrology-main.ts','horoscope':'src/vue/site/horoscope-main.ts','numerology':'src/vue/site/numerology-main.ts','meihua':'src/vue/site/meihua-main.ts','liuyao':'src/vue/site/liuyao-main.ts','qimen':'src/vue/site/qimen-main.ts','ziwei':'src/vue/site/ziwei-main.ts','music':'src/vue/site/music-main.ts'}[name];
    if(!entryKey)throw new Error('Unknown Vue island entry: '+name);
    const entry=ctx.vueAssets?.manifest?.[entryKey];
    if(!entry?.isEntry)throw new Error('Vue site entry is missing from the Vite manifest');

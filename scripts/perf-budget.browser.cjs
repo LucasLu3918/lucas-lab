@@ -39,6 +39,7 @@ const BUDGETS=[
  {route:'/meihua/',maxBytes:600*KB,maxRequests:17},
  // Added 2026-10-17 with the Liuyao island. Measured 497 KB and 12 requests at both widths, the same lunar-javascript chunk as bazi and ziwei.
  {route:'/liuyao/',maxBytes:600*KB,maxRequests:17},
+ {route:'/qimen/',maxBytes:600*KB,maxRequests:17},
  // Added 2026-10-17 with the tarot prerender (tarot-ssr.ts): the first markup is in the static page, so the island mounts without a shift.
  // Measured 527 KB and 23 requests at both widths, plus about 20% headroom.
  {route:'/tarot/',maxBytes:640*KB,maxRequests:28}
