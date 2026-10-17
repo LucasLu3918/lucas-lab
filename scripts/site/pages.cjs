@@ -37,6 +37,7 @@ module.exports=function renderPages(ctx){
  const horoscopeHost=`<section class="wrap section" data-vue-site-island="horoscope" aria-label="星座運勢"><div class="pageintro"><h1>星座運勢</h1><p>選擇太陽星座，查看今日的整體、感情、事業、財務與健康五個面向，附幸運指引與每日提示。</p></div><noscript><p class="warning">啟用 JavaScript 後即可查看今日運勢。</p></noscript></section>`;
  write('horoscope',page('星座運勢','依太陽星座查看今日的五個面向與幸運指引，內容依固定規則與原創文案組合。','horoscope',horoscopeHost,'horoscope',{vueIsland:'horoscope'}));
  write('numerology',page('生命靈數','依畢達哥拉斯系統，從出生日期與英文全名整理生命路徑與循環數字，本機運算。','numerology',birthHost('numerology','生命靈數'),'numerology',{vueIsland:'numerology'}));
+ write('ziwei',page('紫微斗數','依農曆換算排出十二宮、十四主星、四化與大限，排盤規則與公開的 iztro 對照測試，本機運算。','ziwei',birthHost('ziwei','紫微斗數'),'ziwei',{vueIsland:'ziwei'}));
  write('stories',page('故事藏書館','黑暗童話、奇幻故事與原創閱讀體驗。','stories',intro('STORY ARCHIVE','故事藏書館','六部完整黑暗奇幻長篇與原創閱讀示範已上架。依作品選擇喜愛的篇章，使用夜間模式與字體設定閱讀。')+continueShelf+library(catalog.stories,(s,i)=>card(s,'story',i),'cards bookgrid'),'stories'));
  write('games',page('遊戲實驗室','可直接遊玩的恐怖密室逃脫、互動敘事與解謎遊戲概念。','games',intro('PLAYGROUND','互動遊戲館','第一款恐怖密室逃脫已可遊玩。踏入血色魔鏡，解開謎題；其他作品仍以概念規劃展示。')+library(catalog.games,(g,i)=>card(g,'game',i),'cards'),'games'));
  write('projects',page('軟體作品集','從產品設計到工程架構，探索開發專案。','projects',intro('SELECTED PROJECTS','軟體作品集','不只展示外觀，也記錄技術決策、問題背景、產品架構與開發成果。')+library(catalog.projects,(p,i)=>card(p,'project',i),'cards'),'projects'));
