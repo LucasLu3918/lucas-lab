@@ -25,16 +25,17 @@ export const GUA_INFO: Record<number, { name: string; element: string; direction
 };
 
 // 八宅表：每個命卦在八方的星，順序同 DIRECTIONS。每一列都是八星的排列，且東四命的吉星落在北、東、東南、南，
-// 西四命的吉星落在西、西北、西南、東北。兌卦與巽卦依校正值（技能檔的表有重複與漏列，見 §3.10）。
+// 西四命的吉星落在西、西北、西南、東北。各列依《八宅明鏡》的大游年歌訣排布（見 spec 的 SONG 測試），
+// 歌訣與卦變規則（後天卦位與本命卦的爻變）相互對應；來源與校正見 docs/plan/FORTUNE_HUB_PLAN.md §3.10。
 const BA_ZHAI: Record<number, readonly Star[]> = {
-  1: ['伏位', '五鬼', '天醫', '生氣', '延年', '絕命', '六煞', '禍害'],
-  2: ['五鬼', '延年', '六煞', '禍害', '絕命', '生氣', '天醫', '伏位'],
+  1: ['伏位', '五鬼', '天醫', '生氣', '延年', '絕命', '禍害', '六煞'],
+  2: ['絕命', '生氣', '禍害', '五鬼', '六煞', '伏位', '天醫', '延年'],
   3: ['天醫', '六煞', '伏位', '延年', '生氣', '禍害', '絕命', '五鬼'],
-  4: ['生氣', '禍害', '延年', '伏位', '天醫', '五鬼', '六煞', '絕命'],
-  6: ['六煞', '天醫', '五鬼', '絕命', '禍害', '伏位', '延年', '生氣'],
+  4: ['生氣', '絕命', '延年', '伏位', '天醫', '五鬼', '六煞', '禍害'],
+  6: ['六煞', '天醫', '五鬼', '禍害', '絕命', '延年', '生氣', '伏位'],
   7: ['禍害', '延年', '絕命', '六煞', '五鬼', '天醫', '伏位', '生氣'],
-  8: ['絕命', '伏位', '禍害', '五鬼', '六煞', '延年', '生氣', '天醫'],
-  9: ['延年', '絕命', '生氣', '天醫', '伏位', '六煞', '禍害', '五鬼'],
+  8: ['五鬼', '伏位', '六煞', '絕命', '禍害', '生氣', '延年', '天醫'],
+  9: ['延年', '禍害', '生氣', '天醫', '伏位', '六煞', '五鬼', '絕命'],
 };
 
 export const STAR_FORTUNE: Record<Star, Fortune> = {
@@ -128,7 +129,7 @@ export function natalKua(year: number, gender: Gender, lunarYear?: number): Nata
 // 玄空飛星：目前只收錄九運（2024–2043）與四正向。運星為九紫，山星與向星依表排布。
 export const RUNNING_PERIOD = 9;
 
-export type FacingId = 'south' | 'north' | 'east' | 'west';
+export type FacingId = 'south' | 'north' | 'east' | 'west' | 'gen-kun';
 
 export interface Facing {
   id: FacingId;
@@ -140,12 +141,14 @@ export interface Facing {
   facing: { star: number; forward: boolean };
 }
 
-// 九運四正向：山星與向星的數值與順逆，依技能檔 calculation-rules 的九運坐向表（子山午向、午山子向、卯山酉向、酉山卯向）。
+// 九運的山星與向星數值與順逆，依技能檔 calculation-rules 的九運坐向表：四正向（子山午向、午山子向、卯山酉向、酉山卯向），
+// 以及斜向的艮山坤向（2026-10-18 經使用者選定此來源；技能檔非古籍，依據見 docs/plan/FORTUNE_HUB_PLAN.md §3.10）。
 export const FACINGS: readonly Facing[] = [
   { id: 'south', label: '坐北朝南', sitting: '子山午向', toward: '南', mountain: { star: 1, forward: false }, facing: { star: 9, forward: true } },
   { id: 'north', label: '坐南朝北', sitting: '午山子向', toward: '北', mountain: { star: 9, forward: true }, facing: { star: 1, forward: false } },
   { id: 'east', label: '坐東朝西', sitting: '卯山酉向', toward: '西', mountain: { star: 3, forward: true }, facing: { star: 7, forward: false } },
   { id: 'west', label: '坐西朝東', sitting: '酉山卯向', toward: '東', mountain: { star: 7, forward: false }, facing: { star: 3, forward: true } },
+  { id: 'gen-kun', label: '坐東北朝西南', sitting: '艮山坤向', toward: '西南', mountain: { star: 4, forward: false }, facing: { star: 6, forward: true } },
 ];
 
 // 九宮飛布的路徑（宮號），順飛依此順序，逆飛反向。中五在起點。
