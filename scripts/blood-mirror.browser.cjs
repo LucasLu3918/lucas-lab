@@ -155,7 +155,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    await tapSpot(page,'valve',width<600);
    await page.locator('#take-item').click();
    await openEvidenceFromSeal('pipes');
-   await page.locator('[data-vue-pipes-ready="true"]').waitFor();
+   await page.locator('[data-vue-pipes-ready="true"]').waitFor({state:'attached'});
    assert.equal(await page.locator('.pipe-piece').count(),5);
    for(const [i,count] of [1,2,2,2,2].entries())for(let n=0;n<count;n++)await page.locator('[data-pipe="'+i+'"]').click();
    assert.equal(await page.locator('#pipes-confirm').isEnabled(),true);
