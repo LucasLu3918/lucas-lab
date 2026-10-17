@@ -4,7 +4,7 @@
   "private": true,
   "description": "Responsive AI creator portfolio and digital library, without external runtime dependencies.",
   "scripts": {
-    "build": "vite build && node scripts/build.cjs",
+    "build": "vite build && vite build --config vite.inventory.config.mts && node scripts/build.cjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test:vue": "vitest run",
     "check": "npm run typecheck && npm run test:vue && node --check scripts/components.cjs && node --check scripts/build.cjs && node --check scripts/check.cjs && node --check assets/app.js && node --check assets/music.js && node --check scripts/visual-audit.cjs && node --check games/blood-mirror/main.js && node --check games/blood-mirror/puzzles/index.js && node --check games/blood-mirror/engine/index.js && node --test scripts/blood-mirror*.test.mjs && node scripts/blood-mirror-density.mjs --strict > /dev/null && npm run build && node --test scripts/site/catalog.test.cjs scripts/vue-scaffold-contracts.test.mjs scripts/vue-migration-contracts.test.mjs && node scripts/check.cjs",

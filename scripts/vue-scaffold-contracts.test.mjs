@@ -9,6 +9,7 @@ const manifestPath = path.join(dist, '_vue', 'manifest.json');
 
 test('SSG copies Vue entry bundles and loads only the matching route islands', () => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const inventoryManifest = JSON.parse(fs.readFileSync(path.join(root, '.vue-inventory-build', 'manifest.json'), 'utf8'));
   const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
 
   for (const entry of entries) {
@@ -24,6 +25,11 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     }
   }
 
+  const inventoryEntry = inventoryManifest['src/vue/game/inventory-main.ts'];
+  assert.equal(inventoryEntry?.isEntry, true, 'standalone Vue inventory entry exists');
+  assert.deepEqual(inventoryEntry.imports || [], [], 'the game route loads one bundled Vue JavaScript asset');
+  assert.ok(fs.existsSync(path.join(dist, '_vue', inventoryEntry.file)), 'SSG copies the standalone inventory entry');
+
   const htmlFiles = [];
   const visit = directory => {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -36,6 +42,10 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.ok(htmlFiles.length > 0, 'SSG emitted HTML pages');
   const searchHtml = fs.readFileSync(path.join(dist, 'search', 'index.html'), 'utf8');
   const galleryHtml = fs.readFileSync(path.join(dist, 'gallery', 'index.html'), 'utf8');
+  const gameHtml = fs.readFileSync(path.join(dist, 'games', 'blood-mirror', 'play', 'index.html'), 'utf8');
+  assert.match(gameHtml, /data-vue-game-inventory/, 'play route contains its inventory island host');
+  assert.ok(gameHtml.includes(`data-vue-game-inventory-entry="/_vue/${inventoryEntry.file}"`), 'play route exposes its manifest-bound Vue inventory bundle for lazy loading');
+  assert.doesNotMatch(gameHtml, /<script type="module" src="\/_vue\//, 'the playable game loads Vue only when entering a scene');
   assert.match(galleryHtml, /id="gallery-dialog" data-vue-gallery-entry="\/_vue\/assets\/gallery-[^"]+\.js"/, 'Gallery page carries only its route-local lazy entry URL');
   assert.equal((searchHtml.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 1, 'search page loads exactly one Vue module');
   assert.match(searchHtml, /data-vue-site-island="search"/, 'search page contains the site island host');
@@ -66,7 +76,7 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
   }
   for (const file of htmlFiles) {
-    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
+    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || file === path.join(dist, 'games', 'blood-mirror', 'play', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }

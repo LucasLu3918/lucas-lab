@@ -42,7 +42,32 @@ module.exports = function copyVueAssets(ctx) {
   const vueOut = pathApi.join(out, '_vue');
   fs.mkdirSync(vueOut, { recursive: true });
   fs.cpSync(buildDir, vueOut, { recursive: true });
-  return { manifest, output: vueOut };
+
+  const inventoryBuildDir = pathApi.resolve(root, '.vue-inventory-build');
+  const inventoryManifestPath = pathApi.join(inventoryBuildDir, 'manifest.json');
+  if (!fs.existsSync(inventoryManifestPath)) {
+    throw new Error('The standalone Vue inventory manifest is missing; run `npm run build` instead of scripts/build.cjs directly.');
+  }
+  const inventoryManifest = JSON.parse(fs.readFileSync(inventoryManifestPath, 'utf8'));
+  const inventoryEntry = inventoryManifest['src/vue/game/inventory-main.ts'];
+  if (!inventoryEntry?.isEntry) {
+    throw new Error('Vite manifest entry is missing: src/vue/game/inventory-main.ts');
+  }
+  if (inventoryEntry.imports?.length) {
+    throw new Error('The standalone Vue inventory entry must not add shared JavaScript requests to the game route.');
+  }
+  for (const file of [inventoryEntry.file, ...(inventoryEntry.css || []), ...(inventoryEntry.assets || [])]) {
+    if (file) {
+      const source = resolveBuildFile(fs, inventoryBuildDir, file);
+      const target = pathApi.resolve(vueOut, file);
+      if (!target.startsWith(vueOut + pathApi.sep)) {
+        throw new Error(`Invalid standalone Vue inventory output path: ${file}`);
+      }
+      fs.mkdirSync(pathApi.dirname(target), { recursive: true });
+      fs.copyFileSync(source, target);
+    }
+  }
+  return { manifest, inventoryManifest, output: vueOut };
 };
 
 module.exports.ENTRY_POINTS = ENTRY_POINTS;

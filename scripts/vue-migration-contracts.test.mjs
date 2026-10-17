@@ -44,6 +44,20 @@ test('public storage keys remain stable for reader preferences and game saves',(
  assert.match(read('assets/app.js'),/lucaslab\.progress\.v1/);
 });
 
+test('playable Blood Mirror page mounts only the manifest-bound Vue inventory island',()=>{
+ const output=path.join(root,'dist');
+ const route=read('dist/games/blood-mirror/play/index.html');
+ const vueManifest=JSON.parse(read('.vue-inventory-build/manifest.json'));
+ const inventoryEntry=vueManifest['src/vue/game/inventory-main.ts'];
+ assert.equal(inventoryEntry?.isEntry,true);
+ assert.deepEqual(inventoryEntry.imports||[],[],'the page adds only one Vue JavaScript request');
+ assert.match(route,/data-vue-game-inventory/);
+ assert.ok(route.includes(`data-vue-game-inventory-entry="/_vue/${inventoryEntry.file}"`));
+ assert.doesNotMatch(route,/\/_vue\/assets\/inventory-main-[^" ]+\.js"><\/script>/,'the Vue island is lazy and does not add a page-load request');
+ assert.ok(fs.existsSync(path.join(output,'_vue',inventoryEntry.file)),'the referenced Vue inventory asset is copied into the static output');
+ assert.equal((route.match(/data-vue-game-inventory(?=\s|>)/g)||[]).length,1,'Vue owns exactly one inventory subtree');
+});
+
 test('static hosting retains 404 pages and trailing slash handling',()=>{
  const config=JSON.parse(read('wrangler.jsonc'));
  assert.equal(config.assets.not_found_handling,'404-page');
