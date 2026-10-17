@@ -68,7 +68,7 @@ export function mountPipes(ctx){
  };
  if(ctx.mountPuzzleIsland){
   ctx.render('<p class="challenge-help">將左上「泉源」接到右下「城市」。每點一次，管件順時針轉 90°；只有相接的管口能傳送蒸汽，直管轉半圈也算接通。</p><div data-vue-pipes-puzzle><p role="status">管網正在映照…</p></div>');
-  ctx.mountPuzzleIsland('pipes',{snapshot:snapshot(),onAction:act});
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act});
   return;
  }
  ctx.render('<p class="challenge-help">將左上「泉源」接到右下「城市」。每點一次，管件順時針轉 90°；只有相接的管口能傳送蒸汽，直管轉半圈也算接通。</p><div class="pipe-legend"><span>◆ 通汽管段</span><span>○ 尚未通汽</span></div><div class="pipes-board" aria-label="三乘三蒸汽管網">'+Array.from({length:9},(_,at)=>{
