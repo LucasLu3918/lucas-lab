@@ -91,9 +91,26 @@ describe('local divination calculations', () => {
   it('reports a precisely aligned daily transit and its phase', () => {
     const chart = calculateAstrology({ birthDate: '2026-10-17', birthTime: '12:00', timeZone: 'Asia/Taipei', latitude: 25.033, longitude: 121.5654 });
     chart.planets.find(planet => planet.id === 'sun')!.longitude = chart.planets.find(planet => planet.id === 'mercury')!.longitude;
-    const forecast = createAstrologyForecast(chart, 'day', new Date(chart.birthInstant));
-    expect(forecast.events.some(event => event.transit === '水星' && event.natal === '太陽' && event.aspect === '合相' && event.phase === '精確相位')).toBe(true);
+    // 今日掃描未來 24 小時，所以起點設在對齊時刻之前 6 小時，讓精確時刻落在窗口之內。
+    const birthMs = new Date(chart.birthInstant).getTime();
+    const forecast = createAstrologyForecast(chart, 'day', new Date(birthMs - 6 * 3_600_000));
+    const aligned = forecast.events.find(event => event.transit === '水星' && event.natal === '太陽' && event.aspect === '合相');
+    expect(aligned?.phase).toBe('精確相位');
+    expect(Math.abs(new Date(aligned!.exactAt).getTime() - birthMs)).toBeLessThan(5 * 60_000);
     expect(forecast.methodVersion).toBe(chart.methodVersion);
+  });
+
+  it('places daily transit times inside the next 24 hours instead of at the calculation moment', () => {
+    const chart = calculateAstrology({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei', latitude: 25.033, longitude: 121.5654 });
+    const start = new Date('2026-10-17T04:00:00Z');
+    const forecast = createAstrologyForecast(chart, 'day', start);
+    expect(forecast.events.length).toBeGreaterThan(0);
+    for (const event of forecast.events) {
+      const exactMs = new Date(event.exactAt).getTime();
+      expect(exactMs - start.getTime()).toBeGreaterThanOrEqual(60_000);
+      expect(start.getTime() + 24 * 3_600_000 - exactMs).toBeGreaterThanOrEqual(60_000);
+    }
+    expect(forecast.text).toContain('未來 24 小時');
   });
 
   it('lists only transit windows whose exact moment falls inside the forecast period', () => {

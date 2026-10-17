@@ -65,6 +65,15 @@
       "meta": "不需個資，選擇星座即可",
       "inputNeeds": "none",
       "iconSvg": "<path d=\"M16 4l3.4 7.6 8.2 1-6.1 5.6 1.7 8.2L16 22.3 8.8 26.4l1.7-8.2-6.1-5.6 8.2-1z\" />"
+    },
+    {
+      "id": "meihua",
+      "title": "梅花易數",
+      "href": "../meihua/",
+      "description": "以時間、數字或文字起卦，依體用五行生克與互卦、變卦，整理當下時機的象徵提示。",
+      "meta": "不需個資，起卦即可",
+      "inputNeeds": "none",
+      "iconSvg": "<path d=\"M6 8h8M18 8h8M6 16h20M6 24h8M18 24h8\" />"
     }
   ]
 }

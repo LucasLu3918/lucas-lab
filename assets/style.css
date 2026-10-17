@@ -435,3 +435,7 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
 [data-vue-site-island="numerology"] {min-height:1050px}
 [data-vue-site-island="bazi"] {min-height:1190px}
 [data-vue-site-island="astrology"] {min-height:1320px}
+/* Meihua Yishu: the form is two columns above 680 px and the static intro is much shorter, so the footer jumped at 1440 px (CLS 0.148
+   in the visual-audit run). Reserved for desktop only, because the phone layout already measured 0. This value is estimated from the form's
+   layout, not measured; confirm it against the next perf-budget run. */
+@media (min-width:681px) {[data-vue-site-island="meihua"] {min-height:800px}}

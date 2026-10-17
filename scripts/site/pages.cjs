@@ -48,6 +48,7 @@ module.exports=function renderPages(ctx){
  write('astrology',page('西洋占星','本命行星落點、上升與主要相位，附固定規則行運提示。','astrology',birthHost('astrology','西洋占星'),'astrology',{vueIsland:'astrology'}));
  const horoscopeHost=`<section class="wrap section" data-vue-site-island="horoscope" aria-label="星座運勢"><div class="pageintro"><h1>星座運勢</h1><p>選擇太陽星座，查看今日的整體、感情、事業、財務與健康五個面向，附幸運指引與每日提示。</p></div><noscript><p class="warning">啟用 JavaScript 後即可查看今日運勢。</p></noscript></section>`;
  write('horoscope',page('星座運勢','依太陽星座查看今日的五個面向與幸運指引，內容依固定規則與原創文案組合。','horoscope',horoscopeHost,'horoscope',{vueIsland:'horoscope'}));
+ write('meihua',page('梅花易數','以時間、數字或文字起卦，依體用五行生克與互卦、變卦整理象徵提示，本機運算。','meihua',`<section class="wrap section" data-vue-site-island="meihua" aria-label="梅花易數"><div class="pageintro"><h1>梅花易數</h1><p>以時間、數字或文字起卦，依體用五行生克整理當下的象徵提示。起卦在本機完成，不需要出生資料。</p></div><noscript><p class="warning">啟用 JavaScript 後即可起卦。</p></noscript></section>`,'meihua',{vueIsland:'meihua'}));
  write('numerology',page('生命靈數','依畢達哥拉斯系統，從出生日期與英文全名整理生命路徑與循環數字，本機運算。','numerology',birthHost('numerology','生命靈數'),'numerology',{vueIsland:'numerology'}));
  write('ziwei',page('紫微斗數','依農曆換算排出十二宮、十四主星、四化與大限，排盤規則與公開的 iztro 對照測試，本機運算。','ziwei',birthHost('ziwei','紫微斗數'),'ziwei',{vueIsland:'ziwei'}));
  write('stories',page('故事藏書館','黑暗童話、奇幻故事與原創閱讀體驗。','stories',intro('STORY ARCHIVE','故事藏書館','六部完整黑暗奇幻長篇與原創閱讀示範已上架。依作品選擇喜愛的篇章，使用夜間模式與字體設定閱讀。')+continueShelf+library(catalog.stories,(s,i)=>card(s,'story',i),'cards bookgrid'),'stories'));
