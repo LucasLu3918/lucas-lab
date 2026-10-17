@@ -1,8 +1,9 @@
 import { Solar, type EightChar } from 'lunar-javascript';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 import type { InputPrecision } from '../fortune-core/result';
+import { TEN_GOD_TEXT } from './bazi-content';
 
-export const BAZI_METHOD_VERSION = 'bazi-local-v2';
+export const BAZI_METHOD_VERSION = 'bazi-local-v3';
 const CHINA_TIME_ZONE = 'Asia/Shanghai';
 const STEM_ELEMENTS: Record<string, string> = { 甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水' };
 const BRANCH_ELEMENTS: Record<string, string> = { 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
@@ -10,19 +11,15 @@ const STEM_YIN: Record<string, boolean> = { 甲: false, 乙: true, 丙: false, �
 const ELEMENTS = ['木', '火', '土', '金', '水'];
 const GENERATES: Record<string, string> = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
 const CONTROLS: Record<string, string> = { 木: '土', 土: '水', 水: '火', 火: '金', 金: '木' };
-const TEN_GODS: Record<string, string[]> = {
-  比肩: ['自我主張、同儕合作與自主推進。', '適合穩定累積；合作時先談清責任與資源。'],
-  劫財: ['互動與競合感提高，界線和分工值得留意。', '先協調資源，再決定共同投入的程度。'],
-  食神: ['創作、表達與生活品質成為可投入的主題。', '把靈感轉成可持續的小步驟，避免只停在想法。'],
-  傷官: ['創新與表達意願較強，溝通方式會影響合作。', '提出不同做法時，同時說明依據與可行方案。'],
-  偏財: ['外部機會與彈性資源值得觀察，先核實條件。', '機會增加時仍要管理時間、成本與承諾。'],
-  正財: ['穩定安排、實際資源與持續投入較受重視。', '適合檢視預算與進度，避免超出可負擔範圍。'],
-  七殺: ['挑戰與責任感提高，清楚排序能減少被急事牽引。', '先處理可控風險，並為重要工作尋求合適支援。'],
-  正官: ['規則、責任與長期承諾是整理方向的線索。', '遵循明確標準，也保留檢視規則是否合用的空間。'],
-  偏印: ['研究、觀察與非典型解法可能帶來新視角。', '確認資訊來源，替思考安排落地和分享的時間。'],
-  正印: ['學習、支持與知識整理有助於穩定判斷。', '吸收資訊後選出一項能實際運用的重點。'],
-};
-const CLASHES = new Set(['子午', '丑未', '寅申', '卯酉', '辰戌', '巳亥']);
+// 六沖與六合都是無序配對；查詢時兩個方向都要比對，否則「午」在前、「子」在後會漏判。
+const CLASH_PAIRS = ['子午', '丑未', '寅申', '卯酉', '辰戌', '巳亥'];
+const HARMONY_PAIRS = ['子丑', '寅亥', '卯戌', '辰酉', '巳申', '午未'];
+const CLASHES = new Set(CLASH_PAIRS.flatMap(pair => [pair, [...pair].reverse().join('')]));
+const HARMONIES = new Set(HARMONY_PAIRS.flatMap(pair => [pair, [...pair].reverse().join('')]));
+const PILLAR_POSITIONS: Record<string, string> = { 年柱: '年支', 月柱: '月支', 日柱: '日支', 時柱: '時支' };
+/** 流年取年柱時使用的年中時刻，避開立春前後的換年界線。 */
+const ANNUAL_PILLAR_MONTH = 6;
+const ANNUAL_PILLAR_DAY = 15;
 
 export interface BaziInput {
   birthDate: string;
@@ -45,10 +42,20 @@ export interface BaziPillar {
   hiddenTenGods: string[];
 }
 
+export interface BaziDaYunCycle {
+  startYear: number;
+  startAge: number;
+  endYear: number;
+  pillar: string;
+  tenGod: string;
+}
+
 export interface BaziChart {
   pillars: BaziPillar[];
   dayMaster: string;
   elementCounts: Record<string, number>;
+  /** 天干與地支本氣統計中數量為零的五行，以及數量最多的五行（可能並列）。 */
+  elementSummary: { missing: string[]; leading: string[] };
   methodVersion: string;
   methodSummary: string;
   inputPrecision: InputPrecision;
@@ -62,7 +69,7 @@ export interface BaziChart {
     school: 1 | 2;
     startAge: { years: number; months: number; days: number; hours: number };
     startDate: string;
-    cycles: Array<{ startYear: number; startAge: number; pillar: string }>;
+    cycles: BaziDaYunCycle[];
   } | null;
 }
 
@@ -86,7 +93,23 @@ function countElements(pillars: Array<{ stem: string; branch: string }>): Record
   return counts;
 }
 
-function makeLocalLunar(parts: { year: number; month: number; day: number; hour: number; minute: number; second: number }): EightChar {
+function summarizeElements(counts: Record<string, number>): { missing: string[]; leading: string[] } {
+  const highest = Math.max(...Object.values(counts));
+  return {
+    missing: ELEMENTS.filter(element => counts[element] === 0),
+    leading: highest > 0 ? ELEMENTS.filter(element => counts[element] === highest) : [],
+  };
+}
+
+function isClash(first: string, second: string): boolean {
+  return CLASHES.has(first + second);
+}
+
+function isHarmony(first: string, second: string): boolean {
+  return HARMONIES.has(first + second);
+}
+
+function makeLocalLunar(parts:{ year: number; month: number; day: number; hour: number; minute: number; second: number }): EightChar {
   const eightChar = Solar.fromYmdHms(parts.year, parts.month, parts.day, parts.hour, parts.minute, parts.second).getLunar().getEightChar();
   // sect 2 keeps late Zi hour on the same day; the civil day changes at 00:00.
   eightChar.setSect(2);
@@ -159,6 +182,7 @@ export function calculateBazi(input: BaziInput): BaziChart {
     hiddenTenGods: row.hidden.map(stem => elementRelation(dayMaster, stem)),
   }));
   const strengthSignals = getStrengthSignals(dayMaster, rows);
+  const elementCounts = countElements(rows);
   const daYun = input.daYunGender === undefined ? null : (() => {
     const school = input.daYunSchool ?? 1;
     const yun = termChart.getYun(input.daYunGender!, school);
@@ -166,7 +190,11 @@ export function calculateBazi(input: BaziInput): BaziChart {
       gender: input.daYunGender!, school,
       startAge: { years: yun.getStartYear(), months: yun.getStartMonth(), days: yun.getStartDay(), hours: yun.getStartHour() },
       startDate: yun.getStartSolar().toYmd(),
-      cycles: yun.getDaYun().filter(item => item.getGanZhi()).map(item => ({ startYear: item.getStartYear(), startAge: item.getStartAge(), pillar: item.getGanZhi() })).slice(0, 9),
+      // 每步大運涵蓋十個曆年（起始年至起始年加九）；十神以日主天干為基準。
+      cycles: yun.getDaYun().filter(item => item.getGanZhi()).map((item): BaziDaYunCycle => {
+        const pillar = item.getGanZhi();
+        return { startYear: item.getStartYear(), startAge: item.getStartAge(), endYear: item.getStartYear() + 9, pillar, tenGod: elementRelation(dayMaster, pillar[0]) };
+      }).slice(0, 9),
     };
   })();
   const solarNote = input.trueSolarTime
@@ -175,7 +203,8 @@ export function calculateBazi(input: BaziInput): BaziChart {
   return {
     pillars,
     dayMaster,
-    elementCounts: countElements(rows),
+    elementCounts,
+    elementSummary: summarizeElements(elementCounts),
     methodVersion: BAZI_METHOD_VERSION,
     methodSummary: `年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間；${timeUnknown ? '出生時間未知，僅排三柱' : solarNote}晚子時日柱按當天，00:00 換日。大運與起運依 lunar-javascript ${daYun ? `流派${daYun.school}、${daYun.gender === 1 ? '男命' : '女命'}順逆規則` : '未計算（需提供出生時間並選擇傳統排盤參數）'}。`,
     // Without a birth hour the hour pillar is missing, so the chart is an approximation of the full four pillars.
@@ -210,8 +239,8 @@ export function createBaziForecast(chart: BaziChart, period: ForecastPeriod, onD
   const stem = pillar[0];
   const branch = pillar[1];
   const tenGod = elementRelation(chart.dayMaster, stem);
-  const [theme, text] = TEN_GODS[tenGod];
-  const branchClash = chart.pillars.some(item => CLASHES.has(item.value[1] + branch));
+  const [theme, text] = TEN_GOD_TEXT[tenGod];
+  const branchClash = chart.pillars.some(item => isClash(item.value[1], branch));
   const evidence = [`${period === 'day' ? '流日' : period === 'month' ? '流月' : '流年'}${pillar}：相對日主${chart.dayMaster}為${tenGod}`];
   if (branchClash) {
     evidence.push(`${branch}與本命地支出現六沖組合`);
@@ -226,4 +255,40 @@ export function createBaziForecast(chart: BaziChart, period: ForecastPeriod, onD
     evidence,
     methodVersion: BAZI_METHOD_VERSION,
   };
+}
+
+export interface BaziYearFortune {
+  year: number;
+  pillar: string;
+  element: string;
+  tenGod: string;
+  /** 流年地支與本命四柱地支的沖、合關係，例如「沖日支」。 */
+  branchRelations: string[];
+  /** 該年所在的大運干支；未排大運或超出大運範圍時為 null。 */
+  daYunPillar: string | null;
+}
+
+/** 逐年列出流年干支、十神與地支關係；年柱以年中時刻取得，立春換年的界線不會影響結果。 */
+export function createBaziAnnualTimeline(chart: BaziChart, fromYear: number, count: number): BaziYearFortune[] {
+  return Array.from({ length: count }, (_, index) => {
+    const year = fromYear + index;
+    const pillar = makeLocalLunar({ year, month: ANNUAL_PILLAR_MONTH, day: ANNUAL_PILLAR_DAY, hour: 12, minute: 0, second: 0 }).getYear();
+    const stem = pillar[0];
+    const branch = pillar[1];
+    const branchRelations = chart.pillars.flatMap(item => {
+      const position = PILLAR_POSITIONS[item.label];
+      if (isClash(item.value[1], branch)) return [`沖${position}`];
+      if (isHarmony(item.value[1], branch)) return [`合${position}`];
+      return [];
+    });
+    const cycle = chart.daYun?.cycles.find(item => year >= item.startYear && year <= item.endYear);
+    return {
+      year,
+      pillar,
+      element: STEM_ELEMENTS[stem],
+      tenGod: elementRelation(chart.dayMaster, stem),
+      branchRelations,
+      daYunPillar: cycle?.pillar ?? null,
+    };
+  });
 }

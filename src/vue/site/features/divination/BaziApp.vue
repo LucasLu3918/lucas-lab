@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { calculateBazi, createBaziForecast, type BaziChart, type BaziForecast, type ForecastPeriod } from './bazi';
+import { calculateBazi, createBaziAnnualTimeline, createBaziForecast, type BaziChart, type BaziForecast, type BaziYearFortune, type ForecastPeriod } from './bazi';
 import { BIRTH_PLACES } from './locations';
+import { civilPartsAt } from '../fortune-core/civil-time';
 import PrecisionBadge from '../fortune-core/ui/PrecisionBadge.vue';
 
 const birthDate = ref('');
@@ -15,6 +16,10 @@ const daYunGender = ref('');
 const daYunSchool = ref<1 | 2>(1);
 const chart = ref<BaziChart | null>(null);
 const forecasts = ref<BaziForecast[]>([]);
+// 流年時間軸以目前年份為中心，前後各取數年；年份在計算當下以出生地時區判定。
+const currentYear = ref(0);
+const annualTimeline = ref<BaziYearFortune[]>([]);
+const currentCycle = computed(() => chart.value?.daYun?.cycles.find(item => currentYear.value >= item.startYear && currentYear.value <= item.endYear) ?? null);
 const error = ref('');
 const place = computed(() => BIRTH_PLACES.find(item => item.id === placeId.value) ?? { id: 'custom', label: '自訂地點', timeZone: customTimeZone.value.trim(), latitude: 0, longitude: Number(customLongitude.value) });
 
@@ -26,11 +31,16 @@ function calculate(): void {
       timeUnknown: unknownTime.value, longitude: place.value.longitude, trueSolarTime: !unknownTime.value && trueSolarTime.value,
       ...(!unknownTime.value && daYunGender.value ? { daYunGender: Number(daYunGender.value) as 0 | 1, daYunSchool: daYunSchool.value } : {}),
     });
+    const now = new Date();
+    const year = civilPartsAt(now, place.value.timeZone).year;
     chart.value = result;
-    forecasts.value = (['day', 'month', 'year'] as ForecastPeriod[]).map(period => createBaziForecast(result, period, new Date(), place.value.timeZone));
+    currentYear.value = year;
+    annualTimeline.value = createBaziAnnualTimeline(result, year - 2, 10);
+    forecasts.value = (['day', 'month', 'year'] as ForecastPeriod[]).map(period => createBaziForecast(result, period, now, place.value.timeZone));
   } catch (cause) {
     chart.value = null;
     forecasts.value = [];
+    annualTimeline.value = [];
     error.value = cause instanceof Error ? cause.message : '無法排盤，請檢查日期與時間。';
   }
 }
@@ -57,11 +67,12 @@ function calculate(): void {
       <div class="section-title"><div><h2>{{ chart.timeUnknown ? '簡易三柱命盤' : '完整四柱命盤' }}</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
       <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，僅排三柱' : '已提供出生時間，排完整四柱'" />
       <div class="pillars"><article v-for="pillar in chart.pillars" :key="pillar.label" class="pillar"><p>{{ pillar.label }}</p><strong>{{ pillar.value }}</strong><span>{{ pillar.element }}</span><small>{{ pillar.tenGod }}</small><small>藏干：{{ pillar.hiddenStems.join('、') || '—' }}</small></article></div>
-      <div class="result-grid"><div class="result-col"><div class="summary"><h3>日主與五行分布</h3><p>日主為 <strong>{{ chart.dayMaster }}</strong>。五行以天干、地支各計一項作簡要統計：{{ Object.entries(chart.elementCounts).map(([element,count]) => `${element}${count}`).join('・') }}。</p></div>
+      <div class="result-grid"><div class="result-col"><div class="summary"><h3>日主與五行分布</h3><p>日主為 <strong>{{ chart.dayMaster }}</strong>。五行以天干、地支各計一項作簡要統計：{{ Object.entries(chart.elementCounts).map(([element,count]) => `${element}${count}`).join('・') }}。</p><p>數量為零的五行：<strong>{{ chart.elementSummary.missing.join('、') || '無' }}</strong>；數量最多：<strong>{{ chart.elementSummary.leading.join('、') || '無' }}</strong>。</p></div>
       <article class="summary strength"><h3>日主支援線索：{{ chart.strengthSignals.label }}</h3><ul><li v-for="item in chart.strengthSignals.evidence" :key="item">{{ item }}</li></ul><p>這是可查核的簡化觀察，不等同傳統格局、完整旺衰或喜用神判斷。</p></article></div>
-      <div class="result-col"><section v-if="chart.daYun" class="summary dayun"><h3>大運與起運</h3><p>採 {{ chart.daYun.gender === 1 ? '男命' : '女命' }}順逆參數、流派 {{ chart.daYun.school }}；起運約在出生後 {{ chart.daYun.startAge.years }} 年 {{ chart.daYun.startAge.months }} 月 {{ chart.daYun.startAge.days }} 日<span v-if="chart.daYun.startAge.hours"> {{ chart.daYun.startAge.hours }} 小時</span>，約 {{ chart.daYun.startDate }}。</p><ol><li v-for="cycle in chart.daYun.cycles" :key="`${cycle.startYear}-${cycle.pillar}`">{{ cycle.startYear }} 年起・約 {{ cycle.startAge }} 歲・{{ cycle.pillar }} 運</li></ol><small>大運以所選方法推算的年代區間作參考；流派、節氣時刻與出生時間精度會影響起運結果。</small></section></div></div>
+      <div class="result-col"><section v-if="chart.daYun" class="summary dayun"><h3>大運與起運</h3><p>採 {{ chart.daYun.gender === 1 ? '男命' : '女命' }}順逆參數、流派 {{ chart.daYun.school }}；起運約在出生後 {{ chart.daYun.startAge.years }} 年 {{ chart.daYun.startAge.months }} 月 {{ chart.daYun.startAge.days }} 日<span v-if="chart.daYun.startAge.hours"> {{ chart.daYun.startAge.hours }} 小時</span>，約 {{ chart.daYun.startDate }}。</p><ol class="cycle-track"><li v-for="cycle in chart.daYun.cycles" :key="`${cycle.startYear}-${cycle.pillar}`" :class="{ current: cycle === currentCycle }" :aria-current="cycle === currentCycle ? 'true' : undefined"><strong>{{ cycle.pillar }} 運</strong><span>{{ cycle.startYear }}–{{ cycle.endYear }} 年・約 {{ cycle.startAge }} 歲起</span><small>{{ cycle.tenGod }}{{ cycle === currentCycle ? '・目前所在' : '' }}</small></li></ol><small>大運以所選方法推算的年代區間作參考；流派、節氣時刻與出生時間精度會影響起運結果。</small></section></div></div>
       <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }} / {{ forecast.periodPillar }}</p><h3>{{ forecast.tenGod }}的整理方向</h3><p>{{ forecast.text }}</p><small>依據：{{ forecast.evidence.join('；') }}</small></article></div>
-      <details class="method"><summary>計算方法與限制</summary><p>{{ chart.methodSummary }}</p><p>使用地點：{{ place.label }}（{{ place.timeZone }}<template v-if="chart.solarTime === 'true'">，{{ place.longitude }}°</template>）。方法版本：{{ chart.methodVersion }}。五行統計與日主支援線索皆為簡化觀察，不排傳統格局、合沖刑害全表或喜用神；沒有提供時辰時不計大運與起運。大運順逆採明確選定的傳統命例參數，不推定性別。流年提示仍是固定文案，不構成完整命理判斷。</p></details>
+      <section v-if="annualTimeline.length" class="summary annual-years" aria-labelledby="annual-years-title"><h3 id="annual-years-title">流年時間軸（{{ annualTimeline[0].year }}–{{ annualTimeline[annualTimeline.length - 1].year }} 年）</h3><p>逐年列出流年干支、十神與地支沖合；大運欄位表示該年落在哪一步大運。流年為固定規則的象徵整理，不代表事件必然發生。</p><ol class="year-track"><li v-for="item in annualTimeline" :key="item.year" :class="{ current: item.year === currentYear }" :aria-current="item.year === currentYear ? 'date' : undefined"><strong>{{ item.year }}</strong><span class="year-pillar">{{ item.pillar }}</span><small>{{ item.tenGod }}・{{ item.element }}</small><small v-if="item.branchRelations.length">{{ item.branchRelations.join('、') }}</small><small v-if="item.daYunPillar">大運 {{ item.daYunPillar }}</small></li></ol></section>
+      <details class="method"><summary>計算方法與限制</summary><p>{{ chart.methodSummary }}</p><p>使用地點：{{ place.label }}（{{ place.timeZone }}<template v-if="chart.solarTime === 'true'">，{{ place.longitude }}°</template>）。方法版本：{{ chart.methodVersion }}。五行統計與日主支援線索皆為簡化觀察，不排傳統格局、合沖刑害全表或喜用神；沒有提供時辰時不計大運與起運。大運順逆採明確選定的傳統命例參數，不推定性別。流年時間軸以每年年中時刻取年柱，地支沖合只比對本命四柱地支，不含刑害破等其他關係。所有文案皆為固定規則的整理，不構成完整命理判斷。</p></details>
     </section>
     <aside class="privacy-note">資料僅在本機運算，不會儲存或上傳。八字內容為傳統象徵的整理方式，供娛樂與自我反思。</aside>
   </div>
@@ -73,4 +84,5 @@ function calculate(): void {
 .strength ul,.dayun ol{margin:10px 0 0;padding-left:22px;color:#c5c0b6;line-height:1.8}.dayun small{display:block;margin-top:10px;color:#b8b4aa;line-height:1.7}
 @media(max-width:680px){.precision-toggle{grid-template-columns:1fr}}
 .result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}.result-col{display:grid;gap:12px;align-content:start;min-width:0}@media(max-width:680px){.result-grid{grid-template-columns:1fr}}
+.cycle-track,.year-track,.dayun .cycle-track{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}.dayun .cycle-track small{display:block;margin:0}.cycle-track{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.year-track{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.cycle-track li,.year-track li{display:grid;gap:4px;min-width:0;padding:10px 12px;border:1px solid #52606a66;border-radius:9px;background:#0d141a}.cycle-track li.current,.year-track li.current{border-color:#d7bd79;background:#1d2a2e}.cycle-track strong,.year-track strong{color:#e8d8b3}.cycle-track span,.year-track span.year-pillar{color:#d9c994}.cycle-track span{color:#bdb9ae;font-size:.82rem;line-height:1.5}.cycle-track small,.year-track small{color:#aaa99f;font-size:.78rem;line-height:1.5}.year-track span.year-pillar{font-size:1.1rem;letter-spacing:.08em}
 </style>
