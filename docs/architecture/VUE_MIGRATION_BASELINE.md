@@ -133,3 +133,13 @@ Journal 接手既有 modal 中的已解鎖章節筆記、推理簿、人物記�
 不變條件：預設目前章節、全部已解鎖章節篩選、已查看線索、修復後文字、線索詞分組、人物記憶與碎片／成就遮蔽規則維持原樣。Vue 以文字插值顯示內容，不輸出 HTML；Journal 不寫入遊戲狀態或存檔。Hints、Puzzle、遊戲引擎、存檔格式、路由、CSP 與 Worker 行為維持原有邊界。驗證涵蓋快照解析、元件的篩選／空狀態／未解鎖內容、既有遊戲瀏覽器 Journal 流程，以及同一個 lazy game bundle 的 SSG 契約。
 
 下一個遷移切片：Hints（提示）Vue island；在 Hints 完成獨立驗收前，Puzzle 與其他遊戲畫面仍由 legacy 控制器擁有。
+
+## Phase 6 — Blood Mirror Hints Vue island
+
+Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開啟提示 modal 時才掛載 `HintPanel`。`main.js` 將目前步驟名稱、三層提示文字與已揭露層數組成唯讀快照；Vue 以文字插值顯示已揭露內容，按鈕只發出 reveal-next 事件。legacy controller 仍選擇步驟、更新 `stepHints`／`hints`、記錄試玩事件並保存進度。
+
+既有 native modal shell 繼續負責關閉、Escape、焦點還原與標題；modal 關閉或切換時卸載 island。Puzzle 內的 `<details>` 燭光提示維持既有 HTML renderer 與綁定邏輯，不與獨立 Hints modal 混用。載入失敗時在 modal 內顯示可讀狀態。
+
+不變條件：三層提示文字與順序、已揭露層數、試玩紀錄、localStorage 存檔、Puzzle 內嵌提示、遊戲路由、CSP 與 Worker 行為維持原樣。驗證包含快照解析、提示層呈現／事件／完成狀態、實際遊戲瀏覽器開啟及焦點流程，以及 game bundle contract；不另輸出遊戲頁載入腳本或建立第二份 Vue runtime。
+
+下一個遷移切片：Puzzle UI。先挑一個互動邊界清楚的 puzzle modal 做 Vue island，保留 puzzle 規則、SVG／Canvas 操作與 `startPuzzle` 介面；完成單一 puzzle 的行為與鍵盤驗收後，再依群組逐步交接其他 puzzle DOM。
