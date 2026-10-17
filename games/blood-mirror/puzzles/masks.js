@@ -43,6 +43,24 @@ export const masksSolved=picks=>picks.length===maskAnswer.length&&picks.every((g
 
 export function mountMasks(ctx){
  let picks=maskAnswer.map(()=>-1),message='';
+ const snapshot=()=>({maskNames:[...maskNames],guests:[...guests],guestOrder:[...guestOrder],clues:maskClues.map(clue=>clue.text),picks:[...picks],message});
+ const action=change=>{
+  if(change?.type==='select'&&Number.isInteger(change.index)&&change.index>=0&&change.index<picks.length
+   &&Number.isInteger(change.guest)&&change.guest>=-1&&change.guest<guests.length){picks[change.index]=change.guest;message='';}
+  if(change?.type==='reset'){picks=maskAnswer.map(()=>-1);message='';}
+  if(change?.type==='confirm'){
+   if(picks.some(guest=>guest<0))message='還有面具沒有選人。';
+   else if(new Set(picks).size<picks.length){message='同一個人不可能同時戴著兩張面具。';ctx.playCue('wrong');}
+   else if(masksSolved(picks))ctx.done();
+   else{const broken=brokenClue(picks);message='賓客們搖了搖頭——第 '+(broken+1)+' 則證詞說不通：'+maskClues[broken].text;ctx.playCue('wrong');}
+  }
+  return snapshot();
+ };
+ if(ctx.mountPuzzleIsland){
+  ctx.render('<div data-vue-masks-puzzle><p class="challenge-feedback" role="status">面具與賓客載入中…</p></div>');
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action});
+  return;
+ }
  const draw=()=>{
   ctx.render('<p class="challenge-help">六位賓客排成一列，每人臉上都戴著不同的面具。依他們的證詞，替每一張面具填上正確的人。證詞全是真話。</p><ol class="mask-clues">'
    +maskClues.map(clue=>'<li>'+clue.text+'</li>').join('')
@@ -50,16 +68,9 @@ export function mountMasks(ctx){
    +maskNames.map((name,i)=>'<label class="mask-row"><span class="mask-slot">'+(i+1)+'</span><span class="mask-name">'+name+'</span><select data-mask="'+i+'" aria-label="從左數第'+(i+1)+'張面具「'+name+'」是誰"><option value="-1">未選擇</option>'
     +guestOrder.map(g=>'<option value="'+g+'"'+(picks[i]===g?' selected':'')+'>'+guests[g]+'</option>').join('')+'</select></label>').join('')
    +'</div><p class="challenge-feedback" role="status">'+message+'</p><button id="masks-confirm" class="primary-button">向賓客們確認 ⟶</button><button id="masks-reset" class="secondary-button">全部重選</button>');
-  document.querySelectorAll('[data-mask]').forEach(select=>select.onchange=()=>{picks[Number(select.dataset.mask)]=Number(select.value);message='';});
-  document.querySelector('#masks-reset').onclick=()=>{picks=maskAnswer.map(()=>-1);message='';draw();};
-  document.querySelector('#masks-confirm').onclick=()=>{
-   if(picks.some(guest=>guest<0)){message='還有面具沒有選人。';draw();return;}
-   if(new Set(picks).size<picks.length){message='同一個人不可能同時戴著兩張面具。';ctx.playCue('wrong');draw();return;}
-   if(masksSolved(picks)){ctx.done();return;}
-   const broken=brokenClue(picks);
-   message='賓客們搖了搖頭——第 '+(broken+1)+' 則證詞說不通：'+maskClues[broken].text;
-   ctx.playCue('wrong');draw();
-  };
+  document.querySelectorAll('[data-mask]').forEach(select=>select.onchange=()=>{action({type:'select',index:Number(select.dataset.mask),guest:Number(select.value)});draw();});
+  document.querySelector('#masks-reset').onclick=()=>{action({type:'reset'});draw();};
+  document.querySelector('#masks-confirm').onclick=()=>{action({type:'confirm'});if(!masksSolved(picks))draw();};
  };
  draw();
 }

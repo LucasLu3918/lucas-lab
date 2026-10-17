@@ -1,6 +1,7 @@
 import { createApp, defineComponent, h, ref } from 'vue';
 import HintPanel from './HintPanel.vue';
 import LedgerPuzzle from './LedgerPuzzle.vue';
+import MasksPuzzle from './MasksPuzzle.vue';
 import InventoryPanel from './InventoryPanel.vue';
 import JournalPanel from './JournalPanel.vue';
 import MazePuzzle from './MazePuzzle.vue';
@@ -8,6 +9,7 @@ import PipesPuzzle from './PipesPuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
+import { parseMasksSnapshot, type MasksAction, type MasksSnapshot } from './masks';
 import { parseJournalSnapshot } from './journal';
 import { parsePipesSnapshot, type PipesAction } from './pipes';
 import type { PipesSnapshot } from './pipes';
@@ -137,6 +139,22 @@ export function mountLedgerPuzzleIsland(
   const app = createApp(LedgerPuzzle, { snapshot, onAction } satisfies LedgerPuzzleProps);
   app.mount(root);
   root.setAttribute('data-vue-ledger-ready', 'true');
+  return () => app.unmount();
+}
+
+type MasksPuzzleProps = InstanceType<typeof MasksPuzzle>['$props'];
+
+export function mountMasksPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: MasksAction) => MasksSnapshot,
+): (() => void) | null {
+  const snapshot = parseMasksSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(MasksPuzzle, { snapshot, onAction } satisfies MasksPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-masks-ready', 'true');
   return () => app.unmount();
 }
 
