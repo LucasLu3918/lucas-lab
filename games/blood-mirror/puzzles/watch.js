@@ -27,8 +27,9 @@ export function gearPath(teeth=TOOTH,outer=TIP,root=ROOT){
 // The ruby sits on the top spoke and is not part of the phase turn, so it points straight up exactly when the wheel is aligned.
 const SPOKES=Array.from({length:6},(_,i)=>{const a=i*Math.PI/3,x=Math.sin(a),y=-Math.cos(a),n=[-y,x];const p=(r,w)=>(x*r+n[0]*w).toFixed(1)+' '+(y*r+n[1]*w).toFixed(1);return 'M'+p(10,-3.4)+'L'+p(30,-4.6)+'L'+p(30,4.6)+'L'+p(10,3.4)+'Z';}).join('');
 const TEETH_PATH=gearPath();
-const gearArt=i=>'<span class="gear-frame" aria-hidden="true"><span class="gear-spin"><svg class="gear-svg" viewBox="-50 -50 100 100"><g transform="rotate('+(i%2?PHASE:0)+')">'
- +'<path class="gear-body" d="'+TEETH_PATH+'"/><circle class="gear-hole" r="31"/><path class="gear-spokes" d="'+SPOKES+'"/><circle class="gear-hub" r="8.5"/><circle class="gear-axle" r="2.6"/></g></svg><span class="gear-ruby"></span></span><span class="gear-shade"></span></span>';
+export const watchGearSvgMarkup=i=>'<svg class="gear-svg" viewBox="-50 -50 100 100"><g transform="rotate('+(i%2?PHASE:0)+')">'
+ +'<path class="gear-body" d="'+TEETH_PATH+'"/><circle class="gear-hole" r="31"/><path class="gear-spokes" d="'+SPOKES+'"/><circle class="gear-hub" r="8.5"/><circle class="gear-axle" r="2.6"/></g></svg>';
+const gearArt=i=>'<span class="gear-frame" aria-hidden="true"><span class="gear-spin">'+watchGearSvgMarkup(i)+'<span class="gear-ruby"></span></span><span class="gear-shade"></span></span>';
 export const watchSolved=gears=>gears.length===GEARS.length&&gears.every(position=>position===0);
 // Fewest turns that bring `start` to the marks (breadth-first search); -1 when unreachable.
 export function minTurns(start=startGears){
@@ -58,7 +59,25 @@ export function mountWatch(ctx){
  // Each gear remembers its total turn so a wrap from tooth 6 back to 1 keeps spinning the same way.
  let angles=gears.map(position=>position*60),shown=[...angles];
  const start=()=>warm?warmGears:startGears;
- const draw=(note='')=>{
+ const snapshot=(note='',animate=false)=>({warm,gears:[...gears],turns,angles:[...angles],animate,note});
+ const act=action=>{
+  if(!action||typeof action!=='object')return null;
+  if(action.type==='reset'){
+   gears=[...start()];turns=0;angles=gears.map(position=>position*60);shown=[...angles];
+   return snapshot();
+  }
+  if(action.type!=='turn'||!Number.isInteger(action.index)||action.index<0||action.index>=GEARS.length)return null;
+  const i=action.index;
+  gears=turnGear(gears,i);turns++;ctx.playCue('click');
+  angles[i]+=60;angles[(i+1)%GEARS.length]-=60;
+  if(watchSolved(gears)){
+   if(!warm){ctx.done();return null;}
+   warm=false;gears=[...startGears];turns=0;angles=gears.map(position=>position*60);shown=[...angles];
+   return snapshot('轉一枚，下一枚就倒退一格。錶芯真正的位置現在才露出來。');
+  }
+  return snapshot('',true);
+ };
+ const renderLegacy=(note='')=>{
   const aligned=gears.filter(position=>position===0).length;
   ctx.render('<p class="challenge-help">'+(warm
     ?'錶蓋裡藏著咬合的齒輪，指針正在倒著走。先試一次：轉動「時輪」，看看它的下一枚齒輪怎麼被拉回來。'
@@ -75,19 +94,20 @@ export function mountWatch(ctx){
   spins.forEach((el,i)=>{el.style.transform='rotate('+angles[i]+'deg)';});
   shown=[...angles];
   document.querySelectorAll('[data-gear]').forEach(button=>button.onclick=()=>{
-   const i=Number(button.dataset.gear);
-   gears=turnGear(gears,i);turns++;ctx.playCue('click');
-   angles[i]+=60;angles[(i+1)%GEARS.length]-=60;
-   if(watchSolved(gears)){
-    if(!warm){ctx.done();return;}
-    warm=false;gears=[...startGears];turns=0;angles=gears.map(position=>position*60);shown=[...angles];
-    draw('轉一枚，下一枚就倒退一格。錶芯真正的位置現在才露出來。');
-    document.querySelector('[data-gear="'+i+'"]')?.focus({preventScroll:true});
-    return;
-   }
-   draw();
+   const i=Number(button.dataset.gear),next=act({type:'turn',index:i});
+   if(!next)return;
+   renderLegacy(next.note);
+   if(next.note)document.querySelector('[data-gear="'+i+'"]')?.focus({preventScroll:true});
   });
-  document.querySelector('#watch-reset').onclick=()=>{gears=[...start()];turns=0;angles=gears.map(position=>position*60);shown=[...angles];draw();};
+  document.querySelector('#watch-reset').onclick=()=>{const next=act({type:'reset'});if(next)renderLegacy();};
+ };
+ const draw=(note='')=>{
+  if(typeof ctx.mountPuzzleIsland==='function'){
+   ctx.render('<div class="watch-puzzle" data-vue-watch-puzzle><p class="challenge-feedback" role="status">懷錶齒輪載入中…</p></div>');
+   ctx.mountPuzzleIsland({snapshot:snapshot(note),onAction:act});
+   return;
+  }
+  renderLegacy(note);
  };
  draw();
 }

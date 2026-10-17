@@ -8,10 +8,12 @@ import JournalPanel from './JournalPanel.vue';
 import MazePuzzle from './MazePuzzle.vue';
 import PipesPuzzle from './PipesPuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
+import WatchPuzzle from './WatchPuzzle.vue';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
 import { parseLightPuzzleSnapshot, type LightPuzzleAction, type LightPuzzleSnapshot } from './light';
 import { parseMasksSnapshot, type MasksAction, type MasksSnapshot } from './masks';
+import { parseWatchSnapshot, type WatchAction, type WatchSnapshot } from './watch';
 import { parseJournalSnapshot } from './journal';
 import { parsePipesSnapshot, type PipesAction } from './pipes';
 import type { PipesSnapshot } from './pipes';
@@ -173,6 +175,22 @@ export function mountLightPuzzleIsland(
   const app = createApp(LightPuzzle, { snapshot, onAction } satisfies LightPuzzleProps);
   app.mount(root);
   root.setAttribute('data-vue-light-ready', 'true');
+  return () => app.unmount();
+}
+
+type WatchPuzzleProps = InstanceType<typeof WatchPuzzle>['$props'];
+
+export function mountWatchPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: WatchAction) => WatchSnapshot | null,
+): (() => void) | null {
+  const snapshot = parseWatchSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(WatchPuzzle, { snapshot, onAction } satisfies WatchPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-watch-ready', 'true');
   return () => app.unmount();
 }
 
