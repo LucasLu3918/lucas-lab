@@ -65,6 +65,7 @@ function cast(): void {
       <header class="result-head">
         <p class="meta">排盤時間：{{ chart.civil }}｜{{ chart.polarity }}遁 {{ chart.ju }} 局｜{{ chart.yuan }}元｜{{ chart.term }}</p>
         <p class="meta">起盤於 {{ submitted.castAt }}｜節氣交於 {{ chart.termInstant }}｜時辰 {{ chart.hourGanzhi }}（{{ chart.xunHead }}）</p>
+        <p class="meta">流派：時家拆補法，符頭地支定元。局數依拆補表，與部分簡化用局表可能不同；推導過程列出每一步，可自行核對。</p>
         <p class="summary-line">值符 <strong>{{ chart.valueStar }}</strong> 臨 {{ PALACE_NAMES[chart.hourPalace].name }}，值使 <strong>{{ chart.valueDoor }}門</strong> 臨 {{ PALACE_NAMES[chart.shiPalace].name }}</p>
       </header>
 
