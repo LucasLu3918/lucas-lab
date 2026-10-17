@@ -165,16 +165,16 @@ const CAPTIONS={
 const SLOT={A:[16,16],B:[376,16],C:[16,224],D:[376,224]};
 const BOARD_H=548,BORDER=6,TRAY=0.55,K=(PW-2*BORDER)/PW; // the content box inside the gold border is 340x188
 const THREAD_DASH=['','9 5','2 5'],THREAD_SHAPE=['circle','square','diamond'];
-const shell=stageId=>'<div class="belfry gallery"><p class="challenge-help"><b>'+GOALS[stageId].title+'。</b>'+GOALS[stageId].goal+'</p>'
- +'<p id="bf-status" class="belfry-status" role="status"></p>'
- +'<p id="gal-caption" class="gal-caption" aria-live="polite"></p>'
- +'<div class="gal-stage" id="gal-stage"><div class="gal-board" id="gal-board"></div></div>'
- +'<div id="gal-order" class="gal-order" hidden></div>'
- +'<div class="gal-tools" id="gal-tools" role="group" aria-label="放大與翻面"></div>'
- +'<details class="gal-place"><summary>不用拖曳：用清單放置</summary><div class="gal-place-body">'
-  +'<label>拿起<select id="gal-from"></select></label><label>放到<select id="gal-to"></select></label>'
-  +'<button id="gal-put" class="secondary-button">放置</button></div></details>'
- +'<p id="gal-feedback" class="challenge-feedback" role="status"></p>'+hintMarkup+'</div>';
+const shell=(stageId,island=false)=>'<div class="belfry gallery"><p class="challenge-help"><b>'+GOALS[stageId].title+'。</b>'+GOALS[stageId].goal+'</p>'
+ +(island?'':'<p id="bf-status" class="belfry-status" role="status"></p>')
+ +(island?'<div data-vue-gallery-align><p class="challenge-feedback" role="status">畫格載入中…</p></div>':'<p id="gal-caption" class="gal-caption" aria-live="polite"></p>'
+  +'<div class="gal-stage" id="gal-stage"><div class="gal-board" id="gal-board"></div></div>'
+  +'<div id="gal-order" class="gal-order" hidden></div>'
+  +'<div class="gal-tools" id="gal-tools" role="group" aria-label="放大與翻面"></div>'
+  +'<details class="gal-place"><summary>不用拖曳：用清單放置</summary><div class="gal-place-body">'
+   +'<label>拿起<select id="gal-from"></select></label><label>放到<select id="gal-to"></select></label>'
+   +'<button id="gal-put" class="secondary-button">放置</button></div></details>'
+  +'<p id="gal-feedback" class="challenge-feedback" role="status"></p>')+hintMarkup+'</div>';
 const reduced=()=>document.body.classList.contains('reduce-motion');
 const art=p=>'assets/'+PANELS[p].art+'.webp';
 const label=(p,a)=>PANELS[p].name+'：'+a.label;
@@ -185,24 +185,27 @@ export const mountGalleryMerge=ctx=>mountGallery(ctx,'merge');
 // ctx = { render(html), done(), playCue(kind) }
 function mountGallery(ctx,stage){
  const stageId='gallery-'+stage,spec=STAGES[stage];
+ const islandMode=stage==='align'&&typeof ctx.mountPuzzleIsland==='function';
  // Threads already hanging when the stage opens (the merge stage follows the align stage).
  const links=spec.preset.map(kind=>({kind,ends:kind===0?['B.moon','A.moonL']:['C.lantern','D.chandelier']}));
  const view={zoom:null,flip:{A:false,B:false,C:false,D:false}};
  const pos={};for(const p in SLOT)pos[p]=[...SLOT[p]];
- let held=null,live=null,mode='play',finished=false,scale=1,markers=true,order=[];
- ctx.render(shell(stageId));
- const $=id=>document.getElementById(id),stageEl=$('gal-stage'),board=$('gal-board'),alive=()=>stageEl.isConnected;
+ let held=null,live=null,mode='play',finished=false,scale=1,markers=true,order=[],statusText='',statusTone='',feedbackText='';
+ ctx.render(shell(stageId,islandMode));
+ const $=id=>document.getElementById(id),stageEl=$('gal-stage'),board=$('gal-board');
+ const islandRoot=islandMode?document.querySelector('[data-vue-gallery-align]'):null;
+ const alive=()=>Boolean(islandRoot?.isConnected||stageEl?.isConnected);
  const have=()=>links.map(l=>l.kind);
  const step=()=>finished?null:hintStep(stage,have(),view);
  const tiers=new Proxy({},{get:(_,name)=>HINTS[name]});
  const hints=bindHints({hints:tiers,currentStep:step,alive});
- const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
- const note=text=>{$('gal-feedback').textContent=text||'';};
+ const say=(text,tone='')=>{statusText=text;statusTone=tone;if(!islandMode){const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;}};
+ const note=text=>{feedbackText=text||'';if(!islandMode)$('gal-feedback').textContent=feedbackText;};
  const radius=()=>snapRadius(scale);
 
  // ---- layout: the 744x548 board is scaled to the width of the modal
  function layout(){
-  if(stageEl.hidden)return;
+  if(islandMode||stageEl.hidden)return;
   const w=stageEl.clientWidth||BOARD_W;
   scale=Math.min(1,w/BOARD_W);
   board.style.transform='scale('+scale+')';
@@ -214,25 +217,52 @@ function mountGallery(ctx,stage){
  const effPos=p=>{const m=mag(view,p);return m!==1?[(BOARD_W-PW*m)/2,4]:inTray(p)?trayPos(p):pos[p];};
  // Position of an anchor on the board (board units), using the same maths as the model but with the content box.
  const boardPos=(p,a)=>{const m=at(view,p,a),ep=effPos(p),b=BORDER*mag(view,p);return [ep[0]+b+m[0]*K,ep[1]+b+m[1]*K];};
+ const makeSnapshot=()=>{
+  const panels=Object.keys(PANELS).map(p=>{
+   const m=mag(view,p),ep=effPos(p),fl=flipped(view,p),zoomed=m!==1,b=BORDER*m;
+   const anchors=ANCHORS[p].map(a=>{
+    const pt=at(view,p,a),r=Math.max(a.r*F*K*m,9),sd=side(view,p,a),nr=Math.max(a.r*F*K*m,9);
+    let notchLeft=null,notchTop=null,notchWidth=null,notchHeight=null;
+    if(a.notch){
+     const inside=nr>=48,nw=inside?Math.round(nr*0.75):Math.max(30,Math.round(nr*0.9)),nh=Math.round(nw*2/3),cx=pt[0]*K;
+     notchWidth=nw;notchHeight=nh;notchLeft=inside?(sd==='R'?cx+nr-nw-6:cx-nr+6):(sd==='R'?cx+nr+2:cx-nr-nw-2);notchTop=pt[1]*K-nh/2;
+    }
+    return {id:a.id,label:a.label,left:pt[0]*K-r,top:pt[1]*K-r,diameter:2*r,linked:links.some(link=>link.ends.includes(p+'.'+a.id)),notchSide:sd,notchLeft,notchTop,notchWidth,notchHeight};
+   });
+   const active=live?.panel===p?ANCHORS[p].find(a=>a.id===live.anchorId):null,maskPoint=active?at(view,p,active):null;
+   return {id:p,name:PANELS[p].name,art:PANELS[p].art,left:ep[0],top:ep[1],width:PW*m,height:PH*m,borderWidth:b,
+    layerWidth:(PW-2*BORDER)*m,layerHeight:(PH-2*BORDER)*m,zIndex:zoomed?0:held===p?10:inTray(p)?5:1,
+    tray:inTray(p),zoomed,flipped:fl,dragging:held===p,ariaLabel:'畫格：'+PANELS[p].name+(fl?'，已翻面':'')+(zoomed?'，已放大':'')+'。拖曳疊到另一格；方向鍵移動；Enter 放大或縮小；F 翻面',
+    anchors,maskAnchor:maskPoint?{x:BORDER+maskPoint[0]*K,y:BORDER+maskPoint[1]*K}:null};
+  });
+  const view0={zoom:null,flip:view.flip},end=ref=>{const {panel,anchor}=find(ref),pt=at(view0,panel,anchor);return [SLOT[panel][0]+BORDER+pt[0]*K,SLOT[panel][1]+BORDER+pt[1]*K];};
+  const threads=links.filter(link=>link.kind<2).map(link=>{const a=end(link.ends[0]),b=end(link.ends[1]);return {kind:link.kind,x1:a[0],y1:a[1],x2:b[0],y2:b[1]};});
+  return {scale,zoomPanel:view.zoom?.panel||null,markers,panels,threads,
+   live:live?{panel:live.panel,x1:live.p[0],y1:live.p[1],x2:live.q[0],y2:live.q[1],ok:live.ok}:null,
+   caption:step()?CAPTIONS[step().split('-')[0]]||'':'',status:statusText,tone:statusTone,feedback:feedbackText,finished};
+ };
 
  // ---- elements
  const els={};
- board.innerHTML='<svg id="gal-guide" class="gal-guide" viewBox="0 0 '+BOARD_W+' '+BOARD_H+'" aria-hidden="true"></svg>';
- for(const p in PANELS){
-  const el=document.createElement('div');
-  el.className='gal-panel';el.tabIndex=0;el.setAttribute('role','button');el.dataset.galPanel=p;
-  let rings='';
-  for(const a of ANCHORS[p])rings+='<span class="gal-ring" data-a="'+a.id+'"></span>'+(a.notch?'<span class="gal-notch" data-n="'+a.id+'"></span>':'');
-  el.innerHTML='<div class="gal-layer"><img src="'+art(p)+'" alt="" width="1664" height="944" decoding="async" draggable="false">'+rings+'</div><span class="gal-tag"></span>';
-  board.appendChild(el);els[p]=el;bindPanel(p);
+ if(!islandMode){
+  board.innerHTML='<svg id="gal-guide" class="gal-guide" viewBox="0 0 '+BOARD_W+' '+BOARD_H+'" aria-hidden="true"></svg>';
+  for(const p in PANELS){
+   const el=document.createElement('div');
+   el.className='gal-panel';el.tabIndex=0;el.setAttribute('role','button');el.dataset.galPanel=p;
+   let rings='';
+   for(const a of ANCHORS[p])rings+='<span class="gal-ring" data-a="'+a.id+'"></span>'+(a.notch?'<span class="gal-notch" data-n="'+a.id+'"></span>':'');
+   el.innerHTML='<div class="gal-layer"><img src="'+art(p)+'" alt="" width="1664" height="944" decoding="async" draggable="false">'+rings+'</div><span class="gal-tag"></span>';
+   board.appendChild(el);els[p]=el;bindPanel(p);
+  }
+  $('gal-tools').innerHTML='<span class="gal-tools-row"><b>放大</b>'+Object.keys(PANELS).map(p=>'<button class="secondary-button" data-zoom="'+p+'" aria-pressed="false" aria-label="放大'+PANELS[p].name+'">'+PANELS[p].name+'</button>').join('')+'</span>'
+   +'<span class="gal-tools-row"><b>翻面</b>'+Object.keys(PANELS).map(p=>'<button class="secondary-button" data-flip="'+p+'" aria-pressed="false" aria-label="翻面'+PANELS[p].name+'">'+PANELS[p].name+'</button>').join('')+'</span>'
+   +'<span class="gal-tools-row"><button class="secondary-button" id="gal-marks" aria-pressed="true">物件標記</button><button class="secondary-button" id="gal-home">畫格歸位</button></span>';
+  const anchorOptions=Object.keys(PANELS).flatMap(p=>ANCHORS[p].map(a=>'<option value="'+p+'.'+a.id+'">'+label(p,a)+'</option>')).join('');
+  $('gal-from').innerHTML=anchorOptions;$('gal-to').innerHTML=anchorOptions;$('gal-to').selectedIndex=4;
  }
- $('gal-tools').innerHTML='<span class="gal-tools-row"><b>放大</b>'+Object.keys(PANELS).map(p=>'<button class="secondary-button" data-zoom="'+p+'" aria-pressed="false" aria-label="放大'+PANELS[p].name+'">'+PANELS[p].name+'</button>').join('')+'</span>'
-  +'<span class="gal-tools-row"><b>翻面</b>'+Object.keys(PANELS).map(p=>'<button class="secondary-button" data-flip="'+p+'" aria-pressed="false" aria-label="翻面'+PANELS[p].name+'">'+PANELS[p].name+'</button>').join('')+'</span>'
-  +'<span class="gal-tools-row"><button class="secondary-button" id="gal-marks" aria-pressed="true">物件標記</button><button class="secondary-button" id="gal-home">畫格歸位</button></span>';
- const anchorOptions=Object.keys(PANELS).flatMap(p=>ANCHORS[p].map(a=>'<option value="'+p+'.'+a.id+'">'+label(p,a)+'</option>')).join('');
- $('gal-from').innerHTML=anchorOptions;$('gal-to').innerHTML=anchorOptions;$('gal-to').selectedIndex=4;
 
  function render(){
+  if(islandMode){hints.changed();return;}
   for(const p in els){
    const el=els[p],layer=el.firstChild,img=layer.firstChild;
    const m=mag(view,p),ep=effPos(p),fl=flipped(view,p),zoomed=m!==1;
@@ -267,6 +297,7 @@ function mountGallery(ctx,stage){
   hints.changed();
  }
  function drawThreads(){
+  if(islandMode)return;
   let s='';
   const view0={zoom:null,flip:view.flip},end=ref=>{const {panel,anchor}=find(ref),pt=at(view0,panel,anchor);return [SLOT[panel][0]+BORDER+pt[0]*K,SLOT[panel][1]+BORDER+pt[1]*K];};
   const mark=(pt,kind)=>{
@@ -359,7 +390,7 @@ function mountGallery(ctx,stage){
    pos[p]=[drag.ox+(e.clientX-drag.sx)/scale,drag.oy+(e.clientY-drag.sy)/scale];
    el.style.left=pos[p][0]+'px';el.style.top=pos[p][1]+'px';
    const c=candidates(p)[0],r=c?judge(p,c.a,c.q,c.b):null;
-   live=c?{p:c.pa,q:c.pb,ok:r.kind==='link'}:null;setMask(el,p,c);drawThreads();
+   live=c?{p:c.pa,q:c.pb,ok:r.kind==='link',panel:p,anchorId:c.a.id}:null;setMask(el,p,c);drawThreads();
   });
   const end=()=>{
    if(!drag)return;
@@ -393,21 +424,63 @@ function mountGallery(ctx,stage){
  }
  function toggleZoom(p){held=null;view.zoom=view.zoom&&view.zoom.panel===p?null:{panel:p};note('');ctx.playCue('click');render();}
  function flip(p){view.flip[p]=!view.flip[p];note('');ctx.playCue('click');render();}
- $('gal-tools').addEventListener('click',e=>{
-  if(mode!=='play'||finished)return;
-  const z=e.target.closest('[data-zoom]'),f=e.target.closest('[data-flip]');
-  if(z)toggleZoom(z.dataset.zoom);else if(f)flip(f.dataset.flip);
- });
- $('gal-marks').onclick=e=>{markers=!markers;e.currentTarget.setAttribute('aria-pressed',String(markers));render();};
- $('gal-home').onclick=()=>{if(mode!=='play'||finished)return;view.zoom=null;held=null;for(const p in SLOT)pos[p]=[...SLOT[p]];note('');render();};
- // The list does what a drag does, without a pointer: the current zoom and flips still decide whether the pair fits.
- $('gal-put').onclick=()=>{
-  if(mode!=='play'||finished)return;
-  const [p,a]=$('gal-from').value.split('.'),[q,b]=$('gal-to').value.split('.');
-  const r=judge(p,ANCHORS[p].find(x=>x.id===a),q,ANCHORS[q].find(x=>x.id===b));
-  if(r.kind==='link')attach(r.link);
-  else{note(r.text);ctx.playCue('wrong');}
- };
+ if(!islandMode){
+  $('gal-tools').addEventListener('click',e=>{
+   if(mode!=='play'||finished)return;
+   const z=e.target.closest('[data-zoom]'),f=e.target.closest('[data-flip]');
+   if(z)toggleZoom(z.dataset.zoom);else if(f)flip(f.dataset.flip);
+  });
+  $('gal-marks').onclick=e=>{markers=!markers;e.currentTarget.setAttribute('aria-pressed',String(markers));render();};
+  $('gal-home').onclick=()=>{if(mode!=='play'||finished)return;view.zoom=null;held=null;for(const p in SLOT)pos[p]=[...SLOT[p]];note('');render();};
+  // The list does what a drag does, without a pointer: the current zoom and flips still decide whether the pair fits.
+  $('gal-put').onclick=()=>{
+   if(mode!=='play'||finished)return;
+   const [p,a]=$('gal-from').value.split('.'),[q,b]=$('gal-to').value.split('.');
+   const r=judge(p,ANCHORS[p].find(x=>x.id===a),q,ANCHORS[q].find(x=>x.id===b));
+   if(r.kind==='link')attach(r.link);
+   else{note(r.text);ctx.playCue('wrong');}
+  };
+ }
+
+ const validPanel=p=>Object.prototype.hasOwnProperty.call(PANELS,p);
+ function onIslandAction(change){
+  if(!islandMode||!change||typeof change!=='object')return makeSnapshot();
+  if(change.type==='resize'&&Number.isFinite(change.width)&&change.width>0){scale=Math.min(1,change.width/BOARD_W);render();}
+  else if(finished||mode!=='play')return makeSnapshot();
+  else if(change.type==='toggle-zoom'&&validPanel(change.panel))toggleZoom(change.panel);
+  else if(change.type==='flip'&&validPanel(change.panel))flip(change.panel);
+  else if(change.type==='toggle-markers'){markers=!markers;render();}
+  else if(change.type==='home'){view.zoom=null;held=null;live=null;for(const p in SLOT)pos[p]=[...SLOT[p]];note('');render();}
+  else if(change.type==='begin-drag'&&validPanel(change.panel)&&Number.isFinite(change.x)&&Number.isFinite(change.y)){
+   if(inTray(change.panel)){pos[change.panel]=[change.x,change.y];held=change.panel;render();}
+  }
+  else if(change.type==='move-panel'&&validPanel(change.panel)&&Number.isFinite(change.x)&&Number.isFinite(change.y)&&mag(view,change.panel)===1){
+   pos[change.panel]=[change.x,change.y];held=change.panel;const c=candidates(change.panel)[0],r=c?judge(change.panel,c.a,c.q,c.b):null;
+   live=c?{p:c.pa,q:c.pb,ok:r.kind==='link',panel:change.panel,anchorId:c.a.id}:null;render();
+  }
+  else if(change.type==='drop-panel'&&validPanel(change.panel)){
+   const r=resolve(change.panel);live=null;held=null;
+   if(r.kind==='link'){attach(r.link);return makeSnapshot();}
+   pos[change.panel]=[...SLOT[change.panel]];
+   if(r.kind==='bad'){note(r.text);ctx.playCue('wrong');}else note('放開的位置附近沒有東西可以疊。');
+   render();
+  }
+  else if(change.type==='keyboard-move'&&validPanel(change.panel)&&Number.isFinite(change.dx)&&Number.isFinite(change.dy)&&mag(view,change.panel)===1){
+   if(inTray(change.panel)){pos[change.panel]=[(BOARD_W-PW)/2,(BOARD_H-PH)/2];held=change.panel;}
+   pos[change.panel]=[pos[change.panel][0]+change.dx,pos[change.panel][1]+change.dy];render();
+   const r=resolve(change.panel);
+   if(r.kind==='link'){attach(r.link);return makeSnapshot();}
+   if(r.kind==='bad')note(r.text);
+  }
+  else if(change.type==='place'&&typeof change.from==='string'&&typeof change.to==='string'){
+   const [p,a]=change.from.split('.'),[q,b]=change.to.split('.');
+   if(validPanel(p)&&validPanel(q)){
+    const from=ANCHORS[p].find(x=>x.id===a),to=ANCHORS[q].find(x=>x.id===b),r=from&&to?judge(p,from,q,to):{kind:'bad',text:'請選擇兩個畫格中的物件。'};
+    if(r.kind==='link')attach(r.link);else{note(r.text);ctx.playCue('wrong');}
+   }
+  }
+  return makeSnapshot();
+ }
 
  // ---- merge stage: put the four panels in the order of the thread
  function startOrder(){
@@ -453,10 +526,11 @@ function mountGallery(ctx,stage){
  }
 
  layout();
- if(typeof ResizeObserver==='function'){const watcher=new ResizeObserver(()=>{if(!alive()){watcher.disconnect();return;}layout();render();});watcher.observe(stageEl);}
- else window.addEventListener('resize',()=>{if(alive()){layout();render();}});
+ if(!islandMode&&typeof ResizeObserver==='function'){const watcher=new ResizeObserver(()=>{if(!alive()){watcher.disconnect();return;}layout();render();});watcher.observe(stageEl);}
+ else if(!islandMode)window.addEventListener('resize',()=>{if(alive()){layout();render();}});
  say(stage==='align'?'兩條紅線都還沒接上。':'還差一條紅線。');
  render();
+ if(islandMode)ctx.mountPuzzleIsland({snapshot:makeSnapshot(),onAction:onIslandAction});
  // A test hook, read-only state for the browser suites.
- board.__gallery={view,links,pos,els,get mode(){return mode;},get scale(){return scale;},radius,boardPos};
+ if(!islandMode)board.__gallery={view,links,pos,els,get mode(){return mode;},get scale(){return scale;},radius,boardPos};
 }
