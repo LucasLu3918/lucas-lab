@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { calculateAstrology, createAstrologyForecast, signDescription, type AstrologyChart, type AstrologyForecast, type AstrologyForecastPeriod } from './astrology';
 import { createAnnualAstrologyForecast, type AnnualAstrologyForecast } from './astrology-annual';
 import { BIRTH_PLACES } from './locations';
-import type { Disambiguation } from './timezone';
+import type { Disambiguation } from '../fortune-core/civil-time';
 
 const birthDate = ref('');
 const birthTime = ref('12:00');

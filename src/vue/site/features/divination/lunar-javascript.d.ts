@@ -47,10 +47,17 @@ declare module 'lunar-javascript' {
   export interface LunarDate {
     getEightChar(): EightChar;
     getYearInGanZhiExact(): string;
+    getYearInGanZhi(): string;
     getMonthInGanZhiExact(): string;
     getDayInGanZhiExact2(): string;
+    /** Lunar year as a number. */
+    getYear(): number;
+    /** Lunar month as a number; negative for a leap month. */
+    getMonth(): number;
+    getDay(): number;
   }
   export const Solar: {
+    fromYmd(year: number, month: number, day: number): { getLunar(): LunarDate };
     fromYmdHms(year: number, month: number, day: number, hour: number, minute: number, second: number): { getLunar(): LunarDate };
   };
 }

@@ -1,5 +1,5 @@
 import * as Astronomy from 'astronomy-engine';
-import { civilPartsAt } from './timezone';
+import { civilPartsAt } from '../fortune-core/civil-time';
 import type { BirthPlace } from './locations';
 import type { AstrologyChart, PlanetPlacement } from './astrology';
 
