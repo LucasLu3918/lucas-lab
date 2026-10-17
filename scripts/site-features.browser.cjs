@@ -145,6 +145,7 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   const activeTitle=await dialog.locator('#gallery-dialog-title').textContent();
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.querySelector('#gallery-dialog')?.open===false);
+  await page.waitForFunction(title=>document.activeElement?.dataset.title===title,activeTitle);
   assert.equal(await page.evaluate(()=>document.activeElement?.dataset.title),activeTitle,'dialog did not restore focus to the active tile');
   assert.ok(imageCount>1,'first Gallery group has no next image to test');
   console.log('✓ gallery keeps static tiles, lazy-loads the Vue dialog, loads full images and restores focus after keyboard navigation');
