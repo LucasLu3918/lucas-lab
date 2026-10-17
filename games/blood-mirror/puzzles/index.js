@@ -176,7 +176,7 @@ export function preloadStages(){for(const entry of Object.values(puzzles))if(!en
 // mounts / is solved, and
 // `extra` = {html(stage), bind(stage)} appends the step-aware hint panel below the stage, and
 // `stageLines` = {<stage id>: html} shows a few lines of story after that stage is solved (not on a replay), before the next one.
-export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,onStage=()=>{},onStageDone=()=>{},extra=null,stageLines={}}){
+export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,onStage=()=>{},onStageDone=()=>{},mountPuzzleIsland=null,extra=null,stageLines={}}){
  const entry=puzzles[id];
  const complete=()=>{active=null;completed.add(id);persist();playCue('solve');success();};
  if(!entry){complete();return;}
@@ -239,7 +239,7 @@ export function startPuzzle(id,{modal,success,playCue,fresh=false,has=()=>true,o
    showLocked(stage,stage.missing,stillLocked);
    onStage(stage.id);return;
   }
-  stage.mount({render,feedback,playCue,fresh,has,done:()=>stageDone(stage)});
+  stage.mount({render,feedback,playCue,fresh,has,done:()=>stageDone(stage),mountPuzzleIsland:mountPuzzleIsland?(props=>mountPuzzleIsland(stage.id,props)):undefined});
   onStage(stage.id);
  };
  // Both stages are open: the player decides which one to work on, and can switch at any time.

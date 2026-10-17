@@ -142,4 +142,12 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：三層提示文字與順序、已揭露層數、試玩紀錄、localStorage 存檔、Puzzle 內嵌提示、遊戲路由、CSP 與 Worker 行為維持原樣。驗證包含快照解析、提示層呈現／事件／完成狀態、實際遊戲瀏覽器開啟及焦點流程，以及 game bundle contract；不另輸出遊戲頁載入腳本或建立第二份 Vue runtime。
 
-下一個遷移切片：Puzzle UI。先挑一個互動邊界清楚的 puzzle modal 做 Vue island，保留 puzzle 規則、SVG／Canvas 操作與 `startPuzzle` 介面；完成單一 puzzle 的行為與鍵盤驗收後，再依群組逐步交接其他 puzzle DOM。
+### Phase 7 — Blood Mirror Reflection Puzzle Vue island
+
+「反寫手稿」將 4×4 光格交由 `ReflectionPuzzle.vue` 管理，沿用 game Vue lazy bundle 與原生 modal。Vue 持有右半部的互動狀態、格子呈現與即時列數；左半固定。legacy `reflection.js` 保留起始格局與 `glassIsSolved`，接收變更後播放點擊音效並呼叫既有 `done()`；`startPuzzle` 的公開呼叫方式、stage id、完成／存檔流程與下一道鏡像迷廊不變。
+
+`main.js` 只在 reflection stage 建立 island，確認 modal 與 stage 仍有效後才掛載；既有 modal close／切換機制負責卸載。載入失敗會顯示可讀訊息，缺少 adapter 時保留 legacy renderer。元件使用文字插值與原生 button，固定格不可操作，互動格提供 `aria-pressed`，列數透過 status live region 更新。沒有新增 Vue bundle entry、頁面載入腳本、路由或存檔欄位。
+
+驗證包含元件行為、game bundle export 契約與完整瀏覽器解謎流程；原本的 reflection domain test 繼續保護 `glassIsSolved` 規則。這一切片只交接反寫手稿格盤，其他 Puzzle 的 DOM／SVG／Canvas 操作仍由各自 legacy stage 管理。
+
+下一個遷移切片：鏡像迷廊 Maze Puzzle UI。先保留既有路徑、懷錶門檻與存檔行為，將 35 格迷廊的互動面交由 Vue island 管理。

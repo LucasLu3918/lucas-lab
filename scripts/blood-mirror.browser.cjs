@@ -229,6 +229,8 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.equal(await page.locator('#take-item').count(),0,'reversed manuscript cannot be taken before it is mirrored');
    await page.locator('#restore-evidence').click();
    await page.locator('[data-stage-pick="reflection"]').click();
+   await page.locator('[data-vue-reflection-puzzle] .reflection-board').waitFor();
+   assert.equal(await page.locator('[data-vue-reflection-puzzle] .reflection-cell').count(),16,'reflection is mounted as a Vue-owned board');
    assert.equal(await page.locator('.reflection-cell').count(),16);
    for(const k of [1,4,5,6,7])await page.locator('[data-reflection="'+k+'"]').click();
    // Stage two, the mirror corridor: left and right are swapped for the reflection.
