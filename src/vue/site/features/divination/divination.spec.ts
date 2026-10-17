@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import * as Astronomy from 'astronomy-engine';
 import { angleDifference, brentMinimum, calculateAstrology, createAstrologyForecast, geoEclipticLongitude } from './astrology';
-import { calculateBazi, createBaziForecast } from './bazi';
+import { calculateBazi, createBaziAnnualTimeline, createBaziForecast } from './bazi';
+import { TEN_GOD_TEXT } from './bazi-content';
 import { BIRTH_PLACES } from './locations';
 import { parseCivilDateTime, resolveCivilDateTime } from '../fortune-core/civil-time';
 
@@ -36,7 +37,7 @@ describe('local divination calculations', () => {
     expect(chart.pillars).toHaveLength(4);
     expect(chart.pillars.map(pillar => pillar.label)).toEqual(['年柱', '月柱', '日柱', '時柱']);
     expect(chart.dayMaster).toBe(chart.pillars[2].value[0]);
-    expect(chart.methodVersion).toBe('bazi-local-v2');
+    expect(chart.methodVersion).toBe('bazi-local-v3');
     expect(chart.inputPrecision).toBe('full');
     expect(createBaziForecast(chart, 'day', new Date('2026-10-17T04:00:00Z')).evidence.length).toBeGreaterThan(0);
     expect(chart.strengthSignals.evidence).toHaveLength(3);
@@ -69,6 +70,43 @@ describe('local divination calculations', () => {
     expect(Object.values(chart.elementCounts).reduce((sum, count) => sum + count, 0)).toBe(6);
     expect(chart.methodSummary).toContain('僅排三柱');
     expect(chart.inputPrecision).toBe('approximate');
+  });
+
+  it('summarizes five elements as missing and leading, consistent with the counts', () => {
+    const chart = calculateBazi({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei' });
+    const counts = Object.entries(chart.elementCounts);
+    const highest = Math.max(...counts.map(([, count]) => count));
+    expect(chart.elementSummary.missing).toEqual(counts.filter(([, count]) => count === 0).map(([element]) => element));
+    expect(chart.elementSummary.leading).toEqual(counts.filter(([, count]) => count === highest).map(([element]) => element));
+    expect(chart.elementSummary.leading.length).toBeGreaterThan(0);
+  });
+
+  it('lists the 流年 timeline with year pillars, ten gods and the matching 大運 step', () => {
+    const chart = calculateBazi({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei', daYunGender: 1, daYunSchool: 1 });
+    const timeline = createBaziAnnualTimeline(chart, 2026, 10);
+    expect(timeline.map(item => item.year)).toEqual([2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035]);
+    // 2026 年為丙午年（立春後）；年中時刻取年柱，不受立春換年影響。
+    expect(timeline[0].pillar).toBe('丙午');
+    expect(timeline[0].element).toBe('火');
+    expect(Object.keys(TEN_GOD_TEXT)).toContain(timeline[0].tenGod);
+    for (const item of timeline) {
+      expect(item.pillar).toHaveLength(2);
+      const cycle = chart.daYun!.cycles.find(cycle => item.year >= cycle.startYear && item.year <= cycle.endYear);
+      expect(item.daYunPillar).toBe(cycle?.pillar ?? null);
+    }
+    expect(createBaziAnnualTimeline(calculateBazi({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei' }), 2026, 1)[0].daYunPillar).toBeNull();
+  });
+
+  it('marks clashes and harmonies with a natal branch in either order', () => {
+    const chart = calculateBazi({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei' });
+    const withYearBranch = (branch: string) => ({ ...chart, pillars: chart.pillars.map((pillar, index) => index === 0 ? { ...pillar, value: `甲${branch}` } : pillar) });
+    // 2026 年為午年，2008 年為子年；本命年支分別設為子、午，兩種順序都必須判為六沖。
+    const clashNatalZi = createBaziForecast(withYearBranch('子'), 'year', new Date('2026-06-15T04:00:00Z'));
+    const clashNatalWu = createBaziForecast(withYearBranch('午'), 'year', new Date('2008-06-15T04:00:00Z'));
+    expect(clashNatalZi.evidence.some(item => item.includes('六沖'))).toBe(true);
+    expect(clashNatalWu.evidence.some(item => item.includes('六沖'))).toBe(true);
+    const timeline = createBaziAnnualTimeline(withYearBranch('子'), 2026, 1);
+    expect(timeline[0].branchRelations).toContain('沖年支');
   });
 
   it('computes planetary placements and hides time-dependent chart points when time is unknown', () => {

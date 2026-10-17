@@ -127,7 +127,7 @@
   - 生命靈數 `numerology-pythagorean-v1`
   - 星座運勢 `horoscope-daily-v1`，內容 `content` 版本見 `horoscope-zh.json`
   - 紫微斗數 `ziwei-standard-v2`，內容版本 `2026.10.17-1`（v2 加入閏月十六日以後歸下月、祿存／擎羊／陀羅，並提供排盤推導數值與大限起訖年份）
-  - 八字 `bazi-local-v2`
+  - 八字 `bazi-local-v3`
   - 西洋占星 `tropical-whole-sign-v3`
   - 塔羅牌義內容 `rws-zh-tw-1.1.0`
 - 依賴（`package.json`）：`lunar-javascript` 1.7.7（農曆換算，八字與紫微）、`astronomy-engine` 2.1.19（占星）；開發用 `iztro` 2.6.3 僅作紫微差異測試對照，不進入執行期 bundle。

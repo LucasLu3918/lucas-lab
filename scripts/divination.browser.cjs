@@ -50,6 +50,9 @@ async function run(){
   assert.equal(await page.locator('.pillar').count(),4,'BaZi full mode should show four pillars');
   assert.ok(await page.locator('.strength').isVisible(),'BaZi support signals missing');
   assert.ok(await page.locator('.dayun').isVisible(),'BaZi DaYun panel missing');
+  assert.equal(await page.locator('.year-track li').count(),10,'BaZi annual timeline should list ten years');
+  assert.equal(await page.locator('.year-track li[aria-current]').count(),1,'BaZi annual timeline should mark exactly one current year');
+  assert.equal(await page.locator('.cycle-track li[aria-current]').count(),1,'BaZi DaYun should mark the cycle covering the current year');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'BaZi reading overflows the mobile viewport');
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.waitForFunction(()=>window.scrollY===0);
