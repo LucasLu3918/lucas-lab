@@ -167,7 +167,7 @@ const BOARD_H=548,BORDER=6,TRAY=0.55,K=(PW-2*BORDER)/PW; // the content box insi
 const THREAD_DASH=['','9 5','2 5'],THREAD_SHAPE=['circle','square','diamond'];
 const shell=(stageId,island=false)=>'<div class="belfry gallery"><p class="challenge-help"><b>'+GOALS[stageId].title+'。</b>'+GOALS[stageId].goal+'</p>'
  +(island?'':'<p id="bf-status" class="belfry-status" role="status"></p>')
- +(island?'<div data-vue-gallery-align><p class="challenge-feedback" role="status">畫格載入中…</p></div>':'<p id="gal-caption" class="gal-caption" aria-live="polite"></p>'
+ +(island?'<div data-vue-gallery-'+(stageId==='gallery-align'?'align':'merge')+'><p class="challenge-feedback" role="status">畫格載入中…</p></div>':'<p id="gal-caption" class="gal-caption" aria-live="polite"></p>'
   +'<div class="gal-stage" id="gal-stage"><div class="gal-board" id="gal-board"></div></div>'
   +'<div id="gal-order" class="gal-order" hidden></div>'
   +'<div class="gal-tools" id="gal-tools" role="group" aria-label="放大與翻面"></div>'
@@ -186,26 +186,28 @@ export const mountGalleryMerge=ctx=>mountGallery(ctx,'merge');
 function mountGallery(ctx,stage){
  const stageId='gallery-'+stage,spec=STAGES[stage];
  const islandMode=stage==='align'&&typeof ctx.mountPuzzleIsland==='function';
+ const mergeIslandMode=stage==='merge'&&typeof ctx.mountPuzzleIsland==='function';
+ const useIsland=islandMode||mergeIslandMode;
  // Threads already hanging when the stage opens (the merge stage follows the align stage).
  const links=spec.preset.map(kind=>({kind,ends:kind===0?['B.moon','A.moonL']:['C.lantern','D.chandelier']}));
  const view={zoom:null,flip:{A:false,B:false,C:false,D:false}};
  const pos={};for(const p in SLOT)pos[p]=[...SLOT[p]];
  let held=null,live=null,mode='play',finished=false,scale=1,markers=true,order=[],statusText='',statusTone='',feedbackText='';
- ctx.render(shell(stageId,islandMode));
+ ctx.render(shell(stageId,useIsland));
  const $=id=>document.getElementById(id),stageEl=$('gal-stage'),board=$('gal-board');
- const islandRoot=islandMode?document.querySelector('[data-vue-gallery-align]'):null;
+ const islandRoot=useIsland?document.querySelector('[data-vue-gallery-'+(stage==='align'?'align':'merge')+']'):null;
  const alive=()=>Boolean(islandRoot?.isConnected||stageEl?.isConnected);
  const have=()=>links.map(l=>l.kind);
  const step=()=>finished?null:hintStep(stage,have(),view);
  const tiers=new Proxy({},{get:(_,name)=>HINTS[name]});
  const hints=bindHints({hints:tiers,currentStep:step,alive});
- const say=(text,tone='')=>{statusText=text;statusTone=tone;if(!islandMode){const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;}};
- const note=text=>{feedbackText=text||'';if(!islandMode)$('gal-feedback').textContent=feedbackText;};
+ const say=(text,tone='')=>{statusText=text;statusTone=tone;if(!useIsland){const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;}};
+ const note=text=>{feedbackText=text||'';if(!useIsland)$('gal-feedback').textContent=feedbackText;};
  const radius=()=>snapRadius(scale);
 
  // ---- layout: the 744x548 board is scaled to the width of the modal
  function layout(){
-  if(islandMode||stageEl.hidden)return;
+  if(useIsland||stageEl.hidden)return;
   const w=stageEl.clientWidth||BOARD_W;
   scale=Math.min(1,w/BOARD_W);
   board.style.transform='scale('+scale+')';
@@ -241,10 +243,16 @@ function mountGallery(ctx,stage){
    live:live?{panel:live.panel,x1:live.p[0],y1:live.p[1],x2:live.q[0],y2:live.q[1],ok:live.ok}:null,
    caption:step()?CAPTIONS[step().split('-')[0]]||'':'',status:statusText,tone:statusTone,feedback:feedbackText,finished};
  };
+ const makeMergeSnapshot=()=>({
+  mode:finished?'complete':mode,
+  panels:Object.keys(PANELS).map(id=>{const door=ANCHORS[id].find(anchor=>anchor.id==='door'),flip=flipped(view,id);return {id,name:PANELS[id].name,art:PANELS[id].art,flipped:flip,door:door?{x:(flip?SRC[0]-door.x:door.x)/SRC[0]*100,y:door.y/SRC[1]*100,side:side(view,id,door)}:null};}),
+  threads:links.slice().sort((a,b)=>a.kind-b.kind).map(link=>({kind:link.kind,ends:link.ends.map(ref=>{const [panel,anchor]=ref.split('.');return PANELS[panel].name+'：'+ANCHORS[panel].find(item=>item.id===anchor).label;})})),
+  order:[...order],status:statusText,tone:statusTone,feedback:feedbackText,finished,
+ });
 
  // ---- elements
  const els={};
- if(!islandMode){
+ if(!useIsland){
   board.innerHTML='<svg id="gal-guide" class="gal-guide" viewBox="0 0 '+BOARD_W+' '+BOARD_H+'" aria-hidden="true"></svg>';
   for(const p in PANELS){
    const el=document.createElement('div');
@@ -262,7 +270,7 @@ function mountGallery(ctx,stage){
  }
 
  function render(){
-  if(islandMode){hints.changed();return;}
+  if(useIsland){hints.changed();return;}
   for(const p in els){
    const el=els[p],layer=el.firstChild,img=layer.firstChild;
    const m=mag(view,p),ep=effPos(p),fl=flipped(view,p),zoomed=m!==1;
@@ -297,7 +305,7 @@ function mountGallery(ctx,stage){
   hints.changed();
  }
  function drawThreads(){
-  if(islandMode)return;
+  if(useIsland)return;
   let s='';
   const view0={zoom:null,flip:view.flip},end=ref=>{const {panel,anchor}=find(ref),pt=at(view0,panel,anchor);return [SLOT[panel][0]+BORDER+pt[0]*K,SLOT[panel][1]+BORDER+pt[1]*K];};
   const mark=(pt,kind)=>{
@@ -424,7 +432,7 @@ function mountGallery(ctx,stage){
  }
  function toggleZoom(p){held=null;view.zoom=view.zoom&&view.zoom.panel===p?null:{panel:p};note('');ctx.playCue('click');render();}
  function flip(p){view.flip[p]=!view.flip[p];note('');ctx.playCue('click');render();}
- if(!islandMode){
+ if(!useIsland){
   $('gal-tools').addEventListener('click',e=>{
    if(mode!=='play'||finished)return;
    const z=e.target.closest('[data-zoom]'),f=e.target.closest('[data-flip]');
@@ -482,14 +490,28 @@ function mountGallery(ctx,stage){
   return makeSnapshot();
  }
 
+ function onMergeIslandAction(change){
+  if(!mergeIslandMode||!change||typeof change!=='object')return makeMergeSnapshot();
+  if(finished)return makeMergeSnapshot();
+  if(change.type==='flip'&&mode==='play'&&validPanel(change.panel))flip(change.panel);
+  else if(change.type==='place-doors'&&mode==='play'){
+   const r=judge('A',ANCHORS.A.find(anchor=>anchor.id==='door'),'D',ANCHORS.D.find(anchor=>anchor.id==='door'));
+   if(r.kind==='link')attach(r.link);else{note(r.text);ctx.playCue('wrong');}
+  }
+  else if(change.type==='choose-panel'&&mode==='order'&&validPanel(change.panel))chooseOrderPanel(change.panel);
+  else if(change.type==='remove-from'&&mode==='order'&&Number.isInteger(change.index)&&change.index>=0&&change.index<order.length)removeOrderFrom(change.index);
+  return makeMergeSnapshot();
+ }
+
  // ---- merge stage: put the four panels in the order of the thread
  function startOrder(){
   mode='order';order=[];
-  stageEl.hidden=true;$('gal-tools').hidden=true;document.querySelector('.gal-place').hidden=true;
+  if(!mergeIslandMode){stageEl.hidden=true;$('gal-tools').hidden=true;document.querySelector('.gal-place').hidden=true;}
   say('三條紅線都接上了。','ok');renderOrder();
  }
  const names=ends=>ends.map(e=>PANELS[e[0]].name).join('與');
  function renderOrder(){
+  if(mergeIslandMode)return;
   const box=$('gal-order'),what=['月亮','提燈與吊燈','門'];
   box.hidden=false;
   box.innerHTML='<p class="gal-threads">紅線：'+links.slice().sort((x,y)=>x.kind-y.kind).map(l=>names(l.ends)+'（'+what[l.kind]+'）').join('；')+'</p>'
@@ -499,19 +521,31 @@ function mountGallery(ctx,stage){
    +'<div class="gal-cards">'+Object.keys(PANELS).map(p=>'<button class="gal-card'+(order.includes(p)?' used':'')+'" data-card="'+p+'" aria-label="'+PANELS[p].name+(order.includes(p)?'（已放入）':'')+'"><img src="'+art(p)+'" alt="" width="1664" height="944"><span>'+PANELS[p].name+'</span></button>').join('')+'</div>'
    +'<p class="gal-order-note">依序點選四格；點已放的格子可以取消。從哪一端開始都可以，紅線從兩端讀都是同一條。</p>';
   $('gal-caption').textContent=CAPTIONS.order;
-  box.querySelectorAll('[data-i]').forEach(button=>button.onclick=()=>{if(finished)return;order.splice(+button.dataset.i);note('');renderOrder();hints.changed();});
+  box.querySelectorAll('[data-i]').forEach(button=>button.onclick=()=>removeOrderFrom(+button.dataset.i));
   box.querySelectorAll('[data-card]').forEach(button=>button.onclick=()=>{
-   if(finished||order.includes(button.dataset.card))return;
-   order.push(button.dataset.card);ctx.playCue('click');
-   if(order.length<4){note('');renderOrder();hints.changed();return;}
-   if(isChain(order)){orderDone();return;}
-   const i=firstBadGap(order);
-   note('第 '+(i+1)+' 格（'+PANELS[order[i]].name+'）和第 '+(i+2)+' 格（'+PANELS[order[i+1]].name+'）之間沒有紅線。');
-   ctx.playCue('wrong');order=[];renderOrder();hints.changed();
+   chooseOrderPanel(button.dataset.card);
   });
+ }
+ function removeOrderFrom(index){
+  if(finished||mode!=='order')return;
+  order.splice(index);note('');renderOrder();hints.changed();
+ }
+ function chooseOrderPanel(panel){
+  if(finished||mode!=='order'||!validPanel(panel)||order.includes(panel))return;
+  order.push(panel);ctx.playCue('click');
+  if(order.length<4){note('');renderOrder();hints.changed();return;}
+  if(isChain(order)){orderDone();return;}
+  const i=firstBadGap(order);
+  note('第 '+(i+1)+' 格（'+PANELS[order[i]].name+'）和第 '+(i+2)+' 格（'+PANELS[order[i+1]].name+'）之間沒有紅線。');
+  ctx.playCue('wrong');order=[];renderOrder();hints.changed();
  }
  function orderDone(){
   finished=true;
+  if(mergeIslandMode){
+   mode='complete';note('');say('紅線連成一條直線：妳把這截紅線收進手心。','ok');hints.changed();ctx.playCue('door');
+   setTimeout(()=>{if(alive())ctx.done();},reduced()?0:1400);
+   return;
+  }
   const box=$('gal-order');
   // The four panels sit in a row and the thread through them is one straight line: the zhuyin "ㄧ".
   const xs=[60,200,340,480];
@@ -526,11 +560,12 @@ function mountGallery(ctx,stage){
  }
 
  layout();
- if(!islandMode&&typeof ResizeObserver==='function'){const watcher=new ResizeObserver(()=>{if(!alive()){watcher.disconnect();return;}layout();render();});watcher.observe(stageEl);}
- else if(!islandMode)window.addEventListener('resize',()=>{if(alive()){layout();render();}});
+ if(!useIsland&&typeof ResizeObserver==='function'){const watcher=new ResizeObserver(()=>{if(!alive()){watcher.disconnect();return;}layout();render();});watcher.observe(stageEl);}
+ else if(!useIsland)window.addEventListener('resize',()=>{if(alive()){layout();render();}});
  say(stage==='align'?'兩條紅線都還沒接上。':'還差一條紅線。');
  render();
  if(islandMode)ctx.mountPuzzleIsland({snapshot:makeSnapshot(),onAction:onIslandAction});
+ else if(mergeIslandMode)ctx.mountPuzzleIsland({snapshot:makeMergeSnapshot(),onAction:onMergeIslandAction});
  // A test hook, read-only state for the browser suites.
- if(!islandMode)board.__gallery={view,links,pos,els,get mode(){return mode;},get scale(){return scale;},radius,boardPos};
+ if(!useIsland)board.__gallery={view,links,pos,els,get mode(){return mode;},get scale(){return scale;},radius,boardPos};
 }
