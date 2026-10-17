@@ -62,6 +62,11 @@ const save = {
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2 + 24, box.y + box.height / 2 + 18, { steps: 3 });
       await page.mouse.up();
+      await page.waitForFunction(
+        () => Boolean(document.querySelector('#gal-feedback')?.textContent?.trim()),
+        null,
+        { timeout: 5000 },
+      );
       assert.ok((await page.locator('#gal-feedback').innerText()).length > 0, 'a pointer drag receives placement feedback');
 
       await page.locator('.gal-place summary').click();
