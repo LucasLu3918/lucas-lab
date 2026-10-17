@@ -15,11 +15,13 @@ import PrismRaysPuzzle from './PrismRaysPuzzle.vue';
 import PrismBlendPuzzle from './PrismBlendPuzzle.vue';
 import PrismBallroomPuzzle from './PrismBallroomPuzzle.vue';
 import StarwheelPuzzle from './StarwheelPuzzle.vue';
+import ApothecaryTestimonyPuzzle from './ApothecaryTestimonyPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
 import { parsePrismBallroomSnapshot, type PrismBallroomAction, type PrismBallroomSnapshot } from './prism-ballroom';
 import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } from './starwheel';
+import { parseApothecaryTestimonySnapshot, type ApothecaryTestimonyAction, type ApothecaryTestimonySnapshot } from './apothecary-testimony';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -379,6 +381,36 @@ export function mountPrismBallroomPuzzleIsland(
   }));
   app.mount(root);
   root.setAttribute('data-vue-prism-ballroom-ready', 'true');
+  return () => app.unmount();
+}
+
+type ApothecaryTestimonyPuzzleProps = InstanceType<typeof ApothecaryTestimonyPuzzle>['$props'];
+
+export function mountApothecaryTestimonyPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: ApothecaryTestimonyAction) => ApothecaryTestimonySnapshot,
+): (() => void) | null {
+  const snapshot = parseApothecaryTestimonySnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const dispatch = (action: ApothecaryTestimonyAction) => {
+    const next = parseApothecaryTestimonySnapshot(onAction(action));
+    if (next) current.value = next;
+    return next || current.value;
+  };
+  const app = createApp(defineComponent({
+    name: 'ApothecaryTestimonyPuzzleIsland',
+    setup() {
+      return () => h(ApothecaryTestimonyPuzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies ApothecaryTestimonyPuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-apothecary-testimony-ready', 'true');
   return () => app.unmount();
 }
 

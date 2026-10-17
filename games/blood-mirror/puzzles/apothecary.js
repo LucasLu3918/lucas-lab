@@ -107,24 +107,55 @@ const GOALS={
  'apothecary-vessels':{title:'回魂藥要剛好 4',goal:'要調出回魂藥（讓意識從鏡中回到身體），B 杯需要剛好 4 單位的蘋果汁。三個杯子容量 8、5、3，一開始 A 杯是滿的。管子只能照箭頭單向倒：A→C→B→A。點一條管子，就把來源杯倒向目的杯，倒到來源空了或目的杯滿了才停。倒錯了可以復原，不計步數。'},
  'apothecary-mixing':{title:'調出配方的顏色',goal:'回魂藥要調成配方的顏色。每種色精可以加 0–4 滴，瓶子是它們的平均色。配方色隔著綠色玻璃看會歪掉；按「舉起手持鏡」才看得到真正的顏色。顏色夠接近時瓶子會發亮。'}
 };
-const shell=(stageId,body)=>'<div class="belfry apothecary"><p class="challenge-help"><b>'+GOALS[stageId].title+'。</b>'+GOALS[stageId].goal+'</p>'
- +'<p id="bf-status" class="belfry-status" role="status"></p>'+body+hintMarkup+'</div>';
+const shell=(stageId,body,includeStatus=true)=>'<div class="belfry apothecary"><p class="challenge-help"><b>'+GOALS[stageId].title+'。</b>'+GOALS[stageId].goal+'</p>'
+ +(includeStatus?'<p id="bf-status" class="belfry-status" role="status"></p>':'')+body+hintMarkup+'</div>';
 const reduced=()=>document.body.classList.contains('reduce-motion');
 const handlers=(el,act)=>{el.onclick=act;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}};};
 
 // ctx = { render(html), done(), playCue(kind) }
 export function mountApothecaryTestimony(ctx){
- let mirror=false,finished=false;const ruled=new Set();
+ let mirror=false,finished=false,message='還沒有指認。',tone='';const ruled=new Set();
+ let statusEl=null,islandRoot=null,box=null,hints=null;
+ const say2=(text,nextTone='')=>{message=text;tone=nextTone;if(statusEl){statusEl.textContent=text;statusEl.dataset.tone=nextTone;}};
+ const snapshot=()=>({apprentices:[...APPRENTICES],cardLines:[...CARD_LINES],testimonies:TESTIMONY.map(item=>say(item)),mirror,ruled:[...ruled],finished,message,tone});
+ const tiers=new Proxy({},{get:()=>HINTS.A(CULPRIT,[...ruled])});
+ const bindTestimonyHints=()=>{hints=bindHints({hints:tiers,currentStep:()=>finished?null:'accuse',alive:()=>islandRoot?.isConnected||box?.isConnected||false});};
+ if(typeof ctx.mountPuzzleIsland==='function'){
+  ctx.render(shell('apothecary-testimony','<div data-vue-apothecary-testimony><p class="challenge-feedback" role="status">七人證詞載入中…</p></div>',false));
+  islandRoot=document.querySelector('[data-vue-apothecary-testimony]');
+  bindTestimonyHints();
+  say2('還沒有指認。');
+  const act=change=>{
+   if(change?.type==='toggle-mirror'){
+    mirror=!mirror;ctx.playCue('click');
+   }else if(change?.type==='toggle-strike'&&!finished&&Number.isInteger(change.index)&&change.index>=0&&change.index<APPRENTICES.length){
+    ruled.has(change.index)?ruled.delete(change.index):ruled.add(change.index);
+    ctx.playCue('click');hints.changed();
+   }else if(change?.type==='accuse'&&!finished&&Number.isInteger(change.index)&&change.index>=0&&change.index<APPRENTICES.length){
+    const p=change.index,c=conflicts(p);
+    if(!c.length){
+     finished=true;say2('全部說得通：只有'+APPRENTICES[p]+'說了謊，毒蘋果在他手上。','ok');hints.changed();
+     ctx.playCue('door');setTimeout(()=>{if(islandRoot?.isConnected)ctx.done();},reduced()?0:900);
+    }else{
+     const i=firstConflict(p);
+     say2(i===p?'不是'+APPRENTICES[p]+'：如果是他拿著毒蘋果，他就該是說謊的人，但他說的「'+say(TESTIMONY[i])+'」是真的。'
+      :'不是'+APPRENTICES[p]+'：如果是他，'+APPRENTICES[i]+'說的「'+say(TESTIMONY[i])+'」就會是謊話，但'+APPRENTICES[i]+'不該說謊。','bad');
+     ctx.playCue('wrong');hints.changed();
+    }
+   }
+   return snapshot();
+  };
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act});
+  return;
+ }
  ctx.render(shell('apothecary-testimony','<div class="belfry-row"><button id="apo-mirror" class="secondary-button" aria-pressed="false">舉起手持鏡</button><span class="apo-note">證詞原本是反寫的鏡中字</span></div>'
   +'<div class="apo-cards" id="apo-cards">'+APPRENTICES.map((name,i)=>'<div class="apo-card" data-card="'+i+'">'
    +'<svg viewBox="0 0 128 128" aria-hidden="true"><image href="assets/puzzles/scale-icons.webp" width="640" height="128"/></svg>'
    +'<b>'+(i+1)+'　'+name+'</b><span class="apo-card-line">'+CARD_LINES[i]+'</span>'
    +'<span class="apo-say" role="text" aria-label="'+name+'的證詞：'+say(TESTIMONY[i])+'">「'+say(TESTIMONY[i])+'」</span>'
    +'<span class="apo-acts"><button class="secondary-button" data-accuse="'+i+'" aria-label="指認'+name+'拿著毒蘋果">指認</button><button class="secondary-button" data-strike="'+i+'" aria-pressed="false" aria-label="劃掉'+name+'（記下他不是）">劃掉</button></span></div>').join('')+'</div>'));
- const $=id=>document.getElementById(id),box=$('apo-cards'),alive=()=>box.isConnected;
- const say2=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
- const tiers=new Proxy({},{get:()=>HINTS.A(CULPRIT,[...ruled])});
- const hints=bindHints({hints:tiers,currentStep:()=>finished?null:'accuse',alive});
+ const $=id=>document.getElementById(id);box=$('apo-cards');statusEl=$('bf-status');const alive=()=>box.isConnected;
+ bindTestimonyHints();
  box.classList.add('apo-mirrored');
  $('apo-mirror').onclick=e=>{mirror=!mirror;e.currentTarget.setAttribute('aria-pressed',String(mirror));box.classList.toggle('apo-mirrored',!mirror);ctx.playCue('click');};
  box.querySelectorAll('[data-strike]').forEach(button=>button.onclick=()=>{
