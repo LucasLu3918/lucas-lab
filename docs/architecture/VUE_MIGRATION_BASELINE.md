@@ -168,4 +168,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：stage id、原生 modal shell、另一道懷錶齒輪、遊戲進度與存檔格式維持不變；Vue 只擁有格盤子樹與暫態選取狀態，不寫入 storage。沒有新增 route、bundle entry、runtime dependency、CSP 例外或網路存取。驗證包含快照解析、元件互動、manifest/bundle contract，以及實際瀏覽器中的觸控、鍵盤、重設與完成流程。
 
-下一步：重新盤點尚未接手的 Puzzle UI，挑選一個互動邊界獨立、規則可留在 legacy 的項目，再逐項遷移。
+## Phase 11 — Blood Mirror Masks Puzzle Vue island
+
+`MasksPuzzle.vue` 接手 ballroom「面具賓客」的六組原生選單、賓客排序、證詞與狀態回饋，沿用既有 lazy game bundle 和 challenge modal。`masks.js` 保留面具與賓客資料、選擇狀態、未完成／重複選擇檢查、`masksSolved`／`brokenClue` 判定、錯誤音效與 stage 完成回呼；Vue 收到經驗證的 snapshot，將 typed select／reset／confirm actions 交回 legacy controller。沒有 island mount callback 時，原 DOM renderer 保留作為 fallback。
+
+不變條件：六組面具與選項順序、五則證詞、stage id、modal shell、下一道鏡面光路、進度與存檔行為維持原樣。Vue 只呈現 repository-authored 字串並使用原生 `<select>`，不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含快照解析、元件行為、game bundle export contract，以及瀏覽器中的鍵盤選擇、重設、未填／重複／錯誤回饋、通關與進度連續性。
+
+下一步：盤點尚未遷移的獨立 Puzzle UI，優先選擇規則可留在 legacy、互動 DOM 邊界明確且可加入既有 lazy game bundle 的項目。
