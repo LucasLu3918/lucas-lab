@@ -180,4 +180,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：光線入口、暗門位置、四面鏡子的座標／起始方向／解答、stage id、modal shell、內嵌提示、進度與存檔行為維持原樣。Vue 只管理光路 UI 子樹，不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含快照 parser、元件的鍵盤翻轉／重設／即時狀態、既有 game bundle contract，以及 360px／1280px 遊戲瀏覽器中的 lazy mount、解謎、legacy stage 進度和水平溢位。
 
-下一步：評估「懷錶齒輪」Vue island；Vue 接手三枚齒輪控制與狀態呈現，legacy 保留暖身階段、聯動規則、角度動畫、音效和通關判定。
+## Phase 13 — Blood Mirror Watch Puzzle Vue island
+
+`WatchPuzzle.vue` 接手書庫「懷錶齒輪」的三枚齒輪控制與狀態呈現，沿用既有 lazy game bundle、challenge modal 和齒輪素材。`watch.js` 保留暖身階段、齒輪聯動、累積角度與動畫狀態、音效、重設規則和通關判定；Vue 只根據已驗證 snapshot 呈現齒輪並傳回 typed turn/reset action。沒有 island callback 時，legacy DOM renderer 保留作為 fallback。
+
+不變條件：時輪／分輪／秒輪順序、六格位置、暖身初始值與轉動一次後進入真正謎題的流程、三枚齒輪互相牽動的規則、方向連續的旋轉動畫、重設行為與 stage id 維持原樣。modal、Hints、進度、存檔、公開路由、CSP、lazy bundle entry 和 runtime dependencies 不變。Vue 不讀寫 storage 或自行判定答案。驗證包含快照 parser、鍵盤可操作的齒輪按鈕、狀態／暖身轉場／重設、bundle export 契約，以及 360px／1280px 瀏覽器中的 lazy mount、暖身、聯動、解謎和 legacy stage progress。
+
+下一步建議：評估「逆走鐘樓」齒輪列（`games/blood-mirror/puzzles/gears13.js`）的 Vue island 邊界，確認 13 枚齒輪與 SVG 操作是否適合沿用現有 puzzle adapter。
