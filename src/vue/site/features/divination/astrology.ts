@@ -1,7 +1,7 @@
 import * as Astronomy from 'astronomy-engine';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from './timezone';
 
-export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v2';
+export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
 const SIGNS = [
   { name: '牡羊座', element: '火', mode: '開創', text: '主動、直接，適合把想法化為清楚的第一步。' },
   { name: '金牛座', element: '土', mode: '固定', text: '重視穩定與感官經驗，適合用持續投入累積成果。' },
@@ -75,6 +75,7 @@ export interface AstrologyChart {
   methodSummary: string;
   timeUnknown: boolean;
   birthInstant: string;
+  timeZone: string;
   latitude: number;
   longitude: number;
 }
@@ -164,6 +165,7 @@ export function calculateAstrology(input: AstrologyInput): AstrologyChart {
     methodSummary: 'Tropical zodiac、地心視黃道位置、Whole Sign 整宮制、五種主要相位；上升點與天頂依當地恆星時估算。未知出生時間以當地正午估算行星位置，並隱藏上升點、天頂與宮位。',
     timeUnknown: Boolean(input.timeUnknown),
     birthInstant: instant.toISOString(),
+    timeZone: input.timeZone,
     latitude: input.latitude,
     longitude: input.longitude,
   };
@@ -192,11 +194,10 @@ export interface AstrologyTransitEvent {
 export function createAstrologyForecast(chart: AstrologyChart, period: AstrologyForecastPeriod, start = new Date()): AstrologyForecast {
   const spanDays = period === 'day' ? 0 : period === 'month' ? 30 : 365;
   const natalTargets: Array<{ id: string; name: string; longitude: number }> = chart.planets
-    .filter(item => item.id === 'sun' || item.id === 'moon')
     .map(item => ({ id: item.id, name: item.name, longitude: item.longitude }));
   if (chart.ascendant) natalTargets.push({ id: 'ascendant', name: '上升點', longitude: chart.ascendant.longitude });
   if (chart.midheaven) natalTargets.push({ id: 'midheaven', name: '天頂', longitude: chart.midheaven.longitude });
-  const bodyTargets = BODY_LIST.filter(item => !['sun', 'moon'].includes(item.id));
+  const bodyTargets = BODY_LIST;
   const transitData = new Map<string, { transit: string; natal: string; aspect: typeof ASPECTS[number]; samples: Array<{ at: Date; orb: number }> }>();
   const sampleCount = spanDays + 1;
   for (let index = 0; index < sampleCount; index++) {
@@ -255,11 +256,11 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
       events.push({ transit: item.transit, natal: item.natal, aspect: item.aspect.name, exactAt: exactAt.toISOString(), orb, phase, meaning: item.aspect.text });
     }
   }
-  const orderedEvents = events.sort((left, right) => left.orb - right.orb || left.exactAt.localeCompare(right.exactAt)).slice(0, 8);
+  const orderedEvents = events.sort((left, right) => left.exactAt.localeCompare(right.exactAt) || left.orb - right.orb);
   const evidence = orderedEvents.map(event => `${event.transit}與本命${event.natal}${event.aspect}（${new Date(event.exactAt).toLocaleDateString('zh-TW')}附近，${event.phase}，殘餘容許度 ${event.orb.toFixed(2)}°）`);
   const label = period === 'day' ? '今日' : period === 'month' ? '未來一個月' : '未來一年';
   const text = evidence.length
-    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到主要行運相位窗口，以下列出容許度最接近的 ${evidence.length} 項。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
+    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到 ${evidence.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
     : '這段期間未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。';
   return { periodLabel: label, text, evidence, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
