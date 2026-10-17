@@ -122,8 +122,14 @@ Vue 元件責任：`SiteApp` 選擇 island；`SearchApp` 組合搜尋流程；`S
 
 Inventory 是遊戲 UI 的第一個 Vue 垂直切片，沿用 `/games/blood-mirror/play/` 公開路由與既有 SSG。`games/blood-mirror/index.html` 提供唯一的 `[data-vue-game-inventory]` 子樹；`scripts/site/games.cjs` 從已驗證的獨立 Vite manifest 注入同源 hashed bundle 路徑。legacy 控制器在首次進入場景時才動態載入 Vue，標題頁與遊戲頁初始載入不增加請求。
 
-遊戲引擎仍擁有 `state.inventory`、收取規則與存檔。legacy `renderInventory` 只更新清單外的數量，並以 `blood-mirror:inventory-updated` 發布 ID；Vue `InventoryPanel` 根據既有物品 catalog 顯示物品，選取後以 `blood-mirror:inventory-selected` 傳回 ID。legacy 控制器驗證物品仍在背包後，繼續使用原本的 modal、插畫、說明與焦點還原。Vue 不改寫遊戲狀態；Journal、Hints、Puzzle 與其他遊戲畫面仍由 legacy 控制器擁有。
+遊戲引擎仍擁有 `state.inventory`、收取規則與存檔。legacy `renderInventory` 只更新清單外的數量，並以 `blood-mirror:inventory-updated` 發布 ID；Vue `InventoryPanel` 根據既有物品 catalog 顯示物品，選取後以 `blood-mirror:inventory-selected` 傳回 ID。legacy 控制器驗證物品仍在背包後，繼續使用原本的 modal、插畫、說明與焦點還原。Vue 不改寫遊戲狀態；Journal 的內容規則、Hints、Puzzle 與其他遊戲畫面仍由 legacy 控制器擁有。
 
 不變條件：v1/v2 遷移、`blood-mirror-v2` 與 `blood-mirror-v2-backup`、puzzle key、CSP、公開路由與 Worker 行為維持原樣。測試包含清單／空狀態、事件資料驗證、manifest 綁定的 SSG 契約，以及實際收取物品、開啟詳情和焦點還原的遊戲瀏覽器流程。
 
-下一個遷移切片：Journal（線索筆記）；Hints 仍維持 legacy，待 Journal 單獨驗收後再規劃。
+## Phase 5 — Blood Mirror Journal Vue island
+
+Journal 接手既有 modal 中的已解鎖章節筆記、推理簿、人物記憶與收藏；沿用現有 game Vue bundle，並在開啟筆記時才掛載 Vue。legacy `main.js` 使用 `journalChapters`、`memoryCollection` 與既有引擎資料組成唯讀快照，Vue 只管理章節選擇和呈現。既有 modal shell 保留標題、關閉、焦點還原與其他視窗的控制；關閉或切換視窗時卸載 Journal island。祕密尾聲按鈕只把請求交回 legacy 控制器。
+
+不變條件：預設目前章節、全部已解鎖章節篩選、已查看線索、修復後文字、線索詞分組、人物記憶與碎片／成就遮蔽規則維持原樣。Vue 以文字插值顯示內容，不輸出 HTML；Journal 不寫入遊戲狀態或存檔。Hints、Puzzle、遊戲引擎、存檔格式、路由、CSP 與 Worker 行為維持原有邊界。驗證涵蓋快照解析、元件的篩選／空狀態／未解鎖內容、既有遊戲瀏覽器 Journal 流程，以及同一個 lazy game bundle 的 SSG 契約。
+
+下一個遷移切片：Hints（提示）Vue island；在 Hints 完成獨立驗收前，Puzzle 與其他遊戲畫面仍由 legacy 控制器擁有。

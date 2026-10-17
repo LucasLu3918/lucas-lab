@@ -14,7 +14,6 @@ import * as shadow from '../games/blood-mirror/puzzles/shadow.js';
 import * as choir from '../games/blood-mirror/puzzles/choir.js';
 import * as scale from '../games/blood-mirror/puzzles/scale.js';
 import * as frozen from '../games/blood-mirror/puzzles/frozen.js';
-import {collectionMarkup} from '../games/blood-mirror/views/modals.js';
 import * as musicbox from '../games/blood-mirror/puzzles/musicbox.js';
 import * as prism from '../games/blood-mirror/puzzles/prism.js';
 import * as watch from '../games/blood-mirror/puzzles/watch.js';
@@ -946,10 +945,6 @@ test('closing page: lines match the draft, opens with E9, both answers lead to t
  // no new save field: nothing in the page asks the save to store it
  const src=fs.readFileSync(new URL('../games/blood-mirror/abyss.js',import.meta.url),'utf8');
  assert.ok(!/state\.|localStorage|persist/.test(src.slice(src.indexOf('function closing'))),'the closing page must not save anything');
- // the collection tab shows the title only once it is earned
- const shelf={shardIds:['a'],found:[],achievements:[],unlocked:[],titleOf:id=>id,secretTitle:'尾聲'};
- assert.ok(collectionMarkup({...shelf,closingTitle:page.reward.name}).includes(page.reward.name));
- assert.ok(!collectionMarkup(shelf).includes('稱號'));
 });
 
 test('hints: every stage of the acts has three distinct tiers, no broken quotes, and the last tier is the answer',()=>{

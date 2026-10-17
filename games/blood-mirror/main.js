@@ -1,4 +1,4 @@
-import {journalShellMarkup,clueBookMarkup,collectionMarkup,chapterEntriesMarkup,memoriesMarkup,settingsMarkup,playlogPanelMarkup,epilogueMarkup,recapMarkup,fateMarkup,replayPickerMarkup,endingReplayMarkup,hintModalMarkup,stageHintMarkup as stageHintHtml,prerequisiteNote,evidenceGateMarkup,solvedMarkup,codeSealMarkup,sequenceSealMarkup,questionSealMarkup,nameSealMarkup,sealSuccessMarkup,storyBody,guideBody,prologueBody,chapterIntroBody} from './views/modals.js';
+import {settingsMarkup,playlogPanelMarkup,epilogueMarkup,recapMarkup,fateMarkup,replayPickerMarkup,endingReplayMarkup,hintModalMarkup,stageHintMarkup as stageHintHtml,prerequisiteNote,evidenceGateMarkup,solvedMarkup,codeSealMarkup,sequenceSealMarkup,questionSealMarkup,nameSealMarkup,sealSuccessMarkup,storyBody,guideBody,prologueBody,chapterIntroBody} from './views/modals.js';
 import {createMixer} from './audio/mixer.js';import {createSfx} from './audio/sfx.js';import {createAmbience} from './audio/ambience.js';
 import {journeyGuide,journalChapters,spotText,memoryCollection,journeyRecap,dialogueLines,sceneMet,readLog} from './journey.js';import {exportSave,parseSave,loadSave,backupSave,writeSave,SAVE_KEY} from './engine/index.js';import {ledgerMarkup} from './puzzles/ledger-art.js';import {createPlaylog,summarizePlaylog} from './playlog.js';
 import {createGameUI,createDialogueBox} from './ui.js';
@@ -8,6 +8,7 @@ import {conceptMarkup,itemArtwork,placeConcepts,placeZooms,preloadImages,preload
 import {rooms,items,endings,initialState,inspect,collect,solve,travel,chooseEnding,journeyComplete,choose,choiceVariant,visibleSpots,queenResponse,queenResponses,unlockText,markGlow,restoreClues,collectShard,unlockAchievements,achievements,shardIds,PROLOGUE_SHARD,clueWords,judgeInterrogation} from './engine/index.js';
 import {interrogationPage,interrogationNotice,hintFill,nextEmpty} from './puzzles/interrogation.js';
 import {secretEpilogue} from './data/secret-epilogue.js';
+import {clueGroups} from './data/clues.js';
 import {isPuzzleComplete as isChallengeComplete,isStageComplete,activeStage,stageLabel,puzzles as challengeRegistry,startPuzzle as startChallenge,preloadStages,resetPuzzles as resetChallenges,completedPuzzles as completedChallenges,setPuzzleCompletions as setChallenges,setPuzzlePersistence} from './puzzles/index.js';
 import {createSoundtrack} from './soundtrack.js';
 import {createGallery} from './gallery.js';
@@ -20,6 +21,7 @@ const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.
 // A save written by a newer build stays untouched: this page never writes until it is reloaded.
 let saveBlocked=loaded.newer;if(!saveBlocked){if(!loaded.recovered)backupSave(localStorage);if(loaded.migrated||loaded.recovered)writeSave(state,completedChallenges(),localStorage);}
 let view='home',lastFocus=null,lastFocusSelector=null,toastTimeout,activeNodes=[],saveFailed=false;
+let gameIslandModule=null,gameIslandPromise=null,inventoryIslandLoaded=false,inventoryIslandLoading=false,journalIslandUnmount=null;
 const mixer=createMixer();const soundtrack=createSoundtrack({mixer});const sfx=createSfx(mixer);const ambience=createAmbience(mixer);
 const ui=createGameUI();
 // The feedback layer (juice.js) loads on the first pointer or key press, outside the page's initial request budget.
@@ -32,12 +34,14 @@ const currentTrack=()=>['home','gallery'].includes(view)?'home':view==='ending'?
 const save=()=>{if(saveBlocked){$('#save-indicator').textContent='存檔來自較新版本，請重新整理頁面';return;}const fresh=unlockAchievements(state,completedChallenges());if(fresh.length)toast('成就解鎖：'+fresh.map(item=>item.title).join('、'));saveFailed=!writeSave(state,completedChallenges(),localStorage);const message=saveFailed?'無法存檔，請保持本頁開啟':'進度已儲存在此裝置';if($('#save-indicator').textContent!==message)$('#save-indicator').textContent=message;};
 const formatTime=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;
 function toast(text){const box=$('#toast');if($('dialog[open]')){juice?.raise(box);void box.offsetWidth;}box.textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>$('#toast').classList.remove('visible'),3200)}
-function modal(title,eyebrow,html){const d=$('#modal'),opening=!d.open,titleChanged=$('#modal-title').textContent!==title;if(opening){lastFocus=document.activeElement;const key=['data-clue','data-spot','data-item','data-artwork','data-gallery-filter'].find(name=>lastFocus?.hasAttribute(name));lastFocusSelector=key?`[${key}="${lastFocus.getAttribute(key)}"]`:null;}$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;placeConcepts($('#modal-body'));placeZooms($('#modal-body'));if(opening)d.showModal();if(opening||titleChanged)$('#modal-body').scrollTop=0;if(!opening&&!d.contains(document.activeElement))$('#modal-title').focus({preventScroll:true});}
+function unmountJournalIsland(){journalIslandUnmount?.();journalIslandUnmount=null;}
+function modal(title,eyebrow,html){unmountJournalIsland();const d=$('#modal'),opening=!d.open,titleChanged=$('#modal-title').textContent!==title;if(opening){lastFocus=document.activeElement;const key=['data-clue','data-spot','data-item','data-artwork','data-gallery-filter'].find(name=>lastFocus?.hasAttribute(name));lastFocusSelector=key?`[${key}="${lastFocus.getAttribute(key)}"]`:null;}$('#modal-title').textContent=title;$('#modal-eyebrow').textContent=eyebrow;$('#modal-body').innerHTML=html;placeConcepts($('#modal-body'));placeZooms($('#modal-body'));if(opening)d.showModal();if(opening||titleChanged)$('#modal-body').scrollTop=0;if(!opening&&!d.contains(document.activeElement))$('#modal-title').focus({preventScroll:true});}
 function restoreFocus(){if($('#modal').open)return;if(view==='ending'){$('#ending-title').focus({preventScroll:true});return;}const target=lastFocus?.isConnected?lastFocus:lastFocusSelector?$(lastFocusSelector):null;if(target?.getClientRects().length)target.focus({preventScroll:true});}
 function closeModal(){$('#modal').close();restoreFocus();}
 $('#modal-close').onclick=closeModal;
 $('#modal').addEventListener('click',e=>{if(e.target===$('#modal')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal()}});
 $('#modal').addEventListener('close',restoreFocus);$('#modal').addEventListener('close',()=>mixer.setFocus(false));
+$('#modal').addEventListener('close',unmountJournalIsland);
 function showView(next){ui.closeMenu();document.body.dataset.view=next;if(view==='gallery')gallery.stopPreview();if($('#modal').open)closeModal();view=next;['home','game','ending','gallery'].forEach(id=>$('#'+id).classList.toggle('hidden',id!==next));$('#main').classList.remove('view-enter');void $('#main').offsetWidth;$('#main').classList.add('view-enter');window.scrollTo({top:0,behavior:'instant'});if(next==='game'){renderGame();preloadStages();}if(next==='home')renderHome();if(next==='ending'){renderEnding();$('#ending-title').setAttribute('tabindex','-1');$('#ending-title').focus({preventScroll:true});}if(next==='gallery'){gallery.render();$('#gallery-return').textContent=galleryReturn==='home'?'← 返回首頁':'← 返回旅程';}soundtrack.select(currentTrack());if(next!=='game')ambience.stop();$$('#game-nav [data-action]').forEach(button=>{if(button.dataset.action===(next==='home'?'home':next))button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}
 function renderHome(){renderResume();const hasSave=state.started;$('#start').classList.toggle('primary-button',!hasSave);$('#start').classList.toggle('text-button',hasSave);$('#continue').classList.toggle('primary-button',hasSave);$('#continue').classList.toggle('text-button',!hasSave);$('#continue').textContent=state.ending?'回看已完成的結局 ⟶':`繼續${rooms[state.room].title} ⟶`;$('#home-progress').textContent=hasSave?`已找到 ${state.solved.length} / ${rooms.length} 份真相 · 結局收藏 ${state.endings.length} / 3${state.endings.length?` · 人物記憶 ${state.memories?.length||0} / ${memoryCollection(state).length}`:''}`:'觀察光點 → 收取物品 → 解開封印';$('#continue').classList.toggle('hidden',!hasSave);$('#start').textContent=hasSave?'開始新旅程 ⟶':'踏入魔鏡 ⟶';$('#chapter-cards').innerHTML=rooms.map((r,i)=>`<button class="chapter-card${i>state.unlocked?' locked':''}" data-chapter="${i}" aria-label="${r.chapter} ${r.title}，${i<=state.unlocked?'可探索':'尚未解鎖'}">${i<=state.unlocked?`<img class="card-image" loading="lazy" src="assets/${r.image}" alt="">`:''}<span class="card-number">0${i+1}</span><span class="card-status">${icon(state.solved.includes(i)?'gem':i<=state.unlocked?'mirror':'lock')}${state.solved.includes(i)?'已解開':i<=state.unlocked?'可探索':'封印中'}</span><h3>${r.title}</h3><p>${r.subtitle}</p>${i<=state.unlocked?'<span class="card-arrow">⟶</span>':''}</button>`).join('');$$('[data-chapter]').forEach(el=>el.onclick=()=>{const i=Number(el.dataset.chapter);if(i>state.unlocked){toast('這道門仍被封印。先完成前面的章節。');return}state.started=true;state.ending=null;travel(state,i);save();showView('game');});renderAbyssEntry();}
 // "帳本的背面" (鏡淵): optional expert levels outside the seven acts. The home page offers the way in after any ending;
@@ -91,8 +95,15 @@ function renderGame(){const r=rooms[state.room],done=state.solved.includes(state
 $('#room-select').innerHTML=rooms.map((x,i)=>`<option value="${i}"${i>state.unlocked?' disabled':''}>0${i+1} · ${i>state.unlocked?'封印中':x.title}</option>`).join('');$('#room-select').value=String(state.room);$('#room-select').onchange=e=>{travel(state,Number(e.target.value));save();renderGame()};renderInventory();renderJourneyGuide();$('#journal-count').textContent=state.seen.length;save();clampPan();syncDialogue();}
 // The act tabs rebuild on every render, so a keyboard user's focus is moved back to the new active tab.
 function pickRoom(index){const inTabs=!!document.activeElement?.closest('#room-tabs');travel(state,index);save();renderGame();if(inTabs)document.querySelector(`#room-tabs [data-room="${index}"]`)?.focus({preventScroll:true});}
-let inventoryIslandLoaded=false,inventoryIslandLoading=false;
-function renderInventory(){$('#inventory-count').textContent=state.inventory.length+' 件';if(inventoryIslandLoaded){emitInventoryUpdate(document,state.inventory);return;}if(inventoryIslandLoading)return;const root=$('#inventory'),entry=root.dataset.vueGameInventoryEntry;if(!entry)return;inventoryIslandLoading=true;import(entry).then(()=>{inventoryIslandLoaded=true;inventoryIslandLoading=false;emitInventoryUpdate(document,state.inventory);}).catch(()=>{inventoryIslandLoading=false;root.textContent='物品清單載入失敗，請重新整理頁面。';});}
+function loadGameIslands(){
+ if(gameIslandModule)return Promise.resolve(gameIslandModule);
+ if(gameIslandPromise)return gameIslandPromise;
+ const entry=$('#inventory').dataset.vueGameInventoryEntry;
+ if(!entry)return Promise.reject(new Error('Game Vue entry is missing.'));
+ gameIslandPromise=import(entry).then(module=>{gameIslandModule=module;return module;}).catch(error=>{gameIslandPromise=null;throw error;});
+ return gameIslandPromise;
+}
+function renderInventory(){$('#inventory-count').textContent=state.inventory.length+' 件';if(inventoryIslandLoaded){emitInventoryUpdate(document,state.inventory);return;}if(inventoryIslandLoading)return;inventoryIslandLoading=true;loadGameIslands().then(()=>{inventoryIslandLoaded=true;inventoryIslandLoading=false;emitInventoryUpdate(document,state.inventory);}).catch(error=>{console.error('Game Vue island failed to load.',error);inventoryIslandLoading=false;$('#inventory').textContent='物品清單載入失敗，請重新整理頁面。';});}
 function openInventoryItem(id){const it=items[id];if(!it||!state.inventory.includes(id))return;modal(it.name,it.keepsake?'KEEPSAKE · 紀念物':'INVENTORY · 隨身物品',`<div class="modal-image-icon">${itemArtwork[id]?conceptMarkup(itemArtwork[id],{className:'concept-item'}):icon(itemIcon(id,it))}</div><p class="modal-text">${it.text}</p>${it.keepsake?'<p class="modal-note">紀念物不需要在任何地方使用，它只替妳記得發生過的事。</p>':''}<button class="secondary-button" id="item-back">返回探索</button>`);$('#item-back').onclick=closeModal;}
 document.addEventListener(INVENTORY_SELECTED_EVENT,event=>{const id=readInventorySelection(event);if(id)openInventoryItem(id);});
 $('#clue-list').addEventListener('click',event=>{const button=event.target.closest('[data-clue]');if(button)openSpot(button.dataset.clue);});
@@ -282,17 +293,30 @@ function renderJourneyGuide(){
  $('#journey-guide-action').onclick=followJourney;
 }
 function openJournal(){
+ modal('被留下的真相','JOURNAL · 線索筆記','<div data-vue-game-journal></div>');
+ const root=$('[data-vue-game-journal]'),snapshot=journalSnapshot();
+ loadGameIslands().then(module=>{
+  if(!root?.isConnected||!$('#modal').open||$('#modal-title').textContent!=='被留下的真相')return;
+  journalIslandUnmount=module.mountJournalIsland(root,snapshot,openSecretEpilogue);
+  if(!journalIslandUnmount)root.textContent='筆記內容無法載入，請重新整理頁面。';
+ }).catch(error=>{console.error('Journal Vue island failed to load.',error);if(root?.isConnected)root.textContent='筆記載入失敗，請重新整理頁面。';});
+}
+function journalSnapshot(){
+ const words=state.clues||[],foundShards=state.shards||[],unlockedAchievements=state.achievements||[];
  const sections=journalChapters(state,id=>restoredRoom(rooms.findIndex(room=>room.id===id)));
- modal('被留下的真相','JOURNAL · 線索筆記',journalShellMarkup({sections,showMemories:!!(state.endings.length||state.memories?.length)}));
- const select=$('#journal-chapter');select.value=String(state.room);
- const show=book=>{$('#journal-summary').textContent=book.summary;$('#journal-entries').innerHTML=book.html;};
- const draw=()=>{
-  if(select.value==='clues'){show(clueBookMarkup(state.clues||[]));return;}
-  if(select.value==='collection'){$('#journal-summary').textContent='碎片與成就會保留在此裝置，開始新旅程也不會遺失。';$('#journal-entries').innerHTML=collectionBook();$('#secret-epilogue')?.addEventListener('click',openSecretEpilogue);return;}
-  if(select.value==='memories'){show(memoriesMarkup(memoryCollection(state)));return;}
-  show(chapterEntriesMarkup(sections.filter(section=>select.value==='all'||String(section.index)===select.value)));
+ return {
+  initialSelection:String(state.room),
+  chapters:sections.map(section=>({index:section.index,chapter:section.chapter,title:section.title,entries:section.entries.map(spot=>({id:spot.id,label:spot.label,text:spot.text}))})),
+  clues:Object.entries(clueGroups).map(([id,label])=>({id,label,words:words.filter(word=>clueWords[word]?.group===id).map(word=>clueWords[word].label)})).filter(group=>group.words.length),
+  clueCount:words.filter(word=>clueWords[word]).length,clueTotal:Object.keys(clueWords).length,
+  memories:memoryCollection(state).map(({id,chapter,title,found,label,text})=>({id,chapter,title,found,label,text})),
+  memoriesAvailable:!!(state.endings.length||state.memories?.length),
+  shards:shardIds.map(id=>{const found=foundShards.includes(id);return {id,found,title:found?(rooms.find(room=>room.spots.some(spot=>spot.id===id))?.title??'序章'):null};}),
+  achievements:achievements.map(item=>{const unlocked=unlockedAchievements.includes(item.id);return {id:item.id,unlocked,title:unlocked?item.title:null,text:unlocked?item.text:null};}),
+  closingTitle:isChallengeComplete(abyss.closing.requires)?abyss.closing.reward.name:null,
+  secretTitle:secretEpilogue.title,
+  canReadSecretEpilogue:shardIds.every(id=>foundShards.includes(id))
  };
- select.onchange=draw;draw();
 }
 // Step-aware hints (plan r1). Each act lists three tiers per step: its evidence stages, the deduction and the seal.
 // The step is the stage in the modal (or the first unfinished one), then the deduction, then the seal.
@@ -319,8 +343,6 @@ function openPrologue(){
 }
 function openChapterIntro(){modal('第十三聲鐘響','CHAPTER I · 黑鐘書庫',chapterIntroBody+'<button id="intro-explore" class="primary-button">開始探索 ⟶</button>');$('#intro-explore').onclick=closeModal;}
 const mergeIds=(a=[],b=[])=>[...new Set([...a,...b])];
-// The 收藏 tab in the journal: mirror shards, achievements and the secret epilogue button.
-const collectionBook=()=>collectionMarkup({shardIds,found:state.shards||[],achievements,unlocked:state.achievements||[],titleOf:id=>rooms.find(room=>room.spots.some(spot=>spot.id===id))?.title??'序章',secretTitle:secretEpilogue.title,closingTitle:isChallengeComplete(abyss.closing.requires)?abyss.closing.reward.name:''});
 // The secret epilogue (祕密尾聲): two scenes, each a choice with its own reply, then a closing line.
 function openSecretEpilogue(){
  const lines=[...secretEpilogue.opening];let step=0;

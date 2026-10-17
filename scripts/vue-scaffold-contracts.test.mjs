@@ -28,7 +28,11 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   const inventoryEntry = inventoryManifest['src/vue/game/inventory-main.ts'];
   assert.equal(inventoryEntry?.isEntry, true, 'standalone Vue inventory entry exists');
   assert.deepEqual(inventoryEntry.imports || [], [], 'the game route loads one bundled Vue JavaScript asset');
-  assert.ok(fs.existsSync(path.join(dist, '_vue', inventoryEntry.file)), 'SSG copies the standalone inventory entry');
+  const gameEntryPath = path.join(dist, '_vue', inventoryEntry.file);
+  assert.ok(fs.existsSync(gameEntryPath), 'SSG copies the standalone inventory entry');
+  const gameEntry = fs.readFileSync(gameEntryPath, 'utf8');
+  assert.match(gameEntry, /\bmountJournalIsland\b/, 'the lazy game module preserves its Journal mount export');
+  assert.doesNotMatch(gameEntry, /process\.env\.NODE_ENV/, 'the browser bundle has no Node process dependency');
 
   const htmlFiles = [];
   const visit = directory => {

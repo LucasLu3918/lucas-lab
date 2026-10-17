@@ -21,8 +21,11 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
   mkdirSync('/tmp/blood-mirror-concept-preview',{recursive:true});
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:850},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});
-   const page=await context.newPage(),pageErrors=[];
+   const page=await context.newPage(),pageErrors=[],consoleErrors=[],gameAssetResponses=[],requestFailures=[];
    page.on('pageerror',e=>pageErrors.push(e.message));
+   page.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text());});
+   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/_vue/'))gameAssetResponses.push({status:response.status(),url:response.url(),contentType:response.headers()['content-type']});});
+   page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/_vue/'))requestFailures.push({url:request.url(),error:request.failure()?.errorText});});
    // Each act's pre-seal deduction: gather its clue words from the scene, then fill the blanks in order.
    const deduce=async(spots,words)=>{for(const id of spots){await tapSpot(page,id,width<600);try{await page.locator('#modal-close').click({timeout:4000});}catch(e){console.log('FAIL spot',id,await page.evaluate(()=>document.querySelector('#modal')?.className+' | '+document.querySelector('#modal-title')?.innerText));await page.screenshot({path:'/tmp/claude-dbg.png'});throw e;}}await page.locator('#room-puzzle').click();assert.equal(await page.locator('#modal-title').innerText(),'魔鏡審問');assert.equal(await page.locator('#modal .modal-portrait').count(),1,'the mirror speaks with its portrait');for(const word of words)await page.locator('#modal [data-word="'+word+'"]').click();await page.locator('#interrogation-submit').click();};
    await page.goto(ORIGIN+'/games/blood-mirror/play/');
@@ -83,6 +86,10 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.equal(await page.locator('#modal-title').innerText(),'暗門後的契約');
    assert.ok((await page.locator('#modal-body').innerText()).includes('父親'));
    await page.locator('#take-item').click();
+   await page.locator('[data-item="contract"]').waitFor({timeout:5000}).catch(async error=>{
+    console.error('Inventory island diagnostic',JSON.stringify({html:await page.locator('#inventory').innerHTML(),saveIndicator:await page.locator('#save-indicator').innerText(),pageErrors,consoleErrors,gameAssetResponses,requestFailures}));
+    throw error;
+   });
    assert.equal(await page.locator('[data-item="contract"]').count(),1);
    await page.locator('#room-next').click();
    const openEvidenceFromSeal=async(stage)=>{await page.locator('#room-puzzle').click();assert.equal(await page.locator('#seal-evidence').count(),1,'seal must point to evidence');await page.locator('#seal-evidence').click();await page.locator('#restore-evidence').click();if(stage)await page.locator('[data-stage-pick="'+stage+'"]').click();};

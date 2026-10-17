@@ -3,7 +3,6 @@
 // Kept in one module on purpose: the first screen then makes one request for all of this markup, not seven.
 import {conceptMarkup} from '../concept-art.js';
 import {icon} from '../icons.js';
-import {clueWords,clueGroups} from '../data/clues.js';
 
 // ---- seals.js ----
 export const prerequisiteNote=name=>name?`<p class="modal-note">需要物品：${name}。妳可以先檢視謎題。</p>`:'';
@@ -42,60 +41,6 @@ export const sealSuccessMarkup=({queenLines,unlock,solved,total,note,nextLabel})
  +`<button class="primary-button" id="success-next">${nextLabel} ⟶</button>`
  +`<button class="secondary-button" id="success-replay">選擇小遊戲重玩</button>`
  +`<button class="secondary-button" id="success-stay">留在此處探索</button>`;
-
-// ---- journal.js ----
-export const journalShellMarkup=({sections,showMemories})=>`<div class="journal-owner"><img src="assets/portraits/snow.webp" alt="" width="56" height="56" decoding="async"><p><strong>白雪公主</strong><span>她一路留下的線索與記憶</span></p></div>`
- +`<div class="journal-controls"><label for="journal-chapter">查看章節</label><select id="journal-chapter"><option value="all">全部已解鎖章節</option>`
- +sections.map(section=>`<option value="${section.index}">${section.chapter} · ${section.title}</option>`).join('')
- +(showMemories?'<option value="memories">人物記憶</option>':'')
- +`<option value="clues">推理簿</option><option value="collection">收藏</option></select><p id="journal-summary" class="modal-note" role="status"></p></div>`
- +`<div id="journal-entries"></div>`;
-
-// The 推理簿: clue words grouped by theme.
-export function clueBookMarkup(words=[]){
- const total=Object.keys(clueWords).length;
- const sections=Object.entries(clueGroups).map(([group,name])=>{
-  const list=words.filter(id=>clueWords[id].group===group);
-  return list.length?`<section class="journal-chapter"><h3>${name}</h3><ul class="clue-book">${list.map(id=>`<li>${clueWords[id].label}</li>`).join('')}</ul></section>`:'';
- }).join('');
- return {
-  summary:`推理簿收錄 ${words.length} / ${total} 個線索詞。詞彙隨旅程收錄，開始新旅程時會清空。`,
-  html:sections||'<p class="modal-text">推理簿還是空的。回到場景檢視線索，詞彙會自動收錄。</p>'
- };
-}
-
-// The 收藏 tab: mirror shards, achievements, and the button to the secret epilogue once every shard is found.
-export function collectionMarkup({shardIds,found,achievements,unlocked,titleOf,secretTitle,closingTitle=''}){
- const ready=shardIds.every(id=>found.includes(id));
- return `<h3>鏡之碎片 ${shardIds.filter(id=>found.includes(id)).length} / ${shardIds.length}</h3>`
-  +`<ul class="shard-list">${shardIds.map(id=>`<li class="${found.includes(id)?'found':''}">${found.includes(id)?'◇ '+titleOf(id)+' · 已收藏':'◆ 尚未發現'}</li>`).join('')}</ul>`
-  +`<h3>成就 ${unlocked.length} / ${achievements.length}</h3>`
-  +`<ul class="achievement-list">${achievements.map(item=>{
-   const got=unlocked.includes(item.id);
-   return `<li class="${got?'unlocked':'locked'}"><strong>${got?item.title:'？？？'}</strong><span>${got?item.text:'尚未達成。'}</span></li>`;
-  }).join('')}</ul>`
-  +(closingTitle?`<h3>稱號</h3><ul class="achievement-list"><li class="unlocked"><strong>${closingTitle}</strong><span>翻到帳冊的最後一頁，名字被留了下來。</span></li></ul>`:'')
-  +`<button id="secret-epilogue" class="primary-button" ${ready?'':'disabled'}>${ready?secretTitle+' · 閱讀祕密尾聲 ⟶':'集滿碎片後解鎖祕密尾聲'}</button>`;
-}
-
-// Chapter notes: the entries of the chosen sections, each with its line count.
-export function chapterEntriesMarkup(visible){
- const count=visible.reduce((total,section)=>total+section.entries.length,0);
- const html=visible.map(section=>section.entries.length
-   ?`<section class="journal-chapter"><h3>${section.chapter} · ${section.title}</h3>${section.entries.map(spot=>`<article class="journal-entry"><h4>${spot.label}</h4><p>${spot.text}</p></article>`).join('')}</section>`
-   :'').join('')||'<p class="modal-text">這裡還沒有線索。回到場景探索，發現的內容會自動記錄。</p>';
- return {summary:`已記錄 ${count} 處線索。筆記只顯示妳已查看的內容。`,html};
-}
-
-// 人物記憶: found memories in full, unfound ones only by chapter and title so nothing leaks early.
-export function memoriesMarkup(memories){
- return {
-  summary:`已收藏 ${memories.filter(m=>m.found).length} / ${memories.length} 段人物記憶。開始新旅程也會保留。`,
-  html:memories.map(m=>m.found
-    ?`<article class="journal-entry memory-entry"><h4>${m.chapter} · ${m.label}</h4><p>${m.text}</p></article>`
-    :`<article class="journal-entry memory-entry locked"><h4>${m.chapter} · ${m.title}</h4><p>尚未發現。這段記憶藏在${m.title}。</p></article>`).join('')
- };
-}
 
 // ---- settings.js ----
 const pressed=on=>on?'已開啟':'開啟';
