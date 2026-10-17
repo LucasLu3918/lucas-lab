@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   parseBirthDate, DIRECTIONS, FACINGS, FENGSHUI_METHOD_VERSION, GUA_INFO, STAR_ORDER, buildFengshuiReport, eightMansions, flyStars, flyingStarChart, natalKua,
+  type Star,
 } from './fengshui';
 import { interpretFengshui } from './interpretation';
 import { lunarYearOf } from './lunar';
@@ -73,18 +74,59 @@ describe('eightMansions', () => {
     for (const direction of goodDirections) expect(expected).toContain(direction);
   });
 
-  it('places 伏位 in the gua’s own direction except 乾 and 坤, which swap', () => {
+  it('places 伏位 in the gua’s own direction for every gua', () => {
     for (const gua of Object.keys(GUA_INFO).map(Number)) {
       const fuwei = eightMansions(gua).find(row => row.star === '伏位');
-      const expected = gua === 6 ? '西南' : gua === 2 ? '西北' : GUA_INFO[gua].direction;
-      expect(fuwei?.direction).toBe(expected);
+      expect(fuwei?.direction).toBe(GUA_INFO[gua].direction);
     }
   });
 
+  // 坤命：《八宅明鏡》原文「坤命得艮生氣…乾四子…兌三子…只有女…犯坎絕嗣」，以及「犯震」「犯離」「犯巽」條目；
+  // 與歌訣「坤天延絕生祸五六」一致。
+  it('matches the 坤命 table (five cells from the classic text)', () => {
+    const map = Object.fromEntries(eightMansions(2).map(row => [row.direction, row.star]));
+    expect(map).toEqual({
+      北: '絕命', 東北: '生氣', 東: '禍害', 東南: '五鬼', 南: '六煞', 西南: '伏位', 西: '天醫', 西北: '延年',
+    });
+  });
+
+  // 艮命：《八宅明鏡》原文「艮命的坤方生氣灶口…得兌方延年…得乾方天醫…艮方伏位…犯巽方絕命」，
+  // 與歌訣「艮六絕祸生延天五」一致。
+  it('matches the 艮命 table (five cells from the classic text)', () => {
+    const map = Object.fromEntries(eightMansions(8).map(row => [row.direction, row.star]));
+    expect(map).toEqual({
+      北: '五鬼', 東北: '伏位', 東: '六煞', 東南: '絕命', 南: '禍害', 西南: '生氣', 西: '延年', 西北: '天醫',
+    });
+  });
+
+  // 乾命依兩個網路來源（生氣正西、天醫東北、延年西南、伏位西北、禍害東南、六煞北、五鬼東、絕命南）。
+  it('matches the 乾命 table from two web sources', () => {
+    const map = Object.fromEntries(eightMansions(6).map(row => [row.direction, row.star]));
+    expect(map).toEqual({
+      北: '六煞', 東北: '天醫', 東: '五鬼', 東南: '禍害', 南: '絕命', 西南: '延年', 西: '生氣', 西北: '伏位',
+    });
+  });
+
+  // 坎命：《八宅明鏡》歌訣「坎五天生延絕祸六」，西為祸害、西北為六煞。
   it('matches the 坎命 reference table', () => {
     const map = Object.fromEntries(eightMansions(1).map(row => [row.direction, row.star]));
     expect(map).toEqual({
-      北: '伏位', 東北: '五鬼', 東: '天醫', 東南: '生氣', 南: '延年', 西南: '絕命', 西: '六煞', 西北: '禍害',
+      北: '伏位', 東北: '五鬼', 東: '天醫', 東南: '生氣', 南: '延年', 西南: '絕命', 西: '禍害', 西北: '六煞',
+    });
+  });
+
+  // 大游年歌訣（《八宅明鏡》，王琛發〈天人感應的易理觀〉轉引）：卦名之後七字，自伏位的下一位順時針排列。
+  const SONG: Record<number, string> = {
+    1: '五天生延絕祸六', 2: '天延絕生祸五六', 3: '延生祸絕五天六', 4: '天五六祸生絕延',
+    6: '六天五祸絕延生', 7: '生祸延絕六五天', 8: '六絕祸生延天五', 9: '六五絕延祸生天',
+  };
+  const SONG_STAR: Record<string, Star> = { 天: '天醫', 延: '延年', 生: '生氣', 絕: '絕命', 祸: '禍害', 五: '五鬼', 六: '六煞' };
+  it.each(Object.keys(SONG).map(Number))('gua %i follows the 大游年歌訣 clockwise from 伏位', gua => {
+    const rows = eightMansions(gua);
+    const start = DIRECTIONS.indexOf(GUA_INFO[gua].direction);
+    expect(rows[start].star).toBe('伏位');
+    [...SONG[gua]].forEach((ch, k) => {
+      expect(rows[(start + 1 + k) % 8].star).toBe(SONG_STAR[ch]);
     });
   });
 
@@ -117,7 +159,7 @@ describe('flyStars', () => {
 });
 
 describe('flyingStarChart', () => {
-  it('builds a nine-palace chart for each cardinal facing in 九運', () => {
+  it('builds a nine-palace chart for each facing in 九運', () => {
     for (const facing of FACINGS) {
       const chart = flyingStarChart(facing.id);
       expect(chart.palaces).toHaveLength(9);
@@ -125,6 +167,16 @@ describe('flyingStarChart', () => {
       expect(center?.run).toBe(9);
       expect(chart.steps.join('\n')).toContain(facing.sitting.split('山')[0]);
     }
+  });
+
+  // 艮山坤向：依技能檔九運坐向表（山 4 逆、向 6 順）。數值為本模組的飛布結果，來源依據見 §3.10。
+  it('places 艮山坤向 in 九運 from the 技能檔 table (山 4 逆, 向 6 順)', () => {
+    const chart = flyingStarChart('gen-kun');
+    const byPalace = Object.fromEntries(chart.palaces.map(p => [p.palace, [p.run, p.mountain, p.facing]]));
+    expect(byPalace).toEqual({
+      1: [5, 9, 2], 2: [6, 1, 3], 3: [7, 2, 4], 4: [8, 3, 5], 5: [9, 4, 6], 6: [1, 5, 7], 7: [2, 6, 8], 8: [3, 7, 9], 9: [4, 8, 1],
+    });
+    expect(chart.facing.toward).toBe('西南');
   });
 
   it('places 運星 九, 山星 一 and 向星 九 in the center for 坐北朝南', () => {
