@@ -264,12 +264,14 @@ button,a,input,select {outline-offset:4px}
 .swatch {width:76px;text-align:center;font-size:var(--fs-xs);color:var(--muted)}
 .swatch i {display:block;aspect-ratio:1;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:6px}
 @media(max-width:1100px) {.cards,.tools,.cats {grid-template-columns:repeat(2,minmax(0,1fr))}.bookgrid {grid-template-columns:repeat(3,minmax(0,1fr))}.nav a {padding-inline:8px;font-size:13px}.brand-name {font-size:24px}}
-@media(max-width:920px) {
+@media(max-width:1140px) {
  .headerin {min-height:72px}.menu {display:flex;order:2}.github {order:1;margin-left:auto;width:44px;height:44px;padding:0;justify-content:center}.github span {display:none}
  .nav {display:none;position:absolute;top:72px;left:0;right:0;padding:14px 24px 20px;margin:0;background:#09121bfc;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;max-height:calc(100dvh - 72px);overflow-y:auto;overscroll-behavior:contain;box-shadow:var(--shadow)}
  .nav.open {display:flex}.nav a {font-size:15px;min-height:48px;padding:12px 14px;border:1px solid transparent;border-radius:var(--radius)}
  .nav a[aria-current=page] {border-color:#b89e696b;background:var(--panel)}
  .menu[aria-expanded=true] {border-color:var(--gold);color:var(--gold)}
+}
+@media(max-width:920px) {
  .hero {min-height:610px}.bookgrid {grid-template-columns:repeat(2,minmax(0,1fr))}
  .feature {gap:24px;padding:24px}.gallery,.art-gallery {grid-template-columns:repeat(3,minmax(0,1fr))}
 }
@@ -402,7 +404,7 @@ button,a,input,select {outline-offset:4px}
 
 /* Review fixes: search entry in the mobile menu, compact mobile reader header, 12px floor for small text. */
 .nav a.nav-search {display:none}
-@media(max-width:920px) {.nav a.nav-search {display:flex}}
+@media(max-width:1140px) {.nav a.nav-search {display:flex}}
 @media(max-width:720px) {
  .crumb {padding:16px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .readerbar {margin:8px 0}

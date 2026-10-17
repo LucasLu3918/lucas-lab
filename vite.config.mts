@@ -12,6 +12,10 @@ export default defineConfig({
       input: {
         site: 'src/vue/site/main.ts',
         'site-lazy': 'src/vue/site/lazy.ts',
+        tarot: 'src/vue/site/tarot-main.ts',
+        divination: 'src/vue/site/divination-main.ts',
+        bazi: 'src/vue/site/bazi-main.ts',
+        astrology: 'src/vue/site/astrology-main.ts',
         reader: 'src/vue/site/reader-main.ts',
         gallery: 'src/vue/site/gallery-main.ts',
         music: 'src/vue/site/music-main.ts',

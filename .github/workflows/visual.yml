@@ -32,6 +32,8 @@ jobs:
         run: npm run test:game
       - name: Audit responsive layout and interactions
         run: npm run test:visual
+      - name: Verify local divination flows
+        run: npm run test:divination
       - name: Verify reading, offline, search and CSP behaviour in Chromium
         run: npm run test:site
       - name: Enforce page weight and layout-stability budgets

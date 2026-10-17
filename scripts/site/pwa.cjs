@@ -35,8 +35,27 @@ module.exports=function writePwa(ctx){
  };
  visitReaderEntry(readerEntry);
  if(!readerKeys.has(readerEntry))throw new Error('Vue reader entry is missing from the Vite manifest');
- // Everything a reader needs for the shell is precached: static assets plus the Reader entry and its imports.
- const precache=[base,base+'offline/',base+'assets/icons/favicon-64.png',base+'assets/icons/icon-192.png',base+'assets/icons/apple-touch-icon.png',...Object.values(fingerprint).map(file=>base+file),...Array.from(readerFiles).map(file=>base+'_vue/'+file)];
+ const tarotEntry='src/vue/site/tarot-main.ts';
+ const tarotKeys=new Set(),tarotFiles=new Set();
+ const visitTarotEntry=key=>{
+  const entry=ctx.vueAssets?.manifest?.[key];
+  if(!entry||tarotKeys.has(key))return;
+  tarotKeys.add(key);
+  for(const file of [entry.file,...(entry.css||[])])if(file)tarotFiles.add(file);
+  for(const dependency of entry.imports||[])visitTarotEntry(dependency);
+ };
+ visitTarotEntry(tarotEntry);
+ if(!tarotKeys.has(tarotEntry))throw new Error('Vue Tarot entry is missing from the Vite manifest');
+ // Reader and Tarot entries are precached with their imports so a visited feature remains usable offline.
+ const divinationFiles=new Set();
+ for(const entryKey of ['src/vue/site/divination-main.ts','src/vue/site/bazi-main.ts','src/vue/site/astrology-main.ts']){
+  const seen=new Set();
+  const visit=key=>{const entry=ctx.vueAssets?.manifest?.[key];if(!entry||seen.has(key))return;seen.add(key);for(const file of [entry.file,...(entry.css||[])])if(file)divinationFiles.add(file);for(const dependency of entry.imports||[])visit(dependency);};
+  visit(entryKey);
+  if(!seen.has(entryKey))throw new Error('Vue divination entry is missing from the Vite manifest: '+entryKey);
+ }
+ // Bazi and astrology bundles are cached together with their local calculation libraries for offline use.
+ const precache=Array.from(new Set([base,base+'offline/',base+'assets/icons/favicon-64.png',base+'assets/icons/icon-192.png',base+'assets/icons/apple-touch-icon.png',...Object.values(fingerprint).map(file=>base+file),...Array.from(readerFiles).map(file=>base+'_vue/'+file),...Array.from(tarotFiles).map(file=>base+'_vue/'+file),...Array.from(divinationFiles).map(file=>base+'_vue/'+file)]));
  const template=fs.readFileSync(path.join(root,'scripts/site/service-worker.template.js'),'utf8');
  const buildId=String(commit||'dev').replace(/[^a-zA-Z0-9]/g,'').slice(0,12)||'dev';
  fs.writeFileSync(path.join(out,'sw.js'),template.replaceAll('__BUILD_ID__',buildId).replaceAll('__BASE__',base).replaceAll('__PRECACHE__',JSON.stringify(precache)));

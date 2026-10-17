@@ -2,7 +2,7 @@
 
 **Code · Create · Imagine**
 
-一個以暗黑科技與奇幻宇宙為設計語言的個人創作網站，包含工具入口、故事、可遊玩遊戲與概念、軟體作品集、AI 藝廊與開發日誌。
+一個以暗黑科技與奇幻宇宙為設計語言的個人創作網站，包含工具入口、故事、可遊玩遊戲、暗黑童話塔羅、軟體作品集、AI 藝廊與開發日誌。
 
 ## 啟動
 
@@ -59,6 +59,16 @@ docs/                內容與技術規範
 
 所有工具卡片均連結至 [Lucas Tools 原站](https://lucas-tools.owl3918.workers.dev/)，不複製、不嵌入、不遷移原程式碼。工具清單只收錄人工確認可公開的入口。
 
+## 暗黑童話塔羅
+
+- `/divination/` 是塔羅、八字與西洋占星的總入口；`/tarot/` 分成隨機快抽、每日一抽、三張牌陣與五張深入牌陣，78 張牌皆有繁體中文正逆位固定解讀及牌義庫。
+- 塔羅抽牌由瀏覽器安全亂數完成；每日一抽與最近 20 次閱讀紀錄保存在本機，反思筆記最多 500 字。可略過的問題和主題只留在當次頁面，不會寫入紀錄或分享文字。
+- `/bazi/` 以 `lunar-javascript` 提供三柱簡易與四柱完整排盤、十神、藏干、五行簡表及固定規則的日／月／年提示；未知出生時間不會用估算時辰冒充時柱。`/astrology/` 以 Astronomy Engine 計算熱帶黃道行星落點、Whole Sign 宮位、主要相位與固定取樣行運提示。
+- 八字與占星出生資料只在頁面記憶體中計算。可從 22 個常用城市選擇時區／近似座標，也可自訂 IANA 時區；占星自訂地點另填緯度、經度。未知出生時間時占星以當地中午估算行星落點，並隱藏上升、天頂與宮位。
+- 所有內容皆為傳統象徵的固定文案，供娛樂與自我反思，不保證事件或取代專業建議。沒有 Worker API、資料庫、帳號同步、付費、金流或 AI 解讀。
+- `lunar-javascript` 與 `astronomy-engine` 均採 MIT 授權；計算方法版本與主要限制會顯示在結果頁。
+- 牌面採原生幾何與符號樣式；未導入未授權的商業塔羅牌插畫。
+
 ## 內容與版權
 
 - 「霧林來信」是用於閱讀器的本站原創示範短篇（兩章）。
@@ -71,15 +81,17 @@ docs/                內容與技術規範
 
 ## 目前的實作取捨
 
-公開路由繼續由 Node.js SSG 產生並部署到 Cloudflare Workers Static Assets。Vue Islands 以 Vite 雙入口漸進加入；Phase 1 只編譯和保存 hashed bundles，不改既有 HTML、互動或路由。
+公開路由繼續由 Node.js SSG 產生並部署到 Cloudflare Workers Static Assets。Vue Islands 以 Vite 漸進加入；塔羅、八字與占星各自使用獨立入口，只在相應路由載入。
 
 ## 站點優化與瀏覽器驗收
 
 完整規劃、量測數據與取捨見 [docs/design/SITE_OPTIMIZATION_PLAN.md](docs/design/SITE_OPTIMIZATION_PLAN.md)。
 
 - `npm run test:site`：閱讀進度、繼續閱讀、章節搜尋、離線閱讀、CSP 與結構化資料（需先 `npm run build`）。
+- `npm run test:divination`：塔羅深入牌陣、問題分享隱私、八字大運顯示與占星行運介面的 Chromium 互動驗收。
 - `npm run test:perf`：首頁、故事、章節、搜尋與遊戲頁的傳輸量、請求數、LCP、CLS 預算。
-- 上述瀏覽器測試（`test:visual`、`test:game`、`test:site`、`test:perf`）共用 `scripts/browser-harness.cjs`：Chromium 依序使用 `BROWSER_EXECUTABLE`、Playwright 內建版本，最後是本機快取中最新的 Chromium；埠號 4173 若已被其他伺服器佔用會直接報錯，避免測到錯的伺服器。
+- 本機第一次跑瀏覽器測試時，依 CI 方式暫裝工具與 Chromium：`npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 @axe-core/playwright@4.10.2`、`npx playwright install chromium`；再執行 `npm run build`、`npm run test:divination`、`npm run test:visual`。測試工具不加入正式網站相依或 lockfile。
+- 上述瀏覽器測試（`test:divination`、`test:visual`、`test:game`、`test:site`、`test:perf`）共用 `scripts/browser-harness.cjs`：Chromium 依序使用 `BROWSER_EXECUTABLE`、Playwright 內建版本，最後是本機快取中最新的 Chromium；埠號 4173 若已被其他伺服器佔用會直接報錯，避免測到錯的伺服器。
 - `npm run check` 只含原始碼、單元測試與建置驗證；`npm run check:all` 會再依序執行所有瀏覽器測試（需先能啟動 Chromium）。
 - `dist/_headers` 由建置產生，包含安全標頭與快取規則；`npm start` 會依同一份規則回應，方便本機檢查。
 - 安全標頭採嚴格 CSP：`style-src 'self'`，站內頁面與遊戲都沒有 inline `style` 屬性（遊戲的熱點與概念圖以 CSSOM 設定）。`check` 會擋住會重新引入 `unsafe-inline` 的寫法。
@@ -113,8 +125,8 @@ docs/                內容與技術規範
 
 - 新增本機原創 AI 城堡與故事封面 `assets/images/moonlit-castle.webp`、`assets/images/snow-white-portrait.webp`；首頁主視覺與故事封面都由靜態建置複製至 `dist/assets`，`npm run check` 會比對源檔與建置產物。
 - 網站採暗黑奇幻、月光藍與古金色系，首頁使用全幅城堡主視覺與中文標題；導覽品牌以本機 SVG 羅盤呈現，無外部字型或圖像服務依賴。
-- 現有純靜態網站仍不依賴任何執行期套件；Chrome 自動測試工具只於獨立 GitHub Actions 工作流程暫時安裝，不參與 Cloudflare 正式站部署。
-- `npm run test:visual` 使用本機 Chromium + Playwright (需預先安裝)，檢查 320、360、390、480、720、768、900、1024、1440px 的核心頁面，避免水平溢出，並確認城堡與封面載入，測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽。
+- 公開頁面仍由 SSG 產生，互動功能使用既有 Vue Islands 漸進整合；Chrome 自動測試工具只於獨立 GitHub Actions 工作流程暫時安裝，不參與 Cloudflare 正式站部署。
+- `npm run test:visual` 使用本機 Chromium + Playwright，檢查 320、360、390、480、720、768、900、1024、1440px 的代表頁（含塔羅、八字、占星），避免水平溢出，並確認城堡與封面載入，測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽；390px 與 1440px 另跑 axe-core 自動檢查。
 - `.github/workflows/visual.yml` 會在 PR / main 更新時執行，保留桌面、平板、手機三種寬度的自動測試截圖供檢視；此流程提供 Chromium 模擬驗證，不等同於實際 iPhone Safari、Android Chrome 或真人操作驗收。
 - 城堡與封面插畫是本站原創視覺，與既有影視、遊戲或書籍的官方視覺無關。
 

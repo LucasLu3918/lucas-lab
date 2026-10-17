@@ -20,7 +20,7 @@ module.exports=function finalizeSite(ctx){
  fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${ext}/sitemap.xml\n`);
  const storyPaths=story=>story.manuscript?[story.manuscript]:['data/catalog.json'];
  const listed=[
-  {route:'',paths:['scripts/site']},
+  {route:'',paths:['scripts/site']},{route:'divination',paths:['scripts/site','src/vue/site/features/divination']},{route:'tarot',paths:['scripts/site','src/vue/site/features/tarot']},{route:'bazi',paths:['scripts/site','src/vue/site/features/divination']},{route:'astrology',paths:['scripts/site','src/vue/site/features/divination']},
   {route:'tools',paths:['scripts/site']},{route:'stories',paths:['scripts/site']},{route:'games',paths:['scripts/site']},{route:'music',paths:['music','data/catalog.json']},{route:'projects',paths:['scripts/site']},{route:'gallery',paths:['scripts/site']},{route:'journal',paths:['data/catalog.json']},{route:'journal/origin',paths:['scripts/site']},{route:'about',paths:['scripts/site']},{route:'legal',paths:['scripts/site']},
   ...catalog.stories.filter(x=>(x.chapters||[]).length>0).map(x=>({route:'stories/'+x.slug,paths:storyPaths(x)})),
   ...catalog.games.filter(x=>x.status==='playable').map(x=>({route:'games/'+x.slug,paths:['games/'+x.slug]})),
