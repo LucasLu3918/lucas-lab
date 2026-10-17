@@ -2,7 +2,7 @@
 
 const path = require('node:path');
 
-const ENTRY_POINTS = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/tarot-main.ts', 'src/vue/site/divination-main.ts', 'src/vue/site/bazi-main.ts', 'src/vue/site/astrology-main.ts', 'src/vue/site/horoscope-main.ts', 'src/vue/site/numerology-main.ts', 'src/vue/site/ziwei-main.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
+const ENTRY_POINTS = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/tarot-main.ts', 'src/vue/site/divination-main.ts', 'src/vue/site/bazi-main.ts', 'src/vue/site/astrology-main.ts', 'src/vue/site/horoscope-main.ts', 'src/vue/site/numerology-main.ts', 'src/vue/site/meihua-main.ts', 'src/vue/site/ziwei-main.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
 
 function resolveBuildFile(fs, buildDir, relative) {
   if (typeof relative !== 'string' || path.isAbsolute(relative)) {

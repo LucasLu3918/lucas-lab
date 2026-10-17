@@ -73,6 +73,33 @@ async function run(){
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.waitForFunction(()=>window.scrollY===0);
   await page.screenshot({path:path.join(CAPTURES,'astrology-reading-390.png'),fullPage:true,animations:'disabled'});
+  await page.goto(ORIGIN+'/meihua/',{waitUntil:'load'});
+  await page.locator('input[name="meihua-method"][value="numbers"]').check();
+  await page.locator('input[type="text"]').first().fill('7 3');
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.locator('.hexagram-table').waitFor({timeout:15000});
+  assert.match(await page.locator('.hexagram-table').textContent(),/山火賁/,'Meihua numbers 7 3 should cast 山火賁');
+  assert.match(await page.locator('.summary-line').textContent(),/第 4 爻/,'Meihua numbers 7 3 should move line 4');
+  await page.locator('select').first().selectOption('love');
+  assert.match(await page.locator('.reading-card').filter({hasText:'感情'}).first().textContent(),/體卦/,'Meihua topic notes did not follow the selected topic');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Meihua reading overflows the mobile viewport');
+  await page.locator('input[name="meihua-method"][value="time"]').check();
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.waitForFunction(()=>document.querySelector('.meta')?.textContent.includes('農曆'),null,{timeout:15000});
+  await page.locator('input[name="meihua-method"][value="text"]').check();
+  await page.locator('input[type="text"]').first().fill('龘');
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.locator('.cast-form .error').waitFor({timeout:15000});
+  assert.match(await page.locator('.cast-form .error').textContent(),/尚未收錄筆畫/,'Unknown character should explain the stroke gap');
+  await page.locator('input[type="text"]').first().fill('财');
+  await page.getByRole('button',{name:'起卦'}).click();
+  await page.locator('.hexagram-table').waitFor({timeout:15000});
+  assert.match(await page.locator('.hexagram-table').textContent(),/艮為山/,'Meihua text 财 should cast 艮為山');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.waitForFunction(()=>window.scrollY===0);
+  await page.screenshot({path:path.join(CAPTURES,'meihua-reading-390.png'),fullPage:true,animations:'disabled'});
+  console.log('✓ Meihua casts by number, time and text, follows the topic selector and reports unknown characters');
+
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
 
