@@ -18,6 +18,7 @@ import StarwheelPuzzle from './StarwheelPuzzle.vue';
 import ApothecaryTestimonyPuzzle from './ApothecaryTestimonyPuzzle.vue';
 import ApothecaryVesselsPuzzle from './ApothecaryVesselsPuzzle.vue';
 import ApothecaryMixingPuzzle from './ApothecaryMixingPuzzle.vue';
+import GalleryAlignPuzzle from './GalleryAlignPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
@@ -26,6 +27,7 @@ import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } 
 import { parseApothecaryTestimonySnapshot, type ApothecaryTestimonyAction, type ApothecaryTestimonySnapshot } from './apothecary-testimony';
 import { parseApothecaryVesselsSnapshot, type ApothecaryVesselsAction, type ApothecaryVesselsSnapshot } from './apothecary-vessels';
 import { parseApothecaryMixingSnapshot, type ApothecaryMixingAction, type ApothecaryMixingSnapshot } from './apothecary-mixing';
+import { parseGalleryAlignSnapshot, type GalleryAlignAction, type GalleryAlignSnapshot } from './gallery-align';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -475,6 +477,28 @@ export function mountApothecaryMixingPuzzleIsland(
   }));
   app.mount(root);
   root.setAttribute('data-vue-apothecary-mixing-ready', 'true');
+  return () => app.unmount();
+}
+
+type GalleryAlignPuzzleProps = InstanceType<typeof GalleryAlignPuzzle>['$props'];
+
+export function mountGalleryAlignPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: GalleryAlignAction) => GalleryAlignSnapshot | null,
+): (() => void) | null {
+  const snapshot = parseGalleryAlignSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(GalleryAlignPuzzle, {
+    snapshot,
+    onAction: action => {
+      const next = parseGalleryAlignSnapshot(onAction(action));
+      return next;
+    },
+  } satisfies GalleryAlignPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-gallery-align-ready', 'true');
   return () => app.unmount();
 }
 
