@@ -4,7 +4,7 @@
 export type DivinationInputNeeds = 'none' | 'birthdate' | 'birth-datetime-place';
 
 export interface DivinationModule {
-  id: 'tarot' | 'bazi' | 'astrology';
+  id: 'tarot' | 'bazi' | 'astrology' | 'numerology';
   title: string;
   href: string;
   description: string;
@@ -40,5 +40,14 @@ export const DIVINATION_MODULES: readonly DivinationModule[] = [
     meta: '選擇資料完整度',
     inputNeeds: 'birthdate',
     iconSvg: '<circle cx="16" cy="16" r="5" /><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(-24 16 16)" />',
+  },
+  {
+    id: 'numerology',
+    title: '生命靈數',
+    href: '../numerology/',
+    description: '從出生日期與英文全名，整理生命路徑、表達數，以及目前的年度、月與日循環。',
+    meta: '需要出生日期，可選填英文全名',
+    inputNeeds: 'birthdate',
+    iconSvg: '<path d="M16 6l2.6 6.4L25 13l-5 4.4 1.6 6.6L16 21l-5.6 3 1.6-6.6L7 13l6.4-.6z" />',
   },
 ];

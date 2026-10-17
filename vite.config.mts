@@ -17,6 +17,7 @@ export default defineConfig({
         divination: 'src/vue/site/divination-main.ts',
         bazi: 'src/vue/site/bazi-main.ts',
         astrology: 'src/vue/site/astrology-main.ts',
+        numerology: 'src/vue/site/numerology-main.ts',
         reader: 'src/vue/site/reader-main.ts',
         gallery: 'src/vue/site/gallery-main.ts',
         music: 'src/vue/site/music-main.ts',

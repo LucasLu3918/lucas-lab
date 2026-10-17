@@ -48,7 +48,7 @@ module.exports=function writePwa(ctx){
  if(!tarotKeys.has(tarotEntry))throw new Error('Vue Tarot entry is missing from the Vite manifest');
  // Reader and Tarot entries are precached with their imports so a visited feature remains usable offline.
  const divinationFiles=new Set();
- for(const entryKey of ['src/vue/site/divination-main.ts','src/vue/site/bazi-main.ts','src/vue/site/astrology-main.ts']){
+ for(const entryKey of ['src/vue/site/divination-main.ts','src/vue/site/bazi-main.ts','src/vue/site/astrology-main.ts','src/vue/site/numerology-main.ts']){
   const seen=new Set();
   const visit=key=>{const entry=ctx.vueAssets?.manifest?.[key];if(!entry||seen.has(key))return;seen.add(key);for(const file of [entry.file,...(entry.css||[])])if(file)divinationFiles.add(file);for(const dependency of entry.imports||[])visit(dependency);};
   visit(entryKey);
