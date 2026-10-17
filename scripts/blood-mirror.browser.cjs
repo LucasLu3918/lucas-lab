@@ -83,6 +83,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.equal(await page.locator('#modal-title').innerText(),'暗門後的契約');
    assert.ok((await page.locator('#modal-body').innerText()).includes('父親'));
    await page.locator('#take-item').click();
+   await page.locator('[data-item="contract"]').waitFor();
    assert.equal(await page.locator('[data-item="contract"]').count(),1);
    await page.locator('#room-next').click();
    const openEvidenceFromSeal=async(stage)=>{await page.locator('#room-puzzle').click();assert.equal(await page.locator('#seal-evidence').count(),1,'seal must point to evidence');await page.locator('#seal-evidence').click();await page.locator('#restore-evidence').click();if(stage)await page.locator('[data-stage-pick="'+stage+'"]').click();};
