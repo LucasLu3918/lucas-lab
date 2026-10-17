@@ -43,6 +43,8 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.match(gameEntry, /data-vue-light-ready/, 'the lazy game module marks a successfully mounted Light island');
   assert.match(gameEntry, /\bmountWatchPuzzleIsland\b/, 'the lazy game module exposes the Watch puzzle island mount');
   assert.match(gameEntry, /data-vue-watch-ready/, 'the lazy game module marks a successfully mounted Watch island');
+  assert.match(gameEntry, /\bmountGears13PuzzleIsland\b/, 'the lazy game module exposes its gears13 puzzle island mount');
+  assert.match(gameEntry, /data-vue-gears13-ready/, 'the lazy game module marks a successfully mounted gears13 island');
   assert.doesNotMatch(gameEntry, /process\.env\.NODE_ENV/, 'the browser bundle has no Node process dependency');
 
   const htmlFiles = [];

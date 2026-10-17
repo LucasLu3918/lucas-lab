@@ -9,6 +9,8 @@ import MazePuzzle from './MazePuzzle.vue';
 import PipesPuzzle from './PipesPuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import WatchPuzzle from './WatchPuzzle.vue';
+import Gears13Puzzle from './Gears13Puzzle.vue';
+import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
 import { parseLightPuzzleSnapshot, type LightPuzzleAction, type LightPuzzleSnapshot } from './light';
@@ -192,6 +194,42 @@ export function mountWatchPuzzleIsland(
   app.mount(root);
   root.setAttribute('data-vue-watch-ready', 'true');
   return () => app.unmount();
+}
+
+type Gears13PuzzleProps = InstanceType<typeof Gears13Puzzle>['$props'];
+
+export function mountGears13PuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: Gears13Action) => Gears13Snapshot | null,
+): { update(value: unknown): void; unmount(): void } | null {
+  const snapshot = parseGears13Snapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const dispatch = (action: Gears13Action) => {
+    const next = parseGears13Snapshot(onAction(action));
+    if (next) current.value = next;
+    return next;
+  };
+  const app = createApp(defineComponent({
+    name: 'Gears13PuzzleIsland',
+    setup() {
+      return () => h(Gears13Puzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies Gears13PuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-gears13-ready', 'true');
+  return {
+    update(value: unknown) {
+      const next = parseGears13Snapshot(value);
+      if (next) current.value = next;
+    },
+    unmount: () => app.unmount(),
+  };
 }
 
 export function mountReflectionIsland(

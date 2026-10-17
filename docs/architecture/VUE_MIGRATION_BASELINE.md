@@ -186,4 +186,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：時輪／分輪／秒輪順序、六格位置、暖身初始值與轉動一次後進入真正謎題的流程、三枚齒輪互相牽動的規則、方向連續的旋轉動畫、重設行為與 stage id 維持原樣。modal、Hints、進度、存檔、公開路由、CSP、lazy bundle entry 和 runtime dependencies 不變。Vue 不讀寫 storage 或自行判定答案。驗證包含快照 parser、鍵盤可操作的齒輪按鈕、狀態／暖身轉場／重設、bundle export 契約，以及 360px／1280px 瀏覽器中的 lazy mount、暖身、聯動、解謎和 legacy stage progress。
 
-下一步建議：評估「逆走鐘樓」齒輪列（`games/blood-mirror/puzzles/gears13.js`）的 Vue island 邊界，確認 13 枚齒輪與 SVG 操作是否適合沿用現有 puzzle adapter。
+## Phase 14 — Blood Mirror Belfry Gear Train Vue island
+
+`Gears13Puzzle.vue` 與 board／tray／controls 子元件接手鏡淵「逆走鐘樓」齒輪列的 SVG 盤面、軸座、托盤和控制呈現，沿用既有 lazy game bundle、stage id、modal 與鐘樓 CSS。`gears13.js` 保留暖身／主盤狀態、齒輪放置與嚙合／卡死／輸出比判定、提示、時間動畫、音效和通關回呼；Vue 只根據經驗證的快照呈現，並將 typed actions 交回 legacy controller。動畫快照沿用現有 challenge adapter，模態關閉時解除更新與 island。
+
+不變條件：暖身的惰輪教學與唯一解、主盤 13:1 齒輪列、軸座距離尺、下層／上層隔離、曲柄／輸出軸角度、stage id `belfry-gears`、可選關卡進度與存檔格式維持原樣。未掛載 island callback 時沿用 legacy renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 parser／元件測試、bundle export contract、360px／1280px 遊戲瀏覽器中的暖身、齒輪配置、旋轉、通關、進度連續性與 legacy fallback。
+
+下一步建議：評估「逆走鐘樓」鐘擺（`games/blood-mirror/puzzles/pendulum.js`）Vue island 的互動邊界，確認砝碼選取、復原和週期判定是否適合沿用既有 puzzle adapter。
