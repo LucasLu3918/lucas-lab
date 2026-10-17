@@ -23,10 +23,10 @@ const forecasts = ref<AstrologyForecast[]>([]);
 const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
 const forecastPending = ref(false);
-// 行運清單（年度可達上千筆）只在展開後才渲染，記住各期間的展開狀態以便重新計算時保留。
-const transitListOpen = reactive<Record<string, boolean>>({});
-function setTransitListOpen(periodLabel: string, event: Event): void {
-  transitListOpen[periodLabel] = (event.target as HTMLDetailsElement).open;
+// 行運與年度清單（行運年度可達上千筆）只在展開後才渲染；記住展開狀態，重新計算後 <details> 會依此還原。
+const detailsOpen = reactive<Record<string, boolean>>({});
+function setDetailsOpen(key: string, event: Event): void {
+  detailsOpen[key] = (event.target as HTMLDetailsElement).open;
 }
 const place = computed(() => BIRTH_PLACES.find(item => item.id === placeId.value) ?? {
   id: 'custom', label: '自訂地點', timeZone: customTimeZone.value.trim(),
@@ -165,19 +165,19 @@ async function calculate(): Promise<void> {
       <section id="transits" class="result-block">
       <div class="section-title"><div><h2>近期行運提示</h2></div></div>
 
-      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" class="transit-details" @toggle="setTransitListOpen(forecast.periodLabel, $event)"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul v-if="transitListOpen[forecast.periodLabel]" class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
+      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" :open="detailsOpen[forecast.periodLabel]" class="transit-details" @toggle="setDetailsOpen(forecast.periodLabel, $event)"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul v-if="detailsOpen[forecast.periodLabel]" class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
       </section>
       <section v-if="annual" id="annual" class="annual-outlook">
         <div class="annual-heading"><div><h2>{{ annual.label }}</h2></div><span>{{ annual.events.length }} 項天象</span></div>
         <div class="annual-grid">
-          <article class="annual-card annual-card-wide"><h3>年度天象日曆</h3><p>行運相位已列於上方；這裡補上月相、食相，以及水星至冥王星的停滯轉向。</p><details class="annual-details"><summary>查看 {{ annual.events.length }} 個事件</summary><ul class="annual-events"><li v-for="(event, index) in annual.events" :key="`${event.kind}-${event.exactAt}-${index}`"><strong>{{ event.title }}・{{ event.sign }}</strong><time>{{ formatAt(event.exactAt, place.timeZone) }}</time><small>{{ event.detail }}</small></li></ul></details></article>
+          <article class="annual-card annual-card-wide"><h3>年度天象日曆</h3><p>行運相位已列於上方；這裡補上月相、食相，以及水星至冥王星的停滯轉向。</p><details :open="detailsOpen['annual-calendar']" class="annual-details" @toggle="setDetailsOpen('annual-calendar', $event)"><summary>查看 {{ annual.events.length }} 個事件</summary><ul v-if="detailsOpen['annual-calendar']" class="annual-events"><li v-for="(event, index) in annual.events" :key="`${event.kind}-${event.exactAt}-${index}`"><strong>{{ event.title }}・{{ event.sign }}</strong><time>{{ formatAt(event.exactAt, place.timeZone) }}</time><small>{{ event.detail }}</small></li></ul></details></article>
           <article v-if="annual.solarReturn" class="annual-card"><h3>太陽回歸盤</h3><p>太陽回到本命黃經的時刻：{{ formatAt(annual.solarReturn.exactAt, returnPlace.timeZone) }}</p><p>計算地點：{{ annual.solarReturn.location }}；上升 {{ annual.solarReturn.ascendant?.sign ?? '出生時間未知' }}，天頂 {{ annual.solarReturn.midheaven?.sign ?? '未計算' }}。</p><ul class="placement-list"><li v-for="planet in annual.solarReturn.planets" :key="`return-${planet.id}`"><strong>{{ planet.name }}</strong><span>{{ planet.sign }}・{{ planet.degree.toFixed(1) }}°・{{ planet.house ? `${planet.house} 宮` : '宮位未知' }}</span></li></ul></article>
           <article class="annual-card"><h3>次限推運</h3><p>採「出生後一日對應一歲」；本命後推日期 {{ annual.progressedAt ? formatAt(annual.progressedAt, chart.timeZone) : '—' }}，推運年齡約 {{ annual.progressedAge?.toFixed(1) ?? '—' }} 歲。</p><ul class="placement-list"><li v-for="planet in annual.progressedPlanets" :key="`progressed-${planet.id}`"><strong>{{ planet.name }}</strong><span>{{ planet.sign }}・{{ planet.degree.toFixed(1) }}°</span></li></ul><h4>推運對本命主要相位</h4><p v-if="!annual.progressedAspects.length">目前設定容許度內沒有主要相位。</p><ul v-else class="aspect-list"><li v-for="aspect in annual.progressedAspects" :key="`${aspect.first}-${aspect.aspect}-${aspect.second}`"><strong>{{ aspect.first }} {{ aspect.aspect }} {{ aspect.second }}（{{ aspect.orb.toFixed(1) }}°）</strong><small>{{ aspect.meaning }}</small></li></ul></article>
           <article v-if="annual.profection" class="annual-card"><h3>年限主題（整宮制）</h3><p>約 {{ annual.profection.age }} 歲：第 {{ annual.profection.house }} 宮・{{ annual.profection.sign }}；年度主星為{{ annual.profection.ruler }}。</p><p>年度焦點：{{ annual.profection.theme }}</p><p>{{ formatAt(annual.profection.from, chart.timeZone) }} 至 {{ formatAt(annual.profection.through, chart.timeZone) }}</p><small>以出生上升星座為第一宮，每年推進一宮；屬年度主題提示。</small></article>
         </div>
         <details class="method annual-method"><summary>年度方法、來源與限制</summary><p v-for="limit in annual.limits" :key="limit">{{ limit }}</p><p>行運位置、月相和全球食相採用 Astronomy Engine；各項日期以事件瞬間換算顯示。城市座標是市中心近似值。行運只列主要五相位，年度相位清單完整列出容許度內項目。</p><p>涵蓋本命行運、月相／日月食、逆順行轉折、太陽回歸、次限推運與年限主題。仍不等於涵蓋所有占星派別或所有技法；占星內容是娛樂與自我反思，不是可驗證的確定預測。</p></details>
       </section>
-      <details class="method"><summary>本命星盤計算方法與限制</summary><p>{{ chart.methodSummary }}</p><p>出生位置：{{ place.label }}（{{ place.latitude }}°, {{ place.longitude }}°）。相位容許度：合相／對分 7°、四分／三分 6°、六合 5°。行運對本命十顆行星及（有出生時間時）上升、天頂，以每日步進尋找相位窗口，再細化精確時刻並標示接近／分離狀態。</p><p>本命採熱帶黃道、地心視位置、Whole Sign 整宮制與五種主要相位。行星經度與宮位是占星慣例下的計算結果，解讀因派別而異。</p><p>城市清單使用市中心座標；自訂位置請自行核對座標與 IANA 時區。出生時間未知時以當地中午估算行星落點，隱藏依賴時間的角度與宮位；北緯 66 度以外不提供宮位計算。</p></details>
+      <details class="method"><summary>本命星盤計算方法與限制</summary><p>{{ chart.methodSummary }}</p><p>出生位置：{{ place.label }}（{{ place.latitude }}°, {{ place.longitude }}°）。相位容許度：合相／對分 7°、四分／三分 6°、六合 5°。行運對本命十顆行星及（有出生時間時）上升、天頂，以每 12 小時取樣尋找相位窗口，再細化精確時刻並標示接近／分離狀態。</p><p>本命採熱帶黃道、地心視位置、Whole Sign 整宮制與五種主要相位。行星經度與宮位是占星慣例下的計算結果，解讀因派別而異。</p><p>城市清單使用市中心座標；自訂位置請自行核對座標與 IANA 時區。出生時間未知時以當地中午估算行星落點，隱藏依賴時間的角度與宮位；北緯 66 度以外不提供宮位計算。</p></details>
     </section>
     <aside class="privacy-note">出生資料僅在本機運算，不會儲存或上傳。占星內容供娛樂與自我反思，不保證事件。</aside>
   </div>

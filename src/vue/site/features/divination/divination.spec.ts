@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { calculateAstrology, createAstrologyForecast } from './astrology';
+import * as Astronomy from 'astronomy-engine';
+import { angleDifference, calculateAstrology, createAstrologyForecast, geoEclipticLongitude } from './astrology';
 import { calculateBazi, createBaziForecast } from './bazi';
 import { BIRTH_PLACES } from './locations';
 import { parseCivilDateTime, resolveCivilDateTime } from '../fortune-core/civil-time';
@@ -106,6 +107,27 @@ describe('local divination calculations', () => {
       const exactMs = new Date(event.exactAt).getTime();
       expect(exactMs - startMs).toBeGreaterThanOrEqual(60_000);
       expect(endMs - exactMs).toBeGreaterThanOrEqual(60_000);
+    }
+  });
+
+  it('finds every Moon aspect window that an hourly scan finds', () => {
+    // 月亮移動快，逐日取樣曾會跳過六合、四分等較窄的容許帶；以逐時掃描的局部極小值當作對照。
+    const chart = calculateAstrology({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei', latitude: 25.033, longitude: 121.5654 });
+    const start = new Date('2026-10-17T04:00:00Z');
+    const hours = 365 * 24;
+    const moonLongitudes = Array.from({ length: hours + 1 }, (_, hour) => geoEclipticLongitude(Astronomy.Body.Moon, new Date(start.getTime() + hour * 3_600_000)));
+    const forecast = createAstrologyForecast(chart, 'year', start);
+    const moonEvents = forecast.events.filter(event => event.transit === '月亮');
+    const aspects = [{ name: '合相', angle: 0, orb: 7 }, { name: '六合', angle: 60, orb: 5 }, { name: '四分相', angle: 90, orb: 6 }, { name: '三分相', angle: 120, orb: 6 }, { name: '對分相', angle: 180, orb: 7 }];
+    for (const natal of chart.planets) for (const aspect of aspects) {
+      const orbs = moonLongitudes.map(longitude => Math.abs(angleDifference(longitude, natal.longitude) - aspect.angle));
+      for (let hour = 1; hour < hours; hour++) {
+        const isMinimum = orbs[hour] <= aspect.orb && orbs[hour] <= orbs[hour - 1] && orbs[hour] <= orbs[hour + 1];
+        if (!isMinimum) continue;
+        const exactMs = start.getTime() + hour * 3_600_000;
+        const matched = moonEvents.some(event => event.natal === natal.name && event.aspect === aspect.name && Math.abs(new Date(event.exactAt).getTime() - exactMs) < 2 * 86_400_000);
+        expect(matched, `${natal.name} ${aspect.name} at ${new Date(exactMs).toISOString()}`).toBe(true);
+      }
     }
   });
 });

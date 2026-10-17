@@ -66,7 +66,7 @@ async function run(){
   await page.locator('.forecast-grid .forecast').nth(2).waitFor({timeout:15000});
   assert.equal(await page.locator('.forecast-grid .forecast').count(),3,'Astrology forecast periods missing');
   const natalMethod=page.locator('details.method').filter({hasText:'本命星盤計算方法與限制'});
-  assert.match(await natalMethod.textContent(),/每日步進/,'daily transit method is not disclosed');
+  assert.match(await natalMethod.textContent(),/每 12 小時取樣/,'12-hour transit sampling is not disclosed');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Astrology forecast overflows the mobile viewport');
   const transitDetails=page.locator('.transit-details').first();
   if(await transitDetails.count())await transitDetails.locator('summary').click();
