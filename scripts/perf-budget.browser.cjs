@@ -34,10 +34,9 @@ const BUDGETS=[
  {route:'/ziwei/',maxBytes:600*KB,maxRequests:17},
  {route:'/bazi/',maxBytes:600*KB,maxRequests:18},
  {route:'/astrology/',maxBytes:320*KB,maxRequests:16},
- // Added 2026-10-17 with the Meihua Yishu island. That session could not run a browser, so these numbers come from the built asset graph of
- // /meihua/ (local preview serves files uncompressed, so byte counts equal transfer size): 514 KB and 17 requests, plus about 20% headroom.
- // lunar-javascript (306 KB raw) is shared with bazi and ziwei. Replace with the measured values from the next visual-audit run.
- {route:'/meihua/',maxBytes:620*KB,maxRequests:21},
+ // Added 2026-10-17 with the Meihua Yishu island. Measured in visual-audit on PR #118 (commit c6401c8): 495 KB and 14 requests at both widths,
+ // plus about 20% headroom. lunar-javascript (306 KB raw) is shared with bazi and ziwei.
+ {route:'/meihua/',maxBytes:600*KB,maxRequests:17},
  // Added 2026-10-17 with the tarot prerender (tarot-ssr.ts): the first markup is in the static page, so the island mounts without a shift.
  // Measured 527 KB and 23 requests at both widths, plus about 20% headroom.
  {route:'/tarot/',maxBytes:640*KB,maxRequests:28}
