@@ -12,8 +12,10 @@ import {isPuzzleComplete as isChallengeComplete,isStageComplete,activeStage,stag
 import {createSoundtrack} from './soundtrack.js';
 import {createGallery} from './gallery.js';
 import {icon,spotIcon,itemIcon,hydrateIcons,enableButtonArrows} from './icons.js';
-import {emitInventoryUpdate,INVENTORY_SELECTED_EVENT,readInventorySelection} from './inventory-events.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const INVENTORY_UPDATED_EVENT='blood-mirror:inventory-updated',INVENTORY_SELECTED_EVENT='blood-mirror:inventory-selected';
+function emitInventoryUpdate(target,inventory){target.dispatchEvent(new CustomEvent(INVENTORY_UPDATED_EVENT,{detail:{inventory:[...inventory]}}));}
+function readInventorySelection(event){return typeof event.detail?.id==='string'?event.detail.id:null;}
 const loaded=loadSave(localStorage);let state=loaded.state;setChallenges(loaded.puzzles);setPuzzlePersistence(()=>save());
 // A save written by a newer build stays untouched: this page never writes until it is reloaded.
 let saveBlocked=loaded.newer;if(!saveBlocked){if(!loaded.recovered)backupSave(localStorage);if(loaded.migrated||loaded.recovered)writeSave(state,completedChallenges(),localStorage);}

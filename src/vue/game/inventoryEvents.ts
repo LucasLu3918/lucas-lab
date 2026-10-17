@@ -1,22 +1,32 @@
-// @ts-expect-error This plain JavaScript module is also consumed directly by the legacy game entry.
-import * as legacyInventoryEvents from '../../../games/blood-mirror/inventory-events.js';
+export const INVENTORY_UPDATED_EVENT = 'blood-mirror:inventory-updated';
+export const INVENTORY_SELECTED_EVENT = 'blood-mirror:inventory-selected';
 
-interface InventoryEventBridge {
-  INVENTORY_UPDATED_EVENT: string;
-  INVENTORY_SELECTED_EVENT: string;
-  emitInventoryUpdate(target: EventTarget, inventory: readonly string[]): void;
-  readInventoryUpdate(event: Event): string[] | null;
-  emitInventorySelection(target: EventTarget, id: string): void;
-  readInventorySelection(event: Event): string | null;
+interface InventoryUpdateDetail {
+  inventory?: unknown;
 }
 
-const bridge = legacyInventoryEvents as unknown as InventoryEventBridge;
+interface InventorySelectionDetail {
+  id?: unknown;
+}
 
-export const {
-  INVENTORY_UPDATED_EVENT,
-  INVENTORY_SELECTED_EVENT,
-  emitInventoryUpdate,
-  readInventoryUpdate,
-  emitInventorySelection,
-  readInventorySelection,
-} = bridge;
+export function emitInventoryUpdate(target: EventTarget, inventory: readonly string[]): void {
+  target.dispatchEvent(new CustomEvent(INVENTORY_UPDATED_EVENT, {
+    detail: { inventory: [...inventory] },
+  }));
+}
+
+export function readInventoryUpdate(event: Event): string[] | null {
+  const inventory = (event as CustomEvent<InventoryUpdateDetail>).detail?.inventory;
+  return Array.isArray(inventory)
+    ? inventory.filter((itemId): itemId is string => typeof itemId === 'string')
+    : null;
+}
+
+export function emitInventorySelection(target: EventTarget, id: string): void {
+  target.dispatchEvent(new CustomEvent(INVENTORY_SELECTED_EVENT, { detail: { id } }));
+}
+
+export function readInventorySelection(event: Event): string | null {
+  const id = (event as CustomEvent<InventorySelectionDetail>).detail?.id;
+  return typeof id === 'string' ? id : null;
+}
