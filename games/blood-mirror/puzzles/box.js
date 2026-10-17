@@ -227,10 +227,34 @@ export const mountBoxApple=ctx=>mountFace(ctx,'apple',h=>{
 export const mountBoxThread=ctx=>mountFace(ctx,'thread',h=>{
  let seq=[];
  const holes=['D','B','C','A']; // shown in an order that gives nothing away
+ const island=typeof h.ctx.mountPuzzleIsland==='function';
+ const snapshot=()=>({order:[...seq],finished:h.finished});
+ const onAction=change=>{
+  if(!island||h.finished||!change||typeof change!=='object')return snapshot();
+  if(change.type==='undo'){
+   seq=[];h.note('');
+  }else if(change.type==='choose-panel'&&holes.includes(change.panel)&&!seq.includes(change.panel)){
+   seq.push(change.panel);h.ctx.playCue('click');
+   if(!prefixOk(seq)){
+    const bad=seq.length;
+    h.note('紅線從「'+PANELS[seq[bad-1]].name+'」穿不過去，它和前一格之間沒有接上。紅線收回來了。');
+    seq=[];h.ctx.playCue('wrong');
+   }else{
+    h.note('');
+    if(seq.length===CHAIN.length)h.win('紅線穿過了四面鏡孔，鏡中鏡轉開了。');
+   }
+  }
+  return snapshot();
+ };
  const html=()=>'<p class="box-line">紅線已穿過：'+(seq.length?seq.map(p=>'<span class="box-chip">'+PANELS[p].name+'</span>').join('→'):'<span class="box-dim">尚未穿過任何一格</span>')+'</p>'
   +'<div class="box-holes">'+holes.map(p=>'<button class="box-hole'+(seq.includes(p)?' used':'')+'" data-h="'+p+'" aria-label="'+PANELS[p].name+(seq.includes(p)?'（紅線已穿過）':'')+'"'+(seq.includes(p)?' disabled':'')+'><img src="assets/'+PANELS[p].art+'.webp" alt="" width="1664" height="944" decoding="async" draggable="false"><span>'+PANELS[p].name+'</span></button>').join('')+'</div>'
   +(seq.length?'<div class="box-row"><button class="text-button" data-k="undo">收回紅線</button></div>':'');
  function draw(focus){
+  if(island){
+   h.redraw('<div data-vue-box-thread><p class="challenge-help" role="status">鏡中鏡載入中…</p></div>',focus);
+   h.ctx.mountPuzzleIsland({snapshot:snapshot(),onAction});
+   return;
+  }
   h.redraw(html(),focus);
   buttons(h.body,'data-h',p=>{
    seq.push(p);h.ctx.playCue('click');

@@ -20,6 +20,7 @@ import ApothecaryVesselsPuzzle from './ApothecaryVesselsPuzzle.vue';
 import ApothecaryMixingPuzzle from './ApothecaryMixingPuzzle.vue';
 import GalleryAlignPuzzle from './GalleryAlignPuzzle.vue';
 import GalleryMergePuzzle from './GalleryMergePuzzle.vue';
+import BoxThreadPuzzle from './BoxThreadPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
@@ -30,6 +31,7 @@ import { parseApothecaryVesselsSnapshot, type ApothecaryVesselsAction, type Apot
 import { parseApothecaryMixingSnapshot, type ApothecaryMixingAction, type ApothecaryMixingSnapshot } from './apothecary-mixing';
 import { parseGalleryAlignSnapshot, type GalleryAlignAction, type GalleryAlignSnapshot } from './gallery-align';
 import { parseGalleryMergeSnapshot, type GalleryMergeAction, type GalleryMergeSnapshot } from './gallery-merge';
+import { parseBoxThreadSnapshot, type BoxThreadAction, type BoxThreadSnapshot } from './box-thread';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -520,6 +522,25 @@ export function mountGalleryMergePuzzleIsland(
   } satisfies GalleryMergePuzzleProps);
   app.mount(root);
   root.setAttribute('data-vue-gallery-merge-ready', 'true');
+  return () => app.unmount();
+}
+
+type BoxThreadPuzzleProps = InstanceType<typeof BoxThreadPuzzle>['$props'];
+
+export function mountBoxThreadPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: BoxThreadAction) => unknown,
+): (() => void) | null {
+  const snapshot = parseBoxThreadSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(BoxThreadPuzzle, {
+    snapshot,
+    onAction: action => onAction(action),
+  } satisfies BoxThreadPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-box-thread-ready', 'true');
   return () => app.unmount();
 }
 
