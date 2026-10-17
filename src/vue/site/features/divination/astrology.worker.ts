@@ -1,8 +1,8 @@
-import { computeAstrologyForecasts, type AstrologyForecastRequest, type AstrologyForecastResult } from './astrology-forecasts';
+import { computeAstrology, type AstrologyComputeRequest, type AstrologyComputeResult } from './astrology-compute';
 
-// 行運與年度天象計算較耗時，放在 Worker 執行，避免按下按鈕時主執行緒停住。
-export type AstrologyWorkerRequest = AstrologyForecastRequest & { id: number };
-export type AstrologyWorkerResponse = { id: number; result: AstrologyForecastResult } | { id: number; error: string };
+// 占星計算較耗時，放在 Worker 執行，避免按下按鈕時主執行緒停住。
+export type AstrologyWorkerRequest = AstrologyComputeRequest & { id: number };
+export type AstrologyWorkerResponse = { id: number; result: AstrologyComputeResult } | { id: number; error: string };
 
 const workerScope = self as unknown as {
   onmessage: ((event: MessageEvent<AstrologyWorkerRequest>) => void) | null;
@@ -12,8 +12,8 @@ const workerScope = self as unknown as {
 workerScope.onmessage = event => {
   const { id, ...request } = event.data;
   try {
-    workerScope.postMessage({ id, result: computeAstrologyForecasts(request) });
+    workerScope.postMessage({ id, result: computeAstrology(request) });
   } catch (cause) {
-    workerScope.postMessage({ id, error: cause instanceof Error ? cause.message : '無法計算行運與年度天象。' });
+    workerScope.postMessage({ id, error: cause instanceof Error ? cause.message : '無法計算占星結果。' });
   }
 };

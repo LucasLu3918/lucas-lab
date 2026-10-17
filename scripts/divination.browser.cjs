@@ -61,6 +61,7 @@ async function run(){
   await page.locator('input[type="date"]').fill('1990-06-15');
   await page.locator('input[type="time"]').fill('08:30');
   await page.getByRole('button',{name:/繪製深入星盤/}).click();
+  await page.locator('.planet').nth(9).waitFor({timeout:15000});
   assert.equal(await page.locator('.planet').count(),10,'Astrology chart should show ten placements');
   await page.locator('.forecast-grid .forecast').nth(2).waitFor({timeout:15000});
   assert.equal(await page.locator('.forecast-grid .forecast').count(),3,'Astrology forecast periods missing');

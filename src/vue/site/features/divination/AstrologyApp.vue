@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import { calculateAstrology, signDescription, type AstrologyChart, type AstrologyForecast } from './astrology';
+import { signDescription } from './astrology-signs';
+import type { AstrologyChart, AstrologyForecast } from './astrology';
 import type { AnnualAstrologyForecast } from './astrology-annual';
-import { computeAstrologyForecasts, type AstrologyForecastRequest, type AstrologyForecastResult } from './astrology-forecasts';
+import type { AstrologyComputeRequest, AstrologyComputeResult } from './astrology-compute';
 import type { AstrologyWorkerResponse } from './astrology.worker';
 import { BIRTH_PLACES } from './locations';
 import type { Disambiguation } from '../fortune-core/civil-time';
@@ -46,27 +47,27 @@ function formatAt(instant: string, timeZone: string): string {
   return formatter.format(new Date(instant));
 }
 
-// 行運與年度天象在 Worker 中計算；本命星盤仍同步繪製。Worker 無法使用時改在主執行緒計算。
-let forecastWorker: Worker | null = null;
-let forecastRequestId = 0;
+// 占星計算整段放在 Worker（頁面不載入 ephemeris）；Worker 無法使用或載入失敗時，才動態匯入同一份計算程式在主執行緒執行。
+let astrologyWorker: Worker | null = null;
+let workerRequestId = 0;
 let latestCalculation = 0;
 
-function getForecastWorker(): Worker | null {
+class WorkerUnavailableError extends Error {}
+
+function getAstrologyWorker(): Worker | null {
   if (typeof Worker === 'undefined') return null;
-  if (!forecastWorker) {
+  if (!astrologyWorker) {
     try {
-      forecastWorker = new Worker(new URL('./astrology.worker.ts', import.meta.url), { type: 'module' });
+      astrologyWorker = new Worker(new URL('./astrology.worker.ts', import.meta.url), { type: 'module' });
     } catch {
       return null;
     }
   }
-  return forecastWorker;
+  return astrologyWorker;
 }
 
-function computeForecasts(request: AstrologyForecastRequest): Promise<AstrologyForecastResult> {
-  const worker = getForecastWorker();
-  if (!worker) return Promise.resolve(computeAstrologyForecasts(request));
-  const id = ++forecastRequestId;
+function computeInWorker(worker: Worker, request: AstrologyComputeRequest): Promise<AstrologyComputeResult> {
+  const id = ++workerRequestId;
   return new Promise((resolve, reject) => {
     const cleanup = () => {
       worker.removeEventListener('message', onMessage);
@@ -81,8 +82,8 @@ function computeForecasts(request: AstrologyForecastRequest): Promise<AstrologyF
     const onError = () => {
       cleanup();
       worker.terminate();
-      if (forecastWorker === worker) forecastWorker = null;
-      reject(new Error('行運計算工作無法完成，請重新繪製。'));
+      if (astrologyWorker === worker) astrologyWorker = null;
+      reject(new WorkerUnavailableError('astrology worker failed to load'));
     };
     worker.addEventListener('message', onMessage);
     worker.addEventListener('error', onError);
@@ -90,33 +91,40 @@ function computeForecasts(request: AstrologyForecastRequest): Promise<AstrologyF
   });
 }
 
+async function computeAstrologyResult(request: AstrologyComputeRequest): Promise<AstrologyComputeResult> {
+  const worker = getAstrologyWorker();
+  if (worker) {
+    try {
+      return await computeInWorker(worker, request);
+    } catch (cause) {
+      if (!(cause instanceof WorkerUnavailableError)) throw cause;
+    }
+  }
+  const { computeAstrology } = await import('./astrology-compute');
+  return computeAstrology(request);
+}
+
 async function calculate(): Promise<void> {
   error.value = '';
-  const calculation = ++latestCalculation;
-  let result: AstrologyChart;
-  try {
-    result = calculateAstrology({ birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value });
-  } catch (cause) {
-    chart.value = null;
-    forecasts.value = [];
-    annual.value = null;
-    forecastPending.value = false;
-    error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
-    return;
-  }
-  chart.value = result;
+  chart.value = null;
   forecasts.value = [];
   annual.value = null;
+  const calculation = ++latestCalculation;
   forecastPending.value = true;
+  const request: AstrologyComputeRequest = {
+    input: { birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value },
+    returnPlace: returnPlace.value,
+    startMs: Date.now(),
+  };
   try {
-    const computed = await computeForecasts({ chart: result, returnPlace: returnPlace.value, startMs: Date.now() });
+    const computed = await computeAstrologyResult(request);
     if (calculation !== latestCalculation) return;
+    chart.value = computed.chart;
     forecasts.value = computed.forecasts;
     annual.value = computed.annual;
   } catch (cause) {
     if (calculation !== latestCalculation) return;
-    chart.value = null;
-    error.value = cause instanceof Error ? cause.message : '無法計算行運與年度天象。';
+    error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
   } finally {
     if (calculation === latestCalculation) forecastPending.value = false;
   }
