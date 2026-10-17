@@ -54,13 +54,13 @@ const save = {
       await page.locator('[data-gal-panel="A"]').focus();
       await page.keyboard.press('f');
       assert.ok((await page.locator('[data-gal-panel="A"]').getAttribute('aria-label')).includes('已翻面'), 'keyboard F flips the focused panel');
-      await page.locator('[aria-label="放大黑松林"]').click();
 
       const panel = page.locator('[data-gal-panel="A"]');
       const box = await panel.boundingBox();
+      const boardBox = await page.locator('#gal-board').boundingBox();
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width / 2 + 24, box.y + box.height / 2 + 18, { steps: 3 });
+      await page.mouse.move(boardBox.x + boardBox.width * 0.62, boardBox.y + boardBox.height * 0.45, { steps: 6 });
       await page.mouse.up();
       await page.waitForFunction(
         () => Boolean(document.querySelector('#gal-feedback')?.textContent?.trim()),
@@ -68,6 +68,7 @@ const save = {
         { timeout: 5000 },
       );
       assert.ok((await page.locator('#gal-feedback').innerText()).length > 0, 'a pointer drag receives placement feedback');
+      await page.locator('[aria-label="放大黑松林"]').click();
 
       await page.locator('.gal-place summary').click();
       await page.locator('.gal-place select').nth(0).selectOption('B.moon');
