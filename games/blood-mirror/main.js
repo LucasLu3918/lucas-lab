@@ -103,7 +103,7 @@ function loadGameIslands(){
  gameIslandPromise=import(entry).then(module=>{gameIslandModule=module;return module;}).catch(error=>{gameIslandPromise=null;throw error;});
  return gameIslandPromise;
 }
-function renderInventory(){$('#inventory-count').textContent=state.inventory.length+' 件';if(inventoryIslandLoaded){emitInventoryUpdate(document,state.inventory);return;}if(inventoryIslandLoading)return;inventoryIslandLoading=true;loadGameIslands().then(()=>{inventoryIslandLoaded=true;inventoryIslandLoading=false;emitInventoryUpdate(document,state.inventory);}).catch(()=>{inventoryIslandLoading=false;$('#inventory').textContent='物品清單載入失敗，請重新整理頁面。';});}
+function renderInventory(){$('#inventory-count').textContent=state.inventory.length+' 件';if(inventoryIslandLoaded){emitInventoryUpdate(document,state.inventory);return;}if(inventoryIslandLoading)return;inventoryIslandLoading=true;loadGameIslands().then(()=>{inventoryIslandLoaded=true;inventoryIslandLoading=false;emitInventoryUpdate(document,state.inventory);}).catch(error=>{console.error('Game Vue island failed to load.',error);inventoryIslandLoading=false;$('#inventory').textContent='物品清單載入失敗，請重新整理頁面。';});}
 function openInventoryItem(id){const it=items[id];if(!it||!state.inventory.includes(id))return;modal(it.name,it.keepsake?'KEEPSAKE · 紀念物':'INVENTORY · 隨身物品',`<div class="modal-image-icon">${itemArtwork[id]?conceptMarkup(itemArtwork[id],{className:'concept-item'}):icon(itemIcon(id,it))}</div><p class="modal-text">${it.text}</p>${it.keepsake?'<p class="modal-note">紀念物不需要在任何地方使用，它只替妳記得發生過的事。</p>':''}<button class="secondary-button" id="item-back">返回探索</button>`);$('#item-back').onclick=closeModal;}
 document.addEventListener(INVENTORY_SELECTED_EVENT,event=>{const id=readInventorySelection(event);if(id)openInventoryItem(id);});
 $('#clue-list').addEventListener('click',event=>{const button=event.target.closest('[data-clue]');if(button)openSpot(button.dataset.clue);});
@@ -299,7 +299,7 @@ function openJournal(){
   if(!root?.isConnected||!$('#modal').open||$('#modal-title').textContent!=='被留下的真相')return;
   journalIslandUnmount=module.mountJournalIsland(root,snapshot,openSecretEpilogue);
   if(!journalIslandUnmount)root.textContent='筆記內容無法載入，請重新整理頁面。';
- }).catch(()=>{if(root?.isConnected)root.textContent='筆記載入失敗，請重新整理頁面。';});
+ }).catch(error=>{console.error('Journal Vue island failed to load.',error);if(root?.isConnected)root.textContent='筆記載入失敗，請重新整理頁面。';});
 }
 function journalSnapshot(){
  const words=state.clues||[],foundShards=state.shards||[],unlockedAchievements=state.achievements||[];

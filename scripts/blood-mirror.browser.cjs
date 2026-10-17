@@ -21,8 +21,9 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
   mkdirSync('/tmp/blood-mirror-concept-preview',{recursive:true});
   for(const width of [390,1280]){
    const context=await browser.newContext({viewport:{width,height:850},hasTouch:width<600,isMobile:width<600,reducedMotion:'reduce'});
-   const page=await context.newPage(),pageErrors=[],gameAssetResponses=[],requestFailures=[];
+   const page=await context.newPage(),pageErrors=[],consoleErrors=[],gameAssetResponses=[],requestFailures=[];
    page.on('pageerror',e=>pageErrors.push(e.message));
+   page.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text());});
    page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/_vue/'))gameAssetResponses.push({status:response.status(),url:response.url(),contentType:response.headers()['content-type']});});
    page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/_vue/'))requestFailures.push({url:request.url(),error:request.failure()?.errorText});});
    // Each act's pre-seal deduction: gather its clue words from the scene, then fill the blanks in order.
@@ -86,7 +87,7 @@ const tapSpot=async(page,id,touch)=>{const spot=page.locator('[data-spot="'+id+'
    assert.ok((await page.locator('#modal-body').innerText()).includes('父親'));
    await page.locator('#take-item').click();
    await page.locator('[data-item="contract"]').waitFor({timeout:5000}).catch(async error=>{
-    console.error('Inventory island diagnostic',JSON.stringify({html:await page.locator('#inventory').innerHTML(),saveIndicator:await page.locator('#save-indicator').innerText(),pageErrors,gameAssetResponses,requestFailures}));
+    console.error('Inventory island diagnostic',JSON.stringify({html:await page.locator('#inventory').innerHTML(),saveIndicator:await page.locator('#save-indicator').innerText(),pageErrors,consoleErrors,gameAssetResponses,requestFailures}));
     throw error;
    });
    assert.equal(await page.locator('[data-item="contract"]').count(),1);
