@@ -195,6 +195,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         :aria-pressed="mirror.orientation === '\\'"
         :aria-disabled="snapshot.solved"
         :transform="`translate(${px(mirror.x)} ${px(mirror.y)})`"
+        pointer-events="all"
         @click="flip(mirror.index)"
         @keydown.enter.prevent="flip(mirror.index)"
         @keydown.space.prevent="flip(mirror.index)"
@@ -209,7 +210,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
             <image :href="puzzleAsset('prism-parts.webp')" width="1024" height="512" preserveAspectRatio="none" />
           </svg>
         </g>
-        <rect x="-5" y="-5" width="10" height="10" fill="transparent" />
+        <rect x="-5" y="-5" width="10" height="10" fill="transparent" pointer-events="all" />
       </g>
     </svg>
   </div>

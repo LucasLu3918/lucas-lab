@@ -27,6 +27,7 @@ describe('PrismRaysPuzzle', () => {
     expect(wrapper.findAll('[data-mirror]')).toHaveLength(3);
     expect(wrapper.get('[data-mirror="0"]').attributes('role')).toBe('button');
     expect(wrapper.get('[data-mirror="0"]').attributes('aria-pressed')).toBe('true');
+    expect(wrapper.get('[data-mirror="0"] rect').attributes('pointer-events')).toBe('all');
     expect(wrapper.find('.prism-tint').exists()).toBe(true);
     expect(wrapper.findAll('.prism-beams polyline')).toHaveLength(4);
     expect(wrapper.get('[role="status"]').text()).toBe(initial.status);
