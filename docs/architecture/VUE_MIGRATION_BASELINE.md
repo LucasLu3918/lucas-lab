@@ -230,4 +230,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：紅、藍、黃三個目標必須各自精確收到所需顏色；filter、水晶與舞者阻擋仍由既有引擎計算；stage id `prism-ballroom`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、翻鏡／移動舞者、通關、進度連續性、legacy fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 僅依核准範圍手動追查。
 
-下一步建議：評估 E3「七人證詞」（`games/blood-mirror/puzzles/apothecary.js`、stage `apothecary-testimony`）是否有完整且獨立的 Vue UI 邊界；先確認排除／指認狀態、反寫證詞模式與錯誤矛盾提示都可由 typed snapshot／action adapter 呈現，再核准切片。
+### Phase 20 — Blood Mirror Apothecary Testimony Vue island
+
+`ApothecaryTestimonyPuzzle.vue` 接手 `apothecary-testimony` 的七張學徒卡、鏡像模式、劃掉／指認控制與狀態呈現，沿用既有 lazy game bundle、stage id、modal 與 `.apo-*` 樣式。`apothecary.js` 保留 `conflicts`／`firstConflict` 謎題規則、矛盾提示、Hints、音效、完成判定、進度 callback 與 legacy renderer；Vue 僅呈現 parser 驗證的 transient snapshot，並將鏡像切換、劃掉與指認 typed actions 交回 legacy controller。
+
+不變條件：只有甘松拿著毒蘋果時，除持有者外六人的證詞都成立；反寫模式、矛盾提示、stage id `apothecary-testimony`、Hints／音效／可選關卡進度與存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 testimony rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、鏡像模式、劃掉／錯誤指認、通關、fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 依核准範圍手動追查。
+
+下一步建議：評估 E3「回魂藥量杯」（`games/blood-mirror/puzzles/apothecary.js`、stage `apothecary-vessels`）的 SVG 盤面與可及操作是否能形成獨立 Vue island，並保留 legacy 倒液規則、復原、提示與完成流程。
