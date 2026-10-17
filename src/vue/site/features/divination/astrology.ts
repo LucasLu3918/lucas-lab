@@ -1,5 +1,5 @@
 import * as Astronomy from 'astronomy-engine';
-import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
+import { parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 import type { InputPrecision } from '../fortune-core/result';
 
 export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
@@ -17,7 +17,7 @@ const SIGNS = [
   { name: '水瓶座', element: '風', mode: '固定', text: '重視理念、獨立與群體，適合提出新做法並保持互相理解。' },
   { name: '雙魚座', element: '水', mode: '變動', text: '想像力與同理心豐富，適合照料感受並建立清楚界線。' },
 ];
-const BODY_LIST: Array<{ id: string; name: string; body: Astronomy.Body }> = [
+export const BODY_LIST: Array<{ id: string; name: string; body: Astronomy.Body }> = [
   { id: 'sun', name: '太陽', body: Astronomy.Body.Sun },
   { id: 'moon', name: '月亮', body: Astronomy.Body.Moon },
   { id: 'mercury', name: '水星', body: Astronomy.Body.Mercury },
@@ -82,7 +82,7 @@ export interface AstrologyChart {
   longitude: number;
 }
 
-function normalize(degrees: number): number {
+export function normalize(degrees: number): number {
   return (degrees % 360 + 360) % 360;
 }
 
@@ -91,7 +91,7 @@ function signInfo(longitude: number) {
   return { signIndex, sign: SIGNS[signIndex], degree: normalize(longitude) - signIndex * 30 };
 }
 
-function geoEclipticLongitude(body: Astronomy.Body, instant: Date): number {
+export function geoEclipticLongitude(body: Astronomy.Body, instant: Date): number {
   const vector = Astronomy.GeoVector(body, instant, true);
   return normalize(Astronomy.Ecliptic(vector).elon);
 }
@@ -101,7 +101,8 @@ function angleDifference(first: number, second: number): number {
   return Math.min(difference, 360 - difference);
 }
 
-function calculateAscendantAndMidheaven(instant: Date, latitude: number, longitude: number) {
+/** 依當地恆星時與黃赤交角估算上升點與天頂（黃經，度）。 */
+export function calculateAscendantAndMidheaven(instant: Date, latitude: number, longitude: number) {
   const localSidereal = normalize((Astronomy.SiderealTime(instant) + longitude / 15) * 15) * Math.PI / 180;
   const obliquity = Astronomy.e_tilt(new Astronomy.AstroTime(instant)).tobl * Math.PI / 180;
   const latitudeRadians = latitude * Math.PI / 180;
@@ -110,6 +111,27 @@ function calculateAscendantAndMidheaven(instant: Date, latitude: number, longitu
   const ascendant = normalize(Math.atan2(y, x) * 180 / Math.PI + 180);
   const mc = normalize(Math.atan2(Math.sin(localSidereal), Math.cos(localSidereal) * Math.cos(obliquity)) * 180 / Math.PI);
   return { ascendant, midheaven: mc };
+}
+
+/** 計算本命行星落點；`ascendantSignIndex` 為 null 時不推算宮位。 */
+export function calculatePlacements(instant: Date, ascendantSignIndex: number | null): PlanetPlacement[] {
+  return BODY_LIST.map(item => {
+    const longitude = geoEclipticLongitude(item.body, instant);
+    const sign = signInfo(longitude);
+    const previous = geoEclipticLongitude(item.body, new Date(instant.getTime() - 86_400_000));
+    const next = geoEclipticLongitude(item.body, new Date(instant.getTime() + 86_400_000));
+    return {
+      id: item.id,
+      name: item.name,
+      longitude,
+      sign: sign.sign.name,
+      signIndex: sign.signIndex,
+      degree: sign.degree,
+      element: sign.sign.element,
+      house: ascendantSignIndex === null ? null : (sign.signIndex - ascendantSignIndex + 12) % 12 + 1,
+      retrograde: normalize(next - previous) > 180,
+    };
+  });
 }
 
 function getAspects(placements: PlanetPlacement[]): AstrologyAspect[] {
@@ -136,27 +158,7 @@ export function calculateAstrology(input: AstrologyInput): AstrologyChart {
   const instant = resolveCivilDateTime(civil, input.timeZone, input.disambiguation);
   const ascMc = input.timeUnknown ? null : calculateAscendantAndMidheaven(instant, input.latitude, input.longitude);
   const ascInfo = ascMc ? signInfo(ascMc.ascendant) : null;
-  const placements = BODY_LIST.map(item => {
-    const longitude = geoEclipticLongitude(item.body, instant);
-    const sign = signInfo(longitude);
-    const previous = geoEclipticLongitude(item.body, new Date(instant.getTime() - 86_400_000));
-    const next = geoEclipticLongitude(item.body, new Date(instant.getTime() + 86_400_000));
-    const motion = normalize(next - previous);
-    const retrograde = motion > 180;
-    return {
-      id: item.id,
-      name: item.name,
-      longitude,
-      sign: sign.sign.name,
-      signIndex: sign.signIndex,
-      degree: sign.degree,
-      element: sign.sign.element,
-      house: ascInfo ? (sign.signIndex - ascInfo.signIndex + 12) % 12 + 1 : null,
-      retrograde,
-    };
-  });
-  const sun = placements.find(item => item.id === 'sun')!;
-  const moon = placements.find(item => item.id === 'moon')!;
+  const placements = calculatePlacements(instant, ascInfo ? ascInfo.signIndex : null);
   const aspects = getAspects(placements);
   return {
     planets: placements,
@@ -179,7 +181,6 @@ export type AstrologyForecastPeriod = 'day' | 'month' | 'year';
 export interface AstrologyForecast {
   periodLabel: string;
   text: string;
-  evidence: string[];
   events: AstrologyTransitEvent[];
   methodVersion: string;
 }
@@ -192,6 +193,34 @@ export interface AstrologyTransitEvent {
   orb: number;
   phase: string;
   meaning: string;
+}
+
+/**
+ * 在單峰區間內以黃金分割搜尋最小值（每輪只新增一次計算），約 20 輪即可精確到數秒。
+ * 回傳最小值所在的毫秒時間點。
+ */
+function goldenSectionMinimum(valueAt: (milliseconds: number) => number, left: number, right: number): number {
+  const ratio = (Math.sqrt(5) - 1) / 2;
+  let lowerProbe = right - ratio * (right - left);
+  let upperProbe = left + ratio * (right - left);
+  let lowerValue = valueAt(lowerProbe);
+  let upperValue = valueAt(upperProbe);
+  for (let pass = 0; pass < 20; pass++) {
+    if (lowerValue <= upperValue) {
+      right = upperProbe;
+      upperProbe = lowerProbe;
+      upperValue = lowerValue;
+      lowerProbe = right - ratio * (right - left);
+      lowerValue = valueAt(lowerProbe);
+    } else {
+      left = lowerProbe;
+      lowerProbe = upperProbe;
+      lowerValue = upperValue;
+      upperProbe = left + ratio * (right - left);
+      upperValue = valueAt(upperProbe);
+    }
+  }
+  return (left + right) / 2;
 }
 
 export function createAstrologyForecast(chart: AstrologyChart, period: AstrologyForecastPeriod, start = new Date()): AstrologyForecast {
@@ -239,16 +268,10 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
       let exactAt = candidate.at;
       let orb = candidate.orb;
       if (period !== 'day') {
-        let left = Math.max(start.getTime(), candidate.at.getTime() - 86_400_000);
-        let right = Math.min(start.getTime() + spanDays * 86_400_000, candidate.at.getTime() + 86_400_000);
+        const left = Math.max(start.getTime(), candidate.at.getTime() - 86_400_000);
+        const right = Math.min(start.getTime() + spanDays * 86_400_000, candidate.at.getTime() + 86_400_000);
         const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(milliseconds)), natalTarget.longitude) - item.aspect.angle);
-        for (let pass = 0; pass < 26; pass++) {
-          const first = left + (right - left) / 3;
-          const second = right - (right - left) / 3;
-          if (orbAt(first) <= orbAt(second)) right = second;
-          else left = first;
-        }
-        exactAt = new Date((left + right) / 2);
+        exactAt = new Date(goldenSectionMinimum(orbAt, left, right));
         orb = orbAt(exactAt.getTime());
       }
       const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
@@ -260,12 +283,11 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
     }
   }
   const orderedEvents = events.sort((left, right) => left.exactAt.localeCompare(right.exactAt) || left.orb - right.orb);
-  const evidence = orderedEvents.map(event => `${event.transit}與本命${event.natal}${event.aspect}（${new Date(event.exactAt).toLocaleDateString('zh-TW')}附近，${event.phase}，殘餘容許度 ${event.orb.toFixed(2)}°）`);
   const label = period === 'day' ? '今日' : period === 'month' ? '未來一個月' : '未來一年';
-  const text = evidence.length
-    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到 ${evidence.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
+  const text = orderedEvents.length
+    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到 ${orderedEvents.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
     : '這段期間未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。';
-  return { periodLabel: label, text, evidence, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
+  return { periodLabel: label, text, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
 
 export function signDescription(signName: string, role: 'sun' | 'moon' | 'rising'): string {
