@@ -52,7 +52,7 @@ const CHAPTER=c=>STORY+'chapters/'+c+'/';
   await page.locator('[data-theme="night"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-vue-reader-preferences]')?.dataset.vueReaderMounted==='true');
   assert.equal(await page.locator('[data-reader]').evaluate(element=>element.classList.contains('night')),true,'theme was not applied');
-  await page.locator('[aria-label="放大字體"]').click();
+  await page.locator('[aria-label="放大字體 A＋"]').click();
   assert.equal(await page.locator('[data-reader]').evaluate(element=>element.style.getPropertyValue('--reader-size')),'19px','Vue font control did not update the static article');
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('lucaslab.reader.preferences'))),{theme:'night',font:19});
   await page.reload({waitUntil:'load'});

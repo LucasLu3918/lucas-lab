@@ -1,6 +1,6 @@
 # 占卜中心 Fortune Hub 規劃
 
-- 狀態：P0（#103）、P1（#105）、P2（#107）已合併；P3 整合已實作（見 §9.1，分支 `claude/fortune-hub-p3`）；P4 尚未開始
+- 狀態：P0（#103）、P1（#105）、P2（#107）、P3（#109）已合併；P4 體驗與維運已實作，尚未提交（見 §9.2）
 - 日期：2026-10-17
 - 範圍：以既有「月夜占卜室」為基礎，整合六個占卜模組、共用計算引擎與資料層，並導入本機 Claude Code 占卜技能作為規格與內容來源。
 - 原則：所有計算在瀏覽器本機完成；不需要付費 API 或 AI API Key；計算可重現；出生資料不儲存、不上傳。
@@ -242,6 +242,18 @@ P1 的兩個軌道與 P2 的 spike 彼此獨立，只依賴 P0 的共用層，�
 - **日期一致**：`localDayKey` 移至 `fortune-core/civil-time`，星座運勢與塔羅每日一抽共用同一個本機日期。
 - **今日總覽**：占卜中心首頁新增「今日總覽」，今日一抽（已抽則顯示牌名）與今日星座（記住上次選擇的星座，只存於本機）。塔羅歷史與星座運勢引擎都以動態匯入載入。量測（gzip）：`/divination/` 入口 chunk 約 3.5 KB；總覽掛載時就會載入塔羅歷史與牌卡資料約 10.8 KB（每次進入首頁都會）；選擇星座後才載入星座引擎約 4.8 KB。這些數字留給 P4 設定 perf budget 時參考，目前尚未設定預算。
 - **範圍外**：八字與占星仍不保存閱讀紀錄，因為出生資料不儲存（§5）；因此統一歷史目前只包含塔羅。單筆刪除未實作，清除紀錄涵蓋刪除需求。
+
+- **P4 體驗與維運（已實作，未提交）**：
+  - **離線**：`scripts/site/pwa.cjs` 預快取 `/divination/` 與六個模組頁面的 HTML，並把入口的 dynamic import（今日總覽的塔羅歷史、牌卡與星座引擎）一併預快取。`scripts/divination.browser.cjs` 新增離線案例：在首頁取得控制後離線開啟占卜首頁與紫微頁。
+  - **靜態預渲染與版面穩定**：占卜首頁的靜態 HTML 與 Vue 島同結構，文案與門卡來自 `hub.json`，樣式抽成 `divination-hub.css`。掛載前頁面即已排版、連結無需 JS 即可使用；掛載造成的版面位移由 CLS 0.25 降為 0。
+  - **Hub 視覺**：暗黑童話主題，加入月相圖示、星點背景與門卡漸層金框；不改動模組內頁。
+  - **Bundle 修正**：`lunar-javascript` 改以 `manualChunks` 獨立（`vite.config.mts`）。原因是 CJS 模組的共用 runtime helper 被放進該 chunk，使塔羅與占卜首頁各下載約 300 KB 原始資料。量測（傳輸量，未壓縮）：`/divination/` 524 → 226 KB、請求 16；`/horoscope/` 489 → 191 KB。
+  - **Perf budget**：`scripts/perf-budget.browser.cjs` 新增 `/divination/`（272 KB、19 個請求，兩個寬度實測 226 KB、16 個請求，約 20% 餘裕）。
+  - **Visual audit**：`scripts/visual-audit.cjs` 的路由與截圖加入占卜首頁與五個模組路由。
+  - **其他島嶼頁的版面穩定**：horoscope、numerology、ziwei、bazi、astrology 在 assets/style.css 以 `min-height` 保留掛載後的高度（390、768、1440 px 實測，四捨五入到 10 px），掛載後 CLS 為 0，並已加入 perf budget。這是保留空間的做法，掛載前的空白區域會較大；若要移除空白，需要像占卜首頁一樣做靜態預渲染。
+  - **tarot 靜態預渲染**：原因是掛載後的版面（英雄區、牌陣選擇、牌庫）比靜態殼層高很多，桌機寬度 CLS 約 0.33。改為在建置時以 Vue SSR 產生島嶼的首屏標記（`src/vue/site/tarot-ssr.ts`、`vite.tarot-ssr.config.mts`、`scripts/render-tarot-static.mjs`），寫入 `/tarot/` 靜態頁。元件的 scoped 樣式已隨入口 CSS 在 `<head>` 載入，且輸出含相同的 `data-v-*` 屬性，因此掛載後 DOM 與樣式不變，1440 與 390 px 的 CLS 皆為 0。量測（傳輸量）：527 KB、23 個請求，perf budget 設為 640 KB、28 個請求。限制：若訪客本機已有閱讀紀錄，「最近的牌陣」區塊於掛載後才出現，仍會造成位移；靜態標記無法得知本機紀錄。
+  - **視覺稽核**：`npm run test:visual` 已通過（234 個頁面與視窗）。先前的 `label-content-name-mismatch` 以替換 aria-label 的方式修正，範圍包括站頭、工具卡、閱讀器字級按鈕、藝廊、遊戲章節卡與音效按鈕、音樂曲目列與片段按鈕；遊戲與閱讀器測試的選擇器已同步更新。
+  - **相依性**：`@axe-core/playwright` 4.14.0 已加入 `package.json` 的 devDependencies（`npm install --save-dev`），視覺稽核不再需要額外安裝。`playwright` 1.64.0 同樣加入 devDependencies，與沙箱版本一致，瀏覽器測試不再需要 `NODE_PATH`。
 
 ## 10. 待決定事項
 

@@ -55,7 +55,7 @@
 ## 正式部署與 SEO
 - 正式來源：`https://lucas-lab.owl3918.workers.dev/`，使用 Cloudflare Workers Static Assets。
 - Worker 名稱與靜態輸出目錄由 `wrangler.jsonc` 管理；`dist/` 應由 `npm run build` 生成。
-- Cloudflare Git integration 使用 `main`，Build command 為 `npm run build`、Deploy command 為 `npx wrangler deploy`。
+- Cloudflare Git integration 追蹤 `main`；建置步驟為 `npm run build`，部署步驟為 `npx wrangler deploy`。
 - 不再使用 GitHub Pages 部署流程。若啟用自訂網域，再更新 `SITE_URL`。
 - 網站實際是否已部署、Build 過程是否成功，應以 Cloudflare Dashboard 為準，不能以 GitHub CI 成功代替驗證。
 
@@ -118,3 +118,24 @@
 - 驗證：單元測試 67 項（含 `blood-mirror-epilogue.test.mjs`）、既有與新增的瀏覽器套件、結局與片尾的 axe-core 稽核（WCAG 2A/2AA，`scripts/blood-mirror-ending.browser.cjs`）。
 - 內容密度報告：`node scripts/blood-mirror-density.mjs` 以唯讀方式列出每幕對照 plan §4.2 的缺口。目前五幕皆未達標（機關、線索詞、物品與解封後變化仍不足）。
 - 尚未完成：第一、二、四幕的新機關與視角特寫、其餘封印改由審問推得、M6 兩個新章節（需場景美術與配樂）、WebKit 測試、中階手機效能稽核、3 人試玩時長與主題曲循環的真人聆聽。完整紀錄見 [plan-improve.md](../games/blood-mirror/plan-improve/plan-improve.md) 第 14 節。
+
+## 第八階段：占卜中心 Fortune Hub（P0–P4）
+
+- 規劃與階段紀錄見 [FORTUNE_HUB_PLAN.md](plan/FORTUNE_HUB_PLAN.md)。P0（#103）、P1（#105）、P2（#107）、P3（#109）已合併；P4 已實作、尚未提交。
+- 共用層：`src/vue/site/features/fortune-core/`（civil-time、calendar、rng、content、ethics、result、local-history 與 PrecisionBadge）。
+- 版本紀錄（方法版本，規則改變時必須遞增）：
+  - 生命靈數 `numerology-pythagorean-v1`
+  - 星座運勢 `horoscope-daily-v1`，內容 `content` 版本見 `horoscope-zh.json`
+  - 紫微斗數 `ziwei-standard-v1`，內容版本 `2026.10.17-1`
+  - 八字 `bazi-local-v2`
+  - 西洋占星 `tropical-whole-sign-v3`
+  - 塔羅牌義內容 `rws-zh-tw-1.1.0`
+- 依賴（`package.json`）：`lunar-javascript` 1.7.7（農曆換算，八字與紫微）、`astronomy-engine` 2.1.19（占星）；開發用 `iztro` 2.6.3 僅作紫微差異測試對照，不進入執行期 bundle。
+- 建置：`vite.config.mts` 將 `lunar-javascript` 獨立成 chunk，避免共用 runtime helper 把該函式庫帶進塔羅與占卜首頁。
+- 預渲染：`npm run build` 先以 `vite.tarot-ssr.config.mts` 對塔羅島做 SSR（`src/vue/site/tarot-ssr.ts`），再由 `scripts/render-tarot-static.mjs` 寫入 `.vue-ssr/tarot-static.html`，`scripts/site/pages.cjs` 把它放進 `/tarot/`。`.vue-ssr/` 不進版本控制。
+- Service Worker：`scripts/site/pwa.cjs` 預快取占卜首頁與六個模組頁面，並包含入口的 dynamic import。
+- 驗證（P4）：`npm run check`、`npm run test:divination`（含離線案例）、`npm run test:perf`（`/divination/` 226 KB、16 個請求，兩個寬度 CLS 0）。
+- 驗證（完整）：`npm run check:all` 的各項測試皆通過；其中 `npm run test:visual` 含 WCAG 稽核（axe-core 4.14.0，套件尚未列於 `package.json`）。
+- 版面穩定：`/tarot/` 改為靜態預渲染後，390 與 1440 px 的 CLS 皆為 0（先前 1440 px 約 0.33）；傳輸量 527 KB、23 個請求，已加入 perf budget（640 KB、28 個請求）。
+- 相依性：`@axe-core/playwright` 4.14.0 與 `playwright` 1.64.0 已加入 devDependencies；瀏覽器測試不再需要 `NODE_PATH`。
+- 尚未完成：其他島嶼頁以 `min-height` 保留空間，未做預渲染（見計畫 §9.2）。

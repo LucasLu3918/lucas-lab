@@ -4,6 +4,7 @@ import { localDayKey } from '../fortune-core/civil-time';
 import type { HoroscopeReading } from '../horoscope/horoscope';
 import { HOROSCOPE_SIGNS, type HoroscopeSignId } from '../horoscope/signs';
 import { parseHoroscopeSign, rememberSign, rememberedSign, todaysDailyDraw } from './today';
+import { DIVINATION_HUB } from './modules';
 
 interface DailyDrawView {
   name: string;
@@ -63,8 +64,8 @@ onMounted(() => {
   <section class="today" aria-labelledby="today-title">
     <header class="today__heading">
       <p class="today__date">{{ todayLabel }}</p>
-      <h2 id="today-title">今日總覽</h2>
-      <p class="today__note">不需要出生資料。今日牌卡與星座運勢只在這個瀏覽器計算與保存。</p>
+      <h2 id="today-title">{{ DIVINATION_HUB.overview.title }}</h2>
+      <p class="today__note">{{ DIVINATION_HUB.overview.note }}</p>
     </header>
     <div class="today__cards">
       <article class="today-card" aria-labelledby="today-draw-title">
@@ -94,19 +95,3 @@ onMounted(() => {
   </section>
 </template>
 
-<style scoped>
-.today { display:grid; gap:16px; padding:clamp(18px,3vw,24px); border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-panel); background:var(--ll-color-surface); color:var(--ll-color-text); }
-.today__heading { display:grid; gap:6px; }
-.today__heading h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-xl); font-weight:500; }
-.today__date, .today__note { margin:0; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.7; }
-.today__cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:12px; }
-.today-card { display:grid; gap:10px; align-content:start; padding:16px; border:1px solid var(--ll-color-hairline); border-radius:var(--ll-radius-control); }
-.today-card h3 { margin:0; color:var(--ll-color-gold); font-size:var(--ll-font-size-body); font-weight:600; }
-.today-card p { margin:0; font-size:var(--ll-font-size-sm); line-height:1.75; }
-.today-card strong { color:var(--ll-color-gold-bright); font-weight:600; }
-.today-card__meta, .today-card__tip { color:var(--ll-color-text-muted); }
-.today-card select { min-height:44px; padding:0 10px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-control); color:var(--ll-color-text); background:var(--ll-color-surface-raised); font:inherit; }
-.today-card__sign { display:grid; gap:6px; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); }
-.today-card__link { justify-self:start; display:inline-flex; align-items:center; min-height:44px; color:var(--ll-color-gold-bright); text-decoration:underline; text-underline-offset:4px; }
-.today-card select:focus-visible, .today-card__link:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:var(--ll-focus-offset); }
-</style>

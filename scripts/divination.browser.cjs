@@ -73,6 +73,26 @@ async function run(){
   await page.screenshot({path:path.join(CAPTURES,'astrology-reading-390.png'),fullPage:true,animations:'disabled'});
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
+
+  // Offline: the worker precaches every module page and the chunks the hub loads lazily, so a visitor who has never opened
+  // a module (or the hub) can still use them after the worker takes control of the page.
+  const offlineContext=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'});
+  const offlinePage=await offlineContext.newPage();
+  const offlineErrors=[];
+  offlinePage.on('pageerror',error=>offlineErrors.push(error.message));
+  await offlinePage.goto(ORIGIN+'/',{waitUntil:'load'});
+  await offlinePage.waitForFunction(()=>navigator.serviceWorker.controller!==null,null,{timeout:15000});
+  await offlineContext.setOffline(true);
+  await offlinePage.goto(ORIGIN+'/divination/',{waitUntil:'load'});
+  await offlinePage.locator('.today').waitFor();
+  assert.match(await offlinePage.locator('.today-card').first().textContent(),/今日一抽/,'hub overview did not render offline');
+  await offlinePage.locator('.today select').selectOption('aries');
+  await offlinePage.locator('.today-card__tip').waitFor({timeout:10000});
+  await offlinePage.goto(ORIGIN+'/ziwei/',{waitUntil:'load'});
+  assert.match(await offlinePage.locator('h1').first().textContent(),/紫微斗數/,'ziwei page did not open offline');
+  assert.deepEqual(offlineErrors,[],'offline module visit emitted JavaScript errors');
+  await offlineContext.close();
+  console.log('✓ Offline: a visitor who never opened a module still gets the hub, its lazy horoscope reading and the ziwei page');
   console.log('PASS: divination browser acceptance');
  }finally{
   if(browser)await browser.close();

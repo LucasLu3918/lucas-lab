@@ -426,3 +426,12 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
 .chips li {margin:0!important;padding:4px 12px;border:1px solid #625843;border-radius:4px;background:#30291e;color:#dbcbb1!important;font-size:var(--fs-xs)}
 .about-card.wide {grid-column:1/-1}
 @media(max-width:720px) {.about-grid {grid-template-columns:1fr}.about-card {padding:22px}}
+
+/* Vue islands: reserve the height each module reaches once mounted, so the footer does not jump when the island replaces the static
+   intro (CLS budget, scripts/perf-budget.browser.cjs). Measured at 390, 768 and 1440 px, rounded up. Tarot is not reserved: its height
+   depends on the deck art that loads after mount. */
+[data-vue-site-island="horoscope"] {min-height:800px}
+[data-vue-site-island="ziwei"] {min-height:990px}
+[data-vue-site-island="numerology"] {min-height:1050px}
+[data-vue-site-island="bazi"] {min-height:1190px}
+[data-vue-site-island="astrology"] {min-height:1320px}

@@ -20,8 +20,8 @@ const { preferences, canDecreaseFont, canIncreaseFont, update } = useReaderPrefe
     </button>
   </div>
   <div class="control-group reader-buttons" role="group" aria-label="文字大小">
-    <button type="button" data-font="-1" aria-label="縮小字體" :disabled="!canDecreaseFont" @click="update({ type: 'change-font', delta: -1 })">A−</button>
+    <button type="button" data-font="-1" aria-label="縮小字體 A−" :disabled="!canDecreaseFont" @click="update({ type: 'change-font', delta: -1 })">A−</button>
     <span data-size aria-live="polite">{{ preferences.font }}px</span>
-    <button type="button" data-font="1" aria-label="放大字體" :disabled="!canIncreaseFont" @click="update({ type: 'change-font', delta: 1 })">A＋</button>
+    <button type="button" data-font="1" aria-label="放大字體 A＋" :disabled="!canIncreaseFont" @click="update({ type: 'change-font', delta: 1 })">A＋</button>
   </div>
 </template>
