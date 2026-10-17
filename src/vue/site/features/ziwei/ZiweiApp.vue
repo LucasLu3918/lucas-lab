@@ -7,11 +7,16 @@ import {
 import type { MethodResult } from '../fortune-core/result';
 
 const pad = (value: number) => String(value).padStart(2, '0');
-// Two-hour branches: 子時 starts at 23:00. Each branch index matches ziwei.ts (0 = 子 … 11 = 亥).
-const HOURS = BRANCHES.map((name, index) => {
-  const start = (index * 2 - 1 + 24) % 24;
-  return { index, label: `${name}時`, range: `${pad(start)}:00–${pad((start + 1) % 24)}:59` };
-});
+// Two-hour branches. 早子 (00:00–00:59) is index 0; 晚子 (23:00–23:59) is index 12, which ziwei.ts reads as the late 子 hour.
+const HOURS = [
+  { index: 0, label: '早子時', range: '00:00–00:59' },
+  ...BRANCHES.slice(1).map((name, offset) => {
+    const index = offset + 1;
+    const start = index * 2 - 1;
+    return { index, label: `${name}時`, range: `${pad(start)}:00–${pad(start + 1)}:59` };
+  }),
+  { index: 12, label: '晚子時', range: '23:00–23:59' },
+];
 // Grid positions follow the traditional 4×4 chart: 巳午未申 on top, 寅丑子亥 at the bottom, the center holds the summary.
 const GRID_POSITION: Record<number, string> = {
   5: '1 / 1', 6: '1 / 2', 7: '1 / 3', 8: '1 / 4',
@@ -64,7 +69,7 @@ const derivationSteps = computed(() => {
   return [
     `寅宮起正月，順數至農曆${d.palaceMonth}月（${d.monthBranch}）${leapNote}，${hourStep}，命宮在${data.soulBranch}。`,
     `命宮干支為${d.mingStem}${data.soulBranch}（五虎遁定天干），納音為${d.nayin}，定出${data.fiveElementsClass}。`,
-    `紫微落宮：以${data.fiveElementsClass}配農曆${d.ziweiDay}日，依口訣定在${d.ziweiBranch}；天府與紫微以寅申為軸對稱，在${d.tianfuBranch}。`,
+    `紫微落宮：以${data.fiveElementsClass}配農曆${d.ziweiDay}日${d.lateZi ? '（晚子時，取次日的農曆日）' : ''}，依口訣定在${d.ziweiBranch}；天府與紫微以寅申為軸對稱，在${d.tianfuBranch}。`,
     `祿存在${d.lucunBranch}（依年干${data.yearStem}），擎羊與陀羅分別在其後一宮與其前一宮。`,
     `年干${data.yearStem}的四化：${mutagenText}。`,
     `${data.yearStem}年${yinYangLabel.value}${GENDER_LABEL[data.gender]}，大限${data.decadalForward ? '順行' : '逆行'}，${data.bureau}歲起運。`,
@@ -150,7 +155,7 @@ function selectPalace(branch: number): void {
 
         <div class="chart-center">
           <p class="chart-title">紫微斗數命盤</p>
-          <p>農曆 {{ chart.lunar.ganzhiYear }}年 {{ chart.lunar.isLeapMonth ? '閏' : '' }}{{ chart.lunar.month }}月 {{ chart.lunar.day }}日 · {{ chart.hourBranch }}時 · {{ GENDER_LABEL[chart.gender] }}</p>
+          <p>農曆 {{ chart.lunar.ganzhiYear }}年 {{ chart.lunar.isLeapMonth ? '閏' : '' }}{{ chart.lunar.month }}月 {{ chart.lunar.day }}日 · {{ chart.derivation.lateZi ? '晚子' : chart.hourBranch }}時 · {{ GENDER_LABEL[chart.gender] }}</p>
           <p>{{ chart.fiveElementsClass }} · 命宮在{{ chart.soulBranch }} · 身宮在{{ chart.bodyBranch }}</p>
           <p>大限{{ chart.decadalForward ? '順行' : '逆行' }}，從 {{ chart.bureau }} 歲起運。</p>
           <p v-if="currentDecadal">{{ currentYear }} 年（虛歲 {{ currentAge }} 歲）落在{{ currentDecadal.name }}大限。</p>
@@ -213,8 +218,8 @@ function selectPalace(branch: number): void {
       <details class="method">
         <summary>計算方法與版本</summary>
         <p>方法版本：{{ result?.methodVersion }}；內容版本：{{ result?.contentVersion }}。</p>
-        <p>排盤規則以標準安星法為準，並與公開的 iztro 2.6.3 對照測試。閏月十六日以後依 iztro 的預設算作下一個月；子時以出生當日計算，不做晚子時換日。</p>
-        <p>包含十四主星、文昌、文曲、左輔、右弼、天魁、天鉞、祿存、擎羊與陀羅；未包含其餘雜曜。</p>
+        <p>排盤規則以標準安星法為準，並與公開的 iztro 2.6.3 對照測試。閏月十六日以後依 iztro 的預設算作下一個月；晚子時（23:00 以後）的命宮與身宮同子時，紫微落宮改取次日的農曆日，且不套用閏月換月規則。</p>
+        <p>包含十四主星、輔星（文昌、文曲、左輔、右弼、天魁、天鉞）、煞星（祿存、擎羊、陀羅、火星、鈴星、地空、地劫、天馬）與常用雜曜（如紅鸞、天喜、孤辰、寡宿、華蓋、咸池、龍池、鳳閣、三台、八座、恩光、天貴）。未包含天傷、天使，以及十二長生、博士等神煞；僅中州派的星曜也未收錄。</p>
       </details>
     </section>
 

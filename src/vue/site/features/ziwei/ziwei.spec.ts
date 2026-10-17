@@ -195,9 +195,27 @@ describe('閏月 handling for the palace month', () => {
   });
 });
 
+describe('晚子時 (birth hour 12)', () => {
+  it('shares 命宮 and 身宮 with 子 but places 紫微 by the next civil date', () => {
+    // 2024-02-09 is 農曆十二月三十; the next civil day is 正月初一, so 紫微 is placed by day 1 (bureau 金四局 → 亥).
+    const early = calculateZiwei({ birthDate: '2024-02-09', birthBranch: 0, gender: 'male' }).data;
+    const late = calculateZiwei({ birthDate: '2024-02-09', birthBranch: 12, gender: 'male' }).data;
+    expect(late.soulBranch).toBe(early.soulBranch);
+    expect(late.bodyBranch).toBe(early.bodyBranch);
+    expect(late.fiveElementsClass).toBe('金四局');
+    expect(late.derivation).toMatchObject({ lateZi: true, hourIndex: 0, ziweiDay: 1, ziweiBranch: '亥' });
+    expect(early.derivation.lateZi).toBe(false);
+  });
+
+  it('keeps the leap month, since iztro does not apply the leap rule to 晚子時', () => {
+    const late = calculateZiwei({ birthDate: '2025-08-10', birthBranch: 12, gender: 'male' }).data;
+    expect(late.derivation).toMatchObject({ palaceMonth: 6, leapAdjusted: false, lateZi: true });
+  });
+});
+
 describe('input validation', () => {
-  it('rejects a birth hour outside 0–11', () => {
-    expect(() => calculateZiwei({ birthDate: '1990-06-15', birthBranch: 12, gender: 'male' })).toThrow(RangeError);
+  it('rejects a birth hour outside 0–12', () => {
+    expect(() => calculateZiwei({ birthDate: '1990-06-15', birthBranch: 13, gender: 'male' })).toThrow(RangeError);
     expect(() => calculateZiwei({ birthDate: '1990-06-15', birthBranch: -1, gender: 'male' })).toThrow(RangeError);
     expect(() => calculateZiwei({ birthDate: '1990-06-15', birthBranch: 1.5, gender: 'male' })).toThrow(RangeError);
   });

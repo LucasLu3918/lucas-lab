@@ -79,6 +79,16 @@ describe('ZiweiApp', () => {
     expect(wrapper.find('.minor-line').text()).toContain('天魁');
   });
 
+  it('offers 早子 and 晚子 as separate hours, and marks a 晚子 chart as such', async () => {
+    const wrapper = mount(ZiweiApp);
+    const labels = wrapper.findAll('select option').map(option => option.text());
+    expect(labels).toContain('早子時（00:00–00:59）');
+    expect(labels).toContain('晚子時（23:00–23:59）');
+    await calculateChart(wrapper, '2024-02-09', '12');
+    expect(wrapper.find('.chart-center').text()).toContain('晚子時');
+    expect(wrapper.find('.chart-center').text()).toContain('命宮在丑');
+  });
+
   it('asks for an hour before calculating', async () => {
     const wrapper = mount(ZiweiApp);
     await wrapper.find('input[type="date"]').setValue('1990-06-15');

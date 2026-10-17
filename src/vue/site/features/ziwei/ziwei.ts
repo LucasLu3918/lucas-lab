@@ -3,6 +3,7 @@
 import { toLunarDate, type LunarDate } from '../fortune-core/calendar';
 import { parseCivilDateTime } from '../fortune-core/civil-time';
 import { createMethodResult, type InputPrecision, type MethodResult } from '../fortune-core/result';
+import { minorStarPlacements } from './ziwei-stars';
 
 export const ZIWEI_METHOD_VERSION = 'ziwei-standard-v2';
 export const ZIWEI_CONTENT_VERSION = '2026.10.17-1';
@@ -20,7 +21,10 @@ export type FiveElementBureau = 2 | 3 | 4 | 5 | 6;
 export interface ZiweiInput {
   /** Solar (陽曆) birth date, YYYY-MM-DD. The chart is computed from its lunar equivalent. */
   birthDate: string;
-  /** Birth hour as a branch index: 0 = 子時 (23:00–00:59) … 11 = 亥時 (21:00–22:59). */
+  /**
+   * Birth hour as a branch index: 0 = 早子 (00:00–00:59) … 11 = 亥時 (21:00–22:59).
+   * 12 = 晚子 (23:00–23:59): the same 命宮 and 身宮 as 子, but 紫微 is placed by the lunar day of the next civil date (iztro's convention).
+   */
   birthBranch: number;
   gender: Gender;
 }
@@ -50,6 +54,8 @@ export interface ZiweiDerivation {
   monthBranch: string;
   hourIndex: number;
   hourBranch: string;
+  /** 晚子時: 紫微落宮以次日計，ziweiDay 為已加一的日數。 */
+  lateZi: boolean;
   mingStem: string;
   nayin: string;
   ziweiDay: number;
@@ -196,8 +202,8 @@ function stemIndex(stem: string): number {
 }
 
 function validateBirthBranch(birthBranch: number): void {
-  if (!Number.isInteger(birthBranch) || birthBranch < 0 || birthBranch > 11) {
-    throw new RangeError('出生時辰需為 0（子時）至 11（亥時）之間的整數。');
+  if (!Number.isInteger(birthBranch) || birthBranch < 0 || birthBranch > 12) {
+    throw new RangeError('出生時辰需為 0（早子）至 11（亥時）或 12（晚子）之間的整數。');
   }
 }
 
@@ -206,9 +212,17 @@ export function calculateZiwei(input: ZiweiInput): MethodResult<ZiweiChart> {
   const { year, month, day } = parseCivilDateTime(input.birthDate, '00:00');
   const lunar = toLunarDate({ year, month, day });
   const yearStem = stemIndex(lunar.ganzhiYear.charAt(0));
-  const hour = input.birthBranch;
+  // 晚子時 shares the 子 branch for 命宮 and 身宮, and only shifts the day used for 紫微落宮.
+  const lateZi = input.birthBranch === 12;
+  const hour = lateZi ? 0 : input.birthBranch;
+  // 晚子時 takes the lunar day of the next civil date, so a month end gives day 1 (matches iztro on every day of 2024).
+  const nextCivil = new Date(Date.UTC(year, month - 1, day + 1));
+  const placementDay = lateZi
+    ? toLunarDate({ year: nextCivil.getUTCFullYear(), month: nextCivil.getUTCMonth() + 1, day: nextCivil.getUTCDate() }).day
+    : lunar.day;
   // 閏月前半月（十五日及以前）仍算本月，後半月算下月；只影響月數，不影響紫微落宮所用的日數。
-  const leapAdjusted = lunar.isLeapMonth && lunar.day > 15;
+  // iztro skips this rule for 晚子時 (timeIndex 12), so the late-zi chart keeps the leap month.
+  const leapAdjusted = !lateZi && lunar.isLeapMonth && lunar.day > 15;
   const palaceMonth = leapAdjusted ? lunar.month + 1 : lunar.month;
 
   const ming = mingBranch(palaceMonth, hour);
@@ -219,7 +233,7 @@ export function calculateZiwei(input: ZiweiInput): MethodResult<ZiweiChart> {
   // Star branches. Every placed star is recorded once so that transformations can point at it.
   const starBranch = new Map<string, number>();
   const minorStarNames = new Set<string>();
-  const ziwei = ziweiBranch(bureau, lunar.day);
+  const ziwei = ziweiBranch(bureau, placementDay);
   for (const [name, offset] of ZIWEI_SERIES) starBranch.set(name, mod12(ziwei + offset));
   const tianfu = mod12(4 - ziwei);
   for (const [name, offset] of TIANFU_SERIES) starBranch.set(name, mod12(tianfu + offset));
@@ -236,7 +250,18 @@ export function calculateZiwei(input: ZiweiInput): MethodResult<ZiweiChart> {
     ['擎羊', mod12(lucun + 1)],
     ['陀羅', mod12(lucun - 1)],
   ];
-  for (const [name, branch] of auxiliary) {
+  // 煞星與雜曜（ziwei-stars.ts）。晚子時的日數同 iztro：早子取日數減一，晚子取日數本身。
+  const yearBranch = BRANCHES.indexOf(lunar.ganzhiYear.charAt(1) as (typeof BRANCHES)[number]);
+  const minor = minorStarPlacements({
+    yearStem,
+    yearBranch,
+    ming,
+    shen,
+    month: palaceMonth - 1,
+    hour,
+    dayIndex: lateZi ? lunar.day : lunar.day - 1,
+  });
+  for (const [name, branch] of [...auxiliary, ...minor]) {
     starBranch.set(name, branch);
     minorStarNames.add(name);
   }
@@ -292,9 +317,10 @@ export function calculateZiwei(input: ZiweiInput): MethodResult<ZiweiChart> {
         monthBranch: BRANCHES[mod12(2 + (palaceMonth - 1))],
         hourIndex: hour,
         hourBranch: BRANCHES[hour],
+        lateZi,
         mingStem: STEMS[mingStem],
         nayin: nayinOf(mingStem, ming),
-        ziweiDay: lunar.day,
+        ziweiDay: placementDay,
         ziweiBranch: BRANCHES[ziwei],
         tianfuBranch: BRANCHES[tianfu],
         lucunBranch: BRANCHES[lucun],

@@ -9,9 +9,16 @@ const IZTRO_STAR: Record<string, string> = {
   天府: '天府', 太阴: '太陰', 贪狼: '貪狼', 巨门: '巨門', 天相: '天相', 天梁: '天梁',
   七杀: '七殺', 破军: '破軍', 文昌: '文昌', 文曲: '文曲', 左辅: '左輔', 右弼: '右弼',
   天魁: '天魁', 天钺: '天鉞', 禄存: '祿存', 擎羊: '擎羊', 陀罗: '陀羅',
+  火星: '火星', 铃星: '鈴星', 地空: '地空', 地劫: '地劫', 天马: '天馬', 台辅: '台輔', 封诰: '封誥',
+  解神: '解神', 天姚: '天姚', 天刑: '天刑', 阴煞: '陰煞', 天月: '天月', 天巫: '天巫',
+  三台: '三台', 八座: '八座', 恩光: '恩光', 天贵: '天貴', 红鸾: '紅鸞', 天喜: '天喜', 华盖: '華蓋',
+  咸池: '咸池', 孤辰: '孤辰', 寡宿: '寡宿', 龙池: '龍池', 凤阁: '鳳閣', 天哭: '天哭', 天虚: '天虛',
+  年解: '年解', 蜚廉: '蜚廉', 破碎: '破碎', 天空: '天空', 旬空: '旬空', 截路: '截路', 空亡: '空亡',
+  天德: '天德', 月德: '月德', 天才: '天才', 天寿: '天壽', 天官: '天官', 天福: '天福', 天厨: '天廚',
 };
 const IZTRO_MUTAGEN: Record<string, string> = { 禄: '祿', 权: '權', 科: '科', 忌: '忌' };
-const AUXILIARY = new Set(['文昌', '文曲', '左輔', '右弼', '天魁', '天鉞', '祿存', '擎羊', '陀羅']);
+// Every minor star this engine places. A star outside this set is not compared (see ziwei-stars.ts for the exclusions).
+const AUXILIARY = new Set(Object.values(IZTRO_STAR).filter(name => !['紫微', '天機', '太陽', '武曲', '天同', '廉貞', '天府', '太陰', '貪狼', '巨門', '天相', '天梁', '七殺', '破軍'].includes(name)));
 
 interface Case {
   label: string;
@@ -33,6 +40,9 @@ const SOLAR_CASES: Case[] = [
   { label: '2025 閏六月初四 亥時 男', solar: '2025-07-28', birthBranch: 11, gender: 'male' },
   { label: '2025 閏六月十七 亥時 男', solar: '2025-08-10', birthBranch: 11, gender: 'male' },
   { label: '2025 閏六月廿七 寅時 女', solar: '2025-08-20', birthBranch: 2, gender: 'female' },
+  { label: '1990 晚子 男', solar: '1990-06-14', birthBranch: 12, gender: 'male' },
+  { label: '1990 五月初八 晚子 女', solar: '1990-05-31', birthBranch: 12, gender: 'female' },
+  { label: '2025 閏六月十七 晚子 男', solar: '2025-08-10', birthBranch: 12, gender: 'male' },
   { label: '1979 卯時 男', solar: '1979-11-02', birthBranch: 3, gender: 'male' },
   { label: '1996 午時 女', solar: '1996-05-27', birthBranch: 6, gender: 'female' },
   { label: '2010 申時 男', solar: '2010-04-18', birthBranch: 8, gender: 'male' },
@@ -54,7 +64,10 @@ function starSet(chart: ZiweiChart, palaceBranch: number, kind: 'major' | 'minor
 function iztroStarSet(astrolabe: ReturnType<typeof iztroSolar>, branchName: string, kind: 'major' | 'minor'): string[] {
   const palace = astrolabe.palaces.find(item => item.earthlyBranch === branchName);
   if (!palace) throw new Error('iztro palace missing');
-  const source = kind === 'major' ? palace.majorStars : palace.minorStars.filter(star => AUXILIARY.has(IZTRO_STAR[star.name]));
+  // iztro keeps 輔星/煞星 in minorStars and 雜曜 in adjectiveStars; both are compared against the same name set.
+  const source = kind === 'major'
+    ? palace.majorStars
+    : [...palace.minorStars, ...palace.adjectiveStars].filter(star => AUXILIARY.has(IZTRO_STAR[star.name]));
   return source
     .map(star => `${IZTRO_STAR[star.name]}${star.mutagen ? `化${IZTRO_MUTAGEN[star.mutagen]}` : ''}`)
     .sort();
@@ -79,6 +92,25 @@ describe('ziwei standard engine against iztro 2.6.3', () => {
   it.each(SOLAR_CASES)('agrees on solar birth chart: $label', ({ solar, birthBranch, gender }) => {
     const result = calculateZiwei({ birthDate: solar, birthBranch, gender });
     compareChart(iztroSolar(solar, birthBranch, gender), result.data);
+  });
+
+  it('agrees on 晚子時 (iztro timeIndex 12) for every day of 2024, including lunar day 30', () => {
+    // 晚子時 uses the same 命宮 as 子 but places 紫微 by the next lunar day. Sweep the whole year to reach lunar day 29–30 too.
+    for (let day = new Date('2024-01-01T00:00:00Z'); day.getUTCFullYear() === 2024; day = new Date(day.getTime() + 86_400_000)) {
+      const solar = day.toISOString().slice(0, 10);
+      const result = calculateZiwei({ birthDate: solar, birthBranch: 12, gender: 'male' });
+      compareChart(iztroSolar(solar, 12, 'male'), result.data);
+    }
+  });
+
+  it('agrees on every birth hour across 2025 (sampled every 13 days, 女) so the hour, month and day stars are covered', () => {
+    for (let branch = 0; branch < 12; branch += 1) {
+      for (let day = new Date('2025-01-03T00:00:00Z'); day.getUTCFullYear() === 2025; day = new Date(day.getTime() + 13 * 86_400_000)) {
+        const solar = day.toISOString().slice(0, 10);
+        const result = calculateZiwei({ birthDate: solar, birthBranch: branch, gender: 'female' });
+        compareChart(iztroSolar(solar, branch, 'female'), result.data);
+      }
+    }
   });
 
   it('agrees on a chart given as a lunar date (1990 五月初八 亥時 男)', () => {
