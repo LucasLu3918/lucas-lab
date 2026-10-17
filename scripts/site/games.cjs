@@ -24,7 +24,10 @@ module.exports=function renderGames(ctx){
      // Only whitelisted folders ship. source-art/, source-audio/ and plan-improve/ are masters and planning files and are never copied.
      for(const dir of GAME_DIRECTORIES)if(fs.existsSync(path.join(source,dir)))fs.cpSync(path.join(source,dir),path.join(destination,dir),{recursive:true});
      // The same optional analytics beacon as every other page; the game shell is hand-written HTML, so it is added here.
-     const gameHtml=fs.readFileSync(path.join(source,'index.html'),'utf8').replaceAll('__LAB_GAMES_URL__',url('games/')).replaceAll('__LAB_STORY_URL__',url('stories/'+story.slug+'/')).replace('</head>',()=>ctx.analyticsTag+'</head>');
+     const inventoryEntry=ctx.vueAssets.inventoryManifest['src/vue/game/inventory-main.ts'];
+     if(!inventoryEntry?.isEntry)throw new Error('Vite manifest is missing the game inventory entry.');
+     const inventoryEntryUrl=url('_vue/'+inventoryEntry.file);
+     const gameHtml=fs.readFileSync(path.join(source,'index.html'),'utf8').replaceAll('__LAB_GAMES_URL__',url('games/')).replaceAll('__LAB_STORY_URL__',url('stories/'+story.slug+'/')).replace('</head>',()=>ctx.analyticsTag+'</head>').replace('data-vue-game-inventory',`data-vue-game-inventory data-vue-game-inventory-entry="${e(inventoryEntryUrl)}"`);
      fs.writeFileSync(path.join(destination,'index.html'),gameHtml);
      continue;
    }
