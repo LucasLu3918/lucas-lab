@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { calculateAstrology, createAstrologyForecast, signDescription, type AstrologyChart, type AstrologyForecast, type AstrologyForecastPeriod } from './astrology';
 import { createAnnualAstrologyForecast, type AnnualAstrologyForecast } from './astrology-annual';
 import { BIRTH_PLACES } from './locations';
@@ -19,6 +19,11 @@ const chart = ref<AstrologyChart | null>(null);
 const forecasts = ref<AstrologyForecast[]>([]);
 const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
+// 行運清單（年度可達上千筆）只在展開後才渲染，記住各期間的展開狀態以便重新計算時保留。
+const transitListOpen = reactive<Record<string, boolean>>({});
+function setTransitListOpen(periodLabel: string, event: Event): void {
+  transitListOpen[periodLabel] = (event.target as HTMLDetailsElement).open;
+}
 const place = computed(() => BIRTH_PLACES.find(item => item.id === placeId.value) ?? {
   id: 'custom', label: '自訂地點', timeZone: customTimeZone.value.trim(),
   latitude: Number(customLatitude.value), longitude: Number(customLongitude.value),
@@ -87,7 +92,7 @@ function calculate(): void {
       <section id="transits" class="result-block">
       <div class="section-title"><div><h2>近期行運提示</h2></div></div>
 
-      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" class="transit-details"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
+      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" class="transit-details" @toggle="setTransitListOpen(forecast.periodLabel, $event)"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul v-if="transitListOpen[forecast.periodLabel]" class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
       </section>
       <section v-if="annual" id="annual" class="annual-outlook">
         <div class="annual-heading"><div><h2>{{ annual.label }}</h2></div><span>{{ annual.events.length }} 項天象</span></div>
