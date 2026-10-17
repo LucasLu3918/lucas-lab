@@ -186,13 +186,14 @@ export function mountApothecaryTestimony(ctx){
 export function mountApothecaryVessels(ctx){
  ensureMaterials();
  let vessels=[...START],history=[],finished=false;
- ctx.render(shell('apothecary-vessels','<div class="belfry-board apo-board"><svg id="apo-svg" class="belfry-svg" viewBox="0 -34 275 150" role="group" aria-label="三個杯子與單向管線"></svg></div>'
-  +'<div class="belfry-row"><button id="apo-undo" class="secondary-button">復原</button><button id="apo-restart" class="secondary-button">重來</button><span id="apo-moves" class="apo-note"></span></div>'));
- const $=id=>document.getElementById(id),svg=$('apo-svg'),alive=()=>svg.isConnected;
- const say2=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
+ let islandRoot=null,svg=null,message='',tone='';
+ const $=id=>document.getElementById(id),alive=()=>islandRoot?.isConnected||svg?.isConnected||false;
+ const say2=(text,nextTone='')=>{message=text;tone=nextTone;const el=$('bf-status');if(el){el.textContent=text;el.dataset.tone=nextTone;}};
  const tiers=new Proxy({},{get:()=>HINTS.B(vessels)});
  // A step is "the next pipe to open" so the tier starts again when the advice changes; a dead end is its own step.
- const hints=bindHints({hints:tiers,currentStep:()=>{if(finished)return null;const path=shortest(vessels);return path?'pipe-'+path[0]:'dead';},alive});
+ let hints=null;
+ const bindVesselHints=()=>{hints=bindHints({hints:tiers,currentStep:()=>{if(finished)return null;const path=shortest(vessels);return path?'pipe-'+path[0]:'dead';},alive});};
+ const snapshot=()=>({amounts:[...vessels],moveCount:history.length,enabledTubes:TUBES.map((_,tube)=>!finished&&!!pour(vessels,tube)),canUndo:!finished&&history.length>0,canRestart:!finished,finished,message,tone});
  function draw(focusTube){
   // Rows A, C, B in the pouring order; heights follow capacity; the bottoms line up.
   const X=[15,215,125],W=44,BOT=96,unit=70/8,top=i=>BOT-CAP[i]*unit;
@@ -218,28 +219,50 @@ export function mountApothecaryVessels(ctx){
     +'<text x="'+g.lx+'" y="'+g.ly+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e0b84f">'+VESSEL_NAMES[from]+'→'+VESSEL_NAMES[to]+'</text></g>';
   });
   svg.innerHTML=s;
-  svg.querySelectorAll('[data-tube]').forEach(g=>handlers(g,()=>act(+g.dataset.tube)));
+  svg.querySelectorAll('[data-tube]').forEach(g=>handlers(g,()=>act({type:'pour',tube:+g.dataset.tube})));
   if(focusTube!==undefined)svg.querySelector('[data-tube="'+focusTube+'"]')?.focus({preventScroll:true});
   $('apo-moves').textContent='已倒 '+history.length+' 次';
  }
- function refresh(){
+ function refresh(focusTube){
   if(goalB(vessels)){
-   finished=true;draw();
-   say2('B 杯剛好 4：蘋果汁的原液取得了。','ok');hints.changed();
-   ctx.playCue('door');
-   setTimeout(()=>{if(alive())ctx.done();},reduced()?0:900);
+   if(!finished){
+    finished=true;if(svg)draw();
+    say2('B 杯剛好 4：蘋果汁的原液取得了。','ok');hints.changed();
+    ctx.playCue('door');
+    setTimeout(()=>{if(alive())ctx.done();},reduced()?0:900);
+   }
    return;
   }
   say2('A '+vessels[0]+'　B '+vessels[1]+'　C '+vessels[2]+'　目標：B 杯 = 4');
+  if(svg)draw(focusTube);
   hints.changed();
  }
- function act(tube){
-  if(finished)return;
-  const next=pour(vessels,tube);if(!next)return;
-  history.push(vessels);vessels=next;ctx.playCue('click');draw(tube);refresh();
+ function act(change){
+  if(finished||!change||typeof change!=='object')return snapshot();
+  if(change.type==='pour'&&Number.isInteger(change.tube)&&change.tube>=0&&change.tube<TUBES.length){
+   const next=pour(vessels,change.tube);if(!next)return snapshot();
+   history.push([...vessels]);vessels=next;ctx.playCue('click');refresh(change.tube);
+  }else if(change.type==='undo'&&history.length){
+   vessels=history.pop();refresh();
+  }else if(change.type==='restart'){
+   vessels=[...START];history=[];refresh();
+  }
+  return snapshot();
  }
- $('apo-undo').onclick=()=>{if(finished||!history.length)return;vessels=history.pop();draw();refresh();};
- $('apo-restart').onclick=()=>{if(finished)return;vessels=[...START];history=[];draw();refresh();};
+ if(typeof ctx.mountPuzzleIsland==='function'){
+  ctx.render(shell('apothecary-vessels','<div class="belfry-board apo-board"><div data-vue-apothecary-vessels><p class="challenge-feedback" role="status">量杯盤面載入中…</p></div></div>',false));
+  islandRoot=document.querySelector('[data-vue-apothecary-vessels]');
+  bindVesselHints();
+  refresh();
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act});
+  return;
+ }
+ ctx.render(shell('apothecary-vessels','<div class="belfry-board apo-board"><svg id="apo-svg" class="belfry-svg" viewBox="0 -34 275 150" role="group" aria-label="三個杯子與單向管線"></svg></div>'
+  +'<div class="belfry-row"><button id="apo-undo" class="secondary-button">復原</button><button id="apo-restart" class="secondary-button">重來</button><span id="apo-moves" class="apo-note"></span></div>'));
+ svg=$('apo-svg');
+ bindVesselHints();
+ $('apo-undo').onclick=()=>act({type:'undo'});
+ $('apo-restart').onclick=()=>act({type:'restart'});
  draw();refresh();
 }
 
