@@ -193,3 +193,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：暖身的惰輪教學與唯一解、主盤 13:1 齒輪列、軸座距離尺、下層／上層隔離、曲柄／輸出軸角度、stage id `belfry-gears`、可選關卡進度與存檔格式維持原樣。未掛載 island callback 時沿用 legacy renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 parser／元件測試、bundle export contract、360px／1280px 遊戲瀏覽器中的暖身、齒輪配置、旋轉、通關、進度連續性與 legacy fallback。
 
 下一步建議：評估「逆走鐘樓」鐘擺（`games/blood-mirror/puzzles/pendulum.js`）Vue island 的互動邊界，確認砝碼選取、復原和週期判定是否適合沿用既有 puzzle adapter。
+
+## Phase 15 — Blood Mirror Belfry Pendulum Vue island
+
+`PendulumPuzzle.vue` 接手砝碼切換控制與減少動態時的放開操作，沿用既有 lazy game bundle、鐘擺 SVG、樣式、stage id 和 modal。`pendulum.js` 保留砝碼狀態、長度／週期計算、提示、擺動與鐘聲動畫、通關判定、音效和完成回呼；Vue 只呈現經 parser 驗證的三枚固定配重 snapshot，並將 toggle／run typed actions 交回 legacy controller。沒有 island callback 時沿用原 DOM renderer。
+
+不變條件：細桿與配重長度、平方根週期公式、唯一正解、提示層級、正常動態下等待新擺完成一趟才通關，以及 stage id `belfry-pendulum` 維持原樣。存檔、進度、路由、modal、CSP、lazy bundle entry 與 runtime dependencies 不變；不新增 reset 行為。驗證包含 snapshot parser／元件測試、bundle export contract，以及 360px／1280px 瀏覽器中的 lazy mount、配重切換、減少動態通關、進度連續性與 legacy fallback。
+
+下一步建議：評估「逆走鐘樓」星輪（`games/blood-mirror/puzzles/starwheel.js`）Vue island 的互動邊界，確認星盤旋轉、刻度對位與既有動畫／提示 callback 是否適合沿用 puzzle adapter。
