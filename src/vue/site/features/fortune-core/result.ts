@@ -16,3 +16,14 @@ export const DEFAULT_DISCLAIMER = '內容依固定規則和傳統象徵整理，
 export function createMethodResult<T>(input: Omit<MethodResult<T>, 'disclaimer'> & { disclaimer?: string }): MethodResult<T> {
   return { ...input, disclaimer: input.disclaimer ?? DEFAULT_DISCLAIMER };
 }
+
+// Shared wording for the precision badge. Modules add their own reason (for example, which field was missing) next to it.
+const PRECISION_LABELS: Record<InputPrecision, string> = {
+  full: '完整資料',
+  approximate: '近似結果',
+  minimal: '最少資料',
+};
+
+export function precisionLabel(precision: InputPrecision): string {
+  return PRECISION_LABELS[precision];
+}

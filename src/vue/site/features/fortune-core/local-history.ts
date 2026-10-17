@@ -11,6 +11,7 @@ export interface LocalHistoryOptions<T extends { id: string }> {
 export interface LocalHistory<T extends { id: string }> {
   read(): T[];
   save(entry: T): T[];
+  update(id: string, change: (entry: T) => T): T[];
   remove(id: string): T[];
   clear(): void;
   exportJson(): string;
@@ -28,12 +29,9 @@ export function createLocalHistory<T extends { id: string }>(options: LocalHisto
   const storageKey = `lucas-lab:${options.key}:v${options.version}`;
   const resolveStorage = options.storage ?? browserStorage;
 
+  // Write failures propagate so the caller can tell the reader that nothing was saved.
   const write = (entries: T[], storage: Storage | null): T[] => {
-    try {
-      storage?.setItem(storageKey, JSON.stringify(entries));
-    } catch {
-      // Quota or privacy-mode failures leave the in-memory result visible without persisting it.
-    }
+    storage?.setItem(storageKey, JSON.stringify(entries));
     return entries;
   };
 
@@ -54,6 +52,11 @@ export function createLocalHistory<T extends { id: string }>(options: LocalHisto
       const storage = resolveStorage();
       if (!storage) return [];
       return write([entry, ...read().filter(item => item.id !== entry.id)].slice(0, options.limit), storage);
+    },
+    update(id, change) {
+      const storage = resolveStorage();
+      if (!storage) return [];
+      return write(read().map(item => (item.id === id ? change(item) : item)), storage);
     },
     remove(id) {
       const storage = resolveStorage();

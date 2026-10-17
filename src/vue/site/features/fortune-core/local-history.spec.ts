@@ -57,6 +57,20 @@ describe('local history', () => {
     expect(JSON.parse(history.exportJson())).toEqual([{ id: 'a', text: '1' }]);
   });
 
+  it('updates one entry in place without moving it', () => {
+    const history = createHistory(memoryStorage(), 5);
+    history.save({ id: 'a', text: '1' });
+    history.save({ id: 'b', text: '2' });
+    const updated = history.update('a', entry => ({ ...entry, text: 'changed' }));
+    expect(updated).toEqual([{ id: 'b', text: '2' }, { id: 'a', text: 'changed' }]);
+    expect(history.read()).toEqual(updated);
+  });
+
+  it('lets a failed write reach the caller so the reader is not told it was saved', () => {
+    const full = { getItem: () => null, removeItem: () => {}, setItem: () => { throw new Error('QuotaExceededError'); } } as unknown as Storage;
+    expect(() => createHistory(full).save({ id: 'a', text: '1' })).toThrow('QuotaExceededError');
+  });
+
   it('degrades to empty behaviour when storage is unavailable or throws', () => {
     const throwing = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); }, removeItem: () => { throw new Error('blocked'); } } as unknown as Storage;
     const unavailable = createHistory(null);

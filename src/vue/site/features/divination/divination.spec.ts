@@ -36,6 +36,7 @@ describe('local divination calculations', () => {
     expect(chart.pillars.map(pillar => pillar.label)).toEqual(['年柱', '月柱', '日柱', '時柱']);
     expect(chart.dayMaster).toBe(chart.pillars[2].value[0]);
     expect(chart.methodVersion).toBe('bazi-local-v2');
+    expect(chart.inputPrecision).toBe('full');
     expect(createBaziForecast(chart, 'day', new Date('2026-10-17T04:00:00Z')).evidence.length).toBeGreaterThan(0);
     expect(chart.strengthSignals.evidence).toHaveLength(3);
   });
@@ -66,6 +67,7 @@ describe('local divination calculations', () => {
     expect(chart.pillars.map(pillar => pillar.label)).toEqual(['年柱', '月柱', '日柱']);
     expect(Object.values(chart.elementCounts).reduce((sum, count) => sum + count, 0)).toBe(6);
     expect(chart.methodSummary).toContain('僅排三柱');
+    expect(chart.inputPrecision).toBe('approximate');
   });
 
   it('computes planetary placements and hides time-dependent chart points when time is unknown', () => {
@@ -78,6 +80,8 @@ describe('local divination calculations', () => {
     expect(unknown.ascendant).toBeNull();
     expect(unknown.midheaven).toBeNull();
     expect(unknown.planets.every(planet => planet.house === null)).toBe(true);
+    expect(chart.inputPrecision).toBe('full');
+    expect(unknown.inputPrecision).toBe('approximate');
     expect(createAstrologyForecast(chart, 'day', new Date('2026-10-17T04:00:00Z')).methodVersion).toBe(chart.methodVersion);
     expect(() => calculateAstrology({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'America/Chicago', latitude: 41.8781, longitude: -87.6298 })).not.toThrow();
     expect(() => calculateAstrology({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'America/Chicago', latitude: 67, longitude: -87.6298 })).toThrow(/66 度/);

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { clearTarotHistory, readTarotHistory, saveTarotHistory, type TarotHistoryEntry } from './TarotHistoryRepository';
+import {
+  clearTarotHistory,
+  exportTarotHistory,
+  readTarotHistory,
+  saveTarotHistory,
+  updateTarotNote,
+  type TarotHistoryEntry,
+} from './TarotHistoryRepository';
 
 function memoryStorage(): Storage {
   const values = new Map<string, string>();
@@ -41,6 +48,24 @@ describe('local tarot history', () => {
     saveTarotHistory(entry(2), storage);
     clearTarotHistory(storage);
     expect(readTarotHistory(storage)).toEqual([]);
+  });
+
+  it('still reads readings saved under the original storage key', () => {
+    const storage = memoryStorage();
+    storage.setItem('lucas-lab:tarot-history:v1', JSON.stringify([entry(4)]));
+    expect(readTarotHistory(storage)).toEqual([entry(4)]);
+  });
+
+  it('updates a note without moving the reading, and exports exactly what is stored', () => {
+    const storage = memoryStorage();
+    saveTarotHistory(entry(1), storage);
+    saveTarotHistory(entry(2), storage);
+    updateTarotNote('reading-1', '  反思  ', storage);
+
+    const saved = readTarotHistory(storage);
+    expect(saved.map(item => item.id)).toEqual(['reading-2', 'reading-1']);
+    expect(saved[1].note).toBe('反思');
+    expect(JSON.parse(exportTarotHistory(storage))).toEqual(saved);
   });
 
   it('reads a five-card deep spread from local history without storing questions', () => {

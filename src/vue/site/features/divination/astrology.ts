@@ -1,5 +1,6 @@
 import * as Astronomy from 'astronomy-engine';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
+import type { InputPrecision } from '../fortune-core/result';
 
 export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
 const SIGNS = [
@@ -73,6 +74,7 @@ export interface AstrologyChart {
   aspects: AstrologyAspect[];
   methodVersion: string;
   methodSummary: string;
+  inputPrecision: InputPrecision;
   timeUnknown: boolean;
   birthInstant: string;
   timeZone: string;
@@ -163,6 +165,7 @@ export function calculateAstrology(input: AstrologyInput): AstrologyChart {
     aspects,
     methodVersion: ASTROLOGY_METHOD_VERSION,
     methodSummary: 'Tropical zodiac、地心視黃道位置、Whole Sign 整宮制、五種主要相位；上升點與天頂依當地恆星時估算。未知出生時間以當地正午估算行星位置，並隱藏上升點、天頂與宮位。',
+    inputPrecision: input.timeUnknown ? 'approximate' : 'full',
     timeUnknown: Boolean(input.timeUnknown),
     birthInstant: instant.toISOString(),
     timeZone: input.timeZone,
