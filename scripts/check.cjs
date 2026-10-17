@@ -3,7 +3,7 @@
  const {loadMarkdownChapters}=require('./story-source.cjs');
  const {publishedBytes}=require('./site/assets.cjs');
  const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),catalog=JSON.parse(fs.readFileSync(path.join(root,'data/catalog.json'),'utf8'));
- const must=['index.html','tools/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
+ const must=['index.html','tools/index.html','divination/index.html','tarot/index.html','bazi/index.html','astrology/index.html','stories/index.html','games/index.html','projects/index.html','gallery/index.html','music/index.html','assets/music.css','assets/music.js','journal/index.html','about/index.html','search/index.html','legal/index.html','style-guide/index.html','assets/style.css','assets/app.js','assets/snow-white-cover.svg','assets/images/moonlit-castle.webp','assets/images/snow-white-portrait.webp','sitemap.xml','robots.txt','404.html','_build.json'];
  for(const s of catalog.stories)must.push(`stories/${s.slug}/index.html`);
  for(const g of catalog.games)must.push(`games/${g.slug}/index.html`);
  for(const p of catalog.projects)must.push(`projects/${p.slug}/index.html`);
@@ -38,6 +38,15 @@
  }
  assert.ok(!musicPage.includes('.wav'),'music page must not reference uncompressed audio');
  const css=fs.readFileSync(path.join(dist,'assets/style.css'),'utf8');
+ const tarotPage=fs.readFileSync(path.join(dist,'tarot/index.html'),'utf8');
+ assert.ok(tarotPage.includes('暗黑童話塔羅')&&tarotPage.includes('data-vue-site-island="tarot"'),'Tarot route or Vue island missing');
+ assert.ok(tarotPage.includes('/_vue/'),'Tarot Vue bundle missing from page');
+ assert.ok(fs.readFileSync(path.join(dist,'sw.js'),'utf8').includes('/_vue/'),'Tarot route dependencies missing from offline cache manifest');
+ for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology']]){
+  const html=fs.readFileSync(path.join(dist,route,'index.html'),'utf8');
+  assert.ok(html.includes(`data-vue-site-island="${island}"`)&&html.includes('/_vue/'),`${route} route or Vue island missing`);
+  assert.ok(fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8').includes('/'+route+'/'),`${route} route missing from sitemap`);
+ }
  for(const breakpoint of ['max-width:1100px','max-width:920px','max-width:720px','max-width:480px','prefers-reduced-motion'])assert.ok(css.includes(breakpoint),'missing responsive '+breakpoint);
  for(const story of catalog.stories){
   assert.ok(story.cover&&story.coverSmall&&story.coverAlt,'missing cover metadata for '+story.slug);
@@ -227,6 +236,7 @@
  assert.ok(homeHtmlNow.includes('property="og:image"')&&homeHtmlNow.includes('twitter:card'),'default social image or twitter card missing');
  assert.ok(fs.readFileSync(path.join(dist,'assets/images/og-default.jpg')).length<300000,'default social image too large');
  const sitemapNow=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
+ assert.ok(sitemapNow.includes(origin+'/tarot/'),'Tarot route missing from sitemap');
  assert.ok(sitemapNow.includes(origin+'/journal/cloudflare-workers/'),'journal article missing from sitemap');
  if(fs.existsSync(path.join(root,'.git')))assert.match(sitemapNow,/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/,'sitemap lastmod missing');
  const index=JSON.parse(fs.readFileSync(path.join(dist,'search-index.json'),'utf8'));

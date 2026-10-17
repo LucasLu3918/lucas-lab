@@ -2,7 +2,7 @@
 
 **Code · Create · Imagine**
 
-一個以暗黑科技與奇幻宇宙為設計語言的個人創作網站，包含工具入口、故事、可遊玩遊戲與概念、軟體作品集、AI 藝廊與開發日誌。
+一個以暗黑科技與奇幻宇宙為設計語言的個人創作網站，包含工具入口、故事、可遊玩遊戲、暗黑童話塔羅、軟體作品集、AI 藝廊與開發日誌。
 
 ## 啟動
 
@@ -59,6 +59,16 @@ docs/                內容與技術規範
 
 所有工具卡片均連結至 [Lucas Tools 原站](https://lucas-tools.owl3918.workers.dev/)，不複製、不嵌入、不遷移原程式碼。工具清單只收錄人工確認可公開的入口。
 
+## 暗黑童話塔羅
+
+- `/divination/` 是塔羅、八字與西洋占星的總入口；`/tarot/` 提供每日一抽、單張指引與多種三張牌陣，78 張牌皆有繁體中文正逆位固定解讀及牌義庫。
+- 塔羅抽牌由瀏覽器安全亂數完成；每日一抽與最近 20 次閱讀紀錄保存在本機，反思筆記最多 500 字。問題內容不會被要求或寫入分享文字。
+- `/bazi/` 以 `lunar-javascript` 排四柱、十神、藏干與五行簡表，附固定規則的日／月／年提示；`/astrology/` 以 Astronomy Engine 計算熱帶黃道行星落點、Whole Sign 宮位、主要相位與固定取樣行運提示。
+- 八字與占星出生資料只在頁面記憶體中計算。出生地使用精選城市清單，不依賴地名 API；未知出生時間時不顯示占星上升、天頂與宮位。
+- 所有內容皆為傳統象徵的固定文案，供娛樂與自我反思，不保證事件或取代專業建議。沒有 Worker API、資料庫、帳號同步、付費、金流或 AI 解讀。
+- `lunar-javascript` 與 `astronomy-engine` 均採 MIT 授權；計算方法版本與主要限制會顯示在結果頁。
+- 牌面採原生幾何與符號樣式；未導入未授權的商業塔羅牌插畫。
+
 ## 內容與版權
 
 - 「霧林來信」是用於閱讀器的本站原創示範短篇（兩章）。
@@ -71,7 +81,7 @@ docs/                內容與技術規範
 
 ## 目前的實作取捨
 
-公開路由繼續由 Node.js SSG 產生並部署到 Cloudflare Workers Static Assets。Vue Islands 以 Vite 雙入口漸進加入；Phase 1 只編譯和保存 hashed bundles，不改既有 HTML、互動或路由。
+公開路由繼續由 Node.js SSG 產生並部署到 Cloudflare Workers Static Assets。Vue Islands 以 Vite 漸進加入；塔羅、八字與占星各自使用獨立入口，只在相應路由載入。
 
 ## 站點優化與瀏覽器驗收
 
@@ -113,7 +123,7 @@ docs/                內容與技術規範
 
 - 新增本機原創 AI 城堡與故事封面 `assets/images/moonlit-castle.webp`、`assets/images/snow-white-portrait.webp`；首頁主視覺與故事封面都由靜態建置複製至 `dist/assets`，`npm run check` 會比對源檔與建置產物。
 - 網站採暗黑奇幻、月光藍與古金色系，首頁使用全幅城堡主視覺與中文標題；導覽品牌以本機 SVG 羅盤呈現，無外部字型或圖像服務依賴。
-- 現有純靜態網站仍不依賴任何執行期套件；Chrome 自動測試工具只於獨立 GitHub Actions 工作流程暫時安裝，不參與 Cloudflare 正式站部署。
+- 公開頁面仍由 SSG 產生，互動功能使用既有 Vue Islands 漸進整合；Chrome 自動測試工具只於獨立 GitHub Actions 工作流程暫時安裝，不參與 Cloudflare 正式站部署。
 - `npm run test:visual` 使用本機 Chromium + Playwright (需預先安裝)，檢查 320、360、390、480、720、768、900、1024、1440px 的核心頁面，避免水平溢出，並確認城堡與封面載入，測試行動選單、ESC 焦點、搜尋、閱讀主題/字級、章節導覽與藝廊預覽。
 - `.github/workflows/visual.yml` 會在 PR / main 更新時執行，保留桌面、平板、手機三種寬度的自動測試截圖供檢視；此流程提供 Chromium 模擬驗證，不等同於實際 iPhone Safari、Android Chrome 或真人操作驗收。
 - 城堡與封面插畫是本站原創視覺，與既有影視、遊戲或書籍的官方視覺無關。

@@ -2,7 +2,7 @@
   "name": "lucas-lab",
   "version": "0.1.0",
   "private": true,
-  "description": "Responsive AI creator portfolio and digital library, without external runtime dependencies.",
+  "description": "Responsive creator portfolio and digital library with local divination tools.",
   "scripts": {
     "build": "vite build && vite build --config vite.inventory.config.mts && node scripts/build.cjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
@@ -31,5 +31,9 @@
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "astronomy-engine": "2.1.19",
+    "lunar-javascript": "1.7.7"
   }
 }

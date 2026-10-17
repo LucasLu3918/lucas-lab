@@ -10,7 +10,7 @@ const manifestPath = path.join(dist, '_vue', 'manifest.json');
 test('SSG copies Vue entry bundles and loads only the matching route islands', () => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const inventoryManifest = JSON.parse(fs.readFileSync(path.join(root, '.vue-inventory-build', 'manifest.json'), 'utf8'));
-  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
+  const entries = ['src/vue/site/main.ts', 'src/vue/site/lazy.ts', 'src/vue/site/tarot-main.ts', 'src/vue/site/divination-main.ts', 'src/vue/site/bazi-main.ts', 'src/vue/site/astrology-main.ts', 'src/vue/site/reader-main.ts', 'src/vue/site/gallery-main.ts', 'src/vue/site/music-main.ts', 'src/vue/game/main.ts'];
 
   for (const entry of entries) {
     assert.equal(manifest[entry]?.isEntry, true, `missing Vite entry: ${entry}`);
@@ -50,6 +50,10 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   visit(dist);
   assert.ok(htmlFiles.length > 0, 'SSG emitted HTML pages');
   const searchHtml = fs.readFileSync(path.join(dist, 'search', 'index.html'), 'utf8');
+  const tarotHtml = fs.readFileSync(path.join(dist, 'tarot', 'index.html'), 'utf8');
+  const divinationHtml = fs.readFileSync(path.join(dist, 'divination', 'index.html'), 'utf8');
+  const baziHtml = fs.readFileSync(path.join(dist, 'bazi', 'index.html'), 'utf8');
+  const astrologyHtml = fs.readFileSync(path.join(dist, 'astrology', 'index.html'), 'utf8');
   const galleryHtml = fs.readFileSync(path.join(dist, 'gallery', 'index.html'), 'utf8');
   const gameHtml = fs.readFileSync(path.join(dist, 'games', 'blood-mirror', 'play', 'index.html'), 'utf8');
   assert.match(gameHtml, /data-vue-game-inventory/, 'play route contains its inventory island host');
@@ -60,6 +64,12 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.match(searchHtml, /data-vue-site-island="search"/, 'search page contains the site island host');
   assert.match(searchHtml, /data-vue-site-island="search"[\s\S]*class="search-group"/, 'search page keeps its static catalog and controls before Vue activation');
   assert.match(searchHtml, /<meta name="robots" content="noindex,follow">/, 'search stays excluded from indexing');
+  assert.equal((tarotHtml.match(/<script type="module" src="\/_vue\/[^"]+"><\/script>/g) || []).length, 1, 'Tarot page loads exactly one Vue module');
+  assert.match(tarotHtml, /data-vue-site-island="tarot"/, 'Tarot page contains its static island host');
+  for (const [html, island, label] of [[divinationHtml, 'divination', 'hub'], [baziHtml, 'bazi', 'Bazi'], [astrologyHtml, 'astrology', 'astrology']]) {
+    assert.equal((html.match(/<script type="module" src="\/_vue\/[^\"]+"><\/script>/g) || []).length, 1, `${label} page loads exactly one Vue module`);
+    assert.match(html, new RegExp(`data-vue-site-island="${island}"`), `${label} page contains its static island host`);
+  }
   const musicHtml = fs.readFileSync(path.join(dist, 'music', 'index.html'), 'utf8');
   const musicPages = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-music-player'));
   assert.equal((musicHtml.match(/<script type="module" src="\/_vue\/[^"]+"><\/script>/g) || []).length, 1, 'Music page loads exactly one Vue module');
@@ -85,13 +95,17 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
   }
   for (const file of htmlFiles) {
-    if (file === path.join(dist, 'search', 'index.html') || file === path.join(dist, 'gallery', 'index.html') || file === path.join(dist, 'games', 'blood-mirror', 'play', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
+    if (['search', 'tarot', 'divination', 'bazi', 'astrology', 'gallery'].some(route => file === path.join(dist, route, 'index.html')) || file === path.join(dist, 'games', 'blood-mirror', 'play', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }
 
   const serviceWorker = fs.readFileSync(path.join(dist, 'sw.js'), 'utf8');
   assert.match(serviceWorker, /_vue\/assets\/reader-[^" ]+\.js/, 'Reader entry is included in the offline shell precache');
+  assert.match(serviceWorker, /_vue\/assets\/tarot-[^" ]+\.js/, 'Tarot entry is included in the offline shell precache');
+  assert.match(serviceWorker, /_vue\/assets\/divination-[^" ]+\.js/, 'Divination hub entry is included in the offline shell precache');
+  assert.match(serviceWorker, /_vue\/assets\/bazi-[^" ]+\.js/, 'Bazi entry is included in the offline shell precache');
+  assert.match(serviceWorker, /_vue\/assets\/astrology-[^" ]+\.js/, 'Astrology entry is included in the offline shell precache');
   assert.match(serviceWorker, /url\.pathname\.startsWith\(BASE\+'_vue\/'\)/, 'Reader chunks use the immutable cache-first route');
 
   const headers = fs.readFileSync(path.join(dist, '_headers'), 'utf8');
