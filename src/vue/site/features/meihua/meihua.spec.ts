@@ -75,6 +75,12 @@ describe('casting methods', () => {
     expect(reading.moving).toBe(2);
   });
 
+  it('casts the 合作 example from the rules (6 + 7 strokes gives 水山蹇, moving line 1)', () => {
+    const reading = castByText('合作');
+    expect(reading.primary.name).toBe('水山蹇');
+    expect(reading.moving).toBe(1);
+  });
+
   it('rejects characters without a stroke count instead of guessing', () => {
     expect(() => castByText('龘')).toThrow(/尚未收錄筆畫/);
     expect(() => castByText('')).toThrow(/一到四個字/);
