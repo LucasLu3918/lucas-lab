@@ -13,7 +13,7 @@ const emit = defineEmits<{ reveal: [index: number] }>();
 
 <template>
   <section v-if="props.cards.length" class="card-table" aria-labelledby="table-title">
-    <div class="card-table__heading"><p class="eyebrow">THE READING</p><h2 id="table-title">在燭光下揭開牌面</h2></div>
+    <div class="card-table__heading"><h2 id="table-title">在燭光下揭開牌面</h2></div>
     <div class="card-table__cards" :class="{ 'card-table__cards--three': props.cards.length === 3, 'card-table__cards--five': props.cards.length === 5 }">
       <TarotCard
         v-for="(item, index) in props.cards"
@@ -33,13 +33,13 @@ const emit = defineEmits<{ reveal: [index: number] }>();
 </template>
 
 <style scoped>
-.card-table { display:grid; justify-items:center; gap:20px; padding:clamp(20px,4vw,34px); border:1px solid #89784b40; border-radius:20px; background:radial-gradient(ellipse at 50% 0,#26323b80,#0b1016e8 68%); }
+/* The table is a stage, not a box: a soft pool of light under the cards. */
+.card-table { display:grid; justify-items:center; gap:22px; padding:clamp(12px,3vw,24px) 0 clamp(8px,2vw,12px); background:radial-gradient(ellipse at 50% 42%,rgb(56 80 98 / 0.28) 0,transparent 66%); }
 .card-table__heading { text-align:center; }
-.card-table__heading h2 { margin:.3em 0 0; font-family:var(--font-heading,Georgia,serif); font-size:clamp(1.35rem,3vw,1.8rem); }
-.eyebrow { margin:0; color:#cdb578; font-size:.72rem; letter-spacing:.14em; }
+.card-table__heading h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-2xl); font-weight:500; }
 .card-table__cards { display:flex; justify-content:center; gap:clamp(14px,4vw,36px); width:100%; }
-.card-table__cards--three { display:grid; grid-template-columns:repeat(3,minmax(0,220px)); }
-.card-table__cards--five { display:grid; grid-template-columns:repeat(3,minmax(0,180px)); }
-.card-table__hint { margin:0; color:#c3b99f; font-size:.9rem; }
+.card-table__cards--three { display:grid; grid-template-columns:repeat(3,minmax(0,200px)); }
+.card-table__cards--five { display:grid; grid-template-columns:repeat(3,minmax(0,170px)); }
+.card-table__hint { margin:0; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); }
 @media (max-width:620px) { .card-table__cards--three { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .card-table__cards--five { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
 </style>

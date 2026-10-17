@@ -74,11 +74,11 @@ function securityAndCacheHeaders(base){
 
 module.exports=function copyAssets(ctx){
  const {fs,path,root,out}=ctx;
- // Top-level files and the image and icon folders are published as they are (one level deep, no subfolders of folders).
+ // Top-level files and the image, icon and tarot-card folders are published as they are (one level deep, no subfolders of folders).
  for(const f of fs.readdirSync(path.join(root,'assets'))){
   const source=path.join(root,'assets',f);
   if(fs.statSync(source).isFile())fs.copyFileSync(source,path.join(out,'assets',f));
-  else if(f==='images'||f==='icons'){
+  else if(f==='images'||f==='icons'||f==='tarot-cards'){
    const destination=path.join(out,'assets',f);fs.mkdirSync(destination,{recursive:true});
    for(const image of fs.readdirSync(source))if(fs.statSync(path.join(source,image)).isFile())fs.copyFileSync(path.join(source,image),path.join(destination,image));
   }

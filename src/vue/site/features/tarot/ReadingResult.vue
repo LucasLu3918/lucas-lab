@@ -14,7 +14,7 @@ const synthesisText = ({
 
 <template>
   <section v-if="props.cards.length && props.revealedIndexes.length" class="reading-result" aria-labelledby="result-title">
-    <div class="reading-result__heading"><p class="eyebrow">A MOMENT OF REFLECTION</p><h2 id="result-title">牌面訊息</h2></div>
+    <div class="reading-result__heading"><h2 id="result-title">牌面訊息</h2></div>
     <aside class="reading-context"><p><strong>閱讀焦點：</strong>{{ TAROT_FOCI.find(item => item.id === props.focus)?.title ?? '整體' }}。{{ focusPrompt }}</p><p v-if="props.question"><strong>你的問題：</strong>{{ props.question }}</p></aside>
     <article v-for="(item, index) in props.cards" v-show="props.revealedIndexes.includes(index)" :key="item.card.id" class="meaning-card">
       <div class="meaning-card__topline">
@@ -32,20 +32,17 @@ const synthesisText = ({
 </template>
 
 <style scoped>
-.reading-result { display:grid; gap:14px; }
-.reading-result__heading { margin:0 0 2px; }
-.reading-result__heading h2 { margin:.25em 0 0; font-family:var(--font-heading,Georgia,serif); font-size:1.65rem; }
-.reading-context { padding:15px 18px; border-left:2px solid #8e7847; border-radius:0 10px 10px 0; color:#c9c2b3; background:#141d24; line-height:1.7; }
+.reading-result { display:grid; gap:18px; }
+.reading-result__heading h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-2xl); font-weight:500; }
+.reading-context { display:grid; gap:8px; padding-left:16px; border-left:2px solid var(--ll-color-control-border); color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.7; }
 .reading-context p { margin:0; }
-.reading-context p+p { margin-top:8px; }
-.reading-context strong { color:#e8d8b3; }
-.eyebrow { margin:0; color:#cdb578; font-size:.72rem; letter-spacing:.14em; }
-.meaning-card { padding:21px clamp(18px,4vw,28px); border:1px solid #9a84553d; border-left:3px solid #bd9f61; border-radius:14px; background:linear-gradient(140deg,#18232b,#0c1218); }
-.meaning-card__topline { display:flex; justify-content:space-between; gap:12px; color:#cfb878; font-size:.85rem; }
-.meaning-card h3 { margin:11px 0 6px; color:#f1e5c9; font-family:var(--font-heading,Georgia,serif); font-size:1.35rem; }
-.meaning-card h3 small { margin-left:8px; color:#a8a49a; font-family:inherit; font-size:.66em; font-weight:400; }
-.meaning-card__keywords { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0 13px; padding:0; list-style:none; }
-.meaning-card__keywords li { padding:4px 10px; border:1px solid #b89b5c50; border-radius:999px; color:#dcc999; background:#c0a2630d; font-size:.77rem; }
-.meaning-card p { max-width:72ch; margin:0; color:#ded9ce; line-height:1.8; }
-.reading-result__synthesis { margin:2px 0 0; padding:16px 20px; border-radius:12px; color:#d8d1c2; background:#141d24; line-height:1.75; }
+.reading-context strong { color:var(--ll-color-gold); font-weight:600; }
+.meaning-card { display:grid; gap:8px; padding-top:20px; border-top:1px solid var(--ll-color-hairline); }
+.meaning-card__topline { display:flex; justify-content:space-between; gap:12px; color:var(--ll-color-gold); font-size:var(--ll-font-size-sm); }
+.meaning-card h3 { margin:4px 0 0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-2xl); font-weight:500; }
+.meaning-card h3 small { margin-left:8px; color:var(--ll-color-text-muted); font-family:var(--ll-font-body); font-size:var(--ll-font-size-sm); font-weight:400; }
+.meaning-card__keywords { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 0; padding:0; list-style:none; }
+.meaning-card__keywords li { padding:3px 10px; border:1px solid var(--ll-color-control-border); border-radius:999px; color:var(--ll-color-gold); font-size:var(--ll-font-size-xs); }
+.meaning-card p { max-width:70ch; margin:0; color:var(--ll-color-text); line-height:1.8; }
+.reading-result__synthesis { margin:0; padding-left:16px; border-left:2px solid var(--ll-color-gold); color:var(--ll-color-text); line-height:1.8; }
 </style>

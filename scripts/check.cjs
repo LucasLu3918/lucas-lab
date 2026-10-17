@@ -39,7 +39,7 @@
  assert.ok(!musicPage.includes('.wav'),'music page must not reference uncompressed audio');
  const css=fs.readFileSync(path.join(dist,'assets/style.css'),'utf8');
  const tarotPage=fs.readFileSync(path.join(dist,'tarot/index.html'),'utf8');
- assert.ok(tarotPage.includes('暗黑童話塔羅')&&tarotPage.includes('data-vue-site-island="tarot"'),'Tarot route or Vue island missing');
+ assert.ok(tarotPage.includes('星夜塔羅')&&tarotPage.includes('data-vue-site-island="tarot"'),'Tarot route or Vue island missing');
  assert.ok(tarotPage.includes('/_vue/'),'Tarot Vue bundle missing from page');
  assert.ok(fs.readFileSync(path.join(dist,'sw.js'),'utf8').includes('/_vue/'),'Tarot route dependencies missing from offline cache manifest');
  for(const [route,island] of [['divination','divination'],['bazi','bazi'],['astrology','astrology']]){

@@ -101,7 +101,7 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
     assert.match(html, /class="chapterlist"[^>]*data-story-readmarks/, 'chapter list keeps its static read-mark hook');
   }
   for (const file of htmlFiles) {
-    if (['search', 'tarot', 'divination', 'bazi', 'astrology', 'gallery'].some(route => file === path.join(dist, route, 'index.html')) || file === path.join(dist, 'games', 'blood-mirror', 'play', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
+    if (['search', 'tarot', 'tarot/deck', 'divination', 'bazi', 'astrology', 'gallery'].some(route => file === path.join(dist, route, 'index.html')) || file === path.join(dist, 'games', 'blood-mirror', 'play', 'index.html') || musicPages.includes(file) || readerPages.includes(file) || readerFeaturePages.includes(file)) continue;
     const html = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(html, /_vue\/(?:manifest\.json|assets\/)/, `Vue bundles are not loaded by ${path.relative(dist, file)}`);
   }
