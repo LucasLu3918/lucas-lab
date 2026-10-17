@@ -1,7 +1,7 @@
 import { Solar, type EightChar } from 'lunar-javascript';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from './timezone';
 
-export const BAZI_METHOD_VERSION = 'bazi-local-v1';
+export const BAZI_METHOD_VERSION = 'bazi-local-v2';
 const CHINA_TIME_ZONE = 'Asia/Shanghai';
 const STEM_ELEMENTS: Record<string, string> = { 甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水' };
 const BRANCH_ELEMENTS: Record<string, string> = { 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
@@ -29,6 +29,10 @@ export interface BaziInput {
   timeZone: string;
   timeUnknown?: boolean;
   disambiguation?: Disambiguation;
+  longitude?: number;
+  trueSolarTime?: boolean;
+  daYunGender?: 0 | 1;
+  daYunSchool?: 1 | 2;
 }
 
 export interface BaziPillar {
@@ -48,6 +52,16 @@ export interface BaziChart {
   methodSummary: string;
   birthInstant: string;
   timeUnknown: boolean;
+  solarTime: 'civil' | 'true';
+  solarTimeCorrectionMinutes: number;
+  strengthSignals: { label: string; evidence: string[] };
+  daYun: {
+    gender: 0 | 1;
+    school: 1 | 2;
+    startAge: { years: number; months: number; days: number; hours: number };
+    startDate: string;
+    cycles: Array<{ startYear: number; startAge: number; pillar: string }>;
+  } | null;
 }
 
 function elementRelation(dayStem: string, otherStem: string): string {
@@ -77,13 +91,56 @@ function makeLocalLunar(parts: { year: number; month: number; day: number; hour:
   return eightChar;
 }
 
+// NOAA's compact fractional-year approximation for the equation of time.
+// Longitude is east-positive; the result converts the instant to local apparent solar time.
+function equationOfTimeMinutes(instant: Date): number {
+  const yearStart = Date.UTC(instant.getUTCFullYear(), 0, 1);
+  const dayOfYear = Math.floor((Date.UTC(instant.getUTCFullYear(), instant.getUTCMonth(), instant.getUTCDate()) - yearStart) / 86_400_000) + 1;
+  const leapYear = instant.getUTCFullYear() % 4 === 0 && (instant.getUTCFullYear() % 100 !== 0 || instant.getUTCFullYear() % 400 === 0);
+  const decimalHour = instant.getUTCHours() + instant.getUTCMinutes() / 60 + instant.getUTCSeconds() / 3600;
+  const gamma = (2 * Math.PI / (leapYear ? 366 : 365)) * (dayOfYear - 1 + (decimalHour - 12) / 24);
+  return 229.18 * (0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
+}
+
+function utcParts(date: Date) {
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate(), hour: date.getUTCHours(), minute: date.getUTCMinutes(), second: date.getUTCSeconds() };
+}
+
+function getStrengthSignals(dayMaster: string, rows: Array<{ stem: string; branch: string; hidden: string[] }>) {
+  const self = STEM_ELEMENTS[dayMaster];
+  const monthBranch = rows[1].branch;
+  const seasonElement = BRANCH_ELEMENTS[monthBranch];
+  const inSeason = seasonElement === self || GENERATES[seasonElement] === self;
+  const rooted = rows.some(row => row.hidden.some(stem => STEM_ELEMENTS[stem] === self));
+  const helpedByStems = rows.some((row, index) => index !== 2 && (STEM_ELEMENTS[row.stem] === self || GENERATES[STEM_ELEMENTS[row.stem]] === self));
+  const evidence = [
+    `月令${monthBranch}（簡化五行：${seasonElement}）${inSeason ? '支持日主' : '未直接支持日主'}`,
+    rooted ? '地支藏干中可見日主同五行根氣' : '地支藏干中未見日主同五行根氣',
+    helpedByStems ? '其他天干有同五行或生助日主的訊號' : '其他天干未見同五行或生助日主的訊號',
+  ];
+  const supportCount = Number(inSeason) + Number(rooted) + Number(helpedByStems);
+  const label = supportCount === 3 ? '支持訊號較多' : supportCount === 0 ? '支持訊號較少' : '支持線索部分成立';
+  return { label, evidence };
+}
+
 export function calculateBazi(input: BaziInput): BaziChart {
   const timeUnknown = Boolean(input.timeUnknown);
+  if (input.trueSolarTime && timeUnknown) throw new RangeError('真太陽時需要可靠的出生時間。');
+  if (input.daYunGender !== undefined && timeUnknown) throw new RangeError('計算大運需要可靠的出生時間。');
+  if (input.trueSolarTime && (!Number.isFinite(input.longitude) || input.longitude! < -180 || input.longitude! > 180)) throw new RangeError('真太陽時需要 -180 至 180 度的出生地經度。');
   const birthCivil = parseCivilDateTime(input.birthDate, timeUnknown ? '12:00' : input.birthTime);
   const instant = resolveCivilDateTime(birthCivil, input.timeZone, input.disambiguation);
   const solarTermTime = civilPartsAt(instant, CHINA_TIME_ZONE);
   const termChart = makeLocalLunar(solarTermTime);
-  const civilChart = makeLocalLunar(birthCivil);
+  // The UTC instant already includes the civil UTC offset. Correct it directly by
+  // longitude and equation-of-time; this also removes seasonal clock changes.
+  const trueSolarInstant = input.trueSolarTime
+    ? new Date(instant.getTime() + (input.longitude! * 4 + equationOfTimeMinutes(instant)) * 60_000)
+    : instant;
+  const solarTimeCorrectionMinutes = input.trueSolarTime
+    ? (trueSolarInstant.getTime() - Date.UTC(birthCivil.year, birthCivil.month - 1, birthCivil.day, birthCivil.hour, birthCivil.minute, birthCivil.second)) / 60_000
+    : 0;
+  const civilChart = makeLocalLunar(input.trueSolarTime ? utcParts(trueSolarInstant) : birthCivil);
   const dayMaster = civilChart.getDayGan();
   const rows = [
     { label: '年柱', value: termChart.getYear(), stem: termChart.getYearGan(), branch: termChart.getYearZhi(), element: termChart.getYearWuXing(), hidden: termChart.getYearHideGan() },
@@ -99,14 +156,32 @@ export function calculateBazi(input: BaziInput): BaziChart {
     hiddenStems: row.hidden,
     hiddenTenGods: row.hidden.map(stem => elementRelation(dayMaster, stem)),
   }));
+  const strengthSignals = getStrengthSignals(dayMaster, rows);
+  const daYun = input.daYunGender === undefined ? null : (() => {
+    const school = input.daYunSchool ?? 1;
+    const yun = termChart.getYun(input.daYunGender!, school);
+    return {
+      gender: input.daYunGender!, school,
+      startAge: { years: yun.getStartYear(), months: yun.getStartMonth(), days: yun.getStartDay(), hours: yun.getStartHour() },
+      startDate: yun.getStartSolar().toYmd(),
+      cycles: yun.getDaYun().filter(item => item.getGanZhi()).map(item => ({ startYear: item.getStartYear(), startAge: item.getStartAge(), pillar: item.getGanZhi() })).slice(0, 9),
+    };
+  })();
+  const solarNote = input.trueSolarTime
+    ? `日柱與時柱以真太陽時換算（經度修正＋均時差，合計 ${Math.round(solarTimeCorrectionMinutes)} 分鐘；使用 ${input.longitude}°E/W）。`
+    : '日柱與時柱依出生地民用日期時間。';
   return {
     pillars,
     dayMaster,
     elementCounts: countElements(rows),
     methodVersion: BAZI_METHOD_VERSION,
-    methodSummary: `年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間，日柱${timeUnknown ? '依出生地民用日期；出生時間未知，僅排三柱' : '與時柱依出生地民用日期時間'}。晚子時日柱按當天，00:00 換日；不校正真太陽時。`,
+    methodSummary: `年柱採立春換年、月柱採節氣分月；節氣瞬間換算為東八區標準時間；${timeUnknown ? '出生時間未知，僅排三柱' : solarNote}晚子時日柱按當天，00:00 換日。大運與起運依 lunar-javascript ${daYun ? `流派${daYun.school}、${daYun.gender === 1 ? '男命' : '女命'}順逆規則` : '未計算（需提供出生時間並選擇傳統排盤參數）'}。`,
     birthInstant: instant.toISOString(),
     timeUnknown,
+    solarTime: input.trueSolarTime ? 'true' : 'civil',
+    solarTimeCorrectionMinutes,
+    strengthSignals,
+    daYun,
   };
 }
 

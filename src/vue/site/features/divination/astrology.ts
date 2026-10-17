@@ -1,7 +1,7 @@
 import * as Astronomy from 'astronomy-engine';
 import { civilPartsAt, parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from './timezone';
 
-export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v1';
+export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v2';
 const SIGNS = [
   { name: '牡羊座', element: '火', mode: '開創', text: '主動、直接，適合把想法化為清楚的第一步。' },
   { name: '金牛座', element: '土', mode: '固定', text: '重視穩定與感官經驗，適合用持續投入累積成果。' },
@@ -175,45 +175,93 @@ export interface AstrologyForecast {
   periodLabel: string;
   text: string;
   evidence: string[];
+  events: AstrologyTransitEvent[];
   methodVersion: string;
 }
 
-function forecastSampleCount(period: AstrologyForecastPeriod): { samples: number; stepDays: number } {
-  if (period === 'day') return { samples: 1, stepDays: 0 };
-  if (period === 'month') return { samples: 8, stepDays: 4 };
-  return { samples: 27, stepDays: 14 };
+export interface AstrologyTransitEvent {
+  transit: string;
+  natal: string;
+  aspect: string;
+  exactAt: string;
+  orb: number;
+  phase: string;
+  meaning: string;
 }
 
 export function createAstrologyForecast(chart: AstrologyChart, period: AstrologyForecastPeriod, start = new Date()): AstrologyForecast {
-  const sample = forecastSampleCount(period);
-  const natalTargets = chart.planets.filter(item => item.id === 'sun' || item.id === 'moon');
+  const spanDays = period === 'day' ? 0 : period === 'month' ? 30 : 365;
+  const natalTargets: Array<{ id: string; name: string; longitude: number }> = chart.planets
+    .filter(item => item.id === 'sun' || item.id === 'moon')
+    .map(item => ({ id: item.id, name: item.name, longitude: item.longitude }));
+  if (chart.ascendant) natalTargets.push({ id: 'ascendant', name: '上升點', longitude: chart.ascendant.longitude });
+  if (chart.midheaven) natalTargets.push({ id: 'midheaven', name: '天頂', longitude: chart.midheaven.longitude });
   const bodyTargets = BODY_LIST.filter(item => !['sun', 'moon'].includes(item.id));
-  const evidenceByKey = new Map<string, { count: number; text: string }>();
-  for (let index = 0; index < sample.samples; index++) {
-    const instant = new Date(start.getTime() + index * sample.stepDays * 86_400_000);
+  const transitData = new Map<string, { transit: string; natal: string; aspect: typeof ASPECTS[number]; samples: Array<{ at: Date; orb: number }> }>();
+  const sampleCount = spanDays + 1;
+  for (let index = 0; index < sampleCount; index++) {
+    const instant = new Date(start.getTime() + index * 86_400_000);
     const transitPositions = bodyTargets.map(body => ({ ...body, longitude: geoEclipticLongitude(body.body, instant) }));
-    for (const transit of transitPositions) {
-      for (const natal of natalTargets) {
-        const separation = angleDifference(transit.longitude, natal.longitude);
-        const nearest = ASPECTS.map(aspect => ({ aspect, orb: Math.abs(separation - aspect.angle) }))
-          .filter(item => item.orb <= item.aspect.orb)
-          .sort((a, b) => a.orb - b.orb)[0];
-        if (!nearest) continue;
-        const key = `${transit.name}-${nearest.aspect.name}-${natal.name}`;
-        const prior = evidenceByKey.get(key);
-        evidenceByKey.set(key, {
-          count: (prior?.count ?? 0) + 1,
-          text: `${transit.name}與本命${natal.name}接近${nearest.aspect.name}（取樣相位容許度 ${nearest.aspect.orb}°）`,
-        });
+    for (const transit of transitPositions) for (const natal of natalTargets) {
+      const separation = angleDifference(transit.longitude, natal.longitude);
+      for (const aspect of ASPECTS) {
+        const key = `${transit.id}-${aspect.name}-${natal.id}`;
+        const item = transitData.get(key) ?? { transit: transit.name, natal: natal.name, aspect, samples: [] };
+        item.samples.push({ at: instant, orb: Math.abs(separation - aspect.angle) });
+        transitData.set(key, item);
       }
     }
   }
-  const evidence = [...evidenceByKey.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 4).map(([, value]) => value.text);
+
+  const events: AstrologyTransitEvent[] = [];
+  for (const item of transitData.values()) {
+    const minima: Array<{ at: Date; orb: number }> = [];
+    if (period === 'day') {
+      const sample = item.samples[0];
+      if (sample.orb <= item.aspect.orb) minima.push(sample);
+    } else {
+      for (let index = 1; index < item.samples.length - 1; index++) {
+        const previous = item.samples[index - 1];
+        const current = item.samples[index];
+        const next = item.samples[index + 1];
+        if (current.orb <= item.aspect.orb && current.orb <= previous.orb && current.orb <= next.orb) minima.push(current);
+      }
+      if (item.samples[0].orb <= item.aspect.orb && item.samples[0].orb < item.samples[1].orb) minima.unshift(item.samples[0]);
+      if (item.samples.at(-1)!.orb <= item.aspect.orb && item.samples.at(-1)!.orb < item.samples.at(-2)!.orb) minima.push(item.samples.at(-1)!);
+    }
+    const transitBody = bodyTargets.find(body => body.name === item.transit)!;
+    const natalTarget = natalTargets.find(target => target.name === item.natal)!;
+    for (const candidate of minima) {
+      let exactAt = candidate.at;
+      let orb = candidate.orb;
+      if (period !== 'day') {
+        let left = Math.max(start.getTime(), candidate.at.getTime() - 86_400_000);
+        let right = Math.min(start.getTime() + spanDays * 86_400_000, candidate.at.getTime() + 86_400_000);
+        const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(milliseconds)), natalTarget.longitude) - item.aspect.angle);
+        for (let pass = 0; pass < 26; pass++) {
+          const first = left + (right - left) / 3;
+          const second = right - (right - left) / 3;
+          if (orbAt(first) <= orbAt(second)) right = second;
+          else left = first;
+        }
+        exactAt = new Date((left + right) / 2);
+        orb = orbAt(exactAt.getTime());
+      }
+      const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
+      const beforeOrb = Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(exactAt.getTime() - timeDelta)), natalTarget.longitude) - item.aspect.angle);
+      const afterOrb = Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(exactAt.getTime() + timeDelta)), natalTarget.longitude) - item.aspect.angle);
+      const phase = orb <= 0.05 ? '精確相位' : beforeOrb > afterOrb ? '接近中' : '分離中';
+      if (events.some(event => event.transit === item.transit && event.natal === item.natal && event.aspect === item.aspect.name && Math.abs(new Date(event.exactAt).getTime() - exactAt.getTime()) < 2 * 86_400_000)) continue;
+      events.push({ transit: item.transit, natal: item.natal, aspect: item.aspect.name, exactAt: exactAt.toISOString(), orb, phase, meaning: item.aspect.text });
+    }
+  }
+  const orderedEvents = events.sort((left, right) => left.orb - right.orb || left.exactAt.localeCompare(right.exactAt)).slice(0, 8);
+  const evidence = orderedEvents.map(event => `${event.transit}與本命${event.natal}${event.aspect}（${new Date(event.exactAt).toLocaleDateString('zh-TW')}附近，${event.phase}，殘餘容許度 ${event.orb.toFixed(2)}°）`);
   const label = period === 'day' ? '今日' : period === 'month' ? '未來一個月' : '未來一年';
   const text = evidence.length
-    ? `固定取樣顯示${evidence.join('；')}。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
-    : '這段期間的取樣未發現接近本命太陽或月亮的主要相位；可先依照自己的優先順序安排，不代表沒有值得留意的事。';
-  return { periodLabel: label, text, evidence, methodVersion: ASTROLOGY_METHOD_VERSION };
+    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天逐日掃描並細化`}找到主要行運相位窗口，以下列出容許度最接近的 ${evidence.length} 項。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
+    : '這段期間未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。';
+  return { periodLabel: label, text, evidence, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
 
 export function signDescription(signName: string, role: 'sun' | 'moon' | 'rising'): string {

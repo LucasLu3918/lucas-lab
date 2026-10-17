@@ -14,7 +14,7 @@ const emit = defineEmits<{ reveal: [index: number] }>();
 <template>
   <section v-if="props.cards.length" class="card-table" aria-labelledby="table-title">
     <div class="card-table__heading"><p class="eyebrow">THE READING</p><h2 id="table-title">在燭光下揭開牌面</h2></div>
-    <div class="card-table__cards" :class="{ 'card-table__cards--three': props.cards.length === 3 }">
+    <div class="card-table__cards" :class="{ 'card-table__cards--three': props.cards.length === 3, 'card-table__cards--five': props.cards.length === 5 }">
       <TarotCard
         v-for="(item, index) in props.cards"
         :key="`${item.card.id}-${index}`"
@@ -39,6 +39,7 @@ const emit = defineEmits<{ reveal: [index: number] }>();
 .eyebrow { margin:0; color:#cdb578; font-size:.72rem; letter-spacing:.14em; }
 .card-table__cards { display:flex; justify-content:center; gap:clamp(14px,4vw,36px); width:100%; }
 .card-table__cards--three { display:grid; grid-template-columns:repeat(3,minmax(0,220px)); }
+.card-table__cards--five { display:grid; grid-template-columns:repeat(3,minmax(0,180px)); }
 .card-table__hint { margin:0; color:#c3b99f; font-size:.9rem; }
-@media (max-width:620px) { .card-table__cards--three { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } }
+@media (max-width:620px) { .card-table__cards--three { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .card-table__cards--five { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
 </style>

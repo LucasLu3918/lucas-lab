@@ -28,7 +28,22 @@ declare module 'lunar-javascript' {
     getTimeHideGan(): string[];
     getTimeShiShenGan(): string;
     getTimeShiShenZhi(): string[];
+    getYun(gender: number, sect?: number): Yun;
   }
+  export interface Yun {
+    getStartYear(): number;
+    getStartMonth(): number;
+    getStartDay(): number;
+    getStartHour(): number;
+    getStartSolar(): SolarDate;
+    getDaYun(): DaYun[];
+  }
+  export interface DaYun {
+    getStartYear(): number;
+    getStartAge(): number;
+    getGanZhi(): string;
+  }
+  export interface SolarDate { toYmd(): string }
   export interface LunarDate {
     getEightChar(): EightChar;
     getYearInGanZhiExact(): string;
