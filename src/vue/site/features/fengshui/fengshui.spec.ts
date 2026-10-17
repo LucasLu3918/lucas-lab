@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  parseBirthDate, DIRECTIONS, FACINGS, FENGSHUI_METHOD_VERSION, GUA_INFO, STAR_ORDER, buildFengshuiReport, eightMansions, flyStars, flyingStarChart, natalKua,
+  parseBirthDate, DIRECTIONS, FACINGS, FENGSHUI_METHOD_VERSION, GUA_INFO, RUNNING_PERIOD, STAR_ORDER, buildFengshuiReport, eightMansions, flyStars, flyingStarChart, natalKua, sourcesFor,
   type Star,
 } from './fengshui';
 import { interpretFengshui } from './interpretation';
@@ -177,6 +177,33 @@ describe('flyingStarChart', () => {
       1: [5, 9, 2], 2: [6, 1, 3], 3: [7, 2, 4], 4: [8, 3, 5], 5: [9, 4, 6], 6: [1, 5, 7], 7: [2, 6, 8], 8: [3, 7, 9], 9: [4, 8, 1],
     });
     expect(chart.facing.toward).toBe('西南');
+    expect(chart.source.id).toBe('skill');
+    expect(chart.sourceNote).toBe('依技能檔，與部分網路來源不一致');
+  });
+
+  // 紫微研究苑〈艮山坤向 下元九運〉的九宮數值（兩次擷取一致）：山盤與向盤直接採用頁面數值，不重新排布。
+  it('uses the 紫微研究苑 palace values for 艮山坤向 without re-flying them', () => {
+    const chart = flyingStarChart('gen-kun', RUNNING_PERIOD, 'web-108s');
+    const byPalace = Object.fromEntries(chart.palaces.map(p => [p.palace, [p.run, p.mountain, p.facing]]));
+    expect(byPalace).toEqual({
+      1: [5, 7, 2], 2: [6, 6, 3], 3: [7, 5, 4], 4: [8, 4, 5], 5: [9, 3, 6], 6: [1, 2, 7], 7: [2, 1, 8], 8: [3, 9, 9], 9: [4, 8, 1],
+    });
+    expect(chart.source.id).toBe('web-108s');
+    expect(chart.sourceNote).toContain('與技能檔不一致');
+    expect(chart.steps.join('\n')).toContain('未重新排布');
+  });
+
+  it('keeps each source table a permutation of 1 to 9 on both the mountain and facing charts', () => {
+    const chart = flyingStarChart('gen-kun', RUNNING_PERIOD, 'web-108s');
+    expect(chart.palaces.map(p => p.mountain).sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(chart.palaces.map(p => p.facing).sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  });
+
+  it('lists sources only for 艮山坤向 and refuses a source the sitting does not have', () => {
+    expect(sourcesFor('gen-kun')).toEqual(['skill', 'web-108s']);
+    expect(sourcesFor('south')).toEqual(['skill']);
+    expect(() => flyingStarChart('south', RUNNING_PERIOD, 'web-108s')).toThrow('沒有這個來源');
+    expect(flyingStarChart('south').sourceNote).toBeNull();
   });
 
   it('places 運星 九, 山星 一 and 向星 九 in the center for 坐北朝南', () => {

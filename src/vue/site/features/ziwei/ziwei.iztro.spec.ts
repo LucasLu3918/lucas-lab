@@ -8,10 +8,10 @@ const IZTRO_STAR: Record<string, string> = {
   紫微: '紫微', 天机: '天機', 太阳: '太陽', 武曲: '武曲', 天同: '天同', 廉贞: '廉貞',
   天府: '天府', 太阴: '太陰', 贪狼: '貪狼', 巨门: '巨門', 天相: '天相', 天梁: '天梁',
   七杀: '七殺', 破军: '破軍', 文昌: '文昌', 文曲: '文曲', 左辅: '左輔', 右弼: '右弼',
-  天魁: '天魁', 天钺: '天鉞',
+  天魁: '天魁', 天钺: '天鉞', 禄存: '祿存', 擎羊: '擎羊', 陀罗: '陀羅',
 };
 const IZTRO_MUTAGEN: Record<string, string> = { 禄: '祿', 权: '權', 科: '科', 忌: '忌' };
-const AUXILIARY = new Set(['文昌', '文曲', '左輔', '右弼', '天魁', '天鉞']);
+const AUXILIARY = new Set(['文昌', '文曲', '左輔', '右弼', '天魁', '天鉞', '祿存', '擎羊', '陀羅']);
 
 interface Case {
   label: string;
@@ -29,6 +29,10 @@ const SOLAR_CASES: Case[] = [
   { label: '1975 亥時 女', solar: '1975-09-25', birthBranch: 11, gender: 'female' },
   { label: '1968 辰時 男', solar: '1968-07-06', birthBranch: 4, gender: 'male' },
   { label: '2003 酉時 女', solar: '2003-02-14', birthBranch: 9, gender: 'female' },
+  // 2025 閏六月: day 4 keeps the leap month, day 17 and day 27 count as the next month (iztro fixLeap).
+  { label: '2025 閏六月初四 亥時 男', solar: '2025-07-28', birthBranch: 11, gender: 'male' },
+  { label: '2025 閏六月十七 亥時 男', solar: '2025-08-10', birthBranch: 11, gender: 'male' },
+  { label: '2025 閏六月廿七 寅時 女', solar: '2025-08-20', birthBranch: 2, gender: 'female' },
   { label: '1979 卯時 男', solar: '1979-11-02', birthBranch: 3, gender: 'male' },
   { label: '1996 午時 女', solar: '1996-05-27', birthBranch: 6, gender: 'female' },
   { label: '2010 申時 男', solar: '2010-04-18', birthBranch: 8, gender: 'male' },

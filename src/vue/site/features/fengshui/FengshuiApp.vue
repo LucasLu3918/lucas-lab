@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { BIRTH_YEAR_RANGE, FACINGS, PALACE_DIRECTION, buildFengshuiReport, type FacingId, type FengshuiReport, type Fortune, type Gender } from './fengshui';
+import { BIRTH_YEAR_RANGE, CHART_SOURCES, FACINGS, PALACE_DIRECTION, buildFengshuiReport, sourcesFor, type ChartSourceId, type FacingId, type FengshuiReport, type Fortune, type Gender } from './fengshui';
 import { interpretFengshui } from './interpretation';
 import { lunarYearOf } from './lunar';
 
@@ -16,17 +16,21 @@ const yearInput = ref<number | string>(1990);
 const birthDateInput = ref('');
 const genderInput = ref<Gender>('male');
 const facingInput = ref<FacingId | ''>('');
+// 艮山坤向有兩個數值來源；其他坐向只有技能檔，來源選單不顯示。
+const chartSourceInput = ref<ChartSourceId>('skill');
+const SOURCE_OPTIONS = sourcesFor('gen-kun').map(id => ({ value: id, label: CHART_SOURCES[id].label }));
 // 只有成功計算後才保存結果；改動表單不會自動重算，避免結果與目前輸入不一致。
 const result = ref<FengshuiReport | null>(null);
-const calculatedFor = ref<{ year: number; gender: Gender; birthDate: string; facing: FacingId | '' } | null>(null);
+const calculatedFor = ref<{ year: number; gender: Gender; birthDate: string; facing: FacingId | ''; chartSource: ChartSourceId } | null>(null);
 const error = ref('');
 
 const copy = computed(() => (result.value ? interpretFengshui(result.value) : null));
 const flying = computed(() => result.value?.data.flying ?? null);
+const effectiveChartSource = computed<ChartSourceId>(() => (facingInput.value === 'gen-kun' ? chartSourceInput.value : 'skill'));
 const stale = computed(() => {
   const last = calculatedFor.value;
   if (!last) return false;
-  return last.year !== Number(yearInput.value) || last.gender !== genderInput.value || last.birthDate !== birthDateInput.value || last.facing !== facingInput.value;
+  return last.year !== Number(yearInput.value) || last.gender !== genderInput.value || last.birthDate !== birthDateInput.value || last.facing !== facingInput.value || last.chartSource !== effectiveChartSource.value;
 });
 
 function palaceAt(palace: number) {
@@ -46,8 +50,9 @@ async function calculate(): Promise<void> {
     const birthDate = birthDateInput.value || '';
     const lunarYear = birthDate ? await lunarYearOf(birthDate, year) : undefined;
     if (calculation !== latestCalculation) return;
-    result.value = buildFengshuiReport({ year, gender: genderInput.value, lunarYear, facing });
-    calculatedFor.value = { year, gender: genderInput.value, birthDate, facing: facingInput.value };
+    const chartSource = effectiveChartSource.value;
+    result.value = buildFengshuiReport({ year, gender: genderInput.value, lunarYear, facing, chartSource });
+    calculatedFor.value = { year, gender: genderInput.value, birthDate, facing: facingInput.value, chartSource };
   } catch (cause) {
     if (calculation !== latestCalculation) return;
     result.value = null;
@@ -84,7 +89,13 @@ async function calculate(): Promise<void> {
         <select v-model="facingInput">
           <option v-for="item in FACING_OPTIONS" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
-        <small>坐向指房子背靠的方向。目前飛星盤收錄九運的四正向；斜向暫不計算飛星。</small>
+        <small>坐向指房子背靠的方向。飛星盤收錄九運的四正向與艮山坤向。</small>
+      </label>
+      <label v-if="facingInput === 'gen-kun'">艮山坤向的數值來源
+        <select v-model="chartSourceInput">
+          <option v-for="item in SOURCE_OPTIONS" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <small>兩組數值不同，請依需要選擇；預設為技能檔。</small>
       </label>
       <button class="primary-button" type="submit">計算</button>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -144,6 +155,7 @@ async function calculate(): Promise<void> {
 
       <section v-if="flying" class="block" aria-labelledby="fengshui-flying">
         <h2 id="fengshui-flying">玄空飛星（九運・{{ flying.facing.label }}，{{ flying.facing.sitting }}）</h2>
+        <p v-if="flying.sourceNote" class="source-note" role="note">數值來源：{{ flying.source.label }}。{{ flying.sourceNote }}</p>
         <div class="flying-grid" aria-label="九宮飛星盤">
           <template v-for="row in GRID_ROWS" :key="row.join('-')">
             <div v-for="palace in row" :key="palace" class="palace-cell" :class="palace === 5 ? 'palace-center' : ''">
@@ -219,6 +231,7 @@ async function calculate(): Promise<void> {
 .verdict-good { background: #2f4a33; color: #bfe6c3; }
 .verdict-mid { background: #3a3a2d; color: #e7dfb3; }
 .verdict-caution { background: #4a2d2d; color: #f0c0b8; }
+.source-note { margin: 0; padding: 8px 12px; border: 1px solid #a48e524b; border-radius: 10px; color: #e7dfb3; font-size: 0.9rem; line-height: 1.6; }
 .flying-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .palace-cell { min-height: 150px; padding: 12px; border: 1px solid #a48e5240; border-radius: 12px; background: #080e16; }
 .palace-center { background: #151b22; }

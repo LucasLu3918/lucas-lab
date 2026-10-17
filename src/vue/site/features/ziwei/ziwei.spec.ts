@@ -4,9 +4,13 @@ import {
   PALACE_NAMES,
   ZIWEI_METHOD_VERSION,
   calculateZiwei,
+  decadalPalaceAt,
   fiveElementBureau,
+  lucunBranch,
   mingBranch,
+  nayinOf,
   palaceStem,
+  sanFangSiZheng,
   shenBranch,
   ziweiBranch,
 } from './ziwei';
@@ -112,6 +116,82 @@ describe('calculateZiwei chart structure', () => {
 
   it('computes the same chart for the same input (no randomness)', () => {
     expect(calculateZiwei({ birthDate: '1990-06-15', birthBranch: 5, gender: 'male' })).toEqual(result);
+  });
+
+  it('places 祿存, 擎羊 and 陀羅 one branch apart around the 祿存 branch', () => {
+    const minor = (name: string) => result.data.palaces.find(palace => palace.minorStars.some(item => item.name === name))?.branch;
+    const lucun = minor('祿存');
+    expect(lucun).toBe(lucunBranch(6));
+    expect(minor('擎羊')).toBe(((lucun ?? 0) + 1) % 12);
+    expect(minor('陀羅')).toBe(((lucun ?? 0) + 11) % 12);
+  });
+
+  it('records the derivation numbers that the page shows as its steps', () => {
+    // 1990 五月廿三 巳時 男: iztro reports 火六局, 命宮丑, 身宮亥 for the same input.
+    const { derivation, bureau, lunar, fiveElementsClass } = result.data;
+    expect(lunar).toMatchObject({ month: 5, day: 23 });
+    expect(fiveElementsClass).toBe('火六局');
+    expect(bureau).toBe(6);
+    expect(derivation).toMatchObject({
+      palaceMonth: 5,
+      leapAdjusted: false,
+      monthBranch: '午',
+      hourIndex: 5,
+      hourBranch: '巳',
+      mingStem: '己',
+      nayin: '霹靂火',
+      ziweiDay: 23,
+      ziweiBranch: '辰',
+      tianfuBranch: '子',
+      lucunBranch: '申',
+    });
+    expect(derivation.mutagens.map(item => item.mutagen)).toEqual(['祿', '權', '科', '忌']);
+    expect(derivation.mutagens.every(item => (PALACE_NAMES as readonly string[]).includes(item.palace))).toBe(true);
+    const ziweiPalace = result.data.palaces.find(palace => palace.majorStars.some(star => star.name === '紫微'));
+    expect(derivation.ziweiBranch).toBe(ziweiPalace?.branchName);
+  });
+});
+
+describe('三方四正 and 大限 by year', () => {
+  it('finds the opposite palace and the two 三合 palaces', () => {
+    // 子 faces 午 and forms 三合 with 辰 and 申.
+    expect(sanFangSiZheng(0)).toEqual({ opposite: 6, trines: [4, 8] });
+    expect(sanFangSiZheng(11)).toEqual({ opposite: 5, trines: [3, 7] });
+  });
+
+  it('dates each 大限 from the lunar birth year, counting the birth year as age 1', () => {
+    const result = calculateZiwei({ birthDate: '1990-06-15', birthBranch: 5, gender: 'male' });
+    const soul = result.data.palaces[0];
+    expect(soul.decadal.startYear).toBe(1990 + soul.decadal.startAge - 1);
+    expect(soul.decadal.endYear).toBe(soul.decadal.startYear + 9);
+  });
+
+  it('returns the 大限 that contains a year, and null before the first one starts', () => {
+    const result = calculateZiwei({ birthDate: '1990-06-15', birthBranch: 5, gender: 'male' });
+    const chart = result.data;
+    const first = chart.palaces[0];
+    expect(decadalPalaceAt(chart, first.decadal.startYear)?.name).toBe('命宮');
+    expect(decadalPalaceAt(chart, first.decadal.endYear)?.name).toBe('命宮');
+    expect(decadalPalaceAt(chart, first.decadal.startYear - 1)).toBeNull();
+    const last = chart.palaces.reduce((latest, palace) => (palace.decadal.endYear > latest.decadal.endYear ? palace : latest));
+    expect(decadalPalaceAt(chart, last.decadal.endYear)?.name).toBe(last.name);
+  });
+});
+
+describe('閏月 handling for the palace month', () => {
+  it('keeps the leap month for days 1–15', () => {
+    // 2025 閏六月初四
+    const result = calculateZiwei({ birthDate: '2025-07-28', birthBranch: 11, gender: 'male' });
+    expect(result.data.lunar).toMatchObject({ month: 6, isLeapMonth: true, day: 4 });
+    expect(result.data.derivation).toMatchObject({ palaceMonth: 6, leapAdjusted: false });
+  });
+
+  it('counts day 16 onward of a leap month as the next month', () => {
+    // 2025 閏六月十七 places 命宮 as if it were 七月, the same as iztro's default.
+    const leap = calculateZiwei({ birthDate: '2025-08-10', birthBranch: 11, gender: 'male' });
+    expect(leap.data.lunar).toMatchObject({ month: 6, isLeapMonth: true, day: 17 });
+    expect(leap.data.derivation).toMatchObject({ palaceMonth: 7, leapAdjusted: true });
+    expect(leap.data.soulBranch).toBe(BRANCHES[mingBranch(7, 11)]);
   });
 });
 
