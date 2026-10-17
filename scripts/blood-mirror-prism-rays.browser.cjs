@@ -83,8 +83,9 @@ const save = {
         let completed = 0;
         mountPrismRays({ render: html => { host.innerHTML = html; }, playCue: () => {}, done: () => { completed += 1; } });
         const count = host.querySelectorAll('#bf-svg [data-mirror]').length;
-        host.querySelector('[data-mirror="0"]').click();
-        host.querySelector('[data-mirror="1"]').click();
+        const clickMirror = index => host.querySelector(`[data-mirror="${index}"]`).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        clickMirror(0);
+        clickMirror(1);
         await new Promise(resolve => setTimeout(resolve, 80));
         host.remove();
         return { count, completed };
