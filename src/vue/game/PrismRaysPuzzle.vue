@@ -77,6 +77,18 @@ function flip(index: number) {
   if (next) snapshot.value = next;
 }
 
+function handleBoardClick(event: MouseEvent): void {
+  if (snapshot.value.solved) return;
+  const svg = event.currentTarget as SVGSVGElement;
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return;
+  const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+  const mirror = snapshot.value.mirrors.find(item =>
+    Math.abs(point.x - px(item.x)) <= 5.7 && Math.abs(point.y - px(item.y)) <= 5.7,
+  );
+  if (mirror) flip(mirror.index);
+}
+
 function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: number): string {
   return `鏡子 ${index + 1}，在第 ${x + 1} 欄、第 ${y + 1} 列，目前 ${orientation}（點一下轉向）`;
 }
@@ -90,6 +102,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
       viewBox="-3 -14.2 76 68.2"
       role="group"
       aria-label="濾鏡階段光路盤，七欄五列"
+      @click="handleBoardClick"
     >
       <defs>
         <linearGradient id="prism-brass" x1="0" y1="0" x2="1" y2="1">
@@ -198,7 +211,6 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         :aria-pressed="mirror.orientation === '\\'"
         :aria-disabled="snapshot.solved"
         :transform="`translate(${px(mirror.x)} ${px(mirror.y)})`"
-        @click="flip(mirror.index)"
         @keydown.enter.prevent="flip(mirror.index)"
         @keydown.space.prevent="flip(mirror.index)"
         pointer-events="all"
