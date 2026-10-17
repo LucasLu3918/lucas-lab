@@ -11,7 +11,7 @@ export default defineConfig({
     lib: {
       entry: 'src/vue/game/inventory-main.ts',
       formats: ['es'],
-      fileName: 'inventory-main',
+      fileName: () => 'assets/inventory-main-[hash].js',
     },
     rollupOptions: {
       input: 'src/vue/game/inventory-main.ts',
