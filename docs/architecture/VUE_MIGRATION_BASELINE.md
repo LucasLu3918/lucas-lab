@@ -257,3 +257,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：月亮與提燈的兩條線仍由既有規則決定；放大、翻面、方向鍵步進、tray 拖出、標記及清單放置維持原有語意；`gallery-merge` 維持 legacy renderer。stage id、Hints／音效／進度、存檔格式、路由、CSP 與 runtime dependencies 不變。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E4 rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、拖曳／清單／鍵盤操作、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；caller／consumer 依本次核准範圍人工核對，全域 Impact Graph coverage 仍 incomplete。
 
 下一步建議：評估 E4 `gallery-merge` 階段的翻面門對位與四格紅線排序，盤點排序規則、鍵盤操作與 stage 間既有連線狀態，再決定 Vue island 邊界。
+
+## Phase 24 — Blood Mirror Gallery Merge Vue island
+
+`GalleryMergePuzzle.vue` 接手 E4 `gallery-merge` 的四格畫面、鏡廊／舞廳門把方向、翻面控制、接門操作與紅線排序。沿用既有 lazy game bundle、stage id、modal 與 `.gal-*` 樣式。`puzzles/gallery.js` 保留 `judgeMove`／`isChain` 規則、錯誤間隙提示、音效、完成計時、進度 callback 與 legacy renderer；Vue 只呈現經 `parseGalleryMergeSnapshot` 驗證的 transient snapshot，並將 typed flip／place／order actions 交回 legacy controller。
+
+不變條件：`gallery-align` 完成前 `gallery-merge` 仍不可進入；合併階段開場仍帶有月亮與提燈兩條既有連線，門只接受一側翻面後的 `A.door`／`D.door` 對位；排序仍由 `isChain` 接受 `B-A-D-C` 或反向 `C-D-A-B`。stage id、Hints／音效／完成與可選關卡進度、存檔格式、路由、CSP、runtime dependencies 及無 island callback 時的 DOM fallback 維持原樣。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E4 rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、錯誤／正確門位、順序／反向排序、錯誤排序、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；本切片 caller／consumer 依核准範圍人工追查，全域 Impact Graph coverage 仍 incomplete。
+
+下一步建議：評估 E5 `box-thread` 四格排序 Vue island，確認它沿用 E4 畫格與紅線規則的程度、stage／物品前置條件和重玩行為，再決定是否重用 Gallery Merge 的呈現邊界。

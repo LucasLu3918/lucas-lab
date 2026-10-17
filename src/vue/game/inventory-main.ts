@@ -19,6 +19,7 @@ import ApothecaryTestimonyPuzzle from './ApothecaryTestimonyPuzzle.vue';
 import ApothecaryVesselsPuzzle from './ApothecaryVesselsPuzzle.vue';
 import ApothecaryMixingPuzzle from './ApothecaryMixingPuzzle.vue';
 import GalleryAlignPuzzle from './GalleryAlignPuzzle.vue';
+import GalleryMergePuzzle from './GalleryMergePuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
@@ -28,6 +29,7 @@ import { parseApothecaryTestimonySnapshot, type ApothecaryTestimonyAction, type 
 import { parseApothecaryVesselsSnapshot, type ApothecaryVesselsAction, type ApothecaryVesselsSnapshot } from './apothecary-vessels';
 import { parseApothecaryMixingSnapshot, type ApothecaryMixingAction, type ApothecaryMixingSnapshot } from './apothecary-mixing';
 import { parseGalleryAlignSnapshot, type GalleryAlignAction, type GalleryAlignSnapshot } from './gallery-align';
+import { parseGalleryMergeSnapshot, type GalleryMergeAction, type GalleryMergeSnapshot } from './gallery-merge';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -499,6 +501,25 @@ export function mountGalleryAlignPuzzleIsland(
   } satisfies GalleryAlignPuzzleProps);
   app.mount(root);
   root.setAttribute('data-vue-gallery-align-ready', 'true');
+  return () => app.unmount();
+}
+
+type GalleryMergePuzzleProps = InstanceType<typeof GalleryMergePuzzle>['$props'];
+
+export function mountGalleryMergePuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: GalleryMergeAction) => GalleryMergeSnapshot | null,
+): (() => void) | null {
+  const snapshot = parseGalleryMergeSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(GalleryMergePuzzle, {
+    snapshot,
+    onAction: action => parseGalleryMergeSnapshot(onAction(action)),
+  } satisfies GalleryMergePuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-gallery-merge-ready', 'true');
   return () => app.unmount();
 }
 
