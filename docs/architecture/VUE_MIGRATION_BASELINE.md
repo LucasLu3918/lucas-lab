@@ -207,3 +207,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：13 格與紅寶石位置、燭光下的刻字與碑文、每聲跨格設定、錯誤時停在第一個失誤刻度、唯一解與第十三聲回到紅寶石、Hints／音效／stage id `belfry-wheel`、可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 puzzle-rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、刻字、錯誤敲鐘、解謎、進度連續性、fallback 與水平溢位。
 
 下一步建議：評估「稜鏡舞廳」第一道濾鏡關（`games/blood-mirror/puzzles/prism.js`、stage `prism-rays`）是否適合沿用同一 typed snapshot／action adapter，先確認動畫與多階段狀態邊界再核准切片。
+
+## Phase 17 — Blood Mirror Prism Rays Vue island
+
+`PrismRaysPuzzle.vue` 接手 `prism-rays` 的 7×5 光路盤、白光 emitter、紅色 filter、面具 target、三面鏡、光束與狀態呈現，沿用既有 lazy game bundle、stage id、modal 與稜鏡 CSS。`prism.js` 保留 `trace`／`solved`／`litCount` 規則、鏡面狀態、提示、音效、完成判定、進度 callback 與 legacy renderer；Vue 只呈現 parser 驗證的 transient snapshot，並將鏡面 flip typed action 交回 legacy controller。
+
+不變條件：白光經紅色濾鏡後只留下紅光、單一目標須精確收到紅光、解法仍由原 puzzle engine 判定、stage id `prism-rays`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 reset、route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、鍵盤翻鏡、通關與 legacy fallback；全域 Impact Graph 仍不完整，本切片消費者僅依手動追查。
+
+下一步建議：評估 `prism-blend` 合光水晶 Vue island 的 snapshot 邊界，特別確認水晶收光／再發射是否能由單一靜態場景加上既有 beam trace 呈現。

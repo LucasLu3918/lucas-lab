@@ -70,7 +70,20 @@ const save = {
       assert.equal(await page.locator('[data-weight="b"]').getAttribute('aria-pressed'), 'true');
       assert.equal(await page.locator('[data-weight="c"]').getAttribute('aria-pressed'), 'false');
       assert.match(await page.locator('#bf-status').innerText(), /剛好是舊擺兩趟/);
-      await page.getByRole('button', { name: '放開擺錘 ⟶' }).click();
+      const runButton = page.locator('#bf-run');
+      try { await runButton.waitFor({ state: 'visible', timeout: 5000 }); }
+      catch (error) {
+        console.error('pendulum run-control diagnostic:', JSON.stringify({
+          status: await page.locator('#bf-status').innerText().catch(() => '(missing)'),
+          weights: await page.locator('#bf-weights button').evaluateAll(buttons => buttons.map(button => ({
+            id: button.dataset.weight,
+            pressed: button.getAttribute('aria-pressed'),
+          }))).catch(() => []),
+          island: await page.locator('[data-vue-pendulum-puzzle]').innerHTML().catch(() => '(missing)'),
+        }));
+        throw error;
+      }
+      await runButton.click();
       await page.waitForFunction(() => (JSON.parse(localStorage.getItem('blood-mirror-v2') || '{}').puzzles || []).includes('belfry.belfry-pendulum'));
       assert.ok(await page.evaluate(() => (JSON.parse(localStorage.getItem('blood-mirror-v2') || '{}').puzzles || []).includes('belfry.belfry-pendulum')),
         'legacy puzzle progression owns and persists completion');
