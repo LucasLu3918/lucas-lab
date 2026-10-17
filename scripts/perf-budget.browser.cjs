@@ -37,6 +37,8 @@ const BUDGETS=[
  // Added 2026-10-17 with the Meihua Yishu island. Measured in visual-audit on PR #118 (commit c6401c8): 495 KB and 14 requests at both widths,
  // plus about 20% headroom. lunar-javascript (306 KB raw) is shared with bazi and ziwei.
  {route:'/meihua/',maxBytes:600*KB,maxRequests:17},
+ // Added 2026-10-17 with the Liuyao island. Measured 497 KB and 12 requests at both widths, the same lunar-javascript chunk as bazi and ziwei.
+ {route:'/liuyao/',maxBytes:600*KB,maxRequests:17},
  // Added 2026-10-17 with the tarot prerender (tarot-ssr.ts): the first markup is in the static page, so the island mounts without a shift.
  // Measured 527 KB and 23 requests at both widths, plus about 20% headroom.
  {route:'/tarot/',maxBytes:640*KB,maxRequests:28}
