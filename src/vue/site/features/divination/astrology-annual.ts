@@ -44,6 +44,7 @@ export interface AnnualAspect {
 export interface AnnualChartSummary {
   exactAt: string;
   location: string;
+  timeZone: string;
   ascendant: { sign: string; degree: number } | null;
   midheaven: { sign: string; degree: number } | null;
   planets: PlanetPlacement[];
@@ -155,7 +156,7 @@ function createSolarReturn(chart: AstrologyChart, location: BirthPlace, start: D
   }
   if (!exact) return null;
   const localChart = placementsAt(exact.date, location.latitude, location.longitude, !chart.timeUnknown);
-  return { exactAt: exact.date.toISOString(), location: location.label, ascendant: localChart.ascendant, midheaven: localChart.midheaven, planets: localChart.planets };
+  return { exactAt: exact.date.toISOString(), location: location.label, timeZone: location.timeZone, ascendant: localChart.ascendant, midheaven: localChart.midheaven, planets: localChart.planets };
 }
 
 function getProfection(chart: AstrologyChart, start: Date): AnnualAstrologyForecast['profection'] {

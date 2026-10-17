@@ -19,6 +19,19 @@ describe('AstrologyApp', () => {
     expect(wrapper.find('.results').exists()).toBe(true);
   }, 20_000);
 
+  it('keeps the place note on the calculated city after the place selector changes', async () => {
+    const wrapper = mount(AstrologyApp);
+    await wrapper.find('input[type="date"]').setValue('1990-06-15');
+    await wrapper.find('form').trigger('submit');
+    await vi.waitFor(() => expect(wrapper.find('.results').exists()).toBe(true), { timeout: 15_000 });
+    const placeNote = () => wrapper.findAll('.method').find(item => item.text().includes('本命星盤計算方法'))?.text() ?? '';
+    expect(placeNote()).toContain('出生位置：台灣・台北');
+    await wrapper.findAll('select')[0].setValue('tokyo');
+    expect(wrapper.find('.stale-note').exists()).toBe(true);
+    expect(placeNote()).toContain('出生位置：台灣・台北');
+    expect(placeNote()).not.toContain('日本・東京');
+  }, 20_000);
+
   it('keeps the status line empty before any calculation', () => {
     const wrapper = mount(AstrologyApp);
     expect(wrapper.find('[role="status"]').text()).toBe('');

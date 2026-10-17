@@ -445,3 +445,5 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
 /* Qimen: the mounted intro and form are 662 px tall at 1440 px (measured in Chromium), against a short static intro, so the footer
    jumped by CLS 0.059 in the perf-budget run. Reserved for desktop only; the phone layout measured 0 and is unchanged. */
 @media (min-width:681px) {[data-vue-site-island="qimen"] {min-height:662px}}
+/* Fengshui: the mounted form is 762 px tall at 1440 px (measured in Chromium, with the birth-date field) with no result shown, so the footer would otherwise shift on load (CLS 0.064). Desktop only; the phone layout is taller and unchanged. */
+@media (min-width:681px) {[data-vue-site-island="fengshui"] {min-height:762px}}

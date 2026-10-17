@@ -6,7 +6,7 @@ import hub from './hub.json';
 export type DivinationInputNeeds = 'none' | 'birthdate' | 'birth-datetime-place';
 
 export interface DivinationModule {
-  id: 'tarot' | 'bazi' | 'astrology' | 'ziwei' | 'numerology' | 'horoscope' | 'meihua' | 'liuyao' | 'qimen';
+  id: 'tarot' | 'bazi' | 'astrology' | 'ziwei' | 'numerology' | 'horoscope' | 'meihua' | 'liuyao' | 'qimen' | 'fengshui';
   title: string;
   href: string;
   description: string;

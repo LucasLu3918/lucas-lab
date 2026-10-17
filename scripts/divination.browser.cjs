@@ -135,6 +135,29 @@ async function run(){
   await page.screenshot({path:path.join(CAPTURES,'qimen-reading-390.png'),fullPage:true,animations:'disabled'});
   console.log('✓ Qimen casts a fixed time, shows the nine-palace grid, follows the topic selector and stays inside the mobile viewport');
 
+  await page.goto(ORIGIN+'/fengshui/',{waitUntil:'load'});
+  await page.locator('input[type="number"]').fill('1985');
+  await page.locator('select').nth(0).selectOption('male');
+  await page.getByRole('button',{name:'計算'}).click();
+  await page.locator('.direction-table').waitFor({timeout:15000});
+  assert.match(await page.locator('.summary-line').textContent(),/乾卦（6）/,'Fengshui 1985 male should be 乾卦（6）');
+  assert.equal(await page.locator('.direction-table tbody tr').count(),8,'Fengshui should list eight directions');
+  assert.equal(await page.locator('.flying-grid').count(),0,'Fengshui should hide the flying grid without a sitting');
+  await page.locator('input[type="date"]').first().fill('1985-02-10');
+  await page.getByRole('button',{name:'計算'}).click();
+  await page.waitForFunction(()=>document.querySelector('.summary-line')?.textContent.includes('兌卦（7）'),null,{timeout:15000});
+  assert.match(await page.locator('.steps').textContent(),/農曆新年前/,'Fengshui birth date before lunar new year should use the lunar year');
+  await page.locator('input[type="date"]').first().fill('');
+  await page.locator('select').nth(1).selectOption('south');
+  await page.getByRole('button',{name:'計算'}).click();
+  await page.locator('.flying-grid .palace-cell').first().waitFor({timeout:15000});
+  assert.equal(await page.locator('.flying-grid .palace-cell').count(),9,'Fengshui flying grid should show nine palaces');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Fengshui reading overflows the mobile viewport');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.waitForFunction(()=>window.scrollY===0);
+  await page.screenshot({path:path.join(CAPTURES,'fengshui-reading-390.png'),fullPage:true,animations:'disabled'});
+  console.log('✓ Fengshui calculates the natal gua, shows the eight-direction table and the 玄空 grid for a chosen sitting, and stays inside the mobile viewport');
+
   assert.deepEqual(errors,[],'divination pages emitted browser JavaScript errors');
   console.log('✓ Astrology detailed chart and daily-stepped transit windows render without browser errors');
 
