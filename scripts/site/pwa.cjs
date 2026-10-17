@@ -55,7 +55,7 @@ module.exports=function writePwa(ctx){
   if(!seen.has(entryKey))throw new Error('Vue divination entry is missing from the Vite manifest: '+entryKey);
  }
  // Bazi and astrology bundles are cached together with their local calculation libraries for offline use.
- const precache=[base,base+'offline/',base+'assets/icons/favicon-64.png',base+'assets/icons/icon-192.png',base+'assets/icons/apple-touch-icon.png',...Object.values(fingerprint).map(file=>base+file),...Array.from(readerFiles).map(file=>base+'_vue/'+file),...Array.from(tarotFiles).map(file=>base+'_vue/'+file),...Array.from(divinationFiles).map(file=>base+'_vue/'+file)];
+ const precache=Array.from(new Set([base,base+'offline/',base+'assets/icons/favicon-64.png',base+'assets/icons/icon-192.png',base+'assets/icons/apple-touch-icon.png',...Object.values(fingerprint).map(file=>base+file),...Array.from(readerFiles).map(file=>base+'_vue/'+file),...Array.from(tarotFiles).map(file=>base+'_vue/'+file),...Array.from(divinationFiles).map(file=>base+'_vue/'+file)]));
  const template=fs.readFileSync(path.join(root,'scripts/site/service-worker.template.js'),'utf8');
  const buildId=String(commit||'dev').replace(/[^a-zA-Z0-9]/g,'').slice(0,12)||'dev';
  fs.writeFileSync(path.join(out,'sw.js'),template.replaceAll('__BUILD_ID__',buildId).replaceAll('__BASE__',base).replaceAll('__PRECACHE__',JSON.stringify(precache)));
