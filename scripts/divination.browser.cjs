@@ -63,7 +63,8 @@ async function run(){
   await page.getByRole('button',{name:/繪製深入星盤/}).click();
   assert.equal(await page.locator('.planet').count(),10,'Astrology chart should show ten placements');
   assert.equal(await page.locator('.forecast-grid .forecast').count(),3,'Astrology forecast periods missing');
-  assert.match(await page.locator('.method').textContent(),/每日步進/,'daily transit method is not disclosed');
+  const natalMethod=page.locator('details.method').filter({hasText:'本命星盤計算方法與限制'});
+  assert.match(await natalMethod.textContent(),/每日步進/,'daily transit method is not disclosed');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Astrology forecast overflows the mobile viewport');
   const transitDetails=page.locator('.transit-details').first();
   if(await transitDetails.count())await transitDetails.locator('summary').click();
