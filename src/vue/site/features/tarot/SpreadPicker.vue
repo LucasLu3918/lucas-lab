@@ -32,15 +32,15 @@ function selectMode(nextMode: ReadingMode): void {
 <template>
   <section class="spread-picker" aria-labelledby="spread-title">
     <div class="spread-picker__heading">
-      <div><p class="eyebrow">CHOOSE YOUR READING</p><h2 id="spread-title">選擇占卜方式</h2></div>
-      <p>先從適合當下的閱讀深度開始；牌面提供象徵性觀點，請以自身經驗與判斷為主。</p>
+      <h2 id="spread-title">選擇占卜方式</h2>
+      <p>先決定閱讀深度。牌面提供象徵性觀點，判斷仍以你的經驗為主。</p>
     </div>
     <div class="mode-options" role="group" aria-label="占卜方式">
       <button v-for="item in modes" :key="item.id" type="button" class="mode-option" :class="{ 'is-selected': mode === item.id }" :aria-pressed="mode === item.id" @click="selectMode(item.id)">
         <strong>{{ item.title }}</strong><span>{{ item.description }}</span>
       </button>
     </div>
-    <div v-if="mode === 'deep'" class="spread-picker__heading spread-picker__heading--compact"><div><p class="eyebrow">CHOOSE YOUR SPREAD</p><h3>選擇深入牌陣</h3></div></div>
+    <h3 v-if="mode === 'deep'" class="spread-picker__subhead">選擇深入牌陣</h3>
     <div class="spread-picker__options" role="group" aria-label="塔羅牌陣">
       <button v-for="option in options" :key="option.id" type="button" class="spread-option" :class="{ 'is-selected': props.spread === option.id }" :aria-pressed="props.spread === option.id" @click="emit('selectSpread', option.id)">
         <span class="spread-option__title">{{ option.title }}</span>
@@ -52,36 +52,33 @@ function selectMode(nextMode: ReadingMode): void {
       <span>包含逆位</span>
       <small>逆位代表牌義受阻、內化或需要重新調整，不等同於單純的壞結果。</small>
     </label>
-    <button class="draw-button" type="button" @click="emit('draw')">洗牌並展開 <span aria-hidden="true">✦</span></button>
+    <button class="draw-button ll-button ll-button--primary" type="button" @click="emit('draw')">洗牌並展開</button>
   </section>
 </template>
 
 <style scoped>
-.spread-picker { display:grid; gap:18px; padding:clamp(20px,4vw,32px); border:1px solid #9a84553b; border-radius:20px; background:linear-gradient(135deg,#121c25e8,#0b1118f2); box-shadow:0 16px 42px #0004; }
-.spread-picker__heading { display:flex; justify-content:space-between; align-items:end; gap:18px; }
-.spread-picker__heading h2 { margin:.15em 0 0; font-size:1.5rem; }
-.spread-picker__heading h3 { margin:.15em 0 0; color:#eee5d1; font-size:1.1rem; font-weight:500; }
-.spread-picker__heading--compact { margin-top:4px; }
-.spread-picker__heading>p { max-width:380px; margin:0; color:#b5b2a8; font-size:.88rem; }
-.eyebrow { margin:0; color:#cdb578; font-size:.72rem; letter-spacing:.13em; }
+.spread-picker { display:grid; gap:20px; padding:clamp(20px,4vw,30px); border:1px solid var(--ll-color-hairline); border-radius:var(--ll-radius-panel); background:var(--ll-color-surface); }
+.spread-picker__heading { display:grid; gap:6px; }
+.spread-picker__heading h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-2xl); font-weight:500; }
+.spread-picker__heading p { margin:0; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.6; }
+.spread-picker__subhead { margin:0; color:var(--ll-color-text); font-size:var(--ll-font-size-body); font-weight:600; }
 .mode-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-.mode-option { display:grid; gap:7px; min-height:96px; padding:15px; border:1px solid #64717b73; border-radius:13px; color:#eee5d1; background:#0e151c; text-align:left; cursor:pointer; }
-.mode-option strong { color:#ecd7a7; font-weight:600; }
-.mode-option span { color:#b8b6af; font-size:.82rem; line-height:1.5; }
-.mode-option:hover,.mode-option.is-selected { border-color:#c3a96e; background:linear-gradient(135deg,#202c34,#131a20); }
-.spread-picker__options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:12px; }
-.spread-option { display:grid; gap:8px; min-height:100px; padding:17px; border:1px solid #64717b73; border-radius:13px; color:#eee5d1; background:#0e151c; text-align:left; cursor:pointer; }
-.spread-option:hover,.spread-option.is-selected { border-color:#c3a96e; background:linear-gradient(135deg,#202c34,#131a20); }
-.spread-option:focus-visible,.mode-option:focus-visible,.draw-button:focus-visible,.reversal-toggle input:focus-visible { outline:3px solid #f0d59a; outline-offset:3px; }
-.spread-option__title { color:#ecd7a7; font-family:var(--font-heading,Georgia,serif); font-size:1.05rem; }
-.spread-option__description { color:#b8b6af; font-size:.85rem; line-height:1.55; }
-.reversal-toggle { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; align-items:center; color:#e3dccb; }
-.reversal-toggle input { width:18px; height:18px; accent-color:#bd9f61; }
-.reversal-toggle small { grid-column:2; color:#a7a7a1; line-height:1.5; }
-.draw-button { justify-self:start; min-height:48px; padding:0 22px; border:1px solid #d4bc83; border-radius:999px; color:#14130f; background:linear-gradient(135deg,#e0c989,#ad8d50); font-weight:700; cursor:pointer; }
-.draw-button:hover { filter:brightness(1.07); }
-.draw-button span { margin-left:8px; }
+.mode-option { display:grid; align-content:start; gap:6px; min-height:96px; padding:14px 16px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-control); color:var(--ll-color-text); background:var(--ll-color-background); text-align:left; cursor:pointer; transition:border-color var(--ll-motion-standard), background-color var(--ll-motion-standard); }
+.mode-option strong { color:var(--ll-color-gold-bright); font-size:var(--ll-font-size-body); font-weight:650; }
+.mode-option span { color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.5; }
+.mode-option:hover,.mode-option.is-selected { border-color:var(--ll-color-gold); background:var(--ll-color-surface-raised); }
+.mode-option.is-selected { border-color:var(--ll-color-gold-bright); box-shadow:inset 3px 0 0 var(--ll-color-gold-bright); }
+.spread-picker__options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:10px; }
+.spread-option { display:grid; align-content:start; gap:6px; min-height:96px; padding:14px 16px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-control); color:var(--ll-color-text); background:var(--ll-color-background); text-align:left; cursor:pointer; transition:border-color var(--ll-motion-standard), background-color var(--ll-motion-standard); }
+.spread-option:hover,.spread-option.is-selected { border-color:var(--ll-color-gold); background:var(--ll-color-surface-raised); }
+.spread-option.is-selected { border-color:var(--ll-color-gold-bright); box-shadow:inset 3px 0 0 var(--ll-color-gold-bright); }
+.spread-option__title { color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-lg); }
+.spread-option__description { color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.55; }
+.mode-option:focus-visible,.spread-option:focus-visible,.draw-button:focus-visible,.reversal-toggle input:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:var(--ll-focus-offset); }
+.reversal-toggle { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; align-items:center; color:var(--ll-color-text); }
+.reversal-toggle input { width:18px; height:18px; accent-color:var(--ll-color-gold); }
+.reversal-toggle small { grid-column:2; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.5; }
+.draw-button { justify-self:start; min-width:10em; }
 @media (max-width:700px) { .mode-options { grid-template-columns:1fr; } .mode-option { min-height:auto; } }
-@media (max-width:620px) { .spread-picker__heading { display:grid; } }
-@media (prefers-reduced-motion:reduce) { .spread-option,.mode-option,.draw-button { scroll-behavior:auto; } }
+@media (prefers-reduced-motion:reduce) { .mode-option,.spread-option { transition:none; } }
 </style>

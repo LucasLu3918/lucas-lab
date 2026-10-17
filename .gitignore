@@ -13,3 +13,8 @@ visual-audit-artifacts/
 /source-art/
 /games/blood-mirror/source-art/
 /games/blood-mirror/source-audio/
+
+# Starlit Tarot raw renders (about 90 MB of PNG) and review captures. The shipped WebP lives in assets/tarot-cards/.
+/tarot-art/cards/
+/tarot-art/style-test/
+/tarot-review/

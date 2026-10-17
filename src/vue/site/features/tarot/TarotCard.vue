@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed, inject } from 'vue';
+import { TAROT_ART_BASE_KEY } from './tarotArt';
 import type { TarotCard, TarotOrientation } from './tarot';
 
-defineProps<{
+const props = defineProps<{
   card: TarotCard | null;
   orientation: TarotOrientation | null;
   position: string;
@@ -10,6 +12,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{ reveal: [index: number] }>();
+const artBase = inject(TAROT_ART_BASE_KEY, '');
+const backSrc = computed(() => `${artBase}card-back.webp`);
+const frontSrc = computed(() => (props.card ? `${artBase}${props.card.id}.webp` : ''));
 </script>
 
 <template>
@@ -23,40 +28,46 @@ const emit = defineEmits<{ reveal: [index: number] }>();
       @click="emit('reveal', index)"
     >
       <span class="tarot-card__frame" aria-hidden="true">
-        <span class="tarot-card__moon">☾</span>
-        <span class="tarot-card__ornament">✧</span>
+        <img class="tarot-card__art" :src="backSrc" alt="" width="576" height="864" loading="eager" decoding="async">
         <span class="tarot-card__instruction">點選揭牌</span>
       </span>
     </button>
     <article v-else class="tarot-card tarot-card--front" :class="{ 'is-reversed': orientation === 'reversed' }">
       <span class="tarot-card__frame">
+        <img class="tarot-card__art" :src="frontSrc" :alt="card ? `${card.name}的插畫` : ''" width="576" height="864" decoding="async">
         <span class="tarot-card__number">{{ card?.number }}</span>
-        <span class="tarot-card__symbol" aria-hidden="true">{{ card?.symbol }}</span>
-        <span class="tarot-card__name">{{ card?.name }}</span>
-        <span class="tarot-card__english">{{ card?.englishName }}</span>
+        <span class="tarot-card__label">
+          <span class="tarot-card__name">{{ card?.name }}</span>
+          <span class="tarot-card__english">{{ card?.englishName }}</span>
+        </span>
       </span>
     </article>
   </div>
 </template>
 
 <style scoped>
-.drawn-card { display:grid; justify-items:center; gap:10px; min-width:0; }
-.drawn-card__position { min-height:1.5em; margin:0; color:#d4bd89; font-size:.9rem; text-align:center; }
-.tarot-card { position:relative; display:grid; width:min(100%,220px); aspect-ratio:2 / 3; padding:10px; border:1px solid #bd9f61; border-radius:15px; color:#f4e8cf; background:linear-gradient(145deg,#182533,#080d13 72%); box-shadow:0 16px 36px #0008,inset 0 0 0 4px #111a22,inset 0 0 0 5px #bd9f614d; text-align:center; }
-button.tarot-card { cursor:pointer; transition:transform .24s ease,border-color .24s,box-shadow .24s; }
-button.tarot-card:hover { transform:translateY(-4px); border-color:#f2dca9; box-shadow:0 20px 40px #0009,0 0 24px #bd9f6133,inset 0 0 0 4px #111a22,inset 0 0 0 5px #bd9f6170; }
-.tarot-card:focus-visible { outline:3px solid #f0d59a; outline-offset:4px; }
-.tarot-card__frame { display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-width:0; padding:14px 10px; border:1px solid #d2b87373; border-radius:8px; background:radial-gradient(ellipse at 50% 44%,#293741 0,#121a20 55%,#0b1118 100%); }
-.tarot-card--back .tarot-card__frame { position:relative; overflow:hidden; justify-content:center; gap:18px; background:radial-gradient(circle at 50% 45%,#283843,#0c1319 72%); }
-.tarot-card--back .tarot-card__frame::before,.tarot-card--back .tarot-card__frame::after { position:absolute; inset:12px; border:1px solid #bd9f614f; border-radius:50%; content:""; }
-.tarot-card--back .tarot-card__frame::after { inset:28px; border-style:dashed; transform:rotate(22deg); }
-.tarot-card__moon { color:#eddaac; font-size:3.2rem; line-height:1; text-shadow:0 0 24px #d8bb7959; }
-.tarot-card__ornament { color:#bd9f61; font-size:1.8rem; }
-.tarot-card__instruction { color:#d6c5a0; font-size:.82rem; }
-.tarot-card__number { align-self:flex-start; color:#cfb578; font-size:.76rem; }
-.tarot-card__symbol { display:grid; flex:1; place-items:center; color:#e7d29c; font-size:3.5rem; text-shadow:0 0 24px #bd9f6152; }
-.tarot-card__name { font-family:var(--font-heading,Georgia,serif); font-size:1.1rem; }
-.tarot-card__english { color:#b6a987; font-size:.68rem; letter-spacing:.04em; }
-.tarot-card--front.is-reversed .tarot-card__frame { transform:rotate(180deg); }
-@media (prefers-reduced-motion:reduce) { button.tarot-card { transition:none; } button.tarot-card:hover { transform:none; } }
+.drawn-card { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; gap:10px; min-width:0; }
+.drawn-card__position { min-height:1.5em; margin:0; color:var(--ll-color-gold); font-size:var(--ll-font-size-sm); text-align:center; }
+.tarot-card { position:relative; display:grid; width:min(100%,200px); aspect-ratio:2 / 3; padding:6px; border:1px solid var(--ll-color-gold); border-radius:12px; color:var(--ll-color-text); background:#0a1119; box-shadow:0 14px 30px rgb(0 0 0 / 0.45); text-align:center; overflow:hidden; }
+.tarot-card__frame { position:relative; display:block; width:100%; height:100%; overflow:hidden; border-radius:7px; }
+.tarot-card__art { display:block; width:100%; height:100%; object-fit:cover; transition:transform var(--ll-motion-standard) ease; }
+button.tarot-card { cursor:pointer; transition:border-color var(--ll-motion-standard), box-shadow var(--ll-motion-standard); }
+button.tarot-card:hover { border-color:var(--ll-color-gold-bright); box-shadow:0 14px 30px rgb(0 0 0 / 0.5), 0 0 26px rgb(217 191 138 / 0.22); }
+.tarot-card:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:4px; }
+.tarot-card__instruction { position:absolute; right:0; bottom:0; left:0; padding:22px 8px 12px; color:var(--ll-color-gold-bright); font-size:var(--ll-font-size-sm); letter-spacing:0.06em; background:linear-gradient(0deg,rgb(4 8 13 / 0.92),transparent); }
+.tarot-card__label { position:absolute; right:0; bottom:0; left:0; display:grid; justify-items:center; gap:2px; padding:28px 8px 12px; background:linear-gradient(0deg,rgb(4 8 13 / 0.94) 35%,transparent); }
+.tarot-card__number { position:absolute; top:8px; left:10px; padding:2px 7px; border-radius:999px; color:var(--ll-color-gold-bright); font-size:var(--ll-font-size-xs); background:rgb(4 8 13 / 0.7); }
+.tarot-card__name { color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-lg); line-height:1.25; }
+.tarot-card__english { color:var(--ll-color-text-muted); font-size:var(--ll-font-size-xs); letter-spacing:0.02em; }
+/* One-shot turn when a card is revealed; the front face is mounted in its place. */
+.tarot-card--front { animation:card-turn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin:center; }
+.tarot-card--front.is-reversed .tarot-card__art { transform:rotate(180deg); }
+@keyframes card-turn {
+  from { opacity:0.2; transform:perspective(900px) rotateY(82deg); }
+  to { opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  button.tarot-card,.tarot-card__art { transition:none; }
+  .tarot-card--front { animation:none; }
+}
 </style>

@@ -13,6 +13,7 @@ export default defineConfig({
         site: 'src/vue/site/main.ts',
         'site-lazy': 'src/vue/site/lazy.ts',
         tarot: 'src/vue/site/tarot-main.ts',
+        'tarot-deck': 'src/vue/site/tarot-deck-main.ts',
         divination: 'src/vue/site/divination-main.ts',
         bazi: 'src/vue/site/bazi-main.ts',
         astrology: 'src/vue/site/astrology-main.ts',
