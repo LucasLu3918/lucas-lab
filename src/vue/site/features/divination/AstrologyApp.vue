@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import { signDescription } from './astrology-signs';
 import type { AstrologyChart, AstrologyForecast } from './astrology';
 import type { AnnualAstrologyForecast } from './astrology-annual';
@@ -22,7 +22,8 @@ const chart = ref<AstrologyChart | null>(null);
 const forecasts = ref<AstrologyForecast[]>([]);
 const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
-const forecastPending = ref(false);
+// 計算期間顯示狀態並停用按鈕；結果區只在計算完成後才出現，因此狀態列不能放在結果區內。
+const calculating = ref(false);
 // 行運與年度清單（行運年度可達上千筆）只在展開後才渲染；記住展開狀態，重新計算後 <details> 會依此還原。
 const detailsOpen = reactive<Record<string, boolean>>({});
 function setDetailsOpen(key: string, event: Event): void {
@@ -51,8 +52,11 @@ function formatAt(instant: string, timeZone: string): string {
 let astrologyWorker: Worker | null = null;
 let workerRequestId = 0;
 let latestCalculation = 0;
+// 目前送進 Worker 的計算；新的計算開始時會終止它，避免新按下的計算排在舊計算之後等待。
+let inFlight: { worker: Worker; cancel: (cause: Error) => void } | null = null;
 
 class WorkerUnavailableError extends Error {}
+class CalculationCancelledError extends Error {}
 
 function getAstrologyWorker(): Worker | null {
   if (typeof Worker === 'undefined') return null;
@@ -72,6 +76,11 @@ function computeInWorker(worker: Worker, request: AstrologyComputeRequest): Prom
     const cleanup = () => {
       worker.removeEventListener('message', onMessage);
       worker.removeEventListener('error', onError);
+      if (inFlight?.worker === worker) inFlight = null;
+    };
+    const discardWorker = () => {
+      worker.terminate();
+      if (astrologyWorker === worker) astrologyWorker = null;
     };
     const onMessage = (event: MessageEvent<AstrologyWorkerResponse>) => {
       if (event.data.id !== id) return;
@@ -81,14 +90,25 @@ function computeInWorker(worker: Worker, request: AstrologyComputeRequest): Prom
     };
     const onError = () => {
       cleanup();
-      worker.terminate();
-      if (astrologyWorker === worker) astrologyWorker = null;
+      discardWorker();
       reject(new WorkerUnavailableError('astrology worker failed to load'));
+    };
+    inFlight = {
+      worker,
+      cancel: cause => {
+        cleanup();
+        discardWorker();
+        reject(cause);
+      },
     };
     worker.addEventListener('message', onMessage);
     worker.addEventListener('error', onError);
     worker.postMessage({ id, ...request });
   });
+}
+
+function cancelInFlightCalculation(): void {
+  inFlight?.cancel(new CalculationCancelledError('calculation superseded'));
 }
 
 async function computeAstrologyResult(request: AstrologyComputeRequest): Promise<AstrologyComputeResult> {
@@ -104,13 +124,21 @@ async function computeAstrologyResult(request: AstrologyComputeRequest): Promise
   return computeAstrology(request);
 }
 
+onBeforeUnmount(() => {
+  cancelInFlightCalculation();
+  astrologyWorker?.terminate();
+  astrologyWorker = null;
+});
+
 async function calculate(): Promise<void> {
+  // 先取消仍在執行的舊計算（會終止其 Worker），再開始新計算；舊計算的結果即使回來也會被下方的檢查丟棄。
+  cancelInFlightCalculation();
   error.value = '';
   chart.value = null;
   forecasts.value = [];
   annual.value = null;
   const calculation = ++latestCalculation;
-  forecastPending.value = true;
+  calculating.value = true;
   const request: AstrologyComputeRequest = {
     input: { birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value },
     returnPlace: returnPlace.value,
@@ -123,10 +151,10 @@ async function calculate(): Promise<void> {
     forecasts.value = computed.forecasts;
     annual.value = computed.annual;
   } catch (cause) {
-    if (calculation !== latestCalculation) return;
+    if (calculation !== latestCalculation || cause instanceof CalculationCancelledError) return;
     error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
   } finally {
-    if (calculation === latestCalculation) forecastPending.value = false;
+    if (calculation === latestCalculation) calculating.value = false;
   }
 }
 </script>
@@ -147,13 +175,13 @@ async function calculate(): Promise<void> {
       <label class="time-input">出生時間<input v-model="birthTime" type="time" :disabled="unknownTime" :required="!unknownTime"><small v-if="unknownTime">簡易模式用當地中午估算行星位置；月亮等快速移動天體可能跨星座。</small></label>
       <label v-if="!unknownTime">若出生地當時有夏令時間重複時刻<select v-model="disambiguation"><option value="earlier">採較早的一次</option><option value="later">採較晚的一次</option></select></label>
       <p v-if="!unknownTime" class="form-help">若所填時刻因夏令時間切換而不存在，系統會提示重新核對；它不會自動改成其他時間。</p>
-      <button class="primary-button" type="submit">{{ unknownTime ? '查看簡易星盤' : '繪製深入星盤' }}</button>
+      <button class="primary-button" type="submit" :disabled="calculating">{{ calculating ? '計算中…' : unknownTime ? '查看簡易星盤' : '繪製深入星盤' }}</button>
+      <p v-if="calculating" class="form-help" role="status">正在計算本命盤、行運與年度天象，請稍候。</p>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
     </form>
 
     <section v-if="chart" class="results" aria-live="polite">
       <nav class="result-nav" aria-label="結果章節"><a href="#natal">本命星盤</a><a href="#transits">近期行運</a><a href="#annual">年度天象</a></nav>
-      <p v-if="forecastPending" class="form-help">正在計算行運與年度天象…</p>
       <section id="natal" class="result-block">
       <div class="section-title"><div><h2>行星落點</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
       <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，隱藏上升點與宮位' : '已提供出生時間，計算上升點與宮位'" />
@@ -184,7 +212,7 @@ async function calculate(): Promise<void> {
 </template>
 
 <style scoped>
-.divination-app{display:grid;gap:24px;width:min(100% - 32px,960px);margin:0 auto 72px;color:#e4dfd3}.page-head{padding:44px 10px 8px;text-align:center}.forecast-label{margin:0 0 4px;color:#cfb878;font-size:.8125rem}.page-head h1{margin:0;color:#f1e5ca;font-size:clamp(2rem,6vw,3.3rem);font-weight:500}.page-head>p:last-child{color:#bdb9ae}.birth-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;padding:22px;border:1px solid #a48e524b;border-radius:var(--ll-radius-panel);background:#121a21}.birth-form label{display:grid;gap:7px;color:#d4c69f;font-size:.88rem}.birth-form input,.birth-form select{width:100%;min-height:46px;padding:9px 12px;border:1px solid #52606a;border-radius:var(--ll-radius-control);color:#eee8dc;background:#0b1117;font:inherit}.birth-form input:focus-visible,.birth-form select:focus-visible{outline:3px solid #d7bd79;outline-offset:2px}.birth-form input:disabled{opacity:.5}.primary-button{justify-self:start;min-height:48px;padding:0 20px;border:1px solid #b87b68;border-radius:var(--ll-radius-control);color:#fff7ed;background:var(--ll-color-wine);font:650 var(--ll-font-size-body)/1.4 var(--ll-font-body);cursor:pointer}.primary-button:hover{background:var(--ll-color-wine-light)}.primary-button:focus-visible{outline:var(--ll-focus-width) solid var(--ll-color-focus);outline-offset:var(--ll-focus-offset)}.error{grid-column:1/-1;margin:0;color:#ffb7a9}.results{display:grid;gap:18px}.section-title{display:flex;justify-content:space-between;align-items:end}.section-title h2{margin:0;color:#f0e4c6;font-size:1.7rem}.version{color:#99978f;font-size:.75rem}.chart-points{display:flex;flex-wrap:wrap;gap:12px}.point{display:grid;gap:5px;min-width:145px;padding:15px 18px;border:1px solid #b29a5855;border-radius:12px;background:#1b252d}.point small,.point span{color:#bbb5a9}.point strong{color:#efdda9;font-size:1.2rem}.point.unknown{flex:1}.planet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.planet{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:13px 16px;border:1px solid #68727a44;border-radius:10px;background:#11191f}.planet>div{display:grid;gap:3px}.planet>div strong{color:#eaddbd}.planet small,.house,.retrograde{color:#aaa99f;font-size:.78rem}.sign{color:#d8c78e}.degree{color:#eee4cf;font-variant-numeric:tabular-nums}.house{grid-column:2}.retrograde{grid-row:1;grid-column:2;justify-self:end;color:#d9a99b}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.summary,.forecast,.aspects,.method{padding:18px 20px;border:1px solid #64707a55;border-radius:var(--ll-radius-panel);background:#121a21}.summary h3,.aspects h3{margin:0 0 8px;color:#e8d8b3}.summary p,.forecast p,.method p{margin:8px 0 0;color:#c5c0b6;line-height:1.75}.aspects ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0;padding:0;list-style:none}.aspects li{display:grid;gap:5px;padding:12px;border-radius:9px;background:#0d141a}.aspects li strong{color:#e8d8b3}.aspects li span,.aspects li small,.forecast small{color:#bdb9ae;line-height:1.65}.forecast-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.method summary{color:#dec98f;cursor:pointer}.method p{margin-top:12px}.privacy-note{padding:16px 20px;border-left:2px solid #8c784a;color:#bcb8ae;background:#151c21;line-height:1.7}.muted{color:#aaa}@media(max-width:680px){.birth-form{grid-template-columns:1fr}.error{grid-column:1}.planet-grid,.forecast-grid{grid-template-columns:1fr}.divination-app{width:min(100% - 22px,960px)}}
+.divination-app{display:grid;gap:24px;width:min(100% - 32px,960px);margin:0 auto 72px;color:#e4dfd3}.page-head{padding:44px 10px 8px;text-align:center}.forecast-label{margin:0 0 4px;color:#cfb878;font-size:.8125rem}.page-head h1{margin:0;color:#f1e5ca;font-size:clamp(2rem,6vw,3.3rem);font-weight:500}.page-head>p:last-child{color:#bdb9ae}.birth-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;padding:22px;border:1px solid #a48e524b;border-radius:var(--ll-radius-panel);background:#121a21}.birth-form label{display:grid;gap:7px;color:#d4c69f;font-size:.88rem}.birth-form input,.birth-form select{width:100%;min-height:46px;padding:9px 12px;border:1px solid #52606a;border-radius:var(--ll-radius-control);color:#eee8dc;background:#0b1117;font:inherit}.birth-form input:focus-visible,.birth-form select:focus-visible{outline:3px solid #d7bd79;outline-offset:2px}.birth-form input:disabled{opacity:.5}.primary-button{justify-self:start;min-height:48px;padding:0 20px;border:1px solid #b87b68;border-radius:var(--ll-radius-control);color:#fff7ed;background:var(--ll-color-wine);font:650 var(--ll-font-size-body)/1.4 var(--ll-font-body);cursor:pointer}.primary-button:hover{background:var(--ll-color-wine-light)}.primary-button:disabled{opacity:.6;cursor:progress}.primary-button:focus-visible{outline:var(--ll-focus-width) solid var(--ll-color-focus);outline-offset:var(--ll-focus-offset)}.error{grid-column:1/-1;margin:0;color:#ffb7a9}.results{display:grid;gap:18px}.section-title{display:flex;justify-content:space-between;align-items:end}.section-title h2{margin:0;color:#f0e4c6;font-size:1.7rem}.version{color:#99978f;font-size:.75rem}.chart-points{display:flex;flex-wrap:wrap;gap:12px}.point{display:grid;gap:5px;min-width:145px;padding:15px 18px;border:1px solid #b29a5855;border-radius:12px;background:#1b252d}.point small,.point span{color:#bbb5a9}.point strong{color:#efdda9;font-size:1.2rem}.point.unknown{flex:1}.planet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.planet{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:13px 16px;border:1px solid #68727a44;border-radius:10px;background:#11191f}.planet>div{display:grid;gap:3px}.planet>div strong{color:#eaddbd}.planet small,.house,.retrograde{color:#aaa99f;font-size:.78rem}.sign{color:#d8c78e}.degree{color:#eee4cf;font-variant-numeric:tabular-nums}.house{grid-column:2}.retrograde{grid-row:1;grid-column:2;justify-self:end;color:#d9a99b}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.summary,.forecast,.aspects,.method{padding:18px 20px;border:1px solid #64707a55;border-radius:var(--ll-radius-panel);background:#121a21}.summary h3,.aspects h3{margin:0 0 8px;color:#e8d8b3}.summary p,.forecast p,.method p{margin:8px 0 0;color:#c5c0b6;line-height:1.75}.aspects ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0;padding:0;list-style:none}.aspects li{display:grid;gap:5px;padding:12px;border-radius:9px;background:#0d141a}.aspects li strong{color:#e8d8b3}.aspects li span,.aspects li small,.forecast small{color:#bdb9ae;line-height:1.65}.forecast-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.method summary{color:#dec98f;cursor:pointer}.method p{margin-top:12px}.privacy-note{padding:16px 20px;border-left:2px solid #8c784a;color:#bcb8ae;background:#151c21;line-height:1.7}.muted{color:#aaa}@media(max-width:680px){.birth-form{grid-template-columns:1fr}.error{grid-column:1}.planet-grid,.forecast-grid{grid-template-columns:1fr}.divination-app{width:min(100% - 22px,960px)}}
 .precision-toggle{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;border:0}.precision-toggle legend{margin-bottom:8px;color:#d4c69f;font-size:.88rem}.precision-toggle label{display:grid;grid-template-columns:auto 1fr;gap:3px 9px;align-items:center;padding:13px;border:1px solid #52606a;border-radius:10px;background:#0b1117}.precision-toggle input{grid-row:span 2;width:18px;height:18px;accent-color:#c7a859}.precision-toggle small,.birth-form label small{color:#aaa99f;font-size:.78rem;line-height:1.5}.form-help{grid-column:1/-1;margin:0;color:#aaa99f;font-size:.82rem;line-height:1.6}
 @media(max-width:680px){.precision-toggle{grid-template-columns:1fr}.form-help{grid-column:1}}
 </style>

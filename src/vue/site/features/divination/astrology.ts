@@ -193,8 +193,8 @@ export interface AstrologyTransitEvent {
 }
 
 /**
- * 在單峰區間內以黃金分割搜尋最小值（每輪只新增一次計算），約 20 輪即可精確到數秒。
- * 回傳最小值所在的毫秒時間點。
+ * 在單峰區間內以黃金分割搜尋最小值（每輪只新增一次計算）。搜尋區間為 24 小時，16 輪後寬度約 40 秒，
+ * 足以精確到顯示的分鐘，且比原本 20 輪少約 18% 的天體位置計算。回傳最小值所在的毫秒時間點。
  */
 function goldenSectionMinimum(valueAt: (milliseconds: number) => number, left: number, right: number): number {
   const ratio = (Math.sqrt(5) - 1) / 2;
@@ -202,7 +202,7 @@ function goldenSectionMinimum(valueAt: (milliseconds: number) => number, left: n
   let upperProbe = left + ratio * (right - left);
   let lowerValue = valueAt(lowerProbe);
   let upperValue = valueAt(upperProbe);
-  for (let pass = 0; pass < 20; pass++) {
+  for (let pass = 0; pass < 16; pass++) {
     if (lowerValue <= upperValue) {
       right = upperProbe;
       upperProbe = lowerProbe;
@@ -237,7 +237,7 @@ const BOUNDARY_TOLERANCE_MS = 60_000;
  */
 const SAMPLE_MS = DAY_MS / 2;
 
-/** 容許度取樣陣列中的局部極小值索引；單日掃描只看起點。 */
+/** 容許度取樣陣列中的局部極小值索引；只有一個取樣點時，只看該點。 */
 function sampledMinima(orbs: Float64Array, limit: number): number[] {
   const last = orbs.length - 1;
   if (last === 0) return orbs[0] <= limit ? [0] : [];
@@ -252,7 +252,8 @@ function sampledMinima(orbs: Float64Array, limit: number): number[] {
 }
 
 export function createAstrologyForecast(chart: AstrologyChart, period: AstrologyForecastPeriod, start = new Date()): AstrologyForecast {
-  const spanDays = period === 'day' ? 0 : period === 'month' ? 30 : 365;
+  // 「今日」掃描未來 24 小時的相位窗口；舊版只檢查計算當下的容許度，會把當下時刻誤當成相位發生時間。
+  const spanDays = period === 'day' ? 1 : period === 'month' ? 30 : 365;
   const startMs = start.getTime();
   const windowEndMs = startMs + spanDays * DAY_MS;
   const natalTargets = chart.planets.map(item => ({ name: item.name, longitude: item.longitude }));
@@ -279,15 +280,11 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
     const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(body.body, new Date(milliseconds)), natal.longitude) - aspect.angle);
     const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
     for (const index of sampledMinima(combo.orbs, aspect.orb)) {
-      let exactMs = startMs + index * SAMPLE_MS;
-      let orb = combo.orbs[index];
-      if (period !== 'day') {
-        const left = Math.max(startMs, exactMs - SAMPLE_MS);
-        const right = Math.min(windowEndMs, exactMs + SAMPLE_MS);
-        exactMs = new Date(goldenSectionMinimum(orbAt, left, right)).getTime();
-        if (exactMs - startMs < BOUNDARY_TOLERANCE_MS || windowEndMs - exactMs < BOUNDARY_TOLERANCE_MS) continue;
-        orb = orbAt(exactMs);
-      }
+      const left = Math.max(startMs, startMs + (index - 1) * SAMPLE_MS);
+      const right = Math.min(windowEndMs, startMs + (index + 1) * SAMPLE_MS);
+      const exactMs = new Date(goldenSectionMinimum(orbAt, left, right)).getTime();
+      if (exactMs - startMs < BOUNDARY_TOLERANCE_MS || windowEndMs - exactMs < BOUNDARY_TOLERANCE_MS) continue;
+      const orb = orbAt(exactMs);
       if (combo.exactTimes.some(time => Math.abs(time - exactMs) < 2 * DAY_MS)) continue;
       const beforeOrb = orbAt(exactMs - timeDelta);
       const afterOrb = orbAt(exactMs + timeDelta);
@@ -298,9 +295,10 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
   }
   const orderedEvents = events.sort((left, right) => left.exactAt.localeCompare(right.exactAt) || left.orb - right.orb);
   const label = period === 'day' ? '今日' : period === 'month' ? '未來一個月' : '未來一年';
+  const scanNote = period === 'day' ? '未來 24 小時' : `未來 ${spanDays} 天`;
   const text = orderedEvents.length
-    ? `${spanDays === 0 ? '目前' : `未來 ${spanDays} 天每 12 小時掃描並細化`}找到 ${orderedEvents.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
-    : '這段期間未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。';
+    ? `${scanNote}每 12 小時掃描並細化，找到 ${orderedEvents.length} 個主要行運相位窗口，依精確時刻排序完整列出。可把這些象徵主題當作整理節奏與需求的提示，並以實際情況作判斷。`
+    : `${scanNote}未找到設定容許度內的主要行運相位；這不代表沒有值得留意的事。`;
   return { periodLabel: label, text, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
 
