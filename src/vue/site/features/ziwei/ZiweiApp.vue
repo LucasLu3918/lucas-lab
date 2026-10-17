@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { mutagenMeaning, palaceMeaning, starMeaning } from './meanings';
-import { BRANCHES, calculateZiwei, type Gender, type PlacedStar, type ZiweiChart, type ZiweiPalace } from './ziwei';
+import {
+  BRANCHES, calculateZiwei, decadalPalaceAt, sanFangSiZheng, type Gender, type PlacedStar, type ZiweiChart, type ZiweiPalace,
+} from './ziwei';
 import type { MethodResult } from '../fortune-core/result';
 
 const pad = (value: number) => String(value).padStart(2, '0');
@@ -18,6 +20,10 @@ const GRID_POSITION: Record<number, string> = {
   3: '3 / 1', 4: '2 / 1',
 };
 const PALACE_CELLS = Object.keys(GRID_POSITION).map(Number);
+const YANG_STEMS = ['甲', '丙', '戊', '庚', '壬'];
+const GENDER_LABEL: Record<Gender, string> = { male: '男', female: '女' };
+// The year is read when the page loads; 大限 and 虛歲 follow it.
+const currentYear = new Date().getFullYear();
 
 const birthDate = ref('');
 const birthBranch = ref<number | ''>('');
@@ -33,9 +39,44 @@ const palaceByBranch = computed(() => {
   return map;
 });
 const selectedPalace = computed(() => palaceByBranch.value.get(selectedBranch.value) ?? null);
+const selectedTriad = computed(() => {
+  if (!selectedPalace.value) return null;
+  const { opposite, trines } = sanFangSiZheng(selectedPalace.value.branch);
+  return {
+    opposite: palaceByBranch.value.get(opposite) ?? null,
+    trines: trines.map(branch => palaceByBranch.value.get(branch) ?? null),
+  };
+});
+const currentDecadal = computed(() => (chart.value ? decadalPalaceAt(chart.value, currentYear) : null));
+const currentAge = computed(() => (chart.value ? currentYear - chart.value.lunar.year + 1 : 0));
+// 大限依起運年齡排列，即大限運行的先後順序（第一限必為命宮起算的那一宮）。
+const decadalTimeline = computed(() => [...(chart.value?.palaces ?? [])].sort((a, b) => a.decadal.startAge - b.decadal.startAge));
+const yinYangLabel = computed(() => (chart.value && YANG_STEMS.includes(chart.value.yearStem) ? '陽' : '陰'));
+
+// 排盤推導：每一步都帶入實際算出的數字，讓使用者可以逐步核對。
+const derivationSteps = computed(() => {
+  const data = chart.value;
+  if (!data) return [];
+  const d = data.derivation;
+  const hourStep = d.hourIndex === 0 ? '子時不需逆數' : `再逆數 ${d.hourIndex} 步（${d.hourBranch}時）`;
+  const leapNote = d.leapAdjusted ? '（閏月十六日以後，算作下一個月）' : '';
+  const mutagenText = d.mutagens.map(item => `${item.star}化${item.mutagen}入${item.palace}`).join('、');
+  return [
+    `寅宮起正月，順數至農曆${d.palaceMonth}月（${d.monthBranch}）${leapNote}，${hourStep}，命宮在${data.soulBranch}。`,
+    `命宮干支為${d.mingStem}${data.soulBranch}（五虎遁定天干），納音為${d.nayin}，定出${data.fiveElementsClass}。`,
+    `紫微落宮：以${data.fiveElementsClass}配農曆${d.ziweiDay}日，依口訣定在${d.ziweiBranch}；天府與紫微以寅申為軸對稱，在${d.tianfuBranch}。`,
+    `祿存在${d.lucunBranch}（依年干${data.yearStem}），擎羊與陀羅分別在其後一宮與其前一宮。`,
+    `年干${data.yearStem}的四化：${mutagenText}。`,
+    `${data.yearStem}年${yinYangLabel.value}${GENDER_LABEL[data.gender]}，大限${data.decadalForward ? '順行' : '逆行'}，${data.bureau}歲起運。`,
+  ];
+});
 
 function starLabel(star: PlacedStar): string {
   return star.mutagen ? `${star.name}化${star.mutagen}` : star.name;
+}
+
+function palaceLabel(palace: ZiweiPalace | null): string {
+  return palace ? `${palace.name}（${palace.branchName}宮）` : '—';
 }
 
 function calculate(): void {
@@ -79,7 +120,7 @@ function selectPalace(branch: number): void {
         <legend>性別</legend>
         <label><input v-model="gender" type="radio" value="male"> 男</label>
         <label><input v-model="gender" type="radio" value="female"> 女</label>
-        <small>性別決定大限的順逆方向。</small>
+        <small>性別與年干陰陽共同決定大限的順逆方向。</small>
       </fieldset>
       <button class="primary-button" type="submit">排出命盤</button>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -92,7 +133,7 @@ function selectPalace(branch: number): void {
           :key="branch"
           type="button"
           class="palace-cell"
-          :class="{ selected: branch === selectedBranch, body: palaceByBranch.get(branch)?.isBody }"
+          :class="{ selected: branch === selectedBranch, body: palaceByBranch.get(branch)?.isBody, current: branch === currentDecadal?.branch }"
           :style="{ gridArea: GRID_POSITION[branch] }"
           :aria-pressed="branch === selectedBranch"
           @click="selectPalace(branch)"
@@ -104,18 +145,21 @@ function selectPalace(branch: number): void {
           </span>
           <span class="palace-minor">{{ (palaceByBranch.get(branch)?.minorStars ?? []).map(starLabel).join('、') }}</span>
           <span v-if="palaceByBranch.get(branch)?.isBody" class="body-tag">身宮</span>
+          <span v-if="branch === currentDecadal?.branch" class="current-tag">本限</span>
         </button>
 
         <div class="chart-center">
           <p class="chart-title">紫微斗數命盤</p>
-          <p>農曆 {{ chart.lunar.ganzhiYear }}年 {{ chart.lunar.isLeapMonth ? '閏' : '' }}{{ chart.lunar.month }}月 {{ chart.lunar.day }}日 · {{ chart.hourBranch }}時 · {{ chart.gender === 'male' ? '男' : '女' }}</p>
+          <p>農曆 {{ chart.lunar.ganzhiYear }}年 {{ chart.lunar.isLeapMonth ? '閏' : '' }}{{ chart.lunar.month }}月 {{ chart.lunar.day }}日 · {{ chart.hourBranch }}時 · {{ GENDER_LABEL[chart.gender] }}</p>
           <p>{{ chart.fiveElementsClass }} · 命宮在{{ chart.soulBranch }} · 身宮在{{ chart.bodyBranch }}</p>
           <p>大限{{ chart.decadalForward ? '順行' : '逆行' }}，從 {{ chart.bureau }} 歲起運。</p>
+          <p v-if="currentDecadal">{{ currentYear }} 年（虛歲 {{ currentAge }} 歲）落在{{ currentDecadal.name }}大限。</p>
+          <p v-else>{{ currentYear }} 年（虛歲 {{ currentAge }} 歲）尚未進入第一個大限。</p>
         </div>
       </div>
 
       <article v-if="selectedPalace" class="palace-detail">
-        <p class="card-title">{{ selectedPalace.name }}（{{ selectedPalace.branchName }}宮）</p>
+        <p class="card-title">{{ selectedPalace.name }}（{{ selectedPalace.branchName }}宮）<span v-if="selectedPalace.isBody"> · 身宮</span></p>
         <h2>{{ palaceMeaning(selectedPalace.name).keyword }}</h2>
         <p>{{ palaceMeaning(selectedPalace.name).summary }}</p>
         <p class="guidance">{{ palaceMeaning(selectedPalace.name).guidance }}</p>
@@ -126,22 +170,51 @@ function selectPalace(branch: number): void {
           </li>
           <li v-if="selectedPalace.majorStars.length === 0" class="empty">本宮沒有主星，需參考對宮與三方四正的星曜。</li>
         </ul>
+        <p v-if="selectedPalace.minorStars.length" class="minor-line"><strong>輔星</strong>：{{ selectedPalace.minorStars.map(starLabel).join('、') }}</p>
+        <div v-if="selectedTriad" class="triad">
+          <p><strong>對宮</strong>：{{ palaceLabel(selectedTriad.opposite) }}，主星 {{ selectedTriad.opposite?.majorStars.map(starLabel).join('、') || '無' }}</p>
+          <p><strong>三合</strong>：{{ selectedTriad.trines.map(palaceLabel).join('、') }}</p>
+        </div>
+        <p class="decadal-line">大限 {{ selectedPalace.decadal.startAge }}–{{ selectedPalace.decadal.endAge }} 歲，約 {{ selectedPalace.decadal.startYear }}–{{ selectedPalace.decadal.endYear }} 年。</p>
       </article>
 
-      <details class="steps">
+      <section class="decadal-section" aria-labelledby="decadal-title">
+        <h2 id="decadal-title">大限走勢</h2>
+        <p class="muted">虛歲計算：出生年為 1 歲，依農曆出生年推算各限起訖年份。</p>
+        <ol class="decadal-list">
+          <li v-for="(palace, index) in decadalTimeline" :key="palace.name" :class="{ current: palace.name === currentDecadal?.name }">
+            <span class="decadal-order">第 {{ index + 1 }} 限</span>
+            <strong>{{ palace.name }}（{{ palace.branchName }}宮）</strong>
+            <span>{{ palace.decadal.startAge }}–{{ palace.decadal.endAge }} 歲</span>
+            <span>{{ palace.decadal.startYear }}–{{ palace.decadal.endYear }} 年</span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="mutagen-section" aria-labelledby="mutagen-title">
+        <h2 id="mutagen-title">四化分布</h2>
+        <p class="muted">依年干 {{ chart.yearStem }} 定出四化，化祿、化權、化科、化忌所落之宮位如下。</p>
+        <ul class="mutagen-list">
+          <li v-for="item in chart.derivation.mutagens" :key="item.mutagen">
+            <strong>化{{ item.mutagen }}</strong>
+            <span>{{ item.star }} 入 {{ item.palace }}（{{ item.branch }}宮）</span>
+            <small>{{ mutagenMeaning(item.mutagen).keyword }}：{{ mutagenMeaning(item.mutagen).summary }}</small>
+          </li>
+        </ul>
+      </section>
+
+      <details class="steps" open>
         <summary>排盤推導</summary>
         <ol>
-          <li>農曆 {{ chart.lunar.month }} 月、{{ chart.hourBranch }}時，命宮在 {{ chart.soulBranch }}（寅宮起正月，順數至生月，再逆數時辰）。</li>
-          <li>年干 {{ chart.yearStem }}，命宮干支定出五行局：{{ chart.fiveElementsClass }}。</li>
-          <li>紫微落宮：以 {{ chart.bureau }} 局與農曆 {{ chart.lunar.day }} 日定位，其餘紫府星系依規則排列。</li>
-          <li>四化依年干 {{ chart.yearStem }} 定位，標示於星曜之後。</li>
+          <li v-for="step in derivationSteps" :key="step">{{ step }}</li>
         </ol>
       </details>
 
       <details class="method">
         <summary>計算方法與版本</summary>
         <p>方法版本：{{ result?.methodVersion }}；內容版本：{{ result?.contentVersion }}。</p>
-        <p>排盤規則以標準安星法為準，並與公開的 iztro 2.6.3 對照測試；未包含禄存、擎羊、陀羅等煞星與雜曜。</p>
+        <p>排盤規則以標準安星法為準，並與公開的 iztro 2.6.3 對照測試。閏月十六日以後依 iztro 的預設算作下一個月；子時以出生當日計算，不做晚子時換日。</p>
+        <p>包含十四主星、文昌、文曲、左輔、右弼、天魁、天鉞、祿存、擎羊與陀羅；未包含其餘雜曜。</p>
       </details>
     </section>
 
@@ -168,7 +241,9 @@ function selectPalace(branch: number): void {
 .chart-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(120px, auto)); gap: 8px; }
 .palace-cell { position: relative; display: grid; align-content: start; gap: 4px; padding: 10px; border: 1px solid #a48e524b; border-radius: 12px; background: #0b1117; color: #e4dfd3; font: inherit; text-align: left; cursor: pointer; }
 .palace-cell.selected { border-color: #c7a859; background: #141c24; }
+.palace-cell.current { box-shadow: inset 0 0 0 1px #8fb3a0; }
 .palace-cell.body .body-tag { position: absolute; top: 8px; right: 8px; color: #cfb878; font-size: 0.75rem; }
+.palace-cell .current-tag { position: absolute; bottom: 8px; right: 8px; color: #8fb3a0; font-size: 0.75rem; }
 .palace-name { color: #f1e5ca; font-size: 0.95rem; font-weight: 500; }
 .palace-meta { color: #aaa99f; font-size: 0.75rem; }
 .palace-stars { display: grid; gap: 2px; }
@@ -185,9 +260,23 @@ function selectPalace(branch: number): void {
 .star-list { margin: 8px 0 0; padding-left: 20px; line-height: 1.8; }
 .mutagen-note { display: block; color: #bdb9ae; font-size: 0.875rem; }
 .empty { color: #aaa99f; }
+.minor-line, .triad p, .decadal-line { color: #c5c0b6; font-size: 0.9rem; }
+.triad { display: grid; gap: 4px; padding-top: 4px; border-top: 1px solid #a48e524b; }
+.decadal-section, .mutagen-section { display: grid; gap: 10px; padding: 20px; border: 1px solid #a48e524b; border-radius: 14px; background: #0b1117; }
+.decadal-section h2, .mutagen-section h2 { margin: 0; color: #f1e5ca; font-size: 1.125rem; font-weight: 500; }
+.decadal-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.decadal-list li { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid #52606a88; border-radius: 10px; color: #c5c0b6; font-size: 0.875rem; }
+.decadal-list li strong { color: #f1e5ca; font-weight: 500; }
+.decadal-list li.current { border-color: #8fb3a0; background: #141c24; }
+.decadal-order { color: #cfb878; font-size: 0.75rem; }
+.mutagen-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.mutagen-list li { display: grid; gap: 4px; padding: 12px; border-radius: 10px; background: #080e16; color: #c5c0b6; font-size: 0.875rem; line-height: 1.6; }
+.mutagen-list strong { color: #cfb878; }
+.mutagen-list small { color: #aaa99f; line-height: 1.6; }
 .steps summary, .method summary { color: #cfb878; cursor: pointer; }
 .steps ol { margin: 8px 0 0; padding-left: 20px; color: #c5c0b6; line-height: 1.8; font-size: 0.875rem; }
 .method { color: #c5c0b6; line-height: 1.7; }
+.muted { margin: 0; color: #aaa99f; font-size: 0.875rem; line-height: 1.6; }
 .privacy-note { color: #aaa99f; font-size: 0.875rem; line-height: 1.7; }
 @media (max-width: 680px) {
   .birth-form { grid-template-columns: 1fr; }

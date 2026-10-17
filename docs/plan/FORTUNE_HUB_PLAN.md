@@ -16,7 +16,7 @@
 | 西洋占星 | `/astrology/` | 已完成：行星落座、相位、年度流年；使用 `astronomy-engine`；時間未知時隱藏上升與宮位；P3 起標示 `inputPrecision` | `src/vue/site/features/divination/astrology.ts`、`astrology-annual.ts`（`tropical-whole-sign-v3`） |
 | 占卜總覽 | `/divination/` | 入口卡片（月夜占卜室）；P3 起加入零輸入的今日總覽（今日一抽、今日星座） | `DivinationHub.vue`、`TodayOverview.vue` |
 | 星座運勢 | `/horoscope/` | 已完成（P1）：五個面向與幸運指引，原創文案依 `dailySeed` 選取 | `src/vue/site/features/horoscope/` |
-| 紫微斗數 | `/ziwei/` | 已完成（P2）：十二宮、十四主星、四化與大限；標準安星法，與 iztro 差異測試一致 | `src/vue/site/features/ziwei/`（`ziwei-standard-v1`） |
+| 紫微斗數 | `/ziwei/` | 已完成（P2，v2 補齊）：十二宮、十四主星、輔星（含祿存、擎羊、陀羅）、四化、大限年份與本限、三方四正、排盤推導數值；閏月規則與 iztro 一致 | `src/vue/site/features/ziwei/`（`ziwei-standard-v2`） |
 | 生命靈數 | `/numerology/` | 已完成（P1）：生命路徑、表達數、靈魂數、人格數、生日數與個人循環 | `src/vue/site/features/numerology/`（`numerology-pythagorean-v1`） |
 | 梅花易數 | `/meihua/` | 已完成（§3.7）：時間、數字與文字起卦；本卦、互卦、變卦、體用、旺衰與應期 | `src/vue/site/features/meihua/`（`meihua-shaoyong-v1`） |
 | 六爻易經 | `/liuyao/` | 已完成（§3.8）：銅錢與報數起卦；納甲裝卦、世應、六親六神、用神旺衰、動變與應期 | `src/vue/site/features/liuyao/`（`liuyao-jingfang-najia-v1`） |
@@ -317,6 +317,17 @@ P1 的兩個軌道與 P2 的 spike 彼此獨立，只依賴 P0 的共用層，�
   - **tarot 靜態預渲染**：原因是掛載後的版面（英雄區、牌陣選擇、牌庫）比靜態殼層高很多，桌機寬度 CLS 約 0.33。改為在建置時以 Vue SSR 產生島嶼的首屏標記（`src/vue/site/tarot-ssr.ts`、`vite.tarot-ssr.config.mts`、`scripts/render-tarot-static.mjs`），寫入 `/tarot/` 靜態頁。元件的 scoped 樣式已隨入口 CSS 在 `<head>` 載入，且輸出含相同的 `data-v-*` 屬性，因此掛載後 DOM 與樣式不變，1440 與 390 px 的 CLS 皆為 0。量測（傳輸量）：527 KB、23 個請求，perf budget 設為 640 KB、28 個請求。限制：若訪客本機已有閱讀紀錄，「最近的牌陣」區塊於掛載後才出現，仍會造成位移；靜態標記無法得知本機紀錄。
   - **視覺稽核**：`npm run test:visual` 已通過（234 個頁面與視窗）。先前的 `label-content-name-mismatch` 以替換 aria-label 的方式修正，範圍包括站頭、工具卡、閱讀器字級按鈕、藝廊、遊戲章節卡與音效按鈕、音樂曲目列與片段按鈕；遊戲與閱讀器測試的選擇器已同步更新。
   - **相依性**：`@axe-core/playwright` 4.14.0 已加入 `package.json` 的 devDependencies（`npm install --save-dev`），視覺稽核不再需要額外安裝。`playwright` 1.64.0 同樣加入 devDependencies，與沙箱版本一致，瀏覽器測試不再需要 `NODE_PATH`。
+
+### 9.3 紫微補齊與占星室檢視（2026-10-18）
+
+- **紫微 v2（`ziwei-standard-v2`）**：
+  - 閏月：閏月十六日（含）以後命宮與身宮改算下一個月，與 iztro 預設一致。差異測試發現 2025 閏六月十七日的命宮會落在不同宮位（iztro 酉、v1 申），已加入 `ziwei.iztro.spec.ts` 的比對案例。
+  - 輔星：加入祿存（依年干）、擎羊（祿存後一宮）與陀羅（祿存前一宮），差異測試同步比對。
+  - 大限：每限附西曆起訖年份（虛歲，出生年為 1 歲），並可依指定年份找出所在大限；頁面以目前年份標示「本限」。
+  - 排盤推導：頁面列出實際數值（寅起月數、命宮納音、紫微落宮的局數與日數、四化落宮），不再只是概述。
+  - 三方四正：選取宮位時顯示對宮與兩個三合宮。
+- **未納入（刻意）**：子時不做晚子時換日（23:00–24:00 以出生當日計算）；雜曜與其餘煞星未收錄。若要收錄晚子時，需在時辰選項中區分早子與晚子，並同步調整差異測試。
+- **占星室檢視**：計算約 0.2 秒（Worker 內），本命、行運與年度頁面與手算的宮位一致，未發現需要修正的錯誤。嘗試過一項降低計算量的做法：月與年掃描時，木星以外的慢速行星改為每四日取樣（約省四成天體位置計算）。A/B 比對 45 組既有輸出時，天王星停滯點附近的相位時刻改在相隔數日的另一點（同一平台上的兩個極小值，兩者都合理）；另有冥王星數個相位在同一毫秒被標示、但容許度彼此不同，判定為極小值搜尋停在區間端點，而非真正的極小值。取樣間距加寬後，搜尋區間也跟著加寬，因此撤回，未納入程式碼。
 
 ## 10. 待決定事項
 
