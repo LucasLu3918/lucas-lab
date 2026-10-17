@@ -223,3 +223,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：紅光與綠光須同時進入水晶才會合成黃色光、唯一目標仍須精確收到黃光、stage id `prism-blend`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、兩色收光與再發射、鏡面解謎、進度連續性、fallback 與水平溢位；全域 Impact Graph 仍不完整，本切片消費者依手動追查。
 
 下一步建議：評估 `prism-ballroom` 舞廳階段的 Vue island 邊界，先確認多目標、合光水晶與可移動舞者 blocker 能否以同一份靜態場景與 legacy beam trace snapshot 呈現。
+
+## Phase 19 — Blood Mirror Prism Ballroom Vue island
+
+`PrismBallroomPuzzle.vue` 接手 `prism-ballroom` 的 9×7 光路盤、三個 emitter、紅色 filter、合光水晶、三個彩色面具、七面鏡、兩位可移動舞者、光束與狀態呈現，沿用既有 lazy game bundle、stage id、modal、稜鏡素材與 CSS。Vue 僅呈現經 `parsePrismBallroomSnapshot` 驗證的 transient `trace` snapshot，並把 typed mirror flip／dancer move actions 交回 legacy controller。`prism.js` 保留 `trace`／`solved`／`litCount` 規則、鏡面／舞者狀態、提示、音效、完成判定、進度 callback 與 legacy renderer。
+
+不變條件：紅、藍、黃三個目標必須各自精確收到所需顏色；filter、水晶與舞者阻擋仍由既有引擎計算；stage id `prism-ballroom`、Hints／音效／可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 prism rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、翻鏡／移動舞者、通關、進度連續性、legacy fallback 與水平溢位。全域 Impact Graph 仍不完整，本切片 caller／consumer 僅依核准範圍手動追查。
+
+下一步建議：評估 E3「七人證詞」（`games/blood-mirror/puzzles/apothecary.js`、stage `apothecary-testimony`）是否有完整且獨立的 Vue UI 邊界；先確認排除／指認狀態、反寫證詞模式與錯誤矛盾提示都可由 typed snapshot／action adapter 呈現，再核准切片。

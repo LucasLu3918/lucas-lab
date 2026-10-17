@@ -13,10 +13,12 @@ import Gears13Puzzle from './Gears13Puzzle.vue';
 import PendulumPuzzle from './PendulumPuzzle.vue';
 import PrismRaysPuzzle from './PrismRaysPuzzle.vue';
 import PrismBlendPuzzle from './PrismBlendPuzzle.vue';
+import PrismBallroomPuzzle from './PrismBallroomPuzzle.vue';
 import StarwheelPuzzle from './StarwheelPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
 import { parsePrismRaysSnapshot, type PrismRaysAction, type PrismRaysSnapshot } from './prism-rays';
 import { parsePrismBlendSnapshot, type PrismBlendAction, type PrismBlendSnapshot } from './prism-blend';
+import { parsePrismBallroomSnapshot, type PrismBallroomAction, type PrismBallroomSnapshot } from './prism-ballroom';
 import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } from './starwheel';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
@@ -347,6 +349,36 @@ export function mountPrismBlendPuzzleIsland(
   }));
   app.mount(root);
   root.setAttribute('data-vue-prism-blend-ready', 'true');
+  return () => app.unmount();
+}
+
+type PrismBallroomPuzzleProps = InstanceType<typeof PrismBallroomPuzzle>['$props'];
+
+export function mountPrismBallroomPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: PrismBallroomAction) => PrismBallroomSnapshot | null,
+): (() => void) | null {
+  const snapshot = parsePrismBallroomSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const dispatch = (action: PrismBallroomAction) => {
+    const next = parsePrismBallroomSnapshot(onAction(action));
+    if (next) current.value = next;
+    return next;
+  };
+  const app = createApp(defineComponent({
+    name: 'PrismBallroomPuzzleIsland',
+    setup() {
+      return () => h(PrismBallroomPuzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies PrismBallroomPuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-prism-ballroom-ready', 'true');
   return () => app.unmount();
 }
 
