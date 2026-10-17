@@ -271,3 +271,11 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 不變條件：E4 `gallery` 完成前 `box-thread` 仍鎖定；答案仍接受 `B-A-D-C` 與反向 `C-D-A-B`，錯序仍清空整條線；重開階段仍從空序列開始。stage id、Hints／音效／完成與可選關卡進度、存檔格式、路由、CSP、runtime dependencies 與無 island callback 時的 DOM fallback 維持原樣。驗證包含 snapshot parser／元件測試、bundle export contract、既有 E5 規則測試，以及 360px／1280px 瀏覽器中的 lazy mount、撤回、錯序、正序／反序、完成、fallback、進度連續性與水平溢位。AIPS traversal 未映射 island seed；本切片 callers／consumers 依核准範圍人工核對，全域 Impact Graph coverage 仍 incomplete。
 
 下一步建議：評估 E5 `box-shards` 碎片面 Vue island，確認缺少部分碎片與完全沒有碎片時的空槽／略過行為，以及重玩時碎片收集狀態的呈現邊界。
+
+## Phase 26 — Blood Mirror Box Shards Vue island
+
+`BoxShardsPuzzle.vue` 接手 E5 `box-shards` 的七幕位置、已收集碎片托盤、已嵌入狀態、缺片空槽及零碎片時的「這一面先空著」操作。沿用現有 lazy game bundle、stage id 與 `.box-*` 樣式。`puzzles/box.js` 仍從 `ctx.has` 讀取目前收集狀態，保留正確位置判定、錯位回饋、提示、音效、完成與 legacy DOM renderer；Vue 只呈現經 `parseBoxShardsSnapshot` 驗證的 transient snapshot，並回送 typed select／place／skip actions。
+
+不變條件：七個位置始終顯示；缺片位置標出來源章節；只有收集到的碎片能放入對應章節，零碎片才可略過此面。重新開啟時放置與選取狀態重置，收集狀態仍以既有遊戲存檔為準。stage id／registry、Hints／音效／完成與進度、存檔格式、公開路由、CSP、runtime dependencies 與 fallback 維持原樣。驗證涵蓋 snapshot parser／元件互動、scaffold bundle export contract、既有 E5 規則／存檔測試，以及 360px／1280px 瀏覽器中的全碎片、部分碎片、零碎片、錯位、完成持久化、重開狀態、fallback 與水平溢位。AIPS traversal 未映射 island seed；本切片 callers／consumers 依核准範圍人工追查，全域 Impact Graph coverage 仍 incomplete。
+
+下一步建議：評估 E5 `box-cipher` 密碼盤 Vue island，盤點四組注音位移控制、密文／明文呈現與前五面完成鎖定，再確定 legacy 規則及 stage progress 的保留邊界。
