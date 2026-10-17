@@ -80,13 +80,13 @@ function flip(index: number) {
 function handleBoardClick(event: MouseEvent): void {
   if (snapshot.value.solved) return;
   const svg = event.currentTarget as SVGSVGElement;
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return;
-  const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-  const mirror = snapshot.value.mirrors.find(item =>
-    Math.abs(point.x - px(item.x)) <= 5.7 && Math.abs(point.y - px(item.y)) <= 5.7,
-  );
-  if (mirror) flip(mirror.index);
+  const mirror = Array.from(svg.querySelectorAll<SVGGElement>('[data-mirror]')).find(element => {
+    const bounds = element.getBoundingClientRect();
+    return event.clientX >= bounds.left && event.clientX <= bounds.right
+      && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+  });
+  const index = Number(mirror?.dataset.mirror);
+  if (mirror && Number.isInteger(index)) flip(index);
 }
 
 function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: number): string {
