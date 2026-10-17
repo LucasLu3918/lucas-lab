@@ -3,6 +3,7 @@
 import { toLunarDate, type LunarDate } from '../fortune-core/calendar';
 import { parseCivilDateTime } from '../fortune-core/civil-time';
 import { createMethodResult, type InputPrecision, type MethodResult } from '../fortune-core/result';
+import { minorStarPlacements } from './ziwei-stars';
 
 export const ZIWEI_METHOD_VERSION = 'ziwei-standard-v2';
 export const ZIWEI_CONTENT_VERSION = '2026.10.17-1';
@@ -249,7 +250,18 @@ export function calculateZiwei(input: ZiweiInput): MethodResult<ZiweiChart> {
     ['擎羊', mod12(lucun + 1)],
     ['陀羅', mod12(lucun - 1)],
   ];
-  for (const [name, branch] of auxiliary) {
+  // 煞星與雜曜（ziwei-stars.ts）。晚子時的日數同 iztro：早子取日數減一，晚子取日數本身。
+  const yearBranch = BRANCHES.indexOf(lunar.ganzhiYear.charAt(1) as (typeof BRANCHES)[number]);
+  const minor = minorStarPlacements({
+    yearStem,
+    yearBranch,
+    ming,
+    shen,
+    month: palaceMonth - 1,
+    hour,
+    dayIndex: lateZi ? lunar.day : lunar.day - 1,
+  });
+  for (const [name, branch] of [...auxiliary, ...minor]) {
     starBranch.set(name, branch);
     minorStarNames.add(name);
   }

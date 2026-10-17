@@ -126,7 +126,7 @@
 - 版本紀錄（方法版本，規則改變時必須遞增）：
   - 生命靈數 `numerology-pythagorean-v1`
   - 星座運勢 `horoscope-daily-v1`，內容 `content` 版本見 `horoscope-zh.json`
-  - 紫微斗數 `ziwei-standard-v2`，內容版本 `2026.10.17-1`（v2 加入閏月十六日以後歸下月、祿存／擎羊／陀羅，並提供排盤推導數值與大限起訖年份）
+  - 紫微斗數 `ziwei-standard-v2`，內容版本 `2026.10.17-1`（v2 加入閏月十六日以後歸下月、晚子時、祿存／擎羊／陀羅與常用雜曜，並提供排盤推導數值與大限起訖年份）
   - 八字 `bazi-local-v2`
   - 西洋占星 `tropical-whole-sign-v3`
   - 塔羅牌義內容 `rws-zh-tw-1.1.0`
