@@ -8,6 +8,11 @@ export default defineConfig({
     outDir: '.vue-inventory-build',
     emptyOutDir: true,
     manifest: 'manifest.json',
+    lib: {
+      entry: 'src/vue/game/inventory-main.ts',
+      formats: ['es'],
+      fileName: 'inventory-main',
+    },
     rollupOptions: {
       input: 'src/vue/game/inventory-main.ts',
       output: {
