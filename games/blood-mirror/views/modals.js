@@ -119,11 +119,6 @@ export const hintStepsMarkup=(list,count)=>list.slice(0,count)
 
 export const hintButtonText=(count,total)=>count===0?'點亮第一道提示':count>=total?'所有提示已展開':'展開更明確的提示';
 
-// The hint modal opened from the 燭光 button in the HUD, for the step the player is stuck on.
-export const hintModalMarkup=({stepName,list,count})=>`<p class="modal-note">提示只針對妳目前卡住的這一步：${stepName}。提示不會扣分，也不會改變結局。</p>`
- +hintStepsMarkup(list,count)
- +`<button id="more-hint" class="primary-button" ${count>=list.length?'disabled':''}>${hintButtonText(count,list.length)} ✧</button>`;
-
 // The same hints folded under the stage inside the puzzle modal, so a player never loses the puzzle to read one.
 export const stageHintMarkup=({list,count,open})=>{
  if(!list.length)return '';

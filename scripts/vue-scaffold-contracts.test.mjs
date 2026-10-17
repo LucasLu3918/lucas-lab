@@ -32,6 +32,7 @@ test('SSG copies Vue entry bundles and loads only the matching route islands', (
   assert.ok(fs.existsSync(gameEntryPath), 'SSG copies the standalone inventory entry');
   const gameEntry = fs.readFileSync(gameEntryPath, 'utf8');
   assert.match(gameEntry, /\bmountJournalIsland\b/, 'the lazy game module preserves its Journal mount export');
+  assert.match(gameEntry, /\bmountHintIsland\b/, 'the lazy game module exposes the Hints island mount');
   assert.doesNotMatch(gameEntry, /process\.env\.NODE_ENV/, 'the browser bundle has no Node process dependency');
 
   const htmlFiles = [];
