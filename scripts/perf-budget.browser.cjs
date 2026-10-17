@@ -23,7 +23,20 @@ const BUDGETS=[
  {route:'/search/',maxBytes:350*KB,maxRequests:15},
  // The game ships as native ES modules (no bundler, plan §9.1). Puzzle stages and the credits load on demand, so the
  // first screen makes 43 requests (2026-10-13), with all modal markup in one module. The budget of 45 leaves room for one new eager module; a larger jump fails.
- {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:45}
+ {route:'/games/blood-mirror/play/',maxBytes:1550*KB,maxRequests:45},
+ // Added 2026-10-17 (Fortune Hub P4). Measured 226 KB and 16 requests at both widths, plus about 20% headroom. Before the lunar-javascript
+ // chunk was split out (vite.config.mts), the hub also downloaded that 300 KB library through a shared runtime helper.
+ {route:'/divination/',maxBytes:272*KB,maxRequests:19},
+ // Added 2026-10-17 with a height reservation for each island (assets/style.css). Measured at 390 and 1440 px with about 20% headroom:
+ // horoscope 191 KB / 14 requests, numerology 185 KB / 12, ziwei 493 KB / 14 (lunar-javascript), bazi 496 KB / 15, astrology 266 KB / 13.
+ {route:'/horoscope/',maxBytes:230*KB,maxRequests:17},
+ {route:'/numerology/',maxBytes:225*KB,maxRequests:15},
+ {route:'/ziwei/',maxBytes:600*KB,maxRequests:17},
+ {route:'/bazi/',maxBytes:600*KB,maxRequests:18},
+ {route:'/astrology/',maxBytes:320*KB,maxRequests:16},
+ // Added 2026-10-17 with the tarot prerender (tarot-ssr.ts): the first markup is in the static page, so the island mounts without a shift.
+ // Measured 527 KB and 23 requests at both widths, plus about 20% headroom.
+ {route:'/tarot/',maxBytes:640*KB,maxRequests:28}
 ];
 const WIDTHS=[390,1440];
 

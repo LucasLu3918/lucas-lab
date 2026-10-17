@@ -2,6 +2,7 @@ node_modules/
 dist/
 .vue-build/
 .vue-inventory-build/
+.vue-ssr/
 .DS_Store
 *.log
 visual-audit-artifacts/

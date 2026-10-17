@@ -73,7 +73,7 @@ describe('reader preference rules and persistence', () => {
     expect(article.classList.contains('night')).toBe(true);
     expect(article.style.getPropertyValue('--reader-size')).toBe('20px');
 
-    await wrapper.get('[aria-label="放大字體"]').trigger('click');
+    await wrapper.get('[aria-label="放大字體 A＋"]').trigger('click');
     expect(wrapper.text()).toContain('21px');
     expect(article.style.getPropertyValue('--reader-size')).toBe('21px');
     expect(JSON.parse(storage.value!)).toEqual({ theme: 'night', font: 21 });
@@ -87,12 +87,12 @@ describe('reader preference rules and persistence', () => {
     const storage = new MemoryStorage();
     storage.value = JSON.stringify({ theme: 'paper', font: 16 });
     const wrapper = mount(ReaderPreferences, { props: { repository: new ReaderPreferencesRepository(storage) } });
-    expect(wrapper.get('[aria-label="縮小字體"]').attributes('disabled')).toBeDefined();
-    await wrapper.get('[aria-label="放大字體"]').trigger('click');
+    expect(wrapper.get('[aria-label="縮小字體 A−"]').attributes('disabled')).toBeDefined();
+    await wrapper.get('[aria-label="放大字體 A＋"]').trigger('click');
     expect(wrapper.text()).toContain('17px');
 
-    for (let font = 17; font < 24; font += 1) await wrapper.get('[aria-label="放大字體"]').trigger('click');
+    for (let font = 17; font < 24; font += 1) await wrapper.get('[aria-label="放大字體 A＋"]').trigger('click');
     expect(wrapper.text()).toContain('24px');
-    expect(wrapper.get('[aria-label="放大字體"]').attributes('disabled')).toBeDefined();
+    expect(wrapper.get('[aria-label="放大字體 A＋"]').attributes('disabled')).toBeDefined();
   });
 });

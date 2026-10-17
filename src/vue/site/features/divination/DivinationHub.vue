@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import TodayOverview from './TodayOverview.vue';
-import { DIVINATION_MODULES } from './modules';
+import { DIVINATION_HUB, DIVINATION_MODULES } from './modules';
+import './divination-hub.css';
 </script>
 
 <template>
   <div class="divination-hub">
     <header class="divination-hero">
-      <h1>月夜占卜室</h1>
-      <p>三種古老象徵系統，陪你整理眼前的問題。所有計算都在你的瀏覽器完成。</p>
+      <svg class="divination-hero__moon" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M30 7a17 17 0 1 0 11 29.5A13 13 0 0 1 30 7z" /></svg>
+      <h1>{{ DIVINATION_HUB.hero.title }}</h1>
+      <p>{{ DIVINATION_HUB.hero.lead }}</p>
     </header>
     <TodayOverview />
     <section class="doors" aria-label="選擇占卜方式">
@@ -20,27 +22,6 @@ import { DIVINATION_MODULES } from './modules';
         </span>
       </a>
     </section>
-    <aside class="divination-note"><strong>閱讀前的小提醒</strong><p>內容依固定規則和傳統象徵整理，供娛樂與自我反思，不保證事件，也不取代醫療、法律或財務專業建議。出生資料只在本機記憶體中計算，不會儲存或上傳；塔羅閱讀歷史若啟用，只保存在此瀏覽器。</p></aside>
+    <aside class="divination-note"><strong>{{ DIVINATION_HUB.note.title }}</strong><p>{{ DIVINATION_HUB.note.body }}</p></aside>
   </div>
 </template>
-
-<style scoped>
-.divination-hub { display:grid; gap:clamp(28px,5vw,40px); width:min(100% - 32px,1020px); margin:0 auto 72px; color:var(--ll-color-text); }
-.divination-hero { display:grid; justify-items:center; gap:14px; padding:clamp(40px,8vw,72px) 0 clamp(8px,2vw,16px); text-align:center; background:radial-gradient(ellipse closest-side at 50% 40%,rgb(44 64 82 / 0.4) 0,transparent 100%); }
-.divination-hero h1 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:clamp(2.25rem,6vw,3.25rem); font-weight:500; line-height:1.2; letter-spacing:0.06em; }
-.divination-hero p { max-width:36em; margin:0; color:var(--ll-color-text-muted); font-size:clamp(1rem,2.4vw,1.0625rem); line-height:1.8; }
-.doors { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:12px; }
-.door { display:grid; grid-template-columns:44px minmax(0,1fr); gap:16px; align-items:start; padding:22px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-panel); color:inherit; text-decoration:none; background:var(--ll-color-surface); transition:border-color var(--ll-motion-standard); }
-.door:hover { border-color:var(--ll-color-gold); }
-.door:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:var(--ll-focus-offset); }
-.door__icon { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--ll-color-control-border); border-radius:50%; color:var(--ll-color-gold); }
-.door__icon svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-.door__body { display:grid; gap:8px; min-width:0; }
-.door h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-xl); font-weight:500; }
-.door__body>span { color:var(--ll-color-text-muted); font-size:var(--ll-font-size-body); line-height:1.7; }
-.door__body>.door__meta { margin-top:4px; color:var(--ll-color-gold); font-size:var(--ll-font-size-sm); }
-.divination-note { display:grid; gap:8px; padding-left:16px; border-left:2px solid var(--ll-color-control-border); color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.75; }
-.divination-note strong { color:var(--ll-color-gold); font-weight:600; }
-.divination-note p { margin:0; }
-@media (prefers-reduced-motion:reduce) { .door { transition:none; } }
-</style>

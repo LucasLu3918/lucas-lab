@@ -9,6 +9,13 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: 'manifest.json',
     rollupOptions: {
+      output: {
+        // Keep the CommonJS calendar library in its own chunk. Otherwise the bundler places shared runtime helpers inside it,
+        // so every chunk that uses a helper (tarot, the divination hub) downloads the 300 KB library too.
+        manualChunks(id) {
+          return id.includes('lunar-javascript') ? 'lunar-javascript' : undefined;
+        },
+      },
       input: {
         site: 'src/vue/site/main.ts',
         'site-lazy': 'src/vue/site/lazy.ts',

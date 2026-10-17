@@ -1,0 +1,36 @@
+/* Hub styles, kept as a plain stylesheet: scripts/site/pages.cjs writes the hub's static markup with these same classes, so the
+   page has the same layout before the island mounts. Changing a size here changes both (the perf budget checks the layout shift). */
+.divination-hub { display:grid; gap:clamp(28px,5vw,40px); width:min(100% - 32px,1020px); margin:0 auto 72px; color:var(--ll-color-text); }
+.divination-hero { display:grid; justify-items:center; gap:14px; padding:clamp(40px,8vw,72px) 0 clamp(8px,2vw,16px); text-align:center; border-radius:var(--ll-radius-panel); background:radial-gradient(ellipse closest-side at 50% 30%,rgb(217 191 138 / 0.14) 0,transparent 70%),radial-gradient(circle at 12% 18%,rgb(239 219 173 / 0.5) 0 1px,transparent 1.5px),radial-gradient(circle at 84% 12%,rgb(239 219 173 / 0.4) 0 1px,transparent 1.5px),radial-gradient(circle at 76% 62%,rgb(239 219 173 / 0.35) 0 1px,transparent 1.5px),radial-gradient(ellipse closest-side at 50% 40%,rgb(44 64 82 / 0.4) 0,transparent 100%); }
+.divination-hero__moon { width:44px; height:44px; fill:var(--ll-color-gold); filter:drop-shadow(0 0 12px rgb(217 191 138 / 0.35)); }
+.divination-hero h1 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:clamp(2.25rem,6vw,3.25rem); font-weight:500; line-height:1.2; letter-spacing:0.06em; }
+.divination-hero p { max-width:36em; margin:0; color:var(--ll-color-text-muted); font-size:clamp(1rem,2.4vw,1.0625rem); line-height:1.8; }
+.today { display:grid; gap:16px; padding:clamp(18px,3vw,24px); border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-panel); background:var(--ll-color-surface); color:var(--ll-color-text); }
+.today--static { visibility:hidden; }
+.today__heading { display:grid; gap:6px; }
+.today__heading h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-xl); font-weight:500; }
+.today__date, .today__note { margin:0; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.7; }
+.today__cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:12px; }
+.today-card { display:grid; gap:10px; align-content:start; padding:16px; border:1px solid var(--ll-color-hairline); border-radius:var(--ll-radius-control); }
+.today-card h3 { margin:0; color:var(--ll-color-gold); font-size:var(--ll-font-size-body); font-weight:600; }
+.today-card p { margin:0; font-size:var(--ll-font-size-sm); line-height:1.75; }
+.today-card strong { color:var(--ll-color-gold-bright); font-weight:600; }
+.today-card__meta, .today-card__tip { color:var(--ll-color-text-muted); }
+.today-card select { min-height:44px; padding:0 10px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-control); color:var(--ll-color-text); background:var(--ll-color-surface-raised); font:inherit; }
+.today-card__sign { display:grid; gap:6px; color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); }
+.today-card__link { justify-self:start; display:inline-flex; align-items:center; min-height:44px; color:var(--ll-color-gold-bright); text-decoration:underline; text-underline-offset:4px; }
+.today-card select:focus-visible, .today-card__link:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:var(--ll-focus-offset); }
+.doors { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:12px; }
+.door { display:grid; grid-template-columns:44px minmax(0,1fr); gap:16px; align-items:start; padding:22px; border:1px solid var(--ll-color-control-border); border-radius:var(--ll-radius-panel); color:inherit; text-decoration:none; background:linear-gradient(180deg,var(--ll-color-surface-raised) 0,var(--ll-color-surface) 100%); box-shadow:inset 0 0 0 1px var(--ll-color-hairline); transition:border-color var(--ll-motion-standard),box-shadow var(--ll-motion-standard); }
+.door:hover { border-color:var(--ll-color-gold); box-shadow:inset 0 0 0 1px var(--ll-color-hairline),var(--ll-shadow-panel); }
+.door:focus-visible { outline:var(--ll-focus-width) solid var(--ll-color-focus); outline-offset:var(--ll-focus-offset); }
+.door__icon { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--ll-color-control-border); border-radius:50%; color:var(--ll-color-gold); background:rgb(8 14 22 / 0.6); box-shadow:0 0 0 4px var(--ll-color-hairline); }
+.door__icon svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.door__body { display:grid; gap:8px; min-width:0; }
+.door h2 { margin:0; color:var(--ll-color-gold-bright); font-family:var(--ll-font-display); font-size:var(--ll-font-size-xl); font-weight:500; }
+.door__body>span { color:var(--ll-color-text-muted); font-size:var(--ll-font-size-body); line-height:1.7; }
+.door__body>.door__meta { margin-top:4px; color:var(--ll-color-gold); font-size:var(--ll-font-size-sm); }
+.divination-note { display:grid; gap:8px; padding-left:16px; border-left:2px solid var(--ll-color-control-border); color:var(--ll-color-text-muted); font-size:var(--ll-font-size-sm); line-height:1.75; }
+.divination-note strong { color:var(--ll-color-gold); font-weight:600; }
+.divination-note p { margin:0; }
+@media (prefers-reduced-motion:reduce) { .door { transition:none; } }
