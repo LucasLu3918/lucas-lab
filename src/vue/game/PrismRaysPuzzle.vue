@@ -88,7 +88,6 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
       id="bf-svg"
       class="belfry-svg prism-svg"
       viewBox="-3 -14.2 76 68.2"
-      pointer-events="none"
       role="group"
       aria-label="濾鏡階段光路盤，七欄五列"
     >
@@ -126,7 +125,7 @@ function mirrorLabel(index: number, orientation: '/' | '\\', x: number, y: numbe
         stroke-opacity=".09"
         stroke-width=".18"
       />
-      <rect x="0" y="0" width="70" height="50" fill="url(#prism-pool)" />
+      <rect x="0" y="0" width="70" height="50" fill="url(#prism-pool)" pointer-events="none" />
       <rect x="-.8" y="-.8" width="71.6" height="51.6" fill="none" stroke="#c79a3a" stroke-opacity=".55" stroke-width=".25" />
 
       <g>
