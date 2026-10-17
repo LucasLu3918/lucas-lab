@@ -61,6 +61,7 @@ const bobImage=kind=>{const {src,w,h}=BOB[kind];return '<circle cx="1.8" cy="2.6
 export function mountPendulum(ctx){
  ensureMaterials();
  const still=document.body.classList.contains('reduce-motion');
+ const useIsland=typeof ctx.mountPuzzleIsland==='function';
  let attached=[],started=performance.now(),finishing=false;
  ctx.render('<div class="belfry">'
   +'<p class="challenge-help">左邊是舊鐘擺，右邊是新鐘擺。舊鐘擺的刻痕寫著：<b>「擺兩次，鐘響一次。」</b>替新鐘擺掛上配重，改變它的長度，讓它的節奏符合刻痕。</p>'
@@ -68,8 +69,7 @@ export function mountPendulum(ctx){
   +'<p id="bf-status" class="belfry-status" role="status"></p>'
   +'<div class="belfry-board"><svg id="bf-svg" class="belfry-svg" viewBox="0 0 400 290" role="img" aria-label="兩座鐘擺：左邊舊擺長 1 格，右邊新擺可以掛配重"></svg></div>'
   +'<p id="pend-counts" class="belfry-note" aria-hidden="true"></p>'
-  +'<div id="bf-weights" class="belfry-tray" role="group" aria-label="配重"></div>'
-  +'<button id="bf-run" class="primary-button" hidden>放開擺錘 ⟶</button>'
+  +(useIsland?'<div data-vue-pendulum-puzzle><p class="challenge-feedback" role="status">鐘擺控制載入中…</p></div>':'<div id="bf-weights" class="belfry-tray" role="group" aria-label="配重"></div><button id="bf-run" class="primary-button" hidden>放開擺錘 ⟶</button>')
   +hintMarkup+'</div>');
  const $=id=>document.getElementById(id),svg=$('bf-svg');
  const alive=()=>svg.isConnected;
@@ -118,13 +118,14 @@ export function mountPendulum(ctx){
  }
 
  function drawWeights(){
+  if(useIsland)return;
   const box=$('bf-weights');box.textContent='';
   for(const weight of WEIGHTS){
    const on=attached.includes(weight.id),button=document.createElement('button');
    button.className='belfry-gear-button belfry-weight';button.setAttribute('aria-pressed',String(on));
    button.setAttribute('aria-label',weight.name+'配重，'+weight.len+' 格，'+(on?'已掛上，按下取下':'按下掛上'));
    button.innerHTML='<span class="pend-disc-slot" aria-hidden="true"><img src="assets/puzzles/pend-disc.webp" alt="" width="'+Math.round(24+weight.len*9)+'" height="'+Math.round(24+weight.len*9)+'" decoding="async" draggable="false"></span><b>'+weight.name+' · '+weight.len+' 格</b>';
-   button.onclick=()=>{attached=on?attached.filter(id=>id!==weight.id):[...attached,weight.id];started=performance.now();ctx.playCue('click');refresh();};
+   button.onclick=()=>act({type:'toggle-weight',id:weight.id});
    box.appendChild(button);
   }
  }
@@ -140,10 +141,20 @@ export function mountPendulum(ctx){
   drawWeights();
   const [text,tone]=describe();say(text,tone);
   hints.changed();
-  $('bf-run').hidden=!(still&&pendulumSolved(attached));
+  if(!useIsland)$('bf-run').hidden=!(still&&pendulumSolved(attached));
   if(still)pose(0);
  }
- $('bf-run').onclick=finish;
+ function snapshot(){return {weights:WEIGHTS.map(weight=>({id:weight.id,length:weight.len,name:weight.name,attached:attached.includes(weight.id)})),reducedMotion:still,canRun:still&&pendulumSolved(attached)&&!finishing};}
+ function act(action){
+  if(!action||typeof action!=='object')return null;
+  if(action.type==='toggle-weight'&&WEIGHTS.some(weight=>weight.id===action.id)){
+   attached=attached.includes(action.id)?attached.filter(id=>id!==action.id):[...attached,action.id];
+   started=performance.now();ctx.playCue('click');refresh();
+  }else if(action.type==='run'&&still&&pendulumSolved(attached))finish();
+  else return null;
+  return snapshot();
+ }
+ if(!useIsland)$('bf-run').onclick=finish;
  function finish(){
   if(finishing)return;
   finishing=true;ctx.playCue('door');
@@ -152,6 +163,7 @@ export function mountPendulum(ctx){
  }
 
  refresh();
+ if(useIsland)ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act});
  if(!still){
   let lastNew=0;
   animate(()=>{
