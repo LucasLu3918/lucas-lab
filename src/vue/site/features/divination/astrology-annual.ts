@@ -2,16 +2,17 @@ import * as Astronomy from 'astronomy-engine';
 import { civilPartsAt } from '../fortune-core/civil-time';
 import type { BirthPlace } from './locations';
 import {
-  ASTROLOGY_ASPECTS, ASTROLOGY_SIGNS, BODY_LIST, calculateAscendantAndMidheaven, calculatePlacements, geoEclipticLongitude, normalize,
-  type AstrologyChart, type PlanetPlacement,
+  ASTROLOGY_ASPECTS, ASTROLOGY_SIGNS, BODY_LIST, DAY_MS, angleDifference, calculateAscendantAndMidheaven, calculatePlacements, findClosestAspect,
+  geoEclipticLongitude, normalize, type AstrologyChart, type PlanetPlacement,
 } from './astrology';
 
-const DAY_MS = 86_400_000;
 const TROPICAL_YEAR_DAYS = 365.2422;
 const SIGNS = ASTROLOGY_SIGNS;
 const BODIES = BODY_LIST;
 const STATION_BODIES = BODIES.filter(item => !['sun', 'moon'].includes(item.id));
 const ASPECTS = ASTROLOGY_ASPECTS.map(aspect => ({ name: aspect.name, angle: aspect.angle, orb: 2 }));
+const MOON_PHASE_LABELS = ['新月', '上弦月', '滿月', '下弦月'];
+const MOON_PHASE_LONGITUDES = [0, 90, 180, 270];
 const RULERS = ['火星', '金星', '水星', '月亮', '太陽', '水星', '金星', '火星', '木星', '土星', '土星', '木星'];
 const HOUSE_THEMES = [
   '自我定位、身體感受與主動選擇', '資源、收入與個人價值', '學習、溝通與日常往來', '居所、家庭與內在根基',
@@ -82,10 +83,8 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
   const events: AnnualSkyEvent[] = [];
   let quarter = Astronomy.SearchMoonQuarter(start);
   while (quarter.time.date <= end) {
-    const labels = ['新月', '上弦月', '滿月', '下弦月'];
-    const phaseLongitude = [0, 90, 180, 270][quarter.quarter];
     const sign = signAt(geoEclipticLongitude(Astronomy.Body.Moon, quarter.time.date));
-    events.push({ kind: 'moon-phase', title: labels[quarter.quarter], exactAt: quarter.time.date.toISOString(), sign, detail: `月相黃經差 ${phaseLongitude}°；象徵週期節點，並非事件保證。` });
+    events.push({ kind: 'moon-phase', title: MOON_PHASE_LABELS[quarter.quarter], exactAt: quarter.time.date.toISOString(), sign, detail: `月相黃經差 ${MOON_PHASE_LONGITUDES[quarter.quarter]}°；象徵週期節點，並非事件保證。` });
     quarter = Astronomy.NextMoonQuarter(quarter);
   }
 
@@ -181,9 +180,7 @@ function getSecondaryProgressions(chart: AstrologyChart, start: Date): Pick<Annu
   const progressed = placementsAt(progressedAt, chart.latitude, chart.longitude, !chart.timeUnknown).planets;
   const aspects: AnnualAspect[] = [];
   for (const first of progressed) for (const second of chart.planets) {
-    const separation = Math.min(Math.abs(first.longitude - second.longitude), 360 - Math.abs(first.longitude - second.longitude));
-    const closest = ASPECTS.map(aspect => ({ aspect, orb: Math.abs(separation - aspect.angle) }))
-      .filter(item => item.orb <= item.aspect.orb).sort((a, b) => a.orb - b.orb)[0];
+    const closest = findClosestAspect(angleDifference(first.longitude, second.longitude), ASPECTS);
     if (closest) aspects.push({
       first: `推運${first.name}`, second: `本命${second.name}`, aspect: closest.aspect.name,
       orb: closest.orb, meaning: ASPECT_MEANINGS[closest.aspect.name],

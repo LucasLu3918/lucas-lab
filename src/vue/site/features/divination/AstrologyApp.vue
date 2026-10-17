@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { calculateAstrology, createAstrologyForecast, signDescription, type AstrologyChart, type AstrologyForecast, type AstrologyForecastPeriod } from './astrology';
-import { createAnnualAstrologyForecast, type AnnualAstrologyForecast } from './astrology-annual';
+import { computed, reactive, ref } from 'vue';
+import { signDescription } from './astrology-signs';
+import type { AstrologyChart, AstrologyForecast } from './astrology';
+import type { AnnualAstrologyForecast } from './astrology-annual';
+import type { AstrologyComputeRequest, AstrologyComputeResult } from './astrology-compute';
+import type { AstrologyWorkerResponse } from './astrology.worker';
 import { BIRTH_PLACES } from './locations';
 import type { Disambiguation } from '../fortune-core/civil-time';
 import PrecisionBadge from '../fortune-core/ui/PrecisionBadge.vue';
@@ -19,6 +22,12 @@ const chart = ref<AstrologyChart | null>(null);
 const forecasts = ref<AstrologyForecast[]>([]);
 const annual = ref<AnnualAstrologyForecast | null>(null);
 const error = ref('');
+const forecastPending = ref(false);
+// 行運清單（年度可達上千筆）只在展開後才渲染，記住各期間的展開狀態以便重新計算時保留。
+const transitListOpen = reactive<Record<string, boolean>>({});
+function setTransitListOpen(periodLabel: string, event: Event): void {
+  transitListOpen[periodLabel] = (event.target as HTMLDetailsElement).open;
+}
 const place = computed(() => BIRTH_PLACES.find(item => item.id === placeId.value) ?? {
   id: 'custom', label: '自訂地點', timeZone: customTimeZone.value.trim(),
   latitude: Number(customLatitude.value), longitude: Number(customLongitude.value),
@@ -38,18 +47,86 @@ function formatAt(instant: string, timeZone: string): string {
   return formatter.format(new Date(instant));
 }
 
-function calculate(): void {
+// 占星計算整段放在 Worker（頁面不載入 ephemeris）；Worker 無法使用或載入失敗時，才動態匯入同一份計算程式在主執行緒執行。
+let astrologyWorker: Worker | null = null;
+let workerRequestId = 0;
+let latestCalculation = 0;
+
+class WorkerUnavailableError extends Error {}
+
+function getAstrologyWorker(): Worker | null {
+  if (typeof Worker === 'undefined') return null;
+  if (!astrologyWorker) {
+    try {
+      astrologyWorker = new Worker(new URL('./astrology.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      return null;
+    }
+  }
+  return astrologyWorker;
+}
+
+function computeInWorker(worker: Worker, request: AstrologyComputeRequest): Promise<AstrologyComputeResult> {
+  const id = ++workerRequestId;
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      worker.removeEventListener('message', onMessage);
+      worker.removeEventListener('error', onError);
+    };
+    const onMessage = (event: MessageEvent<AstrologyWorkerResponse>) => {
+      if (event.data.id !== id) return;
+      cleanup();
+      if ('error' in event.data) reject(new Error(event.data.error));
+      else resolve(event.data.result);
+    };
+    const onError = () => {
+      cleanup();
+      worker.terminate();
+      if (astrologyWorker === worker) astrologyWorker = null;
+      reject(new WorkerUnavailableError('astrology worker failed to load'));
+    };
+    worker.addEventListener('message', onMessage);
+    worker.addEventListener('error', onError);
+    worker.postMessage({ id, ...request });
+  });
+}
+
+async function computeAstrologyResult(request: AstrologyComputeRequest): Promise<AstrologyComputeResult> {
+  const worker = getAstrologyWorker();
+  if (worker) {
+    try {
+      return await computeInWorker(worker, request);
+    } catch (cause) {
+      if (!(cause instanceof WorkerUnavailableError)) throw cause;
+    }
+  }
+  const { computeAstrology } = await import('./astrology-compute');
+  return computeAstrology(request);
+}
+
+async function calculate(): Promise<void> {
   error.value = '';
+  chart.value = null;
+  forecasts.value = [];
+  annual.value = null;
+  const calculation = ++latestCalculation;
+  forecastPending.value = true;
+  const request: AstrologyComputeRequest = {
+    input: { birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value },
+    returnPlace: returnPlace.value,
+    startMs: Date.now(),
+  };
   try {
-    const result = calculateAstrology({ birthDate: birthDate.value, birthTime: birthTime.value, timeZone: place.value.timeZone, latitude: place.value.latitude, longitude: place.value.longitude, timeUnknown: unknownTime.value, disambiguation: disambiguation.value });
-    chart.value = result;
-    forecasts.value = (['day', 'month', 'year'] as AstrologyForecastPeriod[]).map(period => createAstrologyForecast(result, period));
-    annual.value = createAnnualAstrologyForecast(result, returnPlace.value);
+    const computed = await computeAstrologyResult(request);
+    if (calculation !== latestCalculation) return;
+    chart.value = computed.chart;
+    forecasts.value = computed.forecasts;
+    annual.value = computed.annual;
   } catch (cause) {
-    chart.value = null;
-    forecasts.value = [];
-    annual.value = null;
+    if (calculation !== latestCalculation) return;
     error.value = cause instanceof Error ? cause.message : '無法繪製星盤，請檢查日期與時間。';
+  } finally {
+    if (calculation === latestCalculation) forecastPending.value = false;
   }
 }
 </script>
@@ -76,6 +153,7 @@ function calculate(): void {
 
     <section v-if="chart" class="results" aria-live="polite">
       <nav class="result-nav" aria-label="結果章節"><a href="#natal">本命星盤</a><a href="#transits">近期行運</a><a href="#annual">年度天象</a></nav>
+      <p v-if="forecastPending" class="form-help">正在計算行運與年度天象…</p>
       <section id="natal" class="result-block">
       <div class="section-title"><div><h2>行星落點</h2></div><span class="version">{{ chart.methodVersion }}</span></div>
       <PrecisionBadge :precision="chart.inputPrecision" :reason="chart.timeUnknown ? '出生時間未知，隱藏上升點與宮位' : '已提供出生時間，計算上升點與宮位'" />
@@ -87,7 +165,7 @@ function calculate(): void {
       <section id="transits" class="result-block">
       <div class="section-title"><div><h2>近期行運提示</h2></div></div>
 
-      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" class="transit-details"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
+      <div class="forecast-grid"><article v-for="forecast in forecasts" :key="forecast.periodLabel" class="forecast"><p class="forecast-label">{{ forecast.periodLabel }}</p><p>{{ forecast.text }}</p><details v-if="forecast.events.length" class="transit-details" @toggle="setTransitListOpen(forecast.periodLabel, $event)"><summary>查看 {{ forecast.events.length }} 個相位窗口</summary><ul v-if="transitListOpen[forecast.periodLabel]" class="transit-events"><li v-for="event in forecast.events" :key="`${event.transit}-${event.natal}-${event.aspect}-${event.exactAt}`"><strong>{{ event.transit }} × 本命{{ event.natal }}</strong><span>{{ event.aspect }}・{{ formatAt(event.exactAt, chart.timeZone) }}・{{ event.phase }}・{{ event.orb.toFixed(2) }}°</span><small>{{ event.meaning }}</small></li></ul></details></article></div>
       </section>
       <section v-if="annual" id="annual" class="annual-outlook">
         <div class="annual-heading"><div><h2>{{ annual.label }}</h2></div><span>{{ annual.events.length }} 項天象</span></div>

@@ -1,22 +1,12 @@
 import * as Astronomy from 'astronomy-engine';
 import { parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
 import type { InputPrecision } from '../fortune-core/result';
+import { SIGNS, signDescription } from './astrology-signs';
+
+export { signDescription };
 
 export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
-const SIGNS = [
-  { name: '牡羊座', element: '火', mode: '開創', text: '主動、直接，適合把想法化為清楚的第一步。' },
-  { name: '金牛座', element: '土', mode: '固定', text: '重視穩定與感官經驗，適合用持續投入累積成果。' },
-  { name: '雙子座', element: '風', mode: '變動', text: '好奇且善於連結資訊，適合交流、學習與保留彈性。' },
-  { name: '巨蟹座', element: '水', mode: '開創', text: '重視情感安全與歸屬，適合照料重要關係和生活根基。' },
-  { name: '獅子座', element: '火', mode: '固定', text: '以創造力和熱情展現自我，適合分享成果並尊重彼此空間。' },
-  { name: '處女座', element: '土', mode: '變動', text: '擅長觀察細節和改善流程，適合讓實用判斷配合自我寬容。' },
-  { name: '天秤座', element: '風', mode: '開創', text: '留意互惠、公平與美感，適合透過協商整理關係中的需要。' },
-  { name: '天蠍座', element: '水', mode: '固定', text: '傾向深入理解情緒與信任，適合坦誠面對界線和轉變。' },
-  { name: '射手座', element: '火', mode: '變動', text: '追求探索和意義，適合拓展視野並確認實際承諾。' },
-  { name: '摩羯座', element: '土', mode: '開創', text: '重視長期目標與責任，適合拆解計畫並安排可持續進度。' },
-  { name: '水瓶座', element: '風', mode: '固定', text: '重視理念、獨立與群體，適合提出新做法並保持互相理解。' },
-  { name: '雙魚座', element: '水', mode: '變動', text: '想像力與同理心豐富，適合照料感受並建立清楚界線。' },
-];
+export const DAY_MS = 86_400_000;
 export const BODY_LIST: Array<{ id: string; name: string; body: Astronomy.Body }> = [
   { id: 'sun', name: '太陽', body: Astronomy.Body.Sun },
   { id: 'moon', name: '月亮', body: Astronomy.Body.Moon },
@@ -96,9 +86,19 @@ export function geoEclipticLongitude(body: Astronomy.Body, instant: Date): numbe
   return normalize(Astronomy.Ecliptic(vector).elon);
 }
 
-function angleDifference(first: number, second: number): number {
+export function angleDifference(first: number, second: number): number {
   const difference = Math.abs(normalize(first) - normalize(second));
   return Math.min(difference, 360 - difference);
+}
+
+/** 在容許度內，取與分離角最接近的主要相位；找不到時回傳 undefined。 */
+export function findClosestAspect<T extends { angle: number; orb: number }>(separation: number, aspects: readonly T[]): { aspect: T; orb: number } | undefined {
+  let closest: { aspect: T; orb: number } | undefined;
+  for (const aspect of aspects) {
+    const orb = Math.abs(separation - aspect.angle);
+    if (orb <= aspect.orb && (!closest || orb < closest.orb)) closest = { aspect, orb };
+  }
+  return closest;
 }
 
 /** 依當地恆星時與黃赤交角估算上升點與天頂（黃經，度）。 */
@@ -140,11 +140,8 @@ function getAspects(placements: PlanetPlacement[]): AstrologyAspect[] {
     for (let j = i + 1; j < placements.length; j++) {
       const a = placements[i];
       const b = placements[j];
-      const separation = angleDifference(a.longitude, b.longitude);
-      const nearest = ASPECTS.map(aspect => ({ aspect, orb: Math.abs(separation - aspect.angle) }))
-        .filter(item => item.orb <= item.aspect.orb)
-        .sort((left, right) => left.orb - right.orb)[0];
-      if (nearest) found.push({ first: a.name, second: b.name, aspect: nearest.aspect.name, orb: nearest.orb, meaning: nearest.aspect.text });
+      const closest = findClosestAspect(angleDifference(a.longitude, b.longitude), ASPECTS);
+      if (closest) found.push({ first: a.name, second: b.name, aspect: closest.aspect.name, orb: closest.orb, meaning: closest.aspect.text });
     }
   }
   return found.sort((a, b) => a.orb - b.orb).slice(0, 24);
@@ -223,63 +220,75 @@ function goldenSectionMinimum(valueAt: (milliseconds: number) => number, left: n
   return (left + right) / 2;
 }
 
+/** 行運掃描的一組配對（行星 × 本命點 × 相位）；逐日容許度存在陣列中，避免為每個樣本建立物件。 */
+interface TransitCombo {
+  bodyIndex: number;
+  natal: { name: string; longitude: number };
+  aspect: (typeof ASPECTS)[number];
+  orbs: Float64Array;
+  exactTimes: number[];
+}
+
+/** 精確時刻距離期間起訖不到此值，視為落在期間之外（黃金分割搜尋會收斂到邊界）。 */
+const BOUNDARY_TOLERANCE_MS = 60_000;
+
+/** 每日容許度陣列中的局部極小值索引；單日掃描只看起點。 */
+function sampledMinima(orbs: Float64Array, limit: number): number[] {
+  const last = orbs.length - 1;
+  if (last === 0) return orbs[0] <= limit ? [0] : [];
+  const minima: number[] = [];
+  if (orbs[0] <= limit && orbs[0] < orbs[1]) minima.push(0);
+  for (let index = 1; index < last; index++) {
+    const current = orbs[index];
+    if (current <= limit && current <= orbs[index - 1] && current <= orbs[index + 1]) minima.push(index);
+  }
+  if (orbs[last] <= limit && orbs[last] < orbs[last - 1]) minima.push(last);
+  return minima;
+}
+
 export function createAstrologyForecast(chart: AstrologyChart, period: AstrologyForecastPeriod, start = new Date()): AstrologyForecast {
   const spanDays = period === 'day' ? 0 : period === 'month' ? 30 : 365;
-  const natalTargets: Array<{ id: string; name: string; longitude: number }> = chart.planets
-    .map(item => ({ id: item.id, name: item.name, longitude: item.longitude }));
-  if (chart.ascendant) natalTargets.push({ id: 'ascendant', name: '上升點', longitude: chart.ascendant.longitude });
-  if (chart.midheaven) natalTargets.push({ id: 'midheaven', name: '天頂', longitude: chart.midheaven.longitude });
-  const bodyTargets = BODY_LIST;
-  const transitData = new Map<string, { transit: string; natal: string; aspect: typeof ASPECTS[number]; samples: Array<{ at: Date; orb: number }> }>();
+  const startMs = start.getTime();
+  const windowEndMs = startMs + spanDays * DAY_MS;
+  const natalTargets = chart.planets.map(item => ({ name: item.name, longitude: item.longitude }));
+  if (chart.ascendant) natalTargets.push({ name: '上升點', longitude: chart.ascendant.longitude });
+  if (chart.midheaven) natalTargets.push({ name: '天頂', longitude: chart.midheaven.longitude });
+
   const sampleCount = spanDays + 1;
+  const combos: TransitCombo[] = [];
+  for (let bodyIndex = 0; bodyIndex < BODY_LIST.length; bodyIndex++) for (const natal of natalTargets) for (const aspect of ASPECTS) {
+    combos.push({ bodyIndex, natal, aspect, orbs: new Float64Array(sampleCount), exactTimes: [] });
+  }
   for (let index = 0; index < sampleCount; index++) {
-    const instant = new Date(start.getTime() + index * 86_400_000);
-    const transitPositions = bodyTargets.map(body => ({ ...body, longitude: geoEclipticLongitude(body.body, instant) }));
-    for (const transit of transitPositions) for (const natal of natalTargets) {
-      const separation = angleDifference(transit.longitude, natal.longitude);
-      for (const aspect of ASPECTS) {
-        const key = `${transit.id}-${aspect.name}-${natal.id}`;
-        const item = transitData.get(key) ?? { transit: transit.name, natal: natal.name, aspect, samples: [] };
-        item.samples.push({ at: instant, orb: Math.abs(separation - aspect.angle) });
-        transitData.set(key, item);
-      }
+    const instant = new Date(startMs + index * DAY_MS);
+    const longitudes = BODY_LIST.map(body => geoEclipticLongitude(body.body, instant));
+    for (const combo of combos) {
+      combo.orbs[index] = Math.abs(angleDifference(longitudes[combo.bodyIndex], combo.natal.longitude) - combo.aspect.angle);
     }
   }
 
   const events: AstrologyTransitEvent[] = [];
-  for (const item of transitData.values()) {
-    const minima: Array<{ at: Date; orb: number }> = [];
-    if (period === 'day') {
-      const sample = item.samples[0];
-      if (sample.orb <= item.aspect.orb) minima.push(sample);
-    } else {
-      for (let index = 1; index < item.samples.length - 1; index++) {
-        const previous = item.samples[index - 1];
-        const current = item.samples[index];
-        const next = item.samples[index + 1];
-        if (current.orb <= item.aspect.orb && current.orb <= previous.orb && current.orb <= next.orb) minima.push(current);
-      }
-      if (item.samples[0].orb <= item.aspect.orb && item.samples[0].orb < item.samples[1].orb) minima.unshift(item.samples[0]);
-      if (item.samples.at(-1)!.orb <= item.aspect.orb && item.samples.at(-1)!.orb < item.samples.at(-2)!.orb) minima.push(item.samples.at(-1)!);
-    }
-    const transitBody = bodyTargets.find(body => body.name === item.transit)!;
-    const natalTarget = natalTargets.find(target => target.name === item.natal)!;
-    for (const candidate of minima) {
-      let exactAt = candidate.at;
-      let orb = candidate.orb;
+  for (const combo of combos) {
+    const body = BODY_LIST[combo.bodyIndex];
+    const { natal, aspect } = combo;
+    const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(body.body, new Date(milliseconds)), natal.longitude) - aspect.angle);
+    const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
+    for (const index of sampledMinima(combo.orbs, aspect.orb)) {
+      let exactMs = startMs + index * DAY_MS;
+      let orb = combo.orbs[index];
       if (period !== 'day') {
-        const left = Math.max(start.getTime(), candidate.at.getTime() - 86_400_000);
-        const right = Math.min(start.getTime() + spanDays * 86_400_000, candidate.at.getTime() + 86_400_000);
-        const orbAt = (milliseconds: number) => Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(milliseconds)), natalTarget.longitude) - item.aspect.angle);
-        exactAt = new Date(goldenSectionMinimum(orbAt, left, right));
-        orb = orbAt(exactAt.getTime());
+        const left = Math.max(startMs, exactMs - DAY_MS);
+        const right = Math.min(windowEndMs, exactMs + DAY_MS);
+        exactMs = new Date(goldenSectionMinimum(orbAt, left, right)).getTime();
+        if (exactMs - startMs < BOUNDARY_TOLERANCE_MS || windowEndMs - exactMs < BOUNDARY_TOLERANCE_MS) continue;
+        orb = orbAt(exactMs);
       }
-      const timeDelta = period === 'day' ? 6 * 3_600_000 : 12 * 3_600_000;
-      const beforeOrb = Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(exactAt.getTime() - timeDelta)), natalTarget.longitude) - item.aspect.angle);
-      const afterOrb = Math.abs(angleDifference(geoEclipticLongitude(transitBody.body, new Date(exactAt.getTime() + timeDelta)), natalTarget.longitude) - item.aspect.angle);
+      if (combo.exactTimes.some(time => Math.abs(time - exactMs) < 2 * DAY_MS)) continue;
+      const beforeOrb = orbAt(exactMs - timeDelta);
+      const afterOrb = orbAt(exactMs + timeDelta);
       const phase = orb <= 0.05 ? '精確相位' : beforeOrb > afterOrb ? '接近中' : '分離中';
-      if (events.some(event => event.transit === item.transit && event.natal === item.natal && event.aspect === item.aspect.name && Math.abs(new Date(event.exactAt).getTime() - exactAt.getTime()) < 2 * 86_400_000)) continue;
-      events.push({ transit: item.transit, natal: item.natal, aspect: item.aspect.name, exactAt: exactAt.toISOString(), orb, phase, meaning: item.aspect.text });
+      combo.exactTimes.push(exactMs);
+      events.push({ transit: body.name, natal: natal.name, aspect: aspect.name, exactAt: new Date(exactMs).toISOString(), orb, phase, meaning: aspect.text });
     }
   }
   const orderedEvents = events.sort((left, right) => left.exactAt.localeCompare(right.exactAt) || left.orb - right.orb);
@@ -290,12 +299,6 @@ export function createAstrologyForecast(chart: AstrologyChart, period: Astrology
   return { periodLabel: label, text, events: orderedEvents, methodVersion: ASTROLOGY_METHOD_VERSION };
 }
 
-export function signDescription(signName: string, role: 'sun' | 'moon' | 'rising'): string {
-  const sign = SIGNS.find(item => item.name === signName);
-  if (!sign) return '';
-  const roleText = role === 'sun' ? '核心動機與自我表達' : role === 'moon' ? '情緒需求與安全感' : '初次互動與面對環境的風格';
-  return `${roleText}可參考${sign.name}的象徵特質。${sign.text}元素：${sign.element}；模式：${sign.mode}。`;
-}
 
 export const ASTROLOGY_ASPECTS = ASPECTS;
 export const ASTROLOGY_SIGNS = SIGNS.map(sign => sign.name);

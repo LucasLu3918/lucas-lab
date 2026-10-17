@@ -94,4 +94,18 @@ describe('local divination calculations', () => {
     expect(forecast.events.some(event => event.transit === '水星' && event.natal === '太陽' && event.aspect === '合相' && event.phase === '精確相位')).toBe(true);
     expect(forecast.methodVersion).toBe(chart.methodVersion);
   });
+
+  it('lists only transit windows whose exact moment falls inside the forecast period', () => {
+    const chart = calculateAstrology({ birthDate: '1990-06-15', birthTime: '08:30', timeZone: 'Asia/Taipei', latitude: 25.033, longitude: 121.5654 });
+    const start = new Date('2026-10-17T04:00:00Z');
+    const startMs = start.getTime();
+    const endMs = startMs + 365 * 24 * 60 * 60 * 1000;
+    const forecast = createAstrologyForecast(chart, 'year', start);
+    expect(forecast.events.length).toBeGreaterThan(0);
+    for (const event of forecast.events) {
+      const exactMs = new Date(event.exactAt).getTime();
+      expect(exactMs - startMs).toBeGreaterThanOrEqual(60_000);
+      expect(endMs - exactMs).toBeGreaterThanOrEqual(60_000);
+    }
+  });
 });

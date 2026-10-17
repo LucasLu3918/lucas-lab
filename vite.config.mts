@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   base: './',
   plugins: [vue()],
+  // Module workers (astrology forecasts) are emitted as ES modules so they can be loaded with { type: 'module' }.
+  worker: { format: 'es' },
   build: {
     outDir: '.vue-build',
     emptyOutDir: true,
