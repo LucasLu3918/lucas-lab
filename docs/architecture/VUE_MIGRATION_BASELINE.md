@@ -162,4 +162,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：管件位置與旋轉方向、連通／漏氣判定、50 筆復原歷史、提示順序、方向鍵移格、只有明確確認才完成、stage id、modal shell、進度與存檔行為維持原樣。CSS rotation classes 避免新增 inline style；不新增入口、公開路由、存檔欄位、執行期相依或額外載入腳本。驗證包含快照解析、元件互動、既有 Pipes browser journey 的觸控／鍵盤／提示／復原／通關，以及 game bundle contract。
 
-下一個遷移切片：再次盤點尚未接手的 Puzzle UI，挑一個互動邊界獨立、規則可留在 legacy 的項目，確認其鍵盤與瀏覽器情境後逐項遷移。
+## Phase 10 — Blood Mirror Ledger Puzzle Vue island
+
+`LedgerPuzzle.vue` 接手「拼回帳頁」的 3×3 碎片格盤、選取狀態、歸位數量、重設控制與方向鍵移格，沿用既有 lazy game bundle。`ledger.js` 保留初始／重設排列、碎片交換、完成判定、音效與完成回呼；快照 adapter 只接受完整的 0–8 碎片排列，並使用 `ledger-art.js` 產生已知的靜態 SVG。無法掛載 Vue island 時，原有 DOM renderer 保留作為 fallback。
+
+不變條件：stage id、原生 modal shell、另一道懷錶齒輪、遊戲進度與存檔格式維持不變；Vue 只擁有格盤子樹與暫態選取狀態，不寫入 storage。沒有新增 route、bundle entry、runtime dependency、CSP 例外或網路存取。驗證包含快照解析、元件互動、manifest/bundle contract，以及實際瀏覽器中的觸控、鍵盤、重設與完成流程。
+
+下一步：重新盤點尚未接手的 Puzzle UI，挑選一個互動邊界獨立、規則可留在 legacy 的項目，再逐項遷移。

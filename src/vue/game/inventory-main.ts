@@ -1,11 +1,13 @@
 import { createApp, defineComponent, h, ref } from 'vue';
 import HintPanel from './HintPanel.vue';
+import LedgerPuzzle from './LedgerPuzzle.vue';
 import InventoryPanel from './InventoryPanel.vue';
 import JournalPanel from './JournalPanel.vue';
 import MazePuzzle from './MazePuzzle.vue';
 import PipesPuzzle from './PipesPuzzle.vue';
 import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import { parseHintSnapshot } from './hints';
+import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
 import { parseJournalSnapshot } from './journal';
 import { parsePipesSnapshot, type PipesAction } from './pipes';
 import type { PipesSnapshot } from './pipes';
@@ -119,6 +121,22 @@ export function mountPipesPuzzleIsland(
   const app = createApp(PipesPuzzle, { snapshot, onAction } satisfies PipesPuzzleProps);
   app.mount(root);
   root.setAttribute('data-vue-pipes-ready', 'true');
+  return () => app.unmount();
+}
+
+type LedgerPuzzleProps = InstanceType<typeof LedgerPuzzle>['$props'];
+
+export function mountLedgerPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: LedgerAction) => LedgerSnapshot,
+): (() => void) | null {
+  const snapshot = parseLedgerSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const app = createApp(LedgerPuzzle, { snapshot, onAction } satisfies LedgerPuzzleProps);
+  app.mount(root);
+  root.setAttribute('data-vue-ledger-ready', 'true');
   return () => app.unmount();
 }
 

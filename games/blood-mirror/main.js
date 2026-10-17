@@ -130,6 +130,15 @@ function mountPipesPuzzleIsland(snapshot,onAction){
   if(!gameModalIslandUnmount)root.textContent='管網內容無法載入，請重新整理頁面。';
  }).catch(error=>{console.error('Pipes Vue island failed to load.',error);if(root.isConnected)root.textContent='管網載入失敗，請重新整理頁面。';});
 }
+function mountLedgerPuzzleIsland(puzzle){
+ const root=$('[data-vue-ledger-puzzle]');
+ if(!root)return;
+ loadGameIslands().then(module=>{
+  if(!root.isConnected||!$('#modal').open||!root.closest('.challenge[data-step="ledger"]'))return;
+  gameModalIslandUnmount=module.mountLedgerPuzzleIsland(root,puzzle.snapshot,puzzle.onAction);
+  if(!gameModalIslandUnmount)root.textContent='帳頁內容無法載入，請重新整理頁面。';
+ }).catch(error=>{console.error('Ledger Vue island failed to load.',error);if(root.isConnected)root.textContent='帳頁載入失敗，請重新整理頁面。';});
+}
 function renderInventory(){$('#inventory-count').textContent=state.inventory.length+' 件';if(inventoryIslandLoaded){emitInventoryUpdate(document,state.inventory);return;}if(inventoryIslandLoading)return;inventoryIslandLoading=true;loadGameIslands().then(()=>{inventoryIslandLoaded=true;inventoryIslandLoading=false;emitInventoryUpdate(document,state.inventory);}).catch(error=>{console.error('Game Vue island failed to load.',error);inventoryIslandLoading=false;$('#inventory').textContent='物品清單載入失敗，請重新整理頁面。';});}
 function openInventoryItem(id){const it=items[id];if(!it||!state.inventory.includes(id))return;modal(it.name,it.keepsake?'KEEPSAKE · 紀念物':'INVENTORY · 隨身物品',`<div class="modal-image-icon">${itemArtwork[id]?conceptMarkup(itemArtwork[id],{className:'concept-item'}):icon(itemIcon(id,it))}</div><p class="modal-text">${it.text}</p>${it.keepsake?'<p class="modal-note">紀念物不需要在任何地方使用，它只替妳記得發生過的事。</p>':''}<button class="secondary-button" id="item-back">返回探索</button>`);$('#item-back').onclick=closeModal;}
 document.addEventListener(INVENTORY_SELECTED_EVENT,event=>{const id=readInventorySelection(event);if(id)openInventoryItem(id);});
@@ -358,7 +367,7 @@ function stageHintMarkup(step){const r=rooms[state.room];return stageHintHtml({l
 function bindStageHints(step){const panel=$('#modal .stage-hints');if(!panel)return;panel.ontoggle=()=>{hintPanelOpen=panel.open;};panel.querySelector('[data-stage-hint]').onclick=()=>{raiseHint(state.room,step,hintLevel(state.room,step)+1);hintPanelOpen=true;panel.outerHTML=stageHintMarkup(step);bindStageHints(step);$('#modal [data-stage-hint]')?.focus({preventScroll:true});};}
 // A known bottleneck (stage.whisper): after three quiet minutes on it, the mirror lights the first hint itself.
 function stageWhisper(step){clearTimeout(stageWhisperTimer);const r=rooms[state.room],stage=challengeRegistry[r.id]?.stages.find(s=>s.id===step);if(!stage?.whisper)return;const room=state.room;stageWhisperTimer=setTimeout(()=>{if(state.room!==room||isStageComplete(r.id,step)||!$('#modal [data-challenge="'+r.id+'"][data-step="'+step+'"]'))return;if(hintLevel(room,step)<1)raiseHint(room,step,1);hintPanelOpen=true;const panel=$('#modal .stage-hints');if(panel){panel.outerHTML=stageHintMarkup(step);bindStageHints(step);}log('whisper',{step});toast('魔鏡低語：「妳在這裡停了很久。」第一道燭光提示已經亮起。');},180000);}
-function challengeOptions(){mixer.setFocus(true);return {modal,playCue,has:item=>state.inventory.includes(item)||(state.shards||[]).includes(item),onStage:step=>{markProgress();log('stage-start',{step});stageWhisper(step);},onStageDone:step=>{log('stage-done',{step});},mountPuzzleIsland:(step,snapshot)=>{if(step==='reflection')mountReflectionPuzzleIsland(snapshot);if(step==='maze')mountMazePuzzleIsland(snapshot);if(step==='pipes')mountPipesPuzzleIsland(snapshot.snapshot,snapshot.onAction);},extra:{html:stageHintMarkup,bind:bindStageHints}};}
+function challengeOptions(){mixer.setFocus(true);return {modal,playCue,has:item=>state.inventory.includes(item)||(state.shards||[]).includes(item),onStage:step=>{markProgress();log('stage-start',{step});stageWhisper(step);},onStageDone:step=>{log('stage-done',{step});},mountPuzzleIsland:(step,snapshot)=>{if(step==='reflection')mountReflectionPuzzleIsland(snapshot);if(step==='maze')mountMazePuzzleIsland(snapshot);if(step==='pipes')mountPipesPuzzleIsland(snapshot.snapshot,snapshot.onAction);if(step==='ledger')mountLedgerPuzzleIsland(snapshot);},extra:{html:stageHintMarkup,bind:bindStageHints}};}
 function openStory(){modal('當鏡子第一次說謊','PROLOGUE · 故事序章',storyBody+'<button id="story-play" class="primary-button">開始妳的故事 ⟶</button>');$('#story-play').onclick=()=>{closeModal();if(state.started){state.ending?showView('ending'):showView('game')}else begin();};}
 function openGuide(){modal('如何走出魔鏡','HOW TO PLAY · 遊玩指南',guideBody);}
 function begin(){resetChallenges();playlog.record('journey');loggedRoom=null;state={...initialState(),muted:state.muted,endings:state.endings,memories:state.memories||[],shards:state.shards||[],achievements:state.achievements||[]};state.started=true;save();showView('game');openPrologue();}

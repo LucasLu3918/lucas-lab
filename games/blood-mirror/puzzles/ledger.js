@@ -10,6 +10,24 @@ const pop=cells=>{if(calm())return;for(const i of cells)document.querySelector('
 
 export function mountLedger(ctx){
  let tiles=[4,0,8,2,6,1,3,7,5],selected=-1;
+ const snapshot=()=>({tiles:[...tiles]});
+ const action=change=>{
+  if(change?.type==='reset')tiles=[8,1,5,3,0,7,4,2,6];
+  if(change?.type==='swap'&&Number.isInteger(change.first)&&Number.isInteger(change.second)
+   &&change.first>=0&&change.first<9&&change.second>=0&&change.second<9&&change.first!==change.second){
+   const {first,second}=change;
+   [tiles[first],tiles[second]]=[tiles[second],tiles[first]];
+   if(puzzleIsSolved(tiles)){ctx.done();return snapshot();}
+   ctx.playCue(tiles[first]===first||tiles[second]===second?'restore':'click');
+   pop([first,second]);
+  }
+  return snapshot();
+ };
+ if(ctx.mountPuzzleIsland){
+  ctx.render('<div data-vue-ledger-puzzle><p class="challenge-feedback" role="status">帳頁載入中…</p></div>');
+  ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:action});
+  return;
+ }
  const draw=()=>{
   const placed=tiles.filter((v,i)=>v===i).length;
   ctx.render('<p class="challenge-help">帳頁被撕成九片。點選兩片碎片交換位置，把出生紀錄拼回原狀。邊框與文字的斷口能告訴妳每片的位置。</p><div class="tile-board ledger-board">'+tiles.map((v,i)=>'<button class="picture-tile ledger-tile '+(i===selected?'selected':'')+' '+(v===i?'placed':'')+'" data-pos="'+i+'" aria-label="第'+(i+1)+'格碎片：'+ledgerPieces[v]+'（圖塊 '+(v+1)+'）'+(v===i?'，已歸位':'')+'" aria-pressed="'+(i===selected)+'">'+ledgerTile(v)+'</button>').join('')+'</div><p class="challenge-feedback" role="status">'+placed+' / 9 片碎片已歸位。'+(selected<0?'選取任意兩片進行交換。':'再選一片與它交換。')+'</p><button id="puzzle-reset" class="secondary-button">重新打散碎片</button>');
@@ -18,13 +36,11 @@ export function mountLedger(ctx){
    if(selected<0){selected=i;draw();return;}
    if(selected===i){selected=-1;draw();return;}
    const from=selected;
-   [tiles[i],tiles[from]]=[tiles[from],tiles[i]];
    selected=-1;
-   if(puzzleIsSolved(tiles)){ctx.done();return;}
-   ctx.playCue(tiles[i]===i||tiles[from]===from?'restore':'click');
-   draw();pop([i,from]);
+   action({type:'swap',first:from,second:i});
+   if(!puzzleIsSolved(tiles))draw();
   });
-  document.querySelector('#puzzle-reset').onclick=()=>{tiles=[8,1,5,3,0,7,4,2,6];selected=-1;draw();};
+  document.querySelector('#puzzle-reset').onclick=()=>{selected=-1;action({type:'reset'});draw();};
  };
  draw();
 }
