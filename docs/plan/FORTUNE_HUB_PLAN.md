@@ -22,6 +22,7 @@
 | 六爻易經 | `/liuyao/` | 已完成（§3.8）：銅錢與報數起卦；納甲裝卦、世應、六親六神、用神旺衰、動變與應期 | `src/vue/site/features/liuyao/`（`liuyao-jingfang-najia-v1`） |
 | 奇門遁甲 | `/qimen/` | 已完成（§3.9）：時家拆補法排盤；陰陽遁與局數、九宮地盤、天盤九星、人盤八門、神盤八神、格局與方位評分 | `src/vue/site/features/qimen/`（`qimen-chaibu-shijia-v1`） |
 | 風水命理 | `/fengshui/` | 已完成（§3.10）：八宅本命卦與八方吉凶；九運玄空飛星（四正向） | `src/vue/site/features/fengshui/`（`fengshui-bazhai-xuankong-v1`） |
+| 印度占星 | `/vedic/` | 已完成（§3.11）：恆星黃道（Lahiri）、月宿與分段、維姆歐塔里大運與次限、九曜與整宮制上升 | `src/vue/site/features/vedic/`（`vedic-lahiri-vimshottari-v1`） |
 
 既有可沿用的設計：
 
@@ -170,6 +171,19 @@ Hub 依 `inputNeeds` 顯示「不需個資，立即抽牌」或「選擇資料�
 - 驗證：`fengshui.spec.ts` 驗算 1985、2000、2005 與 1995 年的本命卦，檢查八宅表的排列與吉方歸屬、順逆飛路徑、九運四正向的中宮星，以及斷語的 ethics。`FengshuiApp.spec.ts` 覆蓋表單、坐向切換、範圍錯誤與過期結果提示。`divination.browser.cjs` 於 390 px 驗證。
 - 限制：玄空飛星是單一流派的九運排布，不涵蓋三元其他運與斜向坐向；乾、坤、艮的八星仍待古籍核對（見上）。
 
+### 3.11 印度占星 Vedic（新增）
+
+- 輸入：出生日期、出生時間（可選擇「時間不確定」）與出生地（城市清單，與占星室相同）。時間未知時不顯示上升與宮位；月宿與大運以當地中午估算，結果標示為近似。
+- 恆星黃道：Lahiri 歲差，以 J2000.0 的 23°51′11″ 為基準，依 50.290966″／年線性外推。天體位置沿用 `fortune-core/ephemeris` 的地心視黃道經度（與占星室共用），不另建第二套星曆。
+- 月宿：恆星黃道的月亮經度除以 13°20′，得到第 1 至 27 宿；每宿分四段（pada，各 3°20′）。月亮距宿界不到 1° 時提示，因為出生時間的誤差可能使月宿落在相鄰的宿。
+- 大運：維姆歐塔里（Vimshottari）以月宿主星決定起點，九曜順序為計都、金星、太陽、月亮、火星、羅睺、木星、土星、水星，年數 7、20、6、10、7、18、16、19、17，合計 120 年。出生時的剩餘年數為 (1 − 已走比例) × 宿主星年數；第一段大運以出生前的虛擬起點排列，使剩餘年數正確。次限長度為大運年數 × 次限年數 ÷ 120，依同一循環、從大運主星自己開始。一年以 365.25 日計。
+- 九曜：太陽、月亮、火星、水星、木星、金星、土星以地心視位置計算，行星標示逆行（太陽與月亮不逆行）。羅睺為平均北交點（Meeus 多項式），計都為其對點，兩者不標示逆行。整宮制以上升星座為第一宮，只在知道出生時間時計算。
+- 來源與差異：規則依本機的 vedic-astrology 技能文件與傳統維姆歐塔里大運的常見規則。歲差為線性近似（與標準星曆的差在數角分內）；交點採平均值而非真交點；不同傳統的歲差與宮位制度不同，結果頁的方法說明會列出本版採用的規則。
+- 斷語：固定規則組句，以「傾向」「適合」「可能」描述；大運主題只作為課題與節奏的提示。不提供化解儀式、寶石或咒語，文案通過 `ethics` 檢查。
+- 驗證：`vedic.spec.ts` 驗算 2000 與 2026 年的歲差、2026 年 4 月 14 日前後太陽進入白羊、宿界與 pada、宿主星循環、大運合計 120 年、出生時的虛擬起點與剩餘年數、次限比例，並以一組固定出生資料（1990-06-15 08:00 台北）檢查月宿、大運與交點對點；斷語通過 `ethics`。`VedicApp.spec.ts` 覆蓋表單、時間未知與錯誤輸入；`divination.browser.cjs` 於 390 px 驗證。
+- 限制：不涵蓋分盤（Vargas）、更細的 Pratyantardasha 以下的大運、其他歲差選項與瑜伽（Yoga）等進階判讀；城市座標為市中心近似值。
+
+
 ## 4. 共用計算引擎與資料層（`fortune-core`）
 
 建議放在 `src/vue/site/features/fortune-core/`，各模組只能依賴它，不得互相依賴。
@@ -221,7 +235,7 @@ interface MethodResult<T> {
 | `numerology-fortune` | fortune-telling-skills | 生命靈數計算規則與數字意義參考 |
 | `ziwei-fortune` | fortune-telling-skills | 紫微斗數計算規則（路線 B 的規格來源） |
 | `bazi-fortune` | fortune-telling-skills | 八字規則交叉比對 |
-| `vedic-astrology` | fortune-telling-skills | 本計畫範圍外，保留為未來擴充模組 |
+| `vedic-astrology` | fortune-telling-skills | 已實作為 §3.11 的模組，技能文件只作規則參考 |
 | `fengshui-advisor` | fortune-telling-skills | 已實作為 §3.10 的模組，技能文件只作規則參考 |
 | `meihua-yishu`、`liuyao-yijing`、`qimen-dunjia` | fortune-telling-skills | 已實作為 §3.7、§3.8、§3.9 的模組，技能文件只作規則參考 |
 

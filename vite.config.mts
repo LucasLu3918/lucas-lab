@@ -32,6 +32,7 @@ export default defineConfig({
         liuyao: 'src/vue/site/liuyao-main.ts',
         qimen: 'src/vue/site/qimen-main.ts',
         fengshui: 'src/vue/site/fengshui-main.ts',
+        vedic: 'src/vue/site/vedic-main.ts',
         ziwei: 'src/vue/site/ziwei-main.ts',
         reader: 'src/vue/site/reader-main.ts',
         gallery: 'src/vue/site/gallery-main.ts',

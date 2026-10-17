@@ -1,9 +1,10 @@
 import * as Astronomy from 'astronomy-engine';
 import { parseCivilDateTime, resolveCivilDateTime, type Disambiguation } from '../fortune-core/civil-time';
+import { calculateAscendantAndMidheaven, geoEclipticLongitude, normalize } from '../fortune-core/ephemeris';
 import type { InputPrecision } from '../fortune-core/result';
 import { SIGNS, signDescription } from './astrology-signs';
 
-export { signDescription };
+export { signDescription, calculateAscendantAndMidheaven, geoEclipticLongitude, normalize };
 
 export const ASTROLOGY_METHOD_VERSION = 'tropical-whole-sign-v3';
 export const DAY_MS = 86_400_000;
@@ -72,18 +73,9 @@ export interface AstrologyChart {
   longitude: number;
 }
 
-export function normalize(degrees: number): number {
-  return (degrees % 360 + 360) % 360;
-}
-
 function signInfo(longitude: number) {
   const signIndex = Math.floor(normalize(longitude) / 30);
   return { signIndex, sign: SIGNS[signIndex], degree: normalize(longitude) - signIndex * 30 };
-}
-
-export function geoEclipticLongitude(body: Astronomy.Body, instant: Date): number {
-  const vector = Astronomy.GeoVector(body, instant, true);
-  return normalize(Astronomy.Ecliptic(vector).elon);
 }
 
 export function angleDifference(first: number, second: number): number {
@@ -99,18 +91,6 @@ export function findClosestAspect<T extends { angle: number; orb: number }>(sepa
     if (orb <= aspect.orb && (!closest || orb < closest.orb)) closest = { aspect, orb };
   }
   return closest;
-}
-
-/** 依當地恆星時與黃赤交角估算上升點與天頂（黃經，度）。 */
-export function calculateAscendantAndMidheaven(instant: Date, latitude: number, longitude: number) {
-  const localSidereal = normalize((Astronomy.SiderealTime(instant) + longitude / 15) * 15) * Math.PI / 180;
-  const obliquity = Astronomy.e_tilt(new Astronomy.AstroTime(instant)).tobl * Math.PI / 180;
-  const latitudeRadians = latitude * Math.PI / 180;
-  const x = Math.sin(localSidereal) * Math.cos(obliquity) + Math.tan(latitudeRadians) * Math.sin(obliquity);
-  const y = -Math.cos(localSidereal);
-  const ascendant = normalize(Math.atan2(y, x) * 180 / Math.PI + 180);
-  const mc = normalize(Math.atan2(Math.sin(localSidereal), Math.cos(localSidereal) * Math.cos(obliquity)) * 180 / Math.PI);
-  return { ascendant, midheaven: mc };
 }
 
 /** 計算本命行星落點；`ascendantSignIndex` 為 null 時不推算宮位。 */

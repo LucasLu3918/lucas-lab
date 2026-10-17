@@ -7,6 +7,7 @@ import {
 } from './astrology';
 
 const TROPICAL_YEAR_DAYS = 365.2422;
+const STATION_STEP_MS = 3 * DAY_MS;
 const SIGNS = ASTROLOGY_SIGNS;
 const BODIES = BODY_LIST;
 const STATION_BODIES = BODIES.filter(item => !['sun', 'moon'].includes(item.id));
@@ -111,10 +112,12 @@ function collectAnnualEvents(start: Date, end: Date): AnnualSkyEvent[] {
     const halfDay = DAY_MS / 4;
     return signedDelta(geoEclipticLongitude(body, new Date(time + halfDay)), geoEclipticLongitude(body, new Date(time - halfDay))) * 2;
   };
+  // 最短的逆行期（水星）約 3 週，遠長於掃描步距，同一步距內不會出現兩次轉向；最後一段截止於區間終點，不漏掉尾端。
   for (const item of STATION_BODIES) {
     let leftTime = start.getTime();
     let leftSpeed = speed(item.body, leftTime);
-    for (let rightTime = leftTime + DAY_MS; rightTime <= end.getTime(); rightTime += DAY_MS) {
+    while (leftTime < end.getTime()) {
+      const rightTime = Math.min(leftTime + STATION_STEP_MS, end.getTime());
       const rightSpeed = speed(item.body, rightTime);
       if (leftSpeed === 0 || rightSpeed === 0 || leftSpeed * rightSpeed < 0) {
         let low = leftTime;

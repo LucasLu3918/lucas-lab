@@ -41,6 +41,8 @@ const BUDGETS=[
  {route:'/liuyao/',maxBytes:600*KB,maxRequests:17},
  {route:'/qimen/',maxBytes:600*KB,maxRequests:17},
  {route:'/fengshui/',maxBytes:600*KB,maxRequests:17},
+ // Added 2026-10-18 with the Vedic island. Measured about 263 KB decoded and 15 requests at 390 px (the astronomy-engine chunk is 54 KB), plus headroom.
+ {route:'/vedic/',maxBytes:400*KB,maxRequests:17},
  // Added 2026-10-17 with the tarot prerender (tarot-ssr.ts): the first markup is in the static page, so the island mounts without a shift.
  // Measured 527 KB and 23 requests at both widths, plus about 20% headroom.
  {route:'/tarot/',maxBytes:640*KB,maxRequests:28}

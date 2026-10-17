@@ -447,3 +447,5 @@ html[data-heading-font=system] {--font-display:var(--font-serif)}
 @media (min-width:681px) {[data-vue-site-island="qimen"] {min-height:662px}}
 /* Fengshui: the mounted form is 762 px tall at 1440 px (measured in Chromium, with the birth-date field) with no result shown, so the footer would otherwise shift on load (CLS 0.064). Desktop only; the phone layout is taller and unchanged. */
 @media (min-width:681px) {[data-vue-site-island="fengshui"] {min-height:762px}}
+/* Vedic: the mounted form and its privacy note are 960 px tall at 1440 px (measured in the browser, before any result), so the footer would shift on load. Desktop only. */
+@media (min-width:681px) {[data-vue-site-island="vedic"] {min-height:960px}}
