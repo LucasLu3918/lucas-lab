@@ -11,7 +11,9 @@ import ReflectionPuzzle from './ReflectionPuzzle.vue';
 import WatchPuzzle from './WatchPuzzle.vue';
 import Gears13Puzzle from './Gears13Puzzle.vue';
 import PendulumPuzzle from './PendulumPuzzle.vue';
+import StarwheelPuzzle from './StarwheelPuzzle.vue';
 import { parsePendulumSnapshot, type PendulumAction, type PendulumSnapshot } from './pendulum';
+import { parseStarwheelSnapshot, type StarwheelAction, type StarwheelSnapshot } from './starwheel';
 import { parseGears13Snapshot, type Gears13Action, type Gears13Snapshot } from './gears13';
 import { parseHintSnapshot } from './hints';
 import { parseLedgerSnapshot, type LedgerAction, type LedgerSnapshot } from './ledger';
@@ -248,6 +250,40 @@ export function mountPendulumPuzzleIsland(
   app.mount(root);
   root.setAttribute('data-vue-pendulum-ready', 'true');
   return () => app.unmount();
+}
+
+type StarwheelPuzzleProps = InstanceType<typeof StarwheelPuzzle>['$props'];
+
+export function mountStarwheelPuzzleIsland(
+  root: Element,
+  value: unknown,
+  onAction: (action: StarwheelAction) => StarwheelSnapshot | null,
+): { update(value: unknown): void; unmount(): void } | null {
+  const snapshot = parseStarwheelSnapshot(value);
+  if (!snapshot || typeof onAction !== 'function') return null;
+
+  const current = ref(snapshot);
+  const update = (value: unknown) => {
+    const next = parseStarwheelSnapshot(value);
+    if (next) current.value = next;
+  };
+  const dispatch = (action: StarwheelAction) => {
+    const next = parseStarwheelSnapshot(onAction(action));
+    if (next) current.value = next;
+    return next;
+  };
+  const app = createApp(defineComponent({
+    name: 'StarwheelPuzzleIsland',
+    setup() {
+      return () => h(StarwheelPuzzle, {
+        snapshot: current.value,
+        onAction: dispatch,
+      } satisfies StarwheelPuzzleProps);
+    },
+  }));
+  app.mount(root);
+  root.setAttribute('data-vue-starwheel-ready', 'true');
+  return { update, unmount: () => app.unmount() };
 }
 
 export function mountReflectionIsland(

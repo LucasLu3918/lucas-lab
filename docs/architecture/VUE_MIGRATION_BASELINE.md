@@ -200,4 +200,10 @@ Hints 沿用 `/games/blood-mirror/play/` 與已存在的 game Vue bundle，開�
 
 不變條件：細桿與配重長度、平方根週期公式、唯一正解、提示層級、正常動態下等待新擺完成一趟才通關，以及 stage id `belfry-pendulum` 維持原樣。存檔、進度、路由、modal、CSP、lazy bundle entry 與 runtime dependencies 不變；不新增 reset 行為。驗證包含 snapshot parser／元件測試、bundle export contract，以及 360px／1280px 瀏覽器中的 lazy mount、配重切換、減少動態通關、進度連續性與 legacy fallback。
 
-下一步建議：評估「逆走鐘樓」星輪（`games/blood-mirror/puzzles/starwheel.js`）Vue island 的互動邊界，確認星盤旋轉、刻度對位與既有動畫／提示 callback 是否適合沿用 puzzle adapter。
+## Phase 16 — Blood Mirror Belfry Starwheel Vue island
+
+`StarwheelPuzzle.vue` 接手 13 格 SVG 星輪、燭光／刻字顯示、撥爪跨格控制、敲鐘控制與狀態呈現，沿用既有 lazy game bundle、stage id、modal 與鐘樓 CSS。`starwheel.js` 保留 `numeralAt`／`playTolls`／`wheelSolved`／`solveAll` 解題規則、動畫時鐘與角度推進、每聲音效、錯誤與通關判定、提示狀態、完成回呼及 legacy renderer。Vue 只呈現經 parser 驗證的 transient snapshot，並將 candle／step／run typed actions 交回 legacy；legacy 透過既有 island adapter 推送鐘錘動畫快照。
+
+不變條件：13 格與紅寶石位置、燭光下的刻字與碑文、每聲跨格設定、錯誤時停在第一個失誤刻度、唯一解與第十三聲回到紅寶石、Hints／音效／stage id `belfry-wheel`、可選關卡進度和存檔格式維持原樣。沒有 island callback 時沿用既有 DOM renderer；不新增 route、bundle entry、runtime dependency、storage、network 或 CSP 例外。驗證包含 snapshot parser／元件測試、bundle export contract、既有 puzzle-rule 測試，以及 360px／1280px 瀏覽器中的 lazy mount、刻字、錯誤敲鐘、解謎、進度連續性、fallback 與水平溢位。
+
+下一步建議：評估「稜鏡舞廳」第一道濾鏡關（`games/blood-mirror/puzzles/prism.js`、stage `prism-rays`）是否適合沿用同一 typed snapshot／action adapter，先確認動畫與多階段狀態邊界再核准切片。

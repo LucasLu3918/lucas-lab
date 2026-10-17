@@ -44,65 +44,73 @@ const NS='http://www.w3.org/2000/svg',CENTER=160,RING=116;
 const point=(notch,radius)=>{const angle=notch*Math.PI*2/NOTCHES;return [CENTER+Math.sin(angle)*radius,CENTER-Math.cos(angle)*radius];};
 const numeralName=n=>n?NUMERALS[n-1]:'';
 
-// ctx = { render(html), done(), playCue(kind) }
+// ctx = { render(html), done(), playCue(kind), mountPuzzleIsland?(adapter) }
 export function mountStarWheel(ctx){
  ensureMaterials();
  const still=document.body.classList.contains('reduce-motion');
- let lit=false,everLit=false,step=1,running=false,solvedNow=false;
- ctx.render('<div class="belfry">'
-  +'<p class="challenge-help">星輪有 13 個缺口，紅寶石在最上面。撥爪每響一聲，就順時針跨過固定的格數，敲在缺口上。<b>讓第一聲到第十二聲，依序敲在刻著「一」到「十二」的缺口上</b>，第十三聲就會落回紅寶石，暗格才會鬆開。</p>'
-  +'<ol class="belfry-rules"><li>邊緣的刻字要用燭光才看得見。</li><li>用「−」「＋」設定撥爪每一聲跨幾格，再按「敲鐘」。敲錯不會有懲罰，只會停在出錯的那一聲。</li></ol>'
-  +'<p id="bf-status" class="belfry-status" role="status"></p>'
-  +'<div class="belfry-board wheel-board"><svg id="bf-svg" class="belfry-svg wheel-svg" viewBox="0 0 320 320" role="img" aria-label="十三格星輪"></svg></div>'
-  +'<p id="wheel-engraving" class="wheel-engraving" hidden>刻在輪緣內側：「曲柄十三圈，輪走一圈。擺兩次，鐘響一次。響到第十三聲，暗格才開。」</p>'
-  +'<div class="belfry-row"><button id="wheel-candle" class="secondary-button" aria-pressed="false">點燭</button>'
-  +'<span class="wheel-step"><button id="wheel-less" class="secondary-button" aria-label="撥爪少跨一格">−</button><output id="wheel-step" class="belfry-note" aria-live="polite"></output><button id="wheel-more" class="secondary-button" aria-label="撥爪多跨一格">＋</button></span></div>'
-  +'<button id="bf-run" class="primary-button">敲鐘 ⟶</button>'
-  +hintMarkup+'</div>');
- const $=id=>document.getElementById(id),svg=$('bf-svg');
- const alive=()=>svg.isConnected;
- const say=(text,tone='')=>{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;};
+ const useIsland=typeof ctx.mountPuzzleIsland==='function';
+ let lit=false,everLit=false,step=1,running=false,solvedNow=false,islandUpdate=null;
+ let statusText='',statusTone='',tollText='',hammerNotch=RUBY,hammerAngle=0;
+ ctx.render(useIsland
+  ?'<div class="belfry"><div data-vue-starwheel><p class="challenge-help" role="status">星輪載入中…</p></div>'+hintMarkup+'</div>'
+  :'<div class="belfry">'
+   +'<p class="challenge-help">星輪有 13 個缺口，紅寶石在最上面。撥爪每響一聲，就順時針跨過固定的格數，敲在缺口上。<b>讓第一聲到第十二聲，依序敲在刻著「一」到「十二」的缺口上</b>，第十三聲就會落回紅寶石，暗格才會鬆開。</p>'
+   +'<ol class="belfry-rules"><li>邊緣的刻字要用燭光才看得見。</li><li>用「−」「＋」設定撥爪每一聲跨幾格，再按「敲鐘」。敲錯不會有懲罰，只會停在出錯的那一聲。</li></ol>'
+   +'<p id="bf-status" class="belfry-status" role="status"></p>'
+   +'<div class="belfry-board wheel-board"><svg id="bf-svg" class="belfry-svg wheel-svg" viewBox="0 0 320 320" role="img" aria-label="十三格星輪"></svg></div>'
+   +'<p id="wheel-engraving" class="wheel-engraving" hidden>刻在輪緣內側：「曲柄十三圈，輪走一圈。擺兩次，鐘響一次。響到第十三聲，暗格才開。」</p>'
+   +'<div class="belfry-row"><button id="wheel-candle" class="secondary-button" aria-pressed="false">點燭</button>'
+   +'<span class="wheel-step"><button id="wheel-less" class="secondary-button" aria-label="撥爪少跨一格">−</button><output id="wheel-step" class="belfry-note" aria-live="polite"></output><button id="wheel-more" class="secondary-button" aria-label="撥爪多跨一格">＋</button></span></div>'
+   +'<button id="bf-run" class="primary-button">敲鐘 ⟶</button>'
+   +hintMarkup+'</div>');
+ const $=id=>document.getElementById(id),svg=useIsland?null:$('bf-svg'),host=useIsland?document.querySelector('[data-vue-starwheel]'):null;
+ const alive=()=>useIsland?!!host?.isConnected:!!svg?.isConnected;
+ const snapshot=()=>({notches:Array.from({length:NOTCHES},(_,index)=>({index,numeral:index===RUBY?'':numeralName(numeralAt(index)),ruby:index===RUBY})),lit,step,running,solved:solvedNow,reducedMotion:still,hammerAngle,toll:tollText,status:statusText,tone:statusTone});
+ const publish=()=>{if(useIsland&&typeof islandUpdate==='function')islandUpdate(snapshot());};
+ const say=(text,tone='')=>{statusText=text;statusTone=tone;if(useIsland)publish();else{const el=$('bf-status');el.textContent=text;el.dataset.tone=tone;}};
  const hints=bindHints({hints:HINTS,currentStep:()=>hintStep(solvedNow,everLit),alive});
 
  // The ring is a brass band with a lit edge; the ruby is a painted gem. The hammer is one group that turns about the hub, so a toll
  // is a CSS transition between two angles instead of a jump (see aimHammer).
- let body='<circle class="wheel-ring-shadow" cx="'+(CENTER+1.5)+'" cy="'+(CENTER+3)+'" r="'+RING+'"/><circle class="wheel-ring" cx="'+CENTER+'" cy="'+CENTER+'" r="'+RING+'"/>'
-  +'<circle class="wheel-ring-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING+4.8)+'"/><circle class="wheel-ring-dark" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING-4.8)+'"/>'
-  +'<circle class="wheel-hub" cx="'+CENTER+'" cy="'+CENTER+'" r="26"/><circle class="wheel-hub-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="21"/>';
- for(let notch=0;notch<NOTCHES;notch++){
-  const [x1,y1]=point(notch,RING-9),[x2,y2]=point(notch,RING+9),[tx,ty]=point(notch,RING-30);
-  body+='<line class="wheel-notch" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';
-  body+=notch===RUBY?'<image class="wheel-ruby" href="assets/puzzles/wheel-ruby.webp" x="'+(x2-15).toFixed(1)+'" y="'+(y2+4-18.5).toFixed(1)+'" width="30" height="37" pointer-events="none"/>'
-   :'<text class="wheel-glyph" x="'+tx.toFixed(1)+'" y="'+(ty+5).toFixed(1)+'" data-notch="'+notch+'">'+numeralName(numeralAt(notch))+'</text>';
+ if(!useIsland){
+  let body='<circle class="wheel-ring-shadow" cx="'+(CENTER+1.5)+'" cy="'+(CENTER+3)+'" r="'+RING+'"/><circle class="wheel-ring" cx="'+CENTER+'" cy="'+CENTER+'" r="'+RING+'"/>'
+   +'<circle class="wheel-ring-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING+4.8)+'"/><circle class="wheel-ring-dark" cx="'+CENTER+'" cy="'+CENTER+'" r="'+(RING-4.8)+'"/>'
+   +'<circle class="wheel-hub" cx="'+CENTER+'" cy="'+CENTER+'" r="26"/><circle class="wheel-hub-lit" cx="'+CENTER+'" cy="'+CENTER+'" r="21"/>';
+  for(let notch=0;notch<NOTCHES;notch++){
+   const [x1,y1]=point(notch,RING-9),[x2,y2]=point(notch,RING+9),[tx,ty]=point(notch,RING-30);
+   body+='<line class="wheel-notch" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';
+   body+=notch===RUBY?'<image class="wheel-ruby" href="assets/puzzles/wheel-ruby.webp" x="'+(x2-15).toFixed(1)+'" y="'+(y2+4-18.5).toFixed(1)+'" width="30" height="37" pointer-events="none"/>'
+    :'<text class="wheel-glyph" x="'+tx.toFixed(1)+'" y="'+(ty+5).toFixed(1)+'" data-notch="'+notch+'">'+numeralName(numeralAt(notch))+'</text>';
+  }
+  body+='<g class="wheel-hammer-turn" id="wheel-hammer"><line class="wheel-hammer" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><line class="wheel-hammer-hi" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><circle class="wheel-hammer-head" cx="'+CENTER+'" cy="'+(CENTER-RING+4)+'" r="7"/></g>'
+   +'<circle class="wheel-pin" cx="'+CENTER+'" cy="'+CENTER+'" r="7"/>'
+   +'<text class="wheel-toll" id="wheel-toll" x="'+CENTER+'" y="'+(CENTER+9)+'"></text>';
+  svg.innerHTML=body;
  }
- body+='<g class="wheel-hammer-turn" id="wheel-hammer"><line class="wheel-hammer" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><line class="wheel-hammer-hi" x1="'+CENTER+'" y1="'+CENTER+'" x2="'+CENTER+'" y2="'+(CENTER-RING+4)+'"/><circle class="wheel-hammer-head" cx="'+CENTER+'" cy="'+(CENTER-RING+4)+'" r="7"/></g>'
-  +'<circle class="wheel-pin" cx="'+CENTER+'" cy="'+CENTER+'" r="7"/>'
-  +'<text class="wheel-toll" id="wheel-toll" x="'+CENTER+'" y="'+(CENTER+9)+'"></text>';
- svg.innerHTML=body;
  // The hammer only ever turns forward (clockwise), so the angle keeps growing and the transition never spins back the long way round.
- let hammerNotch=RUBY,hammerAngle=0;
  const aimHammer=notch=>{
   hammerAngle+=((notch-hammerNotch+NOTCHES)%NOTCHES)*360/NOTCHES;hammerNotch=notch;
-  $('wheel-hammer').style.transform='rotate('+hammerAngle.toFixed(2)+'deg)';
+  if(!useIsland)$('wheel-hammer').style.transform='rotate('+hammerAngle.toFixed(2)+'deg)';
+  else publish();
  };
 
  function setLight(on){
   lit=on;if(on)everLit=true;
-  svg.classList.toggle('lit',on);
-  $('wheel-candle').setAttribute('aria-pressed',String(on));
-  $('wheel-candle').textContent=on?'熄燭':'點燭';
-  $('wheel-engraving').hidden=!on;
+  if(!useIsland){svg.classList.toggle('lit',on);$('wheel-candle').setAttribute('aria-pressed',String(on));$('wheel-candle').textContent=on?'熄燭':'點燭';$('wheel-engraving').hidden=!on;}
   hints.changed();
+  publish();
  }
- function showStep(){$('wheel-step').textContent='撥爪每聲跨 '+step+' 格';$('wheel-less').disabled=running||step<=1;$('wheel-more').disabled=running||step>=NOTCHES-1;}
- $('wheel-candle').onclick=()=>{ctx.playCue('click');setLight(!lit);};
- $('wheel-less').onclick=()=>{step=Math.max(1,step-1);ctx.playCue('click');showStep();};
- $('wheel-more').onclick=()=>{step=Math.min(NOTCHES-1,step+1);ctx.playCue('click');showStep();};
+ function showStep(){if(!useIsland){$('wheel-step').textContent='撥爪每聲跨 '+step+' 格';$('wheel-less').disabled=running||step<=1;$('wheel-more').disabled=running||step>=NOTCHES-1;}publish();}
+ if(!useIsland){
+  $('wheel-candle').onclick=()=>{ctx.playCue('click');setLight(!lit);};
+  $('wheel-less').onclick=()=>{step=Math.max(1,step-1);ctx.playCue('click');showStep();};
+  $('wheel-more').onclick=()=>{step=Math.min(NOTCHES-1,step+1);ctx.playCue('click');showStep();};
+ }
 
  // One toll every `gap` ms; the hammer jumps `step` notches each time. The result is known up front (playTolls).
- $('bf-run').onclick=()=>{
+ const run=()=>{
   if(running)return;
-  running=true;showStep();$('bf-run').disabled=true;
+  running=true;showStep();if(!useIsland)$('bf-run').disabled=true;publish();
   const result=playTolls(step),count=result.ok?13:result.fault.toll,gap=still?160:520;
   say('敲鐘……');
   let shown=0;
@@ -112,7 +120,8 @@ export function mountStarWheel(ctx){
    if(toll===shown)return;
    shown=toll;
    aimHammer(notchOf(step,toll));ctx.playCue('click');
-   $('wheel-toll').textContent=toll<=12?numeralName(toll):'';
+   tollText=toll<=12?numeralName(toll):'';
+   if(!useIsland)$('wheel-toll').textContent=tollText;else publish();
    if(toll<count)return;
    setTimeout(()=>{
     if(!alive())return;
@@ -122,13 +131,36 @@ export function mountStarWheel(ctx){
     }else{
      const {toll:wrong,landed}=result.fault;
      say('第 '+wrong+' 聲敲在'+(lit?(landed?'「'+numeralName(landed)+'」':'紅寶石')+'上，應該敲在「'+numeralName(wrong)+'」上。':'錯的缺口上。點燭，看看缺口旁刻著什麼。'),'bad');
-     ctx.playCue('wrong');aimHammer(RUBY);$('wheel-toll').textContent='';
-     running=false;$('bf-run').disabled=false;showStep();
+     ctx.playCue('wrong');aimHammer(RUBY);tollText='';
+     if(!useIsland)$('wheel-toll').textContent='';
+     running=false;if(!useIsland)$('bf-run').disabled=false;showStep();publish();
     }
    },still?0:450);
    return false;
   });
  };
 
+ function act(action){
+  if(!action||typeof action!=='object')return null;
+  if(action.type==='toggle-candle'){
+   ctx.playCue('click');setLight(!lit);
+  }else if(action.type==='adjust-step'){
+   if(running||![-1,1].includes(action.delta))return null;
+   const next=Math.max(1,Math.min(NOTCHES-1,step+action.delta));
+   if(next===step)return null;
+   step=next;ctx.playCue('click');showStep();
+  }else if(action.type==='run'){
+   if(running)return null;
+   run();
+  }else return null;
+  return snapshot();
+ }
+
+ if(!useIsland)$('bf-run').onclick=run;
+
  aimHammer(RUBY);showStep();say('撥爪還在紅寶石上。');hints.changed();
+ if(useIsland)ctx.mountPuzzleIsland({snapshot:snapshot(),onAction:act,connect:update=>{
+  islandUpdate=typeof update==='function'?update:null;
+  if(islandUpdate)islandUpdate(snapshot());
+ }});
 }
